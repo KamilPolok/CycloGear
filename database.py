@@ -8,7 +8,7 @@ class DatabaseHandler:
     def __init__(self):
         self._db_name = 'bearings.db'
         self._table_bb_name = 'ball_bearings'
-        self._headers_list = ['Kod', 'D_wewnetrzna', 'D_zewnetrzna', 'B', 'C', 'C0', 'predkosc_referencyjna', 'predkosc_dopuszczalna']
+        self._headers_list = ["KOD", "D WEWN", "D ZEWN", "B", "C", "C0", "V REF", "V DOP"]
         self._column_types = ['TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'REAL', 'REAL', 'INTEGER', 'INTEGER']
 
 
@@ -46,12 +46,17 @@ class DatabaseHandler:
 
         self._connection.commit()
         self._connection.close()
+    
+    def get_attributes(self):
+        attributes_list = self._headers_list
+        attributes_list.pop(0)
+        return attributes_list
 
     def get_single_position(self, code):
         self._connection = sqlite3.connect(self._db_name)
         self._cursor = self._connection.cursor()
 
-        self._cursor.execute(f"SELECT * FROM {self._table_bb_name} WHERE kod = {code}") 
+        self._cursor.execute(f"SELECT * FROM {self._table_bb_name} WHERE KOD = {code}") 
         position = self._cursor.fetchone()
 
         self._connection.commit()
@@ -70,9 +75,9 @@ class DatabaseHandler:
 
         for key, limit in limits.items():
             if limit['min']:
-                filter_conditions.append(f" {key} >= {limit['min']}")
+                filter_conditions.append(f" \"{key}\" >= {limit['min']}")
             if limit['max']:
-                filter_conditions.append(f" {key} <= {limit['max']}")
+                filter_conditions.append(f" \"{key}\" <= {limit['max']}")
         
         query += " AND".join(filter_conditions)
 

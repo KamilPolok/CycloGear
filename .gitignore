@@ -1,3 +1,5 @@
+#PROJECT SPECIFFICS
+workspace/
 #databases
 *.db
 #vscode
