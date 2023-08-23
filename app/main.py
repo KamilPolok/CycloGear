@@ -1,5 +1,7 @@
 import flet as ft
 import pandas as pd
+from ast import literal_eval
+import re
 
 from database import DatabaseHandler
 
@@ -118,7 +120,9 @@ class Option(ft.UserControl):
         for limit, value in self.limits.items():
             limitTextField = ft.TextField(label=limit,
                                           dense=True,
-                                          text_size=14)
+                                          text_size=14,
+                                          on_blur=self.onBlurEvent
+                                          )
             limitTextFieldColumn = ft.Column(width = 100,
                                              controls = [limitTextField])
             
@@ -132,26 +136,18 @@ class Option(ft.UserControl):
         #todo: move the functionality of changing the limits array from OptionsManager updateResultsClick to here in getLimits
         limits = []
         for limitTextField in self.limitTextFieldsList:
-            number = self._convertToNumber(limitTextField.value)
-            if number <= 0:
-                number = 0
-                limitTextField.value=""
+            number = literal_eval(limitTextField.value) if limitTextField.value else 0
             limits.append(number)
-        self.update()
 
         return limits
     
-    def _convertToNumber(self, string):
-        #todo: use Regex to impelement type safety instead exceptions
-        try:
-            number = int(string)
-        except ValueError:  
-            try:
-                number = float(string)
-            except ValueError:
-                number = 0
-                
-        return number
+    def onBlurEvent(self, e):
+        if re.match(r'^\s*(?!0+(\.0*)?$)\d+(\.\d+)?\s*$', e.control.value):
+            maxLength = 8
+            e.control.value = e.control.value.strip()[:maxLength]
+        else:
+            e.control.value = ""
+        e.control.update()
 
 def main(page: ft.Page):
     page.title="DATABASE SAMPLE"

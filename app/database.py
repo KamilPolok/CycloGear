@@ -30,7 +30,6 @@ class DatabaseHandler:
         headers_str = '", "'.join(headers_with_types)
 
         query = f"CREATE TABLE IF NOT EXISTS {self._table_bb_name} ({headers_str})"
-        print(query)
 
         self._cursor.execute(query)
         
