@@ -50,12 +50,7 @@ class UIListManager(ft.UserControl):
     
     def updateResultsEvent(self, e):
         for option in self._options:
-            optionLimits = option.getOptionLimits()
-            for index, limit in enumerate(self._limits[option._optionName]):
-                if(optionLimits[index]):
-                    self._limits[option._optionName][limit] = optionLimits[index]
-                else:
-                    self._limits[option._optionName][limit] = 0
+            self._limits[option._optionName] = option.getOptionLimits()
 
         self._wrappingColumn.controls.remove(self._dbList)
         self._dbList = ListViewer(self._dbHandler.getFilteredResults(self._limits), self.selectItem)
@@ -105,7 +100,7 @@ class Option(ft.UserControl):
         super().__init__()
         self._optionName = optionName
         self._optionLimits = optionLimits
-        self._limitTextFieldsList = []
+        self._limitTextFieldsDict = {}
     
     def build(self):
         optionNameColumn = ft.Column(width = 200,
@@ -126,18 +121,16 @@ class Option(ft.UserControl):
             
             row.controls.append(limitTextFieldColumn)
 
-            self._limitTextFieldsList.append(limitTextField)
+            self._limitTextFieldsDict[limit] = limitTextField
 
         return row
 
     def getOptionLimits(self):
-        #todo: move the functionality of changing the limits array from UIListManager updateResultsEvent to here in getLimits
-        limits = []
-        for limitTextField in self._limitTextFieldsList:
+        for key, limitTextField in self._limitTextFieldsDict.items():
             number = literal_eval(limitTextField.value) if limitTextField.value else 0
-            limits.append(number)
+            self._optionLimits[key] = number
 
-        return limits
+        return self._optionLimits
     
     def onBlurEvent(self, e):
         if re.match(r'^\s*(?!0+(\.0*)?$)\d+(\.\d+)?\s*$', e.control.value):
