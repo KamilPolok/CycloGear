@@ -46,10 +46,11 @@ class DatabaseHandler:
         self._connection.commit()
         self._connection.close()
     
-    def getAttributes(self):
+    def getFilterConditions(self):
         attributesList = self._tableBbHeaderList
         attributesList.pop(0)
-        return attributesList
+        
+        return {attribute:{"min": 0, "max": 0} for attribute in self._tableBbHeaderList}
 
     def getSnglePosition(self, code):
         self._connection = sqlite3.connect(self._dbName)

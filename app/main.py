@@ -9,7 +9,7 @@ class UIListManager(ft.UserControl):
     def __init__(self):
         super().__init__()
         self._dbHandler = DatabaseHandler()
-        self._limits = {attribute:{"min": 0, "max": 0} for attribute in self._dbHandler.getAttributes() }
+        self._limits = self._dbHandler.getFilterConditions()
 
         self._options = []
         self._selectedItem = []
