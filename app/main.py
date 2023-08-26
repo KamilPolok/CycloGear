@@ -5,137 +5,135 @@ import re
 
 from database import DatabaseHandler
 
-class OptionsManager(ft.UserControl):
+class UIListManager(ft.UserControl):
     def __init__(self):
         super().__init__()
-        self.dbHandler = DatabaseHandler()
-        self.attributes = self.dbHandler.get_attributes()
-        self.limits = {attribute:{"min": 0, "max": 0} for attribute in self.attributes }
+        self._dbHandler = DatabaseHandler()
+        self._limits = {attribute:{"min": 0, "max": 0} for attribute in self._dbHandler.getAttributes() }
 
-        self.options = []
-        self.selectedItem = []
+        self._options = []
+        self._selectedItem = []
 
     def build(self):
         optionsRowsColumn = ft.Column()
-        for attribute, attribute_limits in self.limits.items():
-            option = Option(attribute, attribute_limits)
-            self.options.append(option)
+        for attribute, attributeLimits in self._limits.items():
+            option = Option(attribute, attributeLimits)
+            self._options.append(option)
             optionsRowsColumn.controls.append(option)
         
         updateResultsButton = ft.Row(controls = [ft.ElevatedButton(text = "FILTRUJ",
-                                                                        expand = True,
-                                                                        style = ft.ButtonStyle(shape = ft.RoundedRectangleBorder(radius=10)),
-                                                                        on_click = self.updateResultsClick)],
-                                          alignment=ft.MainAxisAlignment.CENTER)
+                                                                   expand = True,
+                                                                   style = ft.ButtonStyle(shape = ft.RoundedRectangleBorder(radius=10)),
+                                                                   on_click = self.updateResultsEvent)],
+                                                                   alignment = ft.MainAxisAlignment.CENTER)
         
-        self.dbList = ListViewer(self.dbHandler.get_filtered_table(self.limits), self.selectItem)
+        self._dbList = ListViewer(self._dbHandler.getFilteredResults(self._limits), self.selectItem)
         
-        self.selectedItemRow = ft.Row(controls = [ft.Text(f"WYBRANY ELEMENT: {self.selectedItem}")])
+        self._selectedItemRow = ft.Row(controls = [ft.Text(f"WYBRANY ELEMENT: {self._selectedItem}")])
 
-        self.wrappingColumn = ft.Column(controls=[optionsRowsColumn,
-                                               updateResultsButton,
-                                               self.dbList,
-                                               self.selectedItemRow])
+        self._wrappingColumn = ft.Column(controls = [optionsRowsColumn,
+                                                    updateResultsButton,
+                                                    self._dbList,
+                                                    self._selectedItemRow])
         
-        return self.wrappingColumn
+        return self._wrappingColumn
     
     def selectItem(self, dbRow):
         code = dbRow[0]
-        self.selectedItem = self.dbHandler.get_single_position(code)
+        self._selectedItem = self._dbHandler.getSnglePosition(code)
 
-        self.wrappingColumn.controls.remove(self.selectedItemRow)
-        self.selectedItemRow = ft.Row(controls = [ft.Text(f"WYBRANY ELEMENT: {self.selectedItem}")])
-        self.wrappingColumn.controls.insert(3, self.selectedItemRow)
+        self._wrappingColumn.controls.remove(self._selectedItemRow)
+        self._selectedItemRow = ft.Row(controls = [ft.Text(f"WYBRANY ELEMENT: {self._selectedItem}")])
+        self._wrappingColumn.controls.insert(3, self._selectedItemRow)
 
         self.update()
     
-    def updateResultsClick(self, e):
-        for option in self.options:
-            optionLimits = option.getLimits()
-            for index, limit in enumerate(self.limits[option.optionName]):
+    def updateResultsEvent(self, e):
+        for option in self._options:
+            optionLimits = option.getOptionLimits()
+            for index, limit in enumerate(self._limits[option._optionName]):
                 if(optionLimits[index]):
-                    self.limits[option.optionName][limit] = optionLimits[index]
+                    self._limits[option._optionName][limit] = optionLimits[index]
                 else:
-                    self.limits[option.optionName][limit] = 0
+                    self._limits[option._optionName][limit] = 0
 
-        self.wrappingColumn.controls.remove(self.dbList)
-        self.dbList = ListViewer(self.dbHandler.get_filtered_table(self.limits), self.selectItem)
-        self.wrappingColumn.controls.insert(2, self.dbList)
+        self._wrappingColumn.controls.remove(self._dbList)
+        self._dbList = ListViewer(self._dbHandler.getFilteredResults(self._limits), self.selectItem)
+        self._wrappingColumn.controls.insert(2, self._dbList)
         self.update()
 
 class ListViewer(ft.UserControl):
     def __init__(self, df, selectItem):
         super().__init__()
-        self.selectItem = selectItem
-        self.df = df
+        self._selectItem = selectItem
+        self._df = df
         
     def build(self):
-        headersRow = self._createRow(self.df.columns)
+        headersRow = self._createRow(self._df.columns)
 
-        elementsRowsCol = ft.Column(
-            height=200,
-            scroll=ft.ScrollMode.ALWAYS,
-        )
-        for index, dbRow in self.df.astype('str').iterrows():
+        elementsRowsCol = ft.Column(height = 200,
+                                    scroll = ft.ScrollMode.ALWAYS)
+        
+        for index, dbRow in self._df.astype('str').iterrows():
             elementsRowsCol.controls.append(self._createClickableRow(dbRow))
 
-        wrappingColumn = ft.Column(controls=[headersRow,
-                                          elementsRowsCol])
+        wrappingColumn = ft.Column(controls = [headersRow,
+                                               elementsRowsCol])
             
         return wrappingColumn
     
     def _createRow(self, dbRow):
-        listRow = ft.Row(alignment = ft.MainAxisAlignment.SPACE_EVENLY)
+        row = ft.Row(alignment = ft.MainAxisAlignment.SPACE_EVENLY)
         for element in dbRow :
-            listRow.controls.append(ft.Column(width = 100,
-                                          controls=[ft.Text(element)]))
+            row.controls.append(ft.Column(width = 100,
+                                          controls = [ft.Text(element)]))
 
-        return listRow
+        return row
 
     def _createClickableRow(self, dbRow):
-        listRow = self._createRow(dbRow)
-        clickableContainer = ft.Container(content=listRow,
-                                          ink=True,
-                                          on_click=lambda e: self.selectItemClick(dbRow, e))
+        clickableContainer = ft.Container(content=self._createRow(dbRow),
+                                          ink = True,
+                                          on_click=lambda e: self.selectItemEvent(dbRow, e))
 
         return clickableContainer
     
-    def selectItemClick(self, dbRow, e):
-        self.selectItem(dbRow)
+    def selectItemEvent(self, dbRow, e):
+        self._selectItem(dbRow)
     
 class Option(ft.UserControl):
-    def __init__(self, optionName, limits):
+    def __init__(self, optionName, optionLimits):
         super().__init__()
-        self.optionName = optionName
-        self.limits = limits
-        self.limitTextFieldsList = []
+        self._optionName = optionName
+        self._optionLimits = optionLimits
+        self._limitTextFieldsList = []
     
     def build(self):
         optionNameColumn = ft.Column(width = 200,
-                               controls=[ft.Text(self.optionName)])
+                                     controls = [ft.Text(self._optionName)])
         
         row = ft.Row(alignment = ft.MainAxisAlignment.SPACE_EVENLY,
-                     controls=[optionNameColumn])
+                     controls = [optionNameColumn])
         
-        for limit, value in self.limits.items():
-            limitTextField = ft.TextField(label=limit,
-                                          dense=True,
-                                          text_size=14,
-                                          on_blur=self.onBlurEvent
+        for limit, value in self._optionLimits.items():
+            limitTextField = ft.TextField(label = limit,
+                                          dense = True,
+                                          text_size = 14,
+                                          on_blur = self.onBlurEvent
                                           )
+            
             limitTextFieldColumn = ft.Column(width = 100,
                                              controls = [limitTextField])
             
             row.controls.append(limitTextFieldColumn)
 
-            self.limitTextFieldsList.append(limitTextField)
+            self._limitTextFieldsList.append(limitTextField)
 
         return row
 
-    def getLimits(self):
-        #todo: move the functionality of changing the limits array from OptionsManager updateResultsClick to here in getLimits
+    def getOptionLimits(self):
+        #todo: move the functionality of changing the limits array from UIListManager updateResultsEvent to here in getLimits
         limits = []
-        for limitTextField in self.limitTextFieldsList:
+        for limitTextField in self._limitTextFieldsList:
             number = literal_eval(limitTextField.value) if limitTextField.value else 0
             limits.append(number)
 
@@ -155,6 +153,6 @@ def main(page: ft.Page):
     page.window_height=800
     page.bgcolor="WHITE"
 
-    optionsManager = OptionsManager()
-    page.add(optionsManager)
+    uiListManager = UIListManager()
+    page.add(uiListManager)
 ft.app(target=main)
