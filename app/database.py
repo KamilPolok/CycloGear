@@ -2,35 +2,48 @@ import sqlite3
 import pandas as pd
 import os
 
-class DatabaseHandler:
+class Bearings1:
+    def __init__(self):
+        self.name = 'bearings1'
+        self.headers = ["kod", "Dz", "Dw", "B", "C", "C0", "Vref", "Vdop"]
+        self.types = ['TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'REAL', 'REAL', 'INTEGER', 'INTEGER']
+        self.csvName = 'lozyska1.csv'
 
+class Bearings2:
+    def __init__(self):
+        self.name = 'bearings2'
+        self.headers = ["kod", "Dz", "Dw", "B", "C", "C0", "Vref", "Vdop"]
+        self.types = ['TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'REAL', 'REAL', 'INTEGER', 'INTEGER']
+        self.csvName = 'lozyska2.csv'
+
+class Bearings3:
+    def __init__(self):
+        self.name = 'bearings3'
+        self.headers = ["kod", "Dz", "Dw", "B", "C", "C0", "Vref", "Vdop"]
+        self.types = ['TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'REAL', 'REAL', 'INTEGER', 'INTEGER']
+        self.csvName = 'lozyska3.csv'
+
+class DatabaseHandler:
     def __init__(self):
         self._dbName = 'bearings.db'
-        self._tableBbName = 'ball_bearings'
-        self._tableBbHeaderList = ["KOD", "D WEWN", "D ZEWN", "B", "C", "C0", "V REF", "V DOP"]
-        self._tableBbColumnTypes = ['TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'REAL', 'REAL', 'INTEGER', 'INTEGER']
-
-
-        self._csvBbName = 'lozyska_kulkowe.csv'
-        self._csvBbPath = os.path.normpath(os.path.join(os.path.realpath(os.path.dirname(__file__)),self._csvBbName))
+        self._tables = [Bearings1(), Bearings2(), Bearings3()]
+        self._activeTable = None
 
         self._connection = None
         self._cursor = None
-
-        self._createDatabase()
+        
+        self._createTables()
         self._populateDatabase()
 
-    def _createDatabase(self):
+    def _createTables(self):
         self._connection = sqlite3.connect(self._dbName)
         self._cursor = self._connection.cursor()
 
-       
-        headersWithTypes = [h + ' ' + t for h, t in zip(self._tableBbHeaderList, self._tableBbColumnTypes)]
-        headersStr = '", "'.join(headersWithTypes)
-
-        query = f"CREATE TABLE IF NOT EXISTS {self._tableBbName} ({headersStr})"
-
-        self._cursor.execute(query)
+        for table in self._tables:
+            headersWithTypes = [h + ' ' + t for h, t in zip(table.headers, table.types)]
+            headersStr = '", "'.join(headersWithTypes)
+            query = f"CREATE TABLE IF NOT EXISTS {table.name} ({headersStr})"
+            self._cursor.execute(query)
         
         self._connection.commit()
         self._connection.close()
@@ -39,24 +52,40 @@ class DatabaseHandler:
         self._connection = sqlite3.connect(self._dbName)
         self._cursor = self._connection.cursor()
 
-        df = pd.read_csv(self._csvBbPath, delimiter=';', decimal=',')
-        df.columns = self._tableBbHeaderList
-        df.to_sql(self._tableBbName, self._connection, if_exists='replace', index=False)
+        for table in self._tables:
+            csvPath = os.path.normpath(os.path.join(os.path.realpath(os.path.dirname(__file__)),table.csvName))
+            df = pd.read_csv(csvPath, delimiter=';', decimal=',')
+            df.columns = table.headers
+            df.to_sql(table.name, self._connection, if_exists='replace', index=False)
 
         self._connection.commit()
         self._connection.close()
+
+    def getAvailableTables(self):
+        return [table.name for table in self._tables]
+    
+    def setActiveTable(self, activeTableName):
+        for table in self._tables:
+            if table.name == activeTableName:
+                self._activeTable = table
+
+    def getActiveTable(self):
+        return self._activeTable.name
+    
+    def getActiveTableAttributes(self):
+        attributesList = self._activeTable.headers[1:]
+        return attributesList
     
     def getFilterConditions(self):
-        attributesList = self._tableBbHeaderList
-        attributesList.pop(0)
+        attributesList = self._activeTable.headers[1:]
         
-        return {attribute:{"min": 0, "max": 0} for attribute in self._tableBbHeaderList}
+        return {attribute:{"min": 0, "max": 0} for attribute in attributesList}
 
     def getSnglePosition(self, code):
         self._connection = sqlite3.connect(self._dbName)
         self._cursor = self._connection.cursor()
 
-        self._cursor.execute(f"SELECT * FROM {self._tableBbName} WHERE KOD = {code}") 
+        self._cursor.execute(f"SELECT * FROM {self._activeTable.name} WHERE KOD = {code}") 
         position = self._cursor.fetchone()
 
         self._connection.commit()
@@ -69,7 +98,7 @@ class DatabaseHandler:
         self._connection = sqlite3.connect(self._dbName)
         self._cursor = self._connection.cursor()
 
-        query = f"SELECT * FROM {self._tableBbName} WHERE"
+        query = f"SELECT * FROM {self._activeTable.name} WHERE"
 
         filterConditions = []
 

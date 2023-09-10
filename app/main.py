@@ -9,7 +9,12 @@ class UIListManager(ft.UserControl):
     def __init__(self):
         super().__init__()
         self._dbHandler = DatabaseHandler()
+
+        self._tables = self._dbHandler.getAvailableTables()
+        self._dbHandler.setActiveTable(self._tables[0])
+        
         self._limits = self._dbHandler.getFilterConditions()
+
 
         self._options = []
         self._selectedItem = []
