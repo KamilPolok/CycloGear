@@ -1,156 +1,229 @@
-import flet as ft
-import pandas as pd
+import sys
+
 from ast import literal_eval
-import re
+
+from PyQt6.QtCore import (
+    Qt,
+    QRegularExpression,
+)
+
+from PyQt6.QtGui import QRegularExpressionValidator
+
+from PyQt6.QtWidgets import (
+    QApplication,
+    QComboBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QListWidget,
+    QListWidgetItem,
+    QMainWindow,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
 
 from database import DatabaseHandler
 
-class UIListManager(ft.UserControl):
+WINDOW_WIDTH = 450
+WINDOW_HEIGHT = 500
+
+class DBDisplayController:
+    def __init__(self, model, view):
+        self._dbHandler = model
+        self._window = view
+        
+        self._startup()
+        self._connectSignalsAndSlots()
+    
+    def _startup(self):
+        self._availableTables = self._dbHandler.getAvailableTables()
+        self._activeTable = self._availableTables[0]
+        self._dbHandler.setActiveTable(self._activeTable)
+
+        self._limits = self._dbHandler.getFilterConditions()
+        
+        self._window.initUI(self._availableTables,
+                            self._dbHandler.getActiveTableAttributes(),
+                            self._dbHandler.getFilteredResults(self._limits)
+                            )
+    
+    def _switchActiveTableEvent(self):
+        activeTableIndex = self._window.activeTableSelector.currentIndex()
+
+        self._activeTable = self._availableTables[activeTableIndex]
+        self._dbHandler.setActiveTable(self._activeTable)
+
+        self._limits = self._dbHandler.getFilterConditions()
+        updatedResults = self._dbHandler.getFilteredResults(self._limits)
+        self._window.DBDisplay.updateDBList(updatedResults)
+
+    def _updateResultsEvent(self):
+        for attribute, attributeLimits in self._limits.items():
+            for limit in attributeLimits:
+                text = self._window.filters[attribute].filterLineEdits[limit].text()
+                number = literal_eval(text) if text else 0
+                attributeLimits[limit] = number
+
+        updatedResults = self._dbHandler.getFilteredResults(self._limits)
+        self._window.DBDisplay.updateDBList(updatedResults)
+
+    def _selectItemEvent(self, item):
+        customWidget = self._window.DBDisplay.listWidget.itemWidget(item)
+        if customWidget:
+            item_text = "\t".join(label.text() for label in customWidget.findChildren(QLabel))
+            print(f"Item clicked: {item_text}")
+
+    def _connectSignalsAndSlots(self):
+        self._window.activeTableSelector.activated.connect(self._switchActiveTableEvent)
+        self._window.filterResultsButton.clicked.connect(self._updateResultsEvent)
+        self._window.DBDisplay.listWidget.itemClicked.connect(self._selectItemEvent)
+        
+class Window(QMainWindow):
     def __init__(self):
         super().__init__()
-        self._dbHandler = DatabaseHandler()
+        self.setWindowTitle("BAZA ŁOŻYSK TOCZNYCH")
+        self.setFixedSize(WINDOW_WIDTH,WINDOW_HEIGHT)
 
-        self._tables = self._dbHandler.getAvailableTables()
-        self._dbHandler.setActiveTable(self._tables[0])
-        
-        self._limits = self._dbHandler.getFilterConditions()
-
-
-        self._options = []
-        self._selectedItem = []
-
-    def build(self):
-        optionsRowsColumn = ft.Column()
-        for attribute, attributeLimits in self._limits.items():
-            option = Option(attribute, attributeLimits)
-            self._options.append(option)
-            optionsRowsColumn.controls.append(option)
-        
-        updateResultsButton = ft.Row(controls = [ft.ElevatedButton(text = "FILTRUJ",
-                                                                   expand = True,
-                                                                   style = ft.ButtonStyle(shape = ft.RoundedRectangleBorder(radius=10)),
-                                                                   on_click = self.updateResultsEvent)],
-                                                                   alignment = ft.MainAxisAlignment.CENTER)
-        
-        self._dbList = ListViewer(self._dbHandler.getFilteredResults(self._limits), self.selectItem)
-        
-        self._selectedItemRow = ft.Row(controls = [ft.Text(f"WYBRANY ELEMENT: {self._selectedItem}")])
-
-        self._wrappingColumn = ft.Column(controls = [optionsRowsColumn,
-                                                    updateResultsButton,
-                                                    self._dbList,
-                                                    self._selectedItemRow])
-        
-        return self._wrappingColumn
+        self.generalLayout = QVBoxLayout()
+        centralWidget = QWidget(self)
+        centralWidget.setLayout(self.generalLayout)
+        self.setCentralWidget(centralWidget)
     
-    def selectItem(self, dbRow):
-        code = dbRow[0]
-        self._selectedItem = self._dbHandler.getSnglePosition(code)
+    def initUI(self, availableTables, activeTableAttributes, dbDataframe):
+        self._availableTables = availableTables
+        self._activeTableAttributes = activeTableAttributes
+        self._dbDataframe = dbDataframe
+        # call this methods not from Window class, but from Controller, passing needed arguments
+        self._createActiveTableSelector()
+        self._createFilters()
+        self._createDBDisplay()
 
-        self._wrappingColumn.controls.remove(self._selectedItemRow)
-        self._selectedItemRow = ft.Row(controls = [ft.Text(f"WYBRANY ELEMENT: {self._selectedItem}")])
-        self._wrappingColumn.controls.insert(3, self._selectedItemRow)
+    def _createActiveTableSelector(self):
+        self.activeTableSelector = QComboBox()
 
-        self.update()
-    
-    def updateResultsEvent(self, e):
-        for option in self._options:
-            self._limits[option._optionName] = option.getOptionLimits()
+        for table in self._availableTables:
+             self.activeTableSelector.addItem(table)
 
-        self._wrappingColumn.controls.remove(self._dbList)
-        self._dbList = ListViewer(self._dbHandler.getFilteredResults(self._limits), self.selectItem)
-        self._wrappingColumn.controls.insert(2, self._dbList)
-        self.update()
+        self.generalLayout.addWidget(self.activeTableSelector)
+    def _createFilters(self):
+        self.filtersLayout = QVBoxLayout()
+        self.filters = {}
 
-class ListViewer(ft.UserControl):
-    def __init__(self, df, selectItem):
+        for attribute in self._activeTableAttributes:
+            filter = Filter(attribute)
+
+            self.filtersLayout.addLayout(filter.filterLayout)
+            self.filters[attribute] = filter
+
+        self.filterResultsButton = QPushButton("FILTRUJ")
+
+        self.generalLayout.addLayout(self.filtersLayout)
+        self.filtersLayout.addWidget(self.filterResultsButton)
+
+    def _createDBDisplay(self):
+        self.DBDisplay = DBDisplay(self._dbDataframe)
+
+        self.generalLayout.addWidget(self.DBDisplay)
+
+class DBDisplay(QWidget):
+    def __init__(self, dbDataframe):
         super().__init__()
-        self._selectItem = selectItem
-        self._df = df
+        self._dbDataframe = dbDataframe
+
+        self._createDisplay()
+
+    def _createDisplay(self):
+        self.displayLayout = QVBoxLayout()
+        self.setLayout(self.displayLayout)
+
+        self._createHeader()
+        self._createDBList()
+    
+    def _createHeader(self):
+        header = self._createRow(self._dbDataframe.columns)
+        self.displayLayout.addWidget(header)
+
+    def _createDBList(self):
+        self.listWidget = QListWidget()
+        self.updateDBList(self._dbDataframe)
+        self.displayLayout.addWidget(self.listWidget)
+
+
+    def updateDBList(self, df):
+        self.listWidget.clear()
+        for index, dfRow in df.astype('str').iterrows():
+
+            customWidget = self._createRow(dfRow)
+
+            item = QListWidgetItem()
+            item.setSizeHint(customWidget.sizeHint())  
+            self.listWidget.addItem(item)
+            self.listWidget.setItemWidget(item, customWidget)
+
+    def _createRow(self, dfRow):
+        customWidget = QWidget()
+        customWidget.setFixedWidth(400)
+        customLayout = QHBoxLayout()
+
+        for cellValue in dfRow:
+            cellLabel = QLabel(str(cellValue))
+            cellLabel.setAlignment(Qt.AlignmentFlag.AlignLeft)
+
+            customLayout.addWidget(cellLabel)
+
+        customWidget.setLayout(customLayout)
         
-    def build(self):
-        headersRow = self._createRow(self._df.columns)
+        return customWidget
 
-        elementsRowsCol = ft.Column(height = 200,
-                                    scroll = ft.ScrollMode.ALWAYS)
-        
-        for index, dbRow in self._df.astype('str').iterrows():
-            elementsRowsCol.controls.append(self._createClickableRow(dbRow))
-
-        wrappingColumn = ft.Column(controls = [headersRow,
-                                               elementsRowsCol])
-            
-        return wrappingColumn
-    
-    def _createRow(self, dbRow):
-        row = ft.Row(alignment = ft.MainAxisAlignment.SPACE_EVENLY)
-        for element in dbRow :
-            row.controls.append(ft.Column(width = 100,
-                                          controls = [ft.Text(element)]))
-
-        return row
-
-    def _createClickableRow(self, dbRow):
-        clickableContainer = ft.Container(content=self._createRow(dbRow),
-                                          ink = True,
-                                          on_click=lambda e: self.selectItemEvent(dbRow, e))
-
-        return clickableContainer
-    
-    def selectItemEvent(self, dbRow, e):
-        self._selectItem(dbRow)
-    
-class Option(ft.UserControl):
-    def __init__(self, optionName, optionLimits):
+class Filter(QWidget):
+    def __init__(self, filterName):
         super().__init__()
-        self._optionName = optionName
-        self._optionLimits = optionLimits
-        self._limitTextFieldsDict = {}
+        self.filterName = filterName
+
+        self._createFilter()
+
+    def _createFilter(self):
+        self.filterLineEdits = {}
+        self.filterLayout = QHBoxLayout()
+
+        limits = ['min', 'max']
+
+        nameLabel = QLabel(self.filterName)
+        nameLabel.setFixedWidth(50)
+        self.filterLayout.addWidget(nameLabel)
+
+        for limit in limits:
+            limitLayout = QHBoxLayout()
+
+            limitLineEdit = QLineEdit()
+            limitLineEdit.setFixedWidth(60)
+            limitLineEdit.setMaxLength(8)
+            reg_ex = QRegularExpression("[0-9]+\.?[0-9]+")
+            input_validator = QRegularExpressionValidator(reg_ex, limitLineEdit)
+            limitLineEdit.setValidator(input_validator)
+
+            limitLabel = QLabel(limit)
+            limitLabel.setFixedWidth(40)
+
+            limitLayout.addWidget(limitLabel)
+            limitLayout.addWidget(limitLineEdit)
+
+            self.filterLayout.addLayout(limitLayout)
+
+            self.filterLineEdits[limit] = limitLineEdit
+
+def main():
+    dbApp = QApplication([])
+    dbHandler = DatabaseHandler()
     
-    def build(self):
-        optionNameColumn = ft.Column(width = 200,
-                                     controls = [ft.Text(self._optionName)])
-        
-        row = ft.Row(alignment = ft.MainAxisAlignment.SPACE_EVENLY,
-                     controls = [optionNameColumn])
-        
-        for limit, value in self._optionLimits.items():
-            limitTextField = ft.TextField(label = limit,
-                                          dense = True,
-                                          text_size = 14,
-                                          on_blur = self.onBlurEvent
-                                          )
-            
-            limitTextFieldColumn = ft.Column(width = 100,
-                                             controls = [limitTextField])
-            
-            row.controls.append(limitTextFieldColumn)
+    window = Window()
+    window.show()
 
-            self._limitTextFieldsDict[limit] = limitTextField
+    displayController = DBDisplayController(model=dbHandler, view=window)
 
-        return row
+    sys.exit(dbApp.exec())
 
-    def getOptionLimits(self):
-        for key, limitTextField in self._limitTextFieldsDict.items():
-            number = literal_eval(limitTextField.value) if limitTextField.value else 0
-            self._optionLimits[key] = number
+if __name__ == "__main__":
+    main()
 
-        return self._optionLimits
-    
-    def onBlurEvent(self, e):
-        if re.match(r'^\s*(?!0+(\.0*)?$)\d+(\.\d+)?\s*$', e.control.value):
-            maxLength = 8
-            e.control.value = e.control.value.strip()[:maxLength]
-        else:
-            e.control.value = ""
-        e.control.update()
-
-def main(page: ft.Page):
-    page.title="DATABASE SAMPLE"
-    page.window_width=825
-    page.window_height=800
-    page.bgcolor="WHITE"
-
-    uiListManager = UIListManager()
-    page.add(uiListManager)
-ft.app(target=main)
