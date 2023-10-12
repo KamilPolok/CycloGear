@@ -25,18 +25,26 @@ class Bearings3:
 
 class DatabaseHandler:
     def __init__(self):
-        self._dbName = 'bearings.db'
         self._tables = [Bearings1(), Bearings2(), Bearings3()]
         self._activeTable = None
 
         self._connection = None
         self._cursor = None
+
+        self._findDbPath()
         
         self._createTables()
         self._populateDatabase()
+    
+    def _findDbPath(self):
+        currentDirPath = os.path.realpath(os.path.dirname(__file__))
+        dataDirName = 'data'
+        dbName = 'bearings.db'
+        self._dataDirPath = os.path.join(currentDirPath, '..', '..', dataDirName)
+        self._dbPath = os.path.normpath(os.path.join(self._dataDirPath, dbName))
 
     def _createTables(self):
-        self._connection = sqlite3.connect(self._dbName)
+        self._connection = sqlite3.connect(self._dbPath)
         self._cursor = self._connection.cursor()
 
         for table in self._tables:
@@ -49,11 +57,11 @@ class DatabaseHandler:
         self._connection.close()
 
     def _populateDatabase(self):
-        self._connection = sqlite3.connect(self._dbName)
+        self._connection = sqlite3.connect(self._dbPath)
         self._cursor = self._connection.cursor()
 
         for table in self._tables:
-            csvPath = os.path.normpath(os.path.join(os.path.realpath(os.path.dirname(__file__)),table.csvName))
+            csvPath = os.path.normpath(os.path.join(self._dataDirPath,table.csvName))
             df = pd.read_csv(csvPath, delimiter=';', decimal=',')
             df.columns = table.headers
             df.to_sql(table.name, self._connection, if_exists='replace', index=False)
@@ -82,7 +90,7 @@ class DatabaseHandler:
         return {attribute:{"min": 0, "max": 0} for attribute in attributesList}
 
     def getSnglePosition(self, code):
-        self._connection = sqlite3.connect(self._dbName)
+        self._connection = sqlite3.connect(self._dbPath)
         self._cursor = self._connection.cursor()
 
         self._cursor.execute(f"SELECT * FROM {self._activeTable.name} WHERE KOD = {code}") 
@@ -95,7 +103,7 @@ class DatabaseHandler:
         
     def getFilteredResults(self,limits):
         
-        self._connection = sqlite3.connect(self._dbName)
+        self._connection = sqlite3.connect(self._dbPath)
         self._cursor = self._connection.cursor()
 
         query = f"SELECT * FROM {self._activeTable.name} WHERE"
