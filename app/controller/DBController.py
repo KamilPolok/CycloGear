@@ -50,12 +50,10 @@ class DBController:
 
     def _selectItemEvent(self, item):
         #Exract the selected item attributes
-        rowWidget = self._window.TableItemsView.itemsList.itemWidget(item)
-        if rowWidget:
-            item_text = "\t".join(label.text() for label in rowWidget.findChildren(QLabel))
-            print(f"Item clicked: {item_text}")
+        itemData = [self._window.TableItemsView.itemsTable.item(item.row(), col).text() for col in range(self._window.TableItemsView.itemsTable.columnCount())]
+        print(itemData)
 
     def _connectSignalsAndSlots(self):
         self._window.activeTableSelector.activated.connect(self._switchActiveTableEvent)
         self._window.ItemsFiltersView.filterResultsButton.clicked.connect(self._updateResultsEvent)
-        self._window.TableItemsView.itemsList.itemClicked.connect(self._selectItemEvent)
+        self._window.TableItemsView.itemsTable.itemClicked.connect(self._selectItemEvent)

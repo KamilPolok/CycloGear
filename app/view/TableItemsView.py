@@ -2,69 +2,99 @@ from PyQt6.QtCore import Qt
 
 from PyQt6.QtWidgets import (
     QHBoxLayout,
-    QLabel,
-    QListWidget,
-    QListWidgetItem,
+    QHeaderView,
+    QTableWidget,
+    QTableWidgetItem,
     QVBoxLayout,
     QWidget,
 )
-
 class TableItemsView(QWidget):
+    headerStyle = """
+    QHeaderView::section {
+        background-color: transparent;
+        border: 0px;
+        padding: 3px;
+        margin: 0px;
+    }
+    QHeaderView::section:hover {
+        background-color: transparent;
+        border: 0px;
+    }
+    """
+    selectedItemStyle = """
+        QTableWidget::item:selected {
+            background-color: lightgray;
+            color: black;
+        }
+    """
+    
     def __init__(self):
         super().__init__()
 
         self._initView()
 
     def _initView(self):
-        #Init layout with dummy widget and empty list widget
+       
+        #Set layout of TableItemsView
         self.itemsViewLayout = QVBoxLayout()
+        self.itemsViewLayout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+
         self.setLayout(self.itemsViewLayout)
 
-        self._itemsListHeader = QWidget()
-        self.itemsList = QListWidget()
-        
-        self.itemsViewLayout.addWidget(self._itemsListHeader)
-        self.itemsViewLayout.addWidget(self.itemsList)
+        #Set sublayout of viewed table with items
+        self.tablelayout = QHBoxLayout()
+        self.itemsViewLayout.addLayout(self.tablelayout)
+
+        #Set the viewed table
+        self.itemsTable = QTableWidget()
+        self.tablelayout.addWidget(self.itemsTable)
+
+        self.itemsTable.setStyleSheet(self.headerStyle)
+
+        ##Scrollbar settings
+        self.itemsTable.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.itemsTable.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
+
+        ##Headers settings
+        self.itemsTable.horizontalHeader().setStyleSheet(self.selectedItemStyle)
+        self.itemsTable.horizontalHeader().setDefaultAlignment(Qt.AlignmentFlag.AlignLeft)
+
+        self.itemsTable.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
+        self.itemsTable.horizontalHeader().setHighlightSections(False)
+        self.itemsTable.horizontalHeader().sectionPressed.disconnect()
+
+        self.itemsTable.verticalHeader().hide()
+
+        ##Cells settings
+        self.itemsTable.setShowGrid(False)
+
+        self.itemsTable.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.itemsTable.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
+        self.itemsTable.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+
+        self.itemsTable.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
 
     def updateItemsView(self, tableItemsDf):
-        self._updateItemsListHeaderView(tableItemsDf)
-        self._updateItemsListView(tableItemsDf)
+        self.itemsTable.setRowCount(0)
+        self.itemsTable.setColumnCount(len(tableItemsDf.columns))
+        self.itemsTable.setHorizontalHeaderLabels(tableItemsDf.columns)
+
+        for rowIdx, rowData in tableItemsDf.astype('str').iterrows():
+            self.itemsTable.insertRow(rowIdx)
+            for col_idx, value in enumerate(rowData):
+                item = QTableWidgetItem(str(value))
+                self.itemsTable.setItem(rowIdx, col_idx, item)
+
+        self.setTableGeometry()
     
-    def _updateItemsListHeaderView(self, tableItemsDf):
-        updatedHeader = self._createRow(tableItemsDf.columns)
-        self.itemsViewLayout.replaceWidget(self._itemsListHeader, updatedHeader)
-        self._itemsListHeader.deleteLater()
-        self._itemsListHeader = updatedHeader
-        # Another option to replace widget - will be left in case of problems with currebt solution
-        # self.itemsViewLayout.removeWidget(self._itemsListHeader)
-        # self._itemsListHeader.deleteLater()
+    def setTableGeometry(self):
+        self.itemsTable.resizeColumnsToContents()
 
-        # self._itemsListHeader = self._createRow(tableItemsDf)
-        # self.itemsViewLayout.insertWidget(len(self.itemsViewLayout) - 1, self._itemsListHeader)
+        tableWidth = sum([self.itemsTable.columnWidth(i) for i in range(self.itemsTable.columnCount())])
+        tableWidth += 15    #margin for srollbar width
+        self.itemsTable.setFixedWidth(tableWidth)
 
-    def _updateItemsListView(self, tableItemsDf):
-        self.itemsList.clear()
-
-        for index, dfRow in tableItemsDf.astype('str').iterrows():
-
-            rowWidget = self._createRow(dfRow)
-
-            item = QListWidgetItem()
-            item.setSizeHint(rowWidget.sizeHint())  
-            self.itemsList.addItem(item)
-            self.itemsList.setItemWidget(item, rowWidget)
-
-    def _createRow(self, dfRow):
-        rowWidget = QWidget()
-        rowWidget.setFixedWidth(400)
-        rowLayout = QHBoxLayout()
-
-        for cellValue in dfRow:
-            cellLabel = QLabel(str(cellValue), rowWidget)
-            cellLabel.setAlignment(Qt.AlignmentFlag.AlignLeft)
-
-            rowLayout.addWidget(cellLabel)
-
-        rowWidget.setLayout(rowLayout)
+        tableHeight = self.itemsTable.horizontalHeader().height() + 2
+        tableHeight +=  self.itemsTable.rowCount() * self.itemsTable.rowHeight(0)
         
-        return rowWidget
+        self.itemsTable.setMaximumHeight(tableHeight)

@@ -8,14 +8,11 @@ from PyQt6.QtWidgets import (
 from view.TableItemsView import TableItemsView
 from view.ItemsFiltersView import ItemsFiltersView
 
-WINDOW_WIDTH = 450
-WINDOW_HEIGHT = 500
 
 class Window(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("BAZA ŁOŻYSK TOCZNYCH")
-        self.setFixedSize(WINDOW_WIDTH,WINDOW_HEIGHT)
 
         self.generalLayout = QVBoxLayout()
         centralWidget = QWidget(self)
