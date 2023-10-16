@@ -1,4 +1,4 @@
-from PyQt6.QtCore import QRegularExpression
+from PyQt6.QtCore import Qt, QRegularExpression
 
 from PyQt6.QtGui import QRegularExpressionValidator
 
@@ -21,6 +21,7 @@ class ItemsFiltersView(QWidget):
     def _initView(self):
         #Init layout wiith empty sublayout and button
         self.filtersViewLayout = QVBoxLayout()
+        self.filtersViewLayout.setContentsMargins(0,0,0,0)
         self.setLayout(self.filtersViewLayout)
 
         self.filtersLayout = QVBoxLayout()
@@ -30,25 +31,21 @@ class ItemsFiltersView(QWidget):
         self.filtersViewLayout.addWidget(self.filterResultsButton)
 
     def updateFiltersView(self, ItemsAttributes):
-        #Clear Container of LineEdits and clear sublayout
+        #Clear Container of LineEdits and remove Widgets from sublayout
         self.filtersLineEdits = {}
+        for i in reversed(range(self.filtersLayout.count())): 
+            self.filtersLayout.itemAt(i).widget().setParent(None)
 
-        while self.filtersLayout.count():
-            item = self.filtersLayout.takeAt(0)
-            if item is not None:
-                while item.count():
-                    subitem = item.takeAt(0)
-                    widget = subitem.widget()
-                    if widget is not None:
-                        widget.setParent(None)
-                self.filtersLayout.removeItem(item)
-        #Refill sublayout with new layouts
+        #Refill sublayout with new Widgets
         for attribute in ItemsAttributes:
-            filterLayout = self._createFilter(attribute)
-            self.filtersLayout.addLayout(filterLayout)
-    
-    def _createFilter(self, attribute):
+            self._viewFilter(attribute)
+            
+    def _viewFilter(self, attribute):
+        filterWidget = QWidget()
+
         filterLayout = QHBoxLayout()
+        filterLayout.setContentsMargins(0, 0, 0, 0)
+        filterWidget.setLayout(filterLayout)
 
         filterLineEdits = {}
 
@@ -61,9 +58,11 @@ class ItemsFiltersView(QWidget):
         #Create LineEdits for every limit and set their input validation
         for limit in limits:
             limitLayout = QHBoxLayout()
+
             limitLineEdit = QLineEdit()
             limitLineEdit.setFixedWidth(60)
             limitLineEdit.setMaxLength(8)
+            #Set input validation for LineEdit
             reg_ex = QRegularExpression("[0-9]+\.?[0-9]+")
             input_validator = QRegularExpressionValidator(reg_ex, limitLineEdit)
             limitLineEdit.setValidator(input_validator)
@@ -78,5 +77,5 @@ class ItemsFiltersView(QWidget):
             filterLineEdits[limit] = limitLineEdit
 
         self.filtersLineEdits[attribute] = filterLineEdits
-    
-        return filterLayout
+
+        self.filtersLayout.addWidget(filterWidget)
