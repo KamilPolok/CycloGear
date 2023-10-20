@@ -11,45 +11,45 @@ class DBController:
         self._connectSignalsAndSlots()
     
     def _startup(self):
-        #Set active table
+        # Set active table
         self._availableTables = self._dbHandler.getAvailableTables()
         self._activeTable = self._availableTables[0]
-        self._dbHandler.setActiveTable(self._activeTable)
-        #Init UI
-        self._limits = self._dbHandler.getFilterConditions()
+        # Get limits
+        self._limits = self._dbHandler.getTableItemsFilters(self._activeTable)
+        # Init view
         self._window.viewActiveTableSelector(self._availableTables)
-        self._window.viewFilters(self._dbHandler.getActiveTableAttributes())
-        self._window.viewTableItems(self._dbHandler.getFilteredResults(self._limits))
+        self._window.viewFilters(self._dbHandler.getTableItemsAttributes(self._activeTable))
+        self._window.viewTableItems(self._dbHandler.getFilteredResults(self._activeTable, self._limits))
     
     def _switchActiveTableEvent(self):
-        #Check if selected table is not active table
+        # Check if selected table is not active table
         selectedTableIndex = self._window.activeTableSelector.currentIndex()
         selectedTable = self._availableTables[selectedTableIndex]
 
         if self._activeTable is not selectedTable:
-            #Set new active table
+            # Set new active table
             self._activeTable = selectedTable
-            self._dbHandler.setActiveTable(self._activeTable)
-            #Update limits - get them from new active table
-            self._limits = self._dbHandler.getFilterConditions()
-            updatedResults = self._dbHandler.getFilteredResults(self._limits)
-            #Update view
+            # Update limits - get them from new active table
+            self._limits = self._dbHandler.getTableItemsFilters(self._activeTable)
+            # Update view
+            updatedResults = self._dbHandler.getFilteredResults(self._activeTable, self._limits)
+            updatedAttributes = self._dbHandler.getTableItemsAttributes(self._activeTable)
             self._window.TableItemsView.updateItemsView(updatedResults)
-            self._window.ItemsFiltersView.updateFiltersView(self._dbHandler.getActiveTableAttributes())
+            self._window.ItemsFiltersView.updateFiltersView(updatedAttributes)
 
     def _updateResultsEvent(self):
-        #Update limits - get them from lineEdits
+        # Update limits - get them from user inputs
         for attribute, attributeLimits in self._limits.items():
             for limit in attributeLimits:
                 text = self._window.ItemsFiltersView.filtersLineEdits[attribute][limit].text()
                 number = literal_eval(text) if text else 0
                 attributeLimits[limit] = number
-        #Update items view
-        updatedResults = self._dbHandler.getFilteredResults(self._limits)
+        # Update items view
+        updatedResults = self._dbHandler.getFilteredResults(self._activeTable, self._limits)
         self._window.TableItemsView.updateItemsView(updatedResults)
 
     def _selectItemEvent(self, item):
-        #Exract the selected item attributes
+        # Get the selected item attributes
         itemData = [self._window.TableItemsView.itemsTable.item(item.row(), col).text() for col in range(self._window.TableItemsView.itemsTable.columnCount())]
         print(itemData)
 

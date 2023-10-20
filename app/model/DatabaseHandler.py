@@ -1,129 +1,130 @@
 import sqlite3
 import pandas as pd
 import os
+import sys
 
-class Bearings1:
-    def __init__(self):
-        self.name = 'bearings1'
-        self.headers = ["kod", "Dz", "Dw", "B", "C", "C0", "Vref", "Vdop"]
-        self.types = ['TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'REAL', 'REAL', 'INTEGER', 'INTEGER']
-        self.csvName = 'lozyska1.csv'
-
-class Bearings2:
-    def __init__(self):
-        self.name = 'bearings2'
-        self.headers = ["kod", "Dz", "Dw", "B", "C", "C0", "Vref", "Vdop"]
-        self.types = ['TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'REAL', 'REAL', 'INTEGER', 'INTEGER']
-        self.csvName = 'lozyska2.csv'
-
-class Bearings3:
-    def __init__(self):
-        self.name = 'bearings3'
-        self.headers = ["kod", "Dz", "Dw", "B", "C", "C0", "Vref", "Vdop"]
-        self.types = ['TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'REAL', 'REAL', 'INTEGER', 'INTEGER']
-        self.csvName = 'lozyska3.csv'
+CURRENT_DIR_ABS_PATH = os.path.realpath(os.path.dirname(__file__))
+DESTINATION_DIR_NAME = 'data'
+DESTINATION_DIR_REL_PATH = os.path.join('..','..', DESTINATION_DIR_NAME)
+DATABASE_NAME = 'baza_elementow.db'
 
 class DatabaseHandler:
     def __init__(self):
-        self._tables = [Bearings1(), Bearings2(), Bearings3()]
-        self._activeTable = None
-
-        self._connection = None
-        self._cursor = None
-
-        self._findDbPath()
-        
-        self._createTables()
-        self._populateDatabase()
+        self._startup()
     
-    def _findDbPath(self):
-        currentDirPath = os.path.realpath(os.path.dirname(__file__))
-        dataDirName = 'data'
-        dbName = 'bearings.db'
-        self._dataDirPath = os.path.join(currentDirPath, '..', '..', dataDirName)
-        self._dbPath = os.path.normpath(os.path.join(self._dataDirPath, dbName))
+    def _startup(self):
+        # Check if destination folder where database file should be, exists
+        destinationDirAbsPath = os.path.join(CURRENT_DIR_ABS_PATH, DESTINATION_DIR_REL_PATH)
+        if not os.path.exists(destinationDirAbsPath):
+            sys.stderr.write(f"Error: Directory {destinationDirAbsPath} does not exist.\n")
+            sys.exit(1)
+        # Check if database file exists
+        self._databaseAbsPath = os.path.normpath(os.path.join(destinationDirAbsPath, DATABASE_NAME))
+        if not os.path.exists(self._databaseAbsPath):
+            sys.stderr.write(f"Error: Database file {self._databaseAbsPath} does not exist.\n")
+            sys.exit(1)
+        # Check the connection with the database
+        try:
+            conn = sqlite3.connect(self._databaseAbsPath)
+            conn.close()
+        except sqlite3.Error as e:
+            print(f"Connection failed with error: {e}")
+        #TODO: Add check if all required tables are in the database and check if they aren't empty
 
-    def _createTables(self):
-        self._connection = sqlite3.connect(self._dbPath)
-        self._cursor = self._connection.cursor()
+    def getAvailableTables(self, tableGroupName = None):
+        conn = sqlite3.connect(self._databaseAbsPath)
+        cursor = conn.cursor()
+        # Fetch all tables names from the database
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        allTables = [row[0] for row in cursor.fetchall()]
+        # If table group name is not provided, return all tables 
+        if tableGroupName is None:
+            return allTables
+        else:
+            # Filter tables based on the provided table group name
+            matchingTableNames = [table for table in allTables if table.startswith(tableGroupName)]
 
-        for table in self._tables:
-            headersWithTypes = [h + ' ' + t for h, t in zip(table.headers, table.types)]
-            headersStr = '", "'.join(headersWithTypes)
-            query = f"CREATE TABLE IF NOT EXISTS {table.name} ({headersStr})"
-            self._cursor.execute(query)
-        
-        self._connection.commit()
-        self._connection.close()
+            if not matchingTableNames:
+                sys.stderr.write(f"Error: Invalid group name: {tableGroupName}.\n")
+                conn.close()
+                return []
 
-    def _populateDatabase(self):
-        self._connection = sqlite3.connect(self._dbPath)
-        self._cursor = self._connection.cursor()
-
-        for table in self._tables:
-            csvPath = os.path.normpath(os.path.join(self._dataDirPath,table.csvName))
-            df = pd.read_csv(csvPath, delimiter=';', decimal=',')
-            df.columns = table.headers
-            df.to_sql(table.name, self._connection, if_exists='replace', index=False)
-
-        self._connection.commit()
-        self._connection.close()
-
-    def getAvailableTables(self):
-        return [table.name for table in self._tables]
+            conn.close()
+            return matchingTableNames
     
-    def setActiveTable(self, activeTableName):
-        for table in self._tables:
-            if table.name == activeTableName:
-                self._activeTable = table
+    def getTableItemsAttributes(self, tableName):
+        conn = sqlite3.connect(self._databaseAbsPath)
+        cursor = conn.cursor()
+        # Check if the table exists in the database
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (tableName,))
+        if not cursor.fetchone():
+            sys.stderr.write(f"Table '{tableName}' does not exist in the database.")
+            conn.close()
+            return []
+        # Get the column names from the table and store them in list
+        cursor.execute(f"PRAGMA table_info(\"{tableName}\")")
+        columns =  cursor.fetchall()
+        headers = [column[1] for column in columns[1:]]
 
-    def getActiveTable(self):
-        return self._activeTable.name
-    
-    def getActiveTableAttributes(self):
-        attributesList = self._activeTable.headers[1:]
-        return attributesList
-    
-    def getFilterConditions(self):
-        attributesList = self._activeTable.headers[1:]
-        
-        return {attribute:{"min": 0, "max": 0} for attribute in attributesList}
+        conn.close()
+        return headers
 
-    def getSnglePosition(self, code):
-        self._connection = sqlite3.connect(self._dbPath)
-        self._cursor = self._connection.cursor()
+    def getTableItemsFilters(self, tableOrGroupName):
+        conn = sqlite3.connect(self._databaseAbsPath)
+        cursor = conn.cursor()
+        # First, try to treat the input as a full table name
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (tableOrGroupName,))
+        table = cursor.fetchone()
+        # If not found, then try to treat the input as a group name prefix
+        if not table:
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE ? LIMIT 1", (tableOrGroupName + '%',))
+            table = cursor.fetchone()
+        # Check if any table with given name or group name prefix was found
+        if not table:
+            sys.stderr.write(f"No tables found with name or group name: {tableOrGroupName}.")
+            conn.close()
+            return []
+        # Get the column names from the table and store them in list
+        cursor.execute(f"PRAGMA table_info(\"{table[0]}\")")
+        columns = cursor.fetchall()
+        headers = [column[1] for column in columns[1:]]
 
-        self._cursor.execute(f"SELECT * FROM {self._activeTable.name} WHERE KOD = {code}") 
-        position = self._cursor.fetchone()
+        conn.close()
+        return {attribute:{"min": 0, "max": 0} for attribute in headers}
 
-        self._connection.commit()
-        self._connection.close()
+    # This function is currently not in use
+    def getSingleItem(self, tableName, code):
+        conn = sqlite3.connect(self._databaseAbsPath)
+        cursor = conn.cursor()
+
+        cursor.execute(f"SELECT * FROM {tableName} WHERE KOD = {code}") 
+        position = cursor.fetchone()
+
+        conn.commit()
+        conn.close()
 
         return position
-        
-    def getFilteredResults(self,limits):
-        
-        self._connection = sqlite3.connect(self._dbPath)
-        self._cursor = self._connection.cursor()
-
-        query = f"SELECT * FROM {self._activeTable.name} WHERE"
-
-        filterConditions = []
+    
+    def getFilteredResults(self, tableName, limits):
+        conn = sqlite3.connect(self._databaseAbsPath)
+        # Create the base of the query
+        query = f"SELECT * FROM \"{tableName}\" WHERE"
+        # Create the filters query part
+        filtersQuery = []
 
         for attribute, attributeLimits in limits.items():
                 if attributeLimits['min']:
-                    filterConditions.append(f" \"{attribute}\" >= {attributeLimits['min']}")
+                    filtersQuery.append(f" \"{attribute}\" >= {attributeLimits['min']}")
                 if attributeLimits['max']:
-                    filterConditions.append(f" \"{attribute}\" <= {attributeLimits['max']}")
-            
-        query += " AND".join(filterConditions)
+                    filtersQuery.append(f" \"{attribute}\" <= {attributeLimits['max']}")
+        # Join the queries
+        query += " AND".join(filtersQuery)
 
         if query.endswith(" AND") or query.endswith("WHERE"):
             query = query.rsplit(' ', 1)[0]
-        
+        # Get the results in form of a dataframe
+        df = pd.read_sql_query(query,conn)
 
-        df = pd.read_sql_query(query, self._connection)
-
-        self._connection.close()
-
+        conn.close()
         return df
+    
