@@ -1,6 +1,10 @@
+from PyQt6.QtCore import pyqtSignal
+
 from PyQt6.QtWidgets import (
     QComboBox,
     QDialog,
+    QHBoxLayout,
+    QPushButton,
     QVBoxLayout,
     QTreeWidget,
     QTreeWidgetItem,
@@ -10,6 +14,10 @@ from .TableItemsView import TableItemsView
 from .ItemsFiltersView import ItemsFiltersView
 
 class Window(QDialog):
+    # Create a custom signal for passing the selected item attributes
+    # It is needed for sending the selected item attributes outside the Window
+    itemDataSignal = pyqtSignal(list)
+
     def __init__(self):
         super().__init__()
         
@@ -72,3 +80,21 @@ class Window(QDialog):
         self.TableItemsView.updateItemsView(tableItemsDf)
 
         self.generalLayout.addWidget(self.TableItemsView)
+
+    def viewFunctionButtons(self):
+        # View OK and Cancel buttons
+        FunctionBtnsLayout = QHBoxLayout()
+    
+        self.okBtn = QPushButton("OK", self)
+        self.okBtn.setEnabled(False)
+        
+        self.cancelBtn = QPushButton("Anuluj", self)
+
+        FunctionBtnsLayout.addWidget(self.okBtn)
+        FunctionBtnsLayout.addWidget(self.cancelBtn)
+
+        self.generalLayout.addLayout(FunctionBtnsLayout)
+
+    def emitItemDataSignal(self, itemData):
+        # Emit signal with data from selected item
+        self.itemDataSignal.emit(itemData)

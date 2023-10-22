@@ -1,4 +1,5 @@
 from ast import literal_eval
+from functools import partial
 
 class ViewSelectItemController:
     def __init__(self, model, view, availableTables, limits):
@@ -6,6 +7,8 @@ class ViewSelectItemController:
         self._window = view
         self._availableTables = availableTables
         self._limits = limits
+
+        self._selectedItemAttributes = None
         
         self._startup()
         self._connectSignalsAndSlots()
@@ -16,10 +19,13 @@ class ViewSelectItemController:
         # Init view
         self._window.viewActiveTableSelector(self._availableTables)
         self._window.viewTableItems(self._dbHandler.getFilteredResults(self._activeTable, self._limits))
+        self._window.viewFunctionButtons()
 
     def _connectSignalsAndSlots(self):
         self._window.TableItemsView.itemsTable.itemClicked.connect(self._selectItemEvent)
         self._window.activeTableSelector.currentIndexChanged.connect(self._switchActiveTableEvent)
+        self._window.okBtn.clicked.connect(partial(self._closeWindowEvent, True))
+        self._window.cancelBtn.clicked.connect(partial(self._closeWindowEvent, False))
 
     def _switchActiveTableEvent(self, selectedTableIndex):
         # Check if selected table is not active table
@@ -33,8 +39,17 @@ class ViewSelectItemController:
 
     def _selectItemEvent(self, item):
         # Get the selected item attributes
-        self._window.TableItemsView.emitItemDataSignal(item)
-        self._window.close()
+        itemData = self._window.TableItemsView.getItemAttributes(item)
+        self._selectedItemAttributes = itemData
+        # Enable the OK button
+        self._window.okBtn.setEnabled(True)
+    
+    def _closeWindowEvent(self, sendItemData):
+        if sendItemData:
+            self._window.emitItemDataSignal(self._selectedItemAttributes)
+            self._window.accept()
+        else:
+            self._window.reject()
 
 class ViewDbTablesController:
     def __init__(self, model, view):

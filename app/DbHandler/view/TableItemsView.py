@@ -1,4 +1,4 @@
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtCore import Qt
 
 from PyQt6.QtWidgets import (
     QHBoxLayout,
@@ -9,9 +9,6 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 class TableItemsView(QWidget):
-    # Create a custom signal for passing the selected item attributes
-    # It is needed for sending the selected item attributes outside the Window
-    itemDataSignal = pyqtSignal(list)
     # Set Styles of the QTableWidget parts
     headerStyle = """
     QHeaderView::section {
@@ -104,9 +101,8 @@ class TableItemsView(QWidget):
         tableHeight +=  self.itemsTable.rowCount() * self.itemsTable.rowHeight(0)
         
         self.itemsTable.setMaximumHeight(tableHeight)
-    
-    def emitItemDataSignal(self, item):
+
+    def getItemAttributes(self, item):
         # Get the selected item attributes
         itemData = [self.itemsTable.item(item.row(), col).text() for col in range(self.itemsTable.columnCount())]
-        # Emit the custom signal
-        self.itemDataSignal.emit(itemData)
+        return itemData

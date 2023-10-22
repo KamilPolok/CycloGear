@@ -28,8 +28,7 @@ class MainWindowController:
         limits["Dz"]["max"] = 48
         # Setup the controller for the subwindow
         viewSelectItemsCtrl = ViewSelectItemController(dbHandler, subWindow, availableTables, limits)
-        # Connect a method that will use the data passed by signal from the subwindow
-        viewSelectItemsCtrl._window.TableItemsView.itemDataSignal.connect(self._printItemData)
+        subWindow.itemDataSignal.connect(self._printItemData)
         subWindow.exec()
     
     def _openViewDbTablesWindow(self):
