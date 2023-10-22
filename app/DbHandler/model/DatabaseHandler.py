@@ -3,9 +3,8 @@ import pandas as pd
 import os
 import sys
 
-CURRENT_DIR_ABS_PATH = os.path.realpath(os.path.dirname(__file__))
-DESTINATION_DIR_NAME = 'data'
-DESTINATION_DIR_REL_PATH = os.path.join('..','..', DESTINATION_DIR_NAME)
+from config import DATA_DIR
+
 DATABASE_NAME = 'baza_elementow.db'
 
 class DatabaseHandler:
@@ -14,12 +13,11 @@ class DatabaseHandler:
     
     def _startup(self):
         # Check if destination folder where database file should be, exists
-        destinationDirAbsPath = os.path.join(CURRENT_DIR_ABS_PATH, DESTINATION_DIR_REL_PATH)
-        if not os.path.exists(destinationDirAbsPath):
-            sys.stderr.write(f"Error: Directory {destinationDirAbsPath} does not exist.\n")
+        if not os.path.exists(DATA_DIR):
+            sys.stderr.write(f"Error: Directory {DATA_DIR} does not exist.\n")
             sys.exit(1)
         # Check if database file exists
-        self._databaseAbsPath = os.path.normpath(os.path.join(destinationDirAbsPath, DATABASE_NAME))
+        self._databaseAbsPath = os.path.normpath(os.path.join(DATA_DIR, DATABASE_NAME))
         if not os.path.exists(self._databaseAbsPath):
             sys.stderr.write(f"Error: Database file {self._databaseAbsPath} does not exist.\n")
             sys.exit(1)

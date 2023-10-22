@@ -6,8 +6,8 @@ from PyQt6.QtWidgets import (
     QTreeWidgetItem,
 )
 
-from view.TableItemsView import TableItemsView
-from view.ItemsFiltersView import ItemsFiltersView
+from .TableItemsView import TableItemsView
+from .ItemsFiltersView import ItemsFiltersView
 
 class Window(QDialog):
     def __init__(self):
