@@ -66,17 +66,16 @@ class ViewDbTablesController:
         # Get limits
         self._limits = self._dbHandler.getTableItemsFilters(self._activeTable)
         # Init view
-        self._window.viewTableTree(self._availableTables)
+        self._window.viewTablesTree(self._availableTables)
         self._window.viewFilters(self._dbHandler.getTableItemsAttributes(self._activeTable))
         self._window.viewTableItems(self._dbHandler.getFilteredResults(self._activeTable, self._limits))
     
     def _connectSignalsAndSlots(self):
-        self._window.tableTree.itemClicked.connect(self._switchActiveTableEvent)
+        self._window.tablesTreeView.tableSelectedSignal.connect(self._switchActiveTableEvent)
         self._window.ItemsFiltersView.filterResultsButton.clicked.connect(self._updateResultsEvent)
     
-    def _switchActiveTableEvent(self, item, column):
+    def _switchActiveTableEvent(self, selectedTable):
         # Check if selected table is not active table
-        selectedTable = item.data(0, 1)
         if selectedTable and self._activeTable is not selectedTable:
             # Set new active table
             self._activeTable = selectedTable
@@ -87,6 +86,7 @@ class ViewDbTablesController:
             updatedAttributes = self._dbHandler.getTableItemsAttributes(self._activeTable)
             self._window.TableItemsView.updateItemsView(updatedResults)
             self._window.ItemsFiltersView.updateFiltersView(updatedAttributes)
+            self._window.tablesTreeView.updateActiveTable(self._activeTable)
 
     def _updateResultsEvent(self):
         # Update limits - get them from user inputs
