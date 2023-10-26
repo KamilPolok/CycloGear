@@ -66,7 +66,7 @@ class TableItemsView(QWidget):
         self.itemsTable.verticalHeader().hide()
 
         ## Cells settings
-        self.itemsTable.setShowGrid(False)
+        # self.itemsTable.setShowGrid(False)
 
         self.itemsTable.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.itemsTable.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
@@ -92,17 +92,16 @@ class TableItemsView(QWidget):
         self.itemsTable.resizeColumnsToContents()
         # Set the width of the itemsTable
         tableWidth = sum([self.itemsTable.columnWidth(i) for i in range(self.itemsTable.columnCount())])
-        tableWidth += 15    # Margin for srollbar width
+        tableWidth += 14    # Margin for srollbar width
         self.itemsTable.setFixedWidth(tableWidth)
         #TODO: find a better way to get the srollbar width
         # Set the maximum height of the itemsTable
-        tableHeight = self.itemsTable.horizontalHeader().height()
-        tableHeight += 2    # Margin for the summary height of cells frame
+        tableHeight = 1.6 * self.itemsTable.horizontalHeader().height()
         tableHeight +=  self.itemsTable.rowCount() * self.itemsTable.rowHeight(0)
         
         self.itemsTable.setMaximumHeight(tableHeight)
 
-    def getItemAttributes(self, item):
-        # Get the selected item attributes
-        itemData = [self.itemsTable.item(item.row(), col).text() for col in range(self.itemsTable.columnCount())]
-        return itemData
+    def getItemCode(self, item):
+        # Get the selected item code (first column)
+        itemCode = self.itemsTable.item(item.row(), 0).text()
+        return itemCode

@@ -24,8 +24,8 @@ class MainWindowController:
         # Specify the limits for the group of tables
         limits = dbHandler.getTableItemsFilters(tablesGroupName)
         # Set some dummy limits - in the reality those values will be calculated
-        limits["Dz"]["min"] = 25
-        limits["Dz"]["max"] = 48
+        limits["E"]["min"] = 25
+        limits["E"]["max"] = 48
         # Setup the controller for the subwindow
         viewSelectItemsCtrl = ViewSelectItemController(dbHandler, subWindow, availableTables, limits)
         subWindow.itemDataSignal.connect(self._printItemData)

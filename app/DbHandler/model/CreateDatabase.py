@@ -3,10 +3,13 @@ import pandas as pd
 import os
 import sys
 
-CURRENT_DIR_ABS_PATH = os.path.realpath(os.path.dirname(__file__))
-DESTINATION_DIR_NAME = 'data'
-DESTINATION_DIR_REL_PATH = os.path.join('..','..', DESTINATION_DIR_NAME)
-DATABASE_NAME = 'baza_elementow.db'
+
+root_directory = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
+                                               '..', '..', '..',))
+sys.path.append(root_directory)
+
+
+from config import DATA_DIR, DATABASE_NAME
 
 database_tables = [
     {
@@ -15,8 +18,8 @@ database_tables = [
         "type": "kulkowe",
         "name": "łożyska-wał wejściowy-kulkowe",
         "csvName": "wwe_kulkowe.csv",
-        "headers": ["kod", "Dz", "Dw", "B", "C", "C0", "Vref", "Vdop"],
-        "types": ['TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'REAL', 'REAL', 'INTEGER', 'INTEGER']
+        "headers": ["kod", "Dw [mm]", "Dz [mm]", "B [mm]", "C [kN]", "C0 [kN]", "n max [obr/min]"],
+        "types": ['TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'REAL', 'REAL', 'INTEGER']
     },
     {
         "item":  "łożyska",
@@ -24,8 +27,8 @@ database_tables = [
         "type": "walcowe",
         "name": "łożyska-wał wejściowy-walcowe",
         "csvName": "wwe_walcowe.csv",
-        "headers": ["kod", "Dz", "Dw", "B", "C", "C0", "Vref", "Vdop"],
-        "types": ['TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'REAL', 'REAL', 'INTEGER', 'INTEGER']
+        "headers": ["kod", "Dw [mm]", "Dz [mm]", "B [mm]", "C [kN]", "C0 [kN]", "n max [obr/min]"],
+        "types": ['TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'REAL', 'REAL', 'INTEGER']
     },
     {
         "item":  "łożyska",
@@ -33,8 +36,8 @@ database_tables = [
         "type": "walcowe",
         "name": "łożyska-tarcza-walcowe",
         "csvName": "tarcza_walcowe.csv",
-        "headers": ["kod", "Dz", "Dw", "B", "C", "C0", "Vref", "Vdop"],
-        "types": ['TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'REAL', 'REAL', 'INTEGER', 'INTEGER']
+        "headers": ["kod", "Dw [mm]", "E [mm]", "B [mm]", "C [kN]", "C0 [kN]", "n max [obr/min]"],
+        "types": ['TEXT', 'INTEGER', 'REAL', 'INTEGER', 'REAL', 'REAL', 'INTEGER']
     },
     {
         "item":  "łożyska",
@@ -42,8 +45,8 @@ database_tables = [
         "type": "igiełkowe",
         "name": "łożyska-tarcza-igiełkowe",
         "csvName": "tarcza_igielkowe.csv",
-        "headers": ["kod", "Dz", "Dw", "B", "C", "C0", "Vref", "Vdop"],
-        "types": ['TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'REAL', 'REAL', 'INTEGER', 'INTEGER']
+        "headers": ["kod", "Dw [mm]", "E [mm]", "B [mm]", "C [kN]", "C0 [kN]", "n max [obr/min]"],
+        "types": ['TEXT', 'INTEGER', 'REAL', 'INTEGER', 'REAL', 'REAL', 'INTEGER']
     },
 ]
 
@@ -63,14 +66,11 @@ class DatabaseCreator:
         conn.close
 
     def _findDestinationDirectory(self):
-        # Get the absoulte destination directory path basing on its relative path
-        destinationDirAbsPath = os.path.join(CURRENT_DIR_ABS_PATH, DESTINATION_DIR_REL_PATH)
-        # Check if the absoulte destination directory path exists
-        if not os.path.exists(destinationDirAbsPath):
-            sys.stderr.write(f"Error: {destinationDirAbsPath} does not exist.\n")
+        if not os.path.exists(DATA_DIR):
+            sys.stderr.write(f"Error: {DATA_DIR} does not exist.\n")
             sys.exit(1)
         else:
-            return destinationDirAbsPath
+            return DATA_DIR
     
     def _createTables(self):
         conn = sqlite3.connect(self._databaseAbsPath)

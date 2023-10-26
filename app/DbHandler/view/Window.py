@@ -15,7 +15,7 @@ from .TablesTreeView import TablesTreeView
 class Window(QDialog):
     # Create a custom signal for passing the selected item attributes
     # It is needed for sending the selected item attributes outside the Window
-    itemDataSignal = pyqtSignal(list)
+    itemDataSignal = pyqtSignal(dict)
 
     def __init__(self):
         super().__init__()

@@ -39,7 +39,8 @@ class ViewSelectItemController:
 
     def _selectItemEvent(self, item):
         # Get the selected item attributes
-        itemData = self._window.TableItemsView.getItemAttributes(item)
+        itemCode = self._window.TableItemsView.getItemCode(item)
+        itemData = self._dbHandler.getSingleItem(self._activeTable, itemCode)
         self._selectedItemAttributes = itemData
         # Enable the OK button
         self._window.okBtn.setEnabled(True)
