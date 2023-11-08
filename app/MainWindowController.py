@@ -11,18 +11,6 @@ class MainWindowController:
         self.window = view
         self.data = model
 
-        self.material = {'Oznaczenie': 'Stal C45',
-                'Rm': [600, 'MPa'],
-                'Re': [340, 'MPa'],
-                'Zgj': [460,'MPa'],
-                'Zgo': [250, 'MPa'],
-                'Zsj': [300, 'MPa'],
-                'Zso': [150, 'MPa'],
-                'E': [2100000, 'MPa'],
-                'G': [80750, 'MPa'],
-                'g': [7860, 'kg/m^3'],
-            }
-
         self.startup()
         self._connectSignalsAndSlots()
 
@@ -30,13 +18,12 @@ class MainWindowController:
         # Pass necessary data to view:
         self.window.setData(self.data)
         # Init view
-        self.window.viewDataAcqSection()
-        self.window.viewDataDispSection(self.data)
+        self.window.setupTab1()
 
     def _connectSignalsAndSlots(self):
-        self.window.updateDataBtn.clicked.connect(self._performCalculations)
-        self.window.viewChartBtn.clicked.connect(self.displayChart)
+        #self.window.viewChartBtn.clicked.connect(self.displayChart)
         self.window.SelectMaterialBtn.clicked.connect(self.openMaterialsWindow)
+        self.window.updatedShaftDataSignal.connect(self._calculateInputShaftAttr)
 
     def displayChart(self):
         self.chart = Chart(self.z, self.F, self.Mg, self.Ms, self.Mz, self.d)
@@ -58,8 +45,7 @@ class MainWindowController:
         subWindow.itemDataSignal.connect(self.window.updateViewedMaterial)
         subWindow.exec()
 
-    def _performCalculations(self):
-        self.data = self.window.getData()
+    def _calculateInputShaftAttr(self):
         print(self.data)
         L = self.data['L'][0]
         LA = self.data['LA'][0]
@@ -69,11 +55,10 @@ class MainWindowController:
         F1 = self.data['F1'][0]
         F2 = self.data['F2'][0]
         Mo = self.data['Mo'][0]
-        Zgo = self.material['Zgo'][0]
+        Zgo = self.data['Materiał']['Zgo'][0]
         xz = self.data['xz'][0]
 
         self.z = [0, LA, L1, L2, LB, L]
-
 
         # Reakcje podporowe
         Rb = (-F1*L1-F2*L2)/(LB-LA)

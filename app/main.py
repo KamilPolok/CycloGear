@@ -22,7 +22,16 @@ def main():
         'L1': [None, 'mm'],
         'L2': [None, 'mm'],
         'e': [10, 'mm'],
-        'xz': [None, '']
+        'Materiał' : [None],
+        'xz': [None, ''],
+        'Lh1': [None, ''],
+        'fd1': [None, ''],
+        'ft1': [None, ''],
+        'Łożyska1': [None],
+        'Lh2': [None, ''],
+        'fd2': [None, ''],
+        'ft2': [None, ''],
+        'Łożyska2': [None],
         }
 
     mainWindow = MainWindow()

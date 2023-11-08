@@ -1,75 +1,115 @@
 from ast import literal_eval
+from functools import partial
 
-from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QLabel, QWidget, QHBoxLayout, QLineEdit, QSplitter, QPushButton
-from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QLabel, QWidget, QHBoxLayout, QLineEdit, QSplitter, QPushButton, QTabWidget
+
+from PyQt6.QtGui import QRegularExpressionValidator
+from PyQt6.QtCore import Qt, QRegularExpression, pyqtSignal
 
 MAIN_WINDOW_W = 300
 MAIN_WINDOW_H = 100
 
 class MainWindow(QMainWindow):
+    updatedShaftDataSignal = pyqtSignal()
+    updatedSupportBearingsSignal = pyqtSignal(dict)
+    updatedCycloBearingsSignal = pyqtSignal(dict)
+
     def __init__(self):
         super().__init__()
         # Init Window Attributes
         self.setWindowTitle("Mechkonstruktor 2.0")
         self.setBaseSize(MAIN_WINDOW_W, MAIN_WINDOW_H)
-        # Init UI
+
+        self.signals = [self.updatedShaftDataSignal, self.updatedSupportBearingsSignal, self.updatedCycloBearingsSignal]
+
         self.initUI()
-        # View section for data acquisition from user
-
+    
     def initUI(self):
-        # Create central widget
-        centralWidget = QWidget(self)
-        self.setCentralWidget(centralWidget)
-        # Create main layout for the central widget
-        mainLayout = QVBoxLayout()
-        centralWidget.setLayout(mainLayout)
-        # Create splitter and add it to main layout
-        splitter = QSplitter(Qt.Orientation.Horizontal)
-        mainLayout.addWidget(splitter)
-        # Create the left and right widgets
-        leftSectionWidget = QWidget(self)
-        rightSectionWidget = QWidget(self)
-        # Create QVBoxLayouts for the left and right widgets
-        self.leftSectionLayout = QVBoxLayout()
-        self.rightSectionLayout = QVBoxLayout()
-
-        leftSectionWidget.setLayout(self.leftSectionLayout)
-        rightSectionWidget.setLayout(self.rightSectionLayout)
-        # Add the left and right widgets to the splitter
-        splitter.addWidget(leftSectionWidget)
-        splitter.addWidget(rightSectionWidget)
+        # Create tab widget
+        self.tabs = QTabWidget(self)
+        self.setCentralWidget(self.tabs)
+        # Create tabs
+        self.tab1 = QWidget()
+        self.tab2 = QWidget()
+        self.tab3 = QWidget()
+        
+        self.tabs.addTab(self.tab1, "Tab 1")
+        self.tabs.addTab(self.tab2, "Tab 2")
+        self.tabs.addTab(self.tab3, "Tab 3")
+        # Initially Enable only first tab - disable 2 and 3
+        self.tabs.setTabEnabled(1, False)
+        self.tabs.setTabEnabled(2, False)
+        # Set list storing data and LineEdits needed in each tabs
+        self.tabData = [None, None, None]
+        self.tabLE = [None, None, None]
     
     def setData(self, data):
+        # Set data needed for or from GUI
         self._data = data
-        self._LE = {}
 
-    def getData(self):
-        for key, value in self._LE.items():
-            self._data[key][0] = literal_eval(value.text()) if value.text() else 0
-        
-        return self._data
+    def onChange(self):
+        pass
 
-    def viewDataAcqSection(self):
-        # Set section label
-        sectionLabel = QLabel("DANE WEJŚCIOWE")
-        self.leftSectionLayout.addWidget(sectionLabel)
+    # def _connectSignalsAndSlots(self):
+    #     self.tabs.currentChanged.connect(self.onChange)
+    
+    def updateData(self):
+        # Get the index of current tab
+        currentTabIndex = self.tabs.currentIndex()
+        # Update the tabData for current tab
+        for attribute, lineEdit in self.tabLE[currentTabIndex].items():
+            text = lineEdit.text()
+            value = literal_eval(text) if text else None
+            self.tabData[currentTabIndex][attribute][0] = value
+        # Check if every attribute in current tabs tabData is not None
+        # isEveryAttributeProvided = all(value[0] is not None for value in self.tabData[currentTabIndex].values())
 
-        # View component for shaft parameters acquisition
-        self.viewShaftParamsAcqComponent()
-        self.viewFOSAcqComponent()
-        self.viewMaterialAcqComponent()
+        isEveryAttributeProvided = True
+        if isEveryAttributeProvided:
+            # If every attribute has been provided, complete with them the _data
+            for key, value in self.tabData[currentTabIndex].items():
+                if key in self._data:
+                    self._data[key] = value
+            # ...and enable next tab
+            if currentTabIndex < self.tabs.count() - 1:
+                self.tabs.setTabEnabled(currentTabIndex + 1, True)
 
+            self.signals[currentTabIndex].emit()
+        else:
+            # ...else, disable all tabs that come after the current tab 
+            for i in range(currentTabIndex + 1, self.tabs.count()):
+                self.tabs.setTabEnabled(i, False)
+    
+    def setupTab1(self):
+        # Set tab1 layout
+        self.tab1Layout = QVBoxLayout()
+        self.tab1.setLayout(self.tab1Layout)
+        # Set dict of data that are needed in this tab:
+        attributesToExtract = ['L', 'L1', 'L2', 'LA', 'LB', 'Materiał', 'xz']
+        self.tabData[0] = {key: self._data[key] for key in attributesToExtract}
+        # Set dict of line edits
+        self.tabLE[0] = {}
+        # View components for input shaft attributes acquisition
+        self.viewComponent1()
+        self.viewComponent2()
+        self.viewComponent3()
+        # Set update data button
         self.updateDataBtn = QPushButton("Aktualizuj dane")
-        self.leftSectionLayout.addWidget(self.updateDataBtn)
+        self.tab1Layout.addWidget(self.updateDataBtn)
+        self.updateDataBtn.clicked.connect(self.updateData)
 
-    def viewDataDispSection(self, data):
-
-        self.viewLoadDataComponent()
-        self.viewChartBtn = QPushButton("Pokaż wykresy")
-        self.rightSectionLayout.addWidget(self.viewChartBtn)
-
-    def viewShaftParamsAcqComponent(self):
-        componentLayout = QVBoxLayout()
+    def setupTab2(self):
+        # Set tab2 layout
+        self.tab2Layout = QVBoxLayout()
+        self.tab2.setLayout(self.tab2Layout)
+        # Set dict of data that are needed in this tab:
+        attributesToExtract = ['Lh1', 'fd1', 'ft1', 'Łożyska1']
+        self.tabData[1] = {key: self._data[key] for key in attributesToExtract}
+        # Set dict of line edits in tab1
+        self.tabLE[1] = {}
+            
+    def viewComponent1(self):
+        component1Layout = QVBoxLayout()
         componentLabel = QLabel("Wymiary:")
 
         shaftLength = self.createDataInputRow('L','Długość wału', 'L')
@@ -82,62 +122,41 @@ class MainWindow(QMainWindow):
         cycloDisc1 = self.createDataInputRow('L1', 'Tarcza obiegowa 1', 'L<sub>1</sub>')
         cycloDisc2 = self.createDataInputRow('L2','Tarcza obiegowa 2', 'L<sub>2</sub>')
    
+        component1Layout.addWidget(componentLabel) 
+        component1Layout.addLayout(shaftLength)
+        component1Layout.addWidget(supportCoordinatesLabel)
+        component1Layout.addLayout(pinSupport)
+        component1Layout.addLayout(rollerSupport)
+        component1Layout.addWidget(cycloDiscCoordinatesLabel)
+        component1Layout.addLayout(cycloDisc1)
+        component1Layout.addLayout(cycloDisc2)
 
-        componentLayout.addWidget(componentLabel) 
-        componentLayout.addLayout(shaftLength)
-        componentLayout.addWidget(supportCoordinatesLabel)
-        componentLayout.addLayout(pinSupport)
-        componentLayout.addLayout(rollerSupport)
-        componentLayout.addWidget(cycloDiscCoordinatesLabel)
-        componentLayout.addLayout(cycloDisc1)
-        componentLayout.addLayout(cycloDisc2)
+        self.tab1Layout.addLayout(component1Layout)
 
-        self.leftSectionLayout.addLayout(componentLayout)
-
-    def viewFOSAcqComponent(self):
-        componentLayout = QVBoxLayout()
+    def viewComponent2(self):
+        component2Layout = QVBoxLayout()
         componentLabel = QLabel("Współczynnik bezpieczeństwa:")
         fos = self.createDataInputRow('xz', "", "x<sub>z</sub> = ")
 
-        componentLayout.addWidget(componentLabel)
-        componentLayout.addLayout(fos)
+        component2Layout.addWidget(componentLabel)
+        component2Layout.addLayout(fos)
 
-        self.leftSectionLayout.addLayout(componentLayout)
+        self.tab1Layout.addLayout(component2Layout)
 
-    def viewMaterialAcqComponent(self):
-        self.materialAcqComponentLayout = QVBoxLayout()
-        self.SelectMaterialBtn = QPushButton("Materiał:")
-        self.materialAcqComponentLayout.addWidget(self.SelectMaterialBtn)
+    def viewComponent3(self):
+        self.component2Layout = QVBoxLayout()
+        componentLabel = QLabel("Materiał")
+        
+        self.SelectMaterialBtn = QPushButton("Wybierz Materiał")
 
-        self.leftSectionLayout.addLayout(self.materialAcqComponentLayout)
+        self.component2Layout.addWidget(componentLabel)
+        self.component2Layout.addWidget(self.SelectMaterialBtn)
+
+        self.tab1Layout.addLayout(self.component2Layout)
     
-
     def updateViewedMaterial(self, itemData):
-        for attribute, value in itemData.items():
-            layout = QHBoxLayout()
-            layout.addWidget(QLabel(f"{attribute}: "))
-            layout.addWidget(QLabel(f"{value[0]} "))
-            layout.addWidget(QLabel(f"{value[1]}"))
-
-            self.materialAcqComponentLayout.addLayout(layout)
-
-    def viewLoadDataComponent(self):
-        componentLayout = QVBoxLayout()
-        componentLabel = QLabel("Obciążenia:")
-        equalForcesLabel = QLabel("Siły wypadkowe pochodzące od tarcz:")
-        f1 = self.createDataDisplayRow("F<sub>1</sub>", self._data['F1'])
-        f2 = self.createDataDisplayRow("F<sub>2</sub>", self._data['F2'])
-        inputTourqeLabel = QLabel("Wejściowy moment obrotowy:")
-        tin = self.createDataDisplayRow("M<sub>o</sub>", self._data['Mo'])
-
-        componentLayout.addWidget(componentLabel)
-        componentLayout.addWidget(equalForcesLabel)
-        componentLayout.addLayout(f1)
-        componentLayout.addLayout(f2)
-        componentLayout.addWidget(inputTourqeLabel)
-        componentLayout.addLayout(tin)
-
-        self.rightSectionLayout.addLayout(componentLayout)
+        self.SelectMaterialBtn.setText(itemData['Materiał'][0])
+        self.tabData[self.tabs.currentIndex()]['Materiał']  = itemData
 
     def createDataInputRow(self, parameter, description, symbol):
         if parameter not in self._data:
@@ -150,26 +169,19 @@ class MainWindow(QMainWindow):
         SymbolLabel = QLabel(f'{symbol} = ')
         # Create LineEdit and save it
         lineEdit = QLineEdit()
-        self._LE[parameter] = lineEdit
-        if self._data[parameter][0] is not None:
-            lineEdit.setText(f'{self._data[parameter][0]}')
+        # Set input validation for LineEdit
+        regex = QRegularExpression("[1-9]+")
+        inputValidator = QRegularExpressionValidator(regex, lineEdit)
+        lineEdit.setValidator(inputValidator)
+        self.tabLE[self.tabs.currentIndex()][parameter] = lineEdit
+        if self.tabData[self.tabs.currentIndex()][parameter][0] is not None:
+            lineEdit.setText(f'{self.tabData[self.tabs.currentIndex()][parameter][0]}')
         # Create units label
-        unitsLabel = QLabel(self._data[parameter][1])
+        unitsLabel = QLabel(self.tabData[self.tabs.currentIndex()][parameter][-1])
 
         layout.addWidget(Descriptionlabel)
         layout.addWidget(SymbolLabel)
         layout.addWidget(lineEdit)
-        layout.addWidget(unitsLabel)
-
-        return layout
-    
-    def createDataDisplayRow(self, description, parameter):
-        layout = QHBoxLayout()
-        descriptionlabel = QLabel(description)
-        parameterLabel = QLabel(f'{parameter[0]}')
-        unitsLabel = QLabel(parameter[1])
-        layout.addWidget(descriptionlabel)
-        layout.addWidget(parameterLabel)
         layout.addWidget(unitsLabel)
 
         return layout
