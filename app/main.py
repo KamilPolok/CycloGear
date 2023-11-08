@@ -12,8 +12,22 @@ from MainWindowController import MainWindowController
 def main():
     dbApp = QApplication([])
 
+    data = {
+        'F1': [100, 'N'],
+        'F2': [-100, 'N'],
+        'Mo': [9.55, 'Nm'],
+        'L': [None, 'mm'],
+        'LA': [None, 'mm'],
+        'LB': [None, 'mm'],
+        'L1': [None, 'mm'],
+        'L2': [None, 'mm'],
+        'e': [10, 'mm'],
+        'xz': [None, '']
+        }
+
     mainWindow = MainWindow()
-    mainWindowCtrl = MainWindowController(mainWindow)
+
+    mainWindowCtrl = MainWindowController(data, mainWindow)
     mainWindow.show()
 
     sys.exit(dbApp.exec())

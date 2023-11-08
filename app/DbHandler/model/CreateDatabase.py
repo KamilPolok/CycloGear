@@ -48,10 +48,19 @@ database_tables = [
         "headers": ["kod", "Dw [mm]", "E [mm]", "B [mm]", "C [kN]", "C0 [kN]", "n max [obr/min]"],
         "types": ['TEXT', 'INTEGER', 'REAL', 'INTEGER', 'REAL', 'REAL', 'INTEGER']
     },
+    {
+        "item":  "wał bierny: materiały",
+        # "group": "tarcza",
+        # "type": "igiełkowe",
+        "name": "wał bierny: materiały",
+        "csvName": "wwe_materiały.csv",
+        "headers": [ "Materiał", "Obróbka", "Rm [MPa]", "Re [MPa]", "Zgj [MPa]", "Zgo [MPa]", "Zsj [MPa]", "Zso [MPa]", "E [MPa]", "G [MPa]", "g [kg/m3]" ],
+        "types": [ 'TEXT', 'TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER' ]
+    },
 ]
 
 class DatabaseCreator:
-    def __init__(self):
+    def __init__(self): 
         self._createDatabase()
         self._createTables()
         self._populateTables()
