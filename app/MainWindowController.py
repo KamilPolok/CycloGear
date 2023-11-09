@@ -19,11 +19,16 @@ class MainWindowController:
         self.window.setData(self.data)
         # Init view
         self.window.setupTab1()
+        self.window.setupTab2()
+        # self.window.setupTab3()
 
     def _connectSignalsAndSlots(self):
         #self.window.viewChartBtn.clicked.connect(self.displayChart)
         self.window.SelectMaterialBtn.clicked.connect(self.openMaterialsWindow)
+        self.window.SelectBearingBtn.clicked.connect(self.openBearingsWindow)
         self.window.updatedShaftDataSignal.connect(self._calculateInputShaftAttr)
+        self.window.updatedSupportBearingsSignal.connect(self._calculateBearings1Attr)
+        self.window.updatedCycloBearingsSignal.connect(self._calculateBearings2Attr)
 
     def displayChart(self):
         self.chart = Chart(self.z, self.F, self.Mg, self.Ms, self.Mz, self.d)
@@ -44,9 +49,58 @@ class MainWindowController:
         viewSelectItemsCtrl = ViewSelectItemController(dbHandler, subWindow, availableTables, limits)
         subWindow.itemDataSignal.connect(self.window.updateViewedMaterial)
         subWindow.exec()
+    
+    def openBearingsWindow(self):
+        # # Get acces to the database
+        dbHandler = DatabaseHandler()
+        # Create a subwindow that views GUI for the DatabaseHandler
+        subWindow = Window()
+        subWindow.setWindowTitle("Wybór łożyska tocznego")
+        # Specify the group name of the tables you want to take for consideration
+        tablesGroupName = 'łożyska-wał wejściowy'
+        availableTables = dbHandler.getAvailableTables(tablesGroupName)
+        # Specify the limits for the group of tables
+        limits = dbHandler.getTableItemsFilters(tablesGroupName)
+        limits['Dw']['min'] = self.data['ds'][0]
+        limits['C']['min'] = self.data['C1'][0]
+        # Setup the controller for the subwindow
+        viewSelectItemsCtrl = ViewSelectItemController(dbHandler, subWindow, availableTables, limits)
+        subWindow.itemDataSignal.connect(self.window.updateViewedBearing)
+        subWindow.exec()
+
+    def _calculateBearings1Attr(self):
+        nwe = self.data['nwe'][0]
+        lh = self.data['Lh1'][0]
+        fd = self.data['fd1'][0]
+        ft = self.data['ft1'][0]
+        p = 3.0
+
+        ra = self.data['Ra'][0]
+        rb = self.data['Rb'][0]
+
+        l = 60*lh*nwe/np.power(10,6)
+        c = ra*np.power(l,1/p)*ft/fd
+
+        self.data['L1'][0] = l
+        self.data['C1'][0] = c
+    
+    def _calculateBearings2Attr(self):
+        nwe = self.data['nwe'][0]
+        lh = self.data['Lh2'][0]
+        fd = self.data['fd2'][0]
+        ft = self.data['ft2'][0]
+        p = 3.0
+
+        f1 = self.data['F1'][0]
+        f2 = self.data['F2'][0]
+
+        l = 60*lh*nwe/np.power(10,6)
+        c = f1*np.power(l,1/p)*ft/fd
+
+        self.data['L2'][0] = l
+        self.data['C2'][0] = c
 
     def _calculateInputShaftAttr(self):
-        print(self.data)
         L = self.data['L'][0]
         LA = self.data['LA'][0]
         LB = self.data['LB'][0]
@@ -57,6 +111,7 @@ class MainWindowController:
         Mo = self.data['Mo'][0]
         Zgo = self.data['Materiał']['Zgo'][0]
         xz = self.data['xz'][0]
+        e = self.data['e'][0]
 
         self.z = [0, LA, L1, L2, LB, L]
 
@@ -83,3 +138,9 @@ class MainWindowController:
         # Średnica wału
         kgo = Zgo/xz
         self.d = np.power(32*self.Mz/(np.pi*kgo*1000000), 1/3)*1000
+
+        # Safe the calculated parameters
+        self.data['ds'][0] = max(self.d)
+        self.data['de'][0] = max(self.d) + 2 * e
+        self.data['Ra'][0] = Ra
+        self.data['Rb'][0] = Rb

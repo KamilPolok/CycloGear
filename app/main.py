@@ -13,6 +13,9 @@ def main():
     dbApp = QApplication([])
 
     data = {
+        'nwe':[1500, 'obr/min'],
+        'Ra':[None, 'obr/min'],
+        'Rb':[None, 'obr/min'],
         'F1': [100, 'N'],
         'F2': [-100, 'N'],
         'Mo': [9.55, 'Nm'],
@@ -22,16 +25,22 @@ def main():
         'L1': [None, 'mm'],
         'L2': [None, 'mm'],
         'e': [10, 'mm'],
+        'ds': [None, 'mm'],
+        'de': [None, 'mm'],
         'Materiał' : [None],
         'xz': [None, ''],
+        'Łożyska1': [None],
         'Lh1': [None, ''],
+        'L1': [None, ''],
+        'C1': [None, ''],
         'fd1': [None, ''],
         'ft1': [None, ''],
-        'Łożyska1': [None],
+        'Łożyska2': [None],
         'Lh2': [None, ''],
+        'L2': [None, ''],
+        'C2': [None, ''],
         'fd2': [None, ''],
         'ft2': [None, ''],
-        'Łożyska2': [None],
         }
 
     mainWindow = MainWindow()
