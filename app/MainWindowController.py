@@ -1,13 +1,14 @@
 import numpy as np
 
 from ChartView import Chart
+from MainWindow import MainWindow
 
 from DbHandler.controller.DBController import ViewSelectItemController
 from DbHandler.model.DatabaseHandler import DatabaseHandler
 from DbHandler.view.Window import Window
 
 class MainWindowController:
-    def __init__(self, model, view):
+    def __init__(self, model, view: MainWindow):
         self.window = view
         self.data = model
 
@@ -17,18 +18,17 @@ class MainWindowController:
     def startup(self):
         # Pass necessary data to view:
         self.window.setData(self.data)
-        # Init view
-        self.window.setupTab1()
-        self.window.setupTab2()
-        # self.window.setupTab3()
+        # Init tabs
+        self.window.initTabs()
 
     def _connectSignalsAndSlots(self):
         #self.window.viewChartBtn.clicked.connect(self.displayChart)
-        self.window.SelectMaterialBtn.clicked.connect(self.openMaterialsWindow)
-        self.window.SelectBearingBtn.clicked.connect(self.openBearingsWindow)
+        self.window.tabs[0].SelectMaterialBtn.clicked.connect(self.openMaterialsWindow)
+        # self.window.SelectBearingBtn.clicked.connect(self.openBearingsWindow)
         self.window.updatedShaftDataSignal.connect(self._calculateInputShaftAttr)
-        self.window.updatedSupportBearingsSignal.connect(self._calculateBearings1Attr)
-        self.window.updatedCycloBearingsSignal.connect(self._calculateBearings2Attr)
+        # self.window.updatedSupportBearingsSignal.connect(self._calculateBearings1Attr)
+        # self.window.updatedCycloBearingsSignal.connect(self._calculateBearings2Attr)
+        pass
 
     def displayChart(self):
         self.chart = Chart(self.z, self.F, self.Mg, self.Ms, self.Mz, self.d)
@@ -47,7 +47,7 @@ class MainWindowController:
         limits = dbHandler.getTableItemsFilters(tablesGroupName)
         # Setup the controller for the subwindow
         viewSelectItemsCtrl = ViewSelectItemController(dbHandler, subWindow, availableTables, limits)
-        subWindow.itemDataSignal.connect(self.window.updateViewedMaterial)
+        subWindow.itemDataSignal.connect(self.window.tabs[0].updateViewedMaterial)
         subWindow.exec()
     
     def openBearingsWindow(self):
@@ -100,7 +100,12 @@ class MainWindowController:
         self.data['L2'][0] = l
         self.data['C2'][0] = c
 
-    def _calculateInputShaftAttr(self):
+    def _calculateInputShaftAttr(self, data = None):
+        if data is not None:
+            for key, value in data.items():
+                    if key in self.data:
+                        self.data[key] = value
+
         L = self.data['L'][0]
         LA = self.data['LA'][0]
         LB = self.data['LB'][0]
