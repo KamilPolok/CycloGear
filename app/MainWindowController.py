@@ -22,10 +22,11 @@ class MainWindowController:
         self.window.initTabs()
 
     def _connectSignalsAndSlots(self):
-        #self.window.viewChartBtn.clicked.connect(self.displayChart)
+        # self.window.viewChartBtn.clicked.connect(self.displayChart)
         self.window.tabs[0].SelectMaterialBtn.clicked.connect(self.openMaterialsWindow)
-        # self.window.SelectBearingBtn.clicked.connect(self.openBearingsWindow)
-        self.window.updatedShaftDataSignal.connect(self._calculateInputShaftAttr)
+        self.window.tabs[1].updatedBearings1DataSignal.connect(self.openBearings1Window)
+        self.window.tabs[1].updatedBearings2DataSignal.connect(self.openBearings2Window)
+        self.window.tabs[0].updatedDataSignal.connect(self._calculateInputShaftAttr)
         # self.window.updatedSupportBearingsSignal.connect(self._calculateBearings1Attr)
         # self.window.updatedCycloBearingsSignal.connect(self._calculateBearings2Attr)
         pass
@@ -50,7 +51,8 @@ class MainWindowController:
         subWindow.itemDataSignal.connect(self.window.tabs[0].updateViewedMaterial)
         subWindow.exec()
     
-    def openBearingsWindow(self):
+    def openBearings1Window(self, data):
+        self._calculateBearings1Attr(data)
         # # Get acces to the database
         dbHandler = DatabaseHandler()
         # Create a subwindow that views GUI for the DatabaseHandler
@@ -65,10 +67,34 @@ class MainWindowController:
         limits['C']['min'] = self.data['C1'][0]
         # Setup the controller for the subwindow
         viewSelectItemsCtrl = ViewSelectItemController(dbHandler, subWindow, availableTables, limits)
-        subWindow.itemDataSignal.connect(self.window.updateViewedBearing)
+        subWindow.itemDataSignal.connect(self.window.tabs[1].updateViewedBearing1)
+        subWindow.exec()
+    
+    def openBearings2Window(self, data):
+        self._calculateBearings2Attr(data)
+        # # Get acces to the database
+        dbHandler = DatabaseHandler()
+        # Create a subwindow that views GUI for the DatabaseHandler
+        subWindow = Window()
+        subWindow.setWindowTitle("Wybór łożyska tocznego")
+        # Specify the group name of the tables you want to take for consideration
+        tablesGroupName = 'łożyska-tarcza'
+        availableTables = dbHandler.getAvailableTables(tablesGroupName)
+        # Specify the limits for the group of tables
+        limits = dbHandler.getTableItemsFilters(tablesGroupName)
+        limits['Dw']['min'] = self.data['de'][0]
+        limits['C']['min'] = self.data['C2'][0]
+        # Setup the controller for the subwindow
+        viewSelectItemsCtrl = ViewSelectItemController(dbHandler, subWindow, availableTables, limits)
+        subWindow.itemDataSignal.connect(self.window.tabs[1].updateViewedBearing2)
         subWindow.exec()
 
-    def _calculateBearings1Attr(self):
+    def _calculateBearings1Attr(self, data):
+        if data is not None:
+            for key, value in data.items():
+                    if key in self.data:
+                        self.data[key] = value
+
         nwe = self.data['nwe'][0]
         lh = self.data['Lh1'][0]
         fd = self.data['fd1'][0]
@@ -81,10 +107,17 @@ class MainWindowController:
         l = 60*lh*nwe/np.power(10,6)
         c = ra*np.power(l,1/p)*ft/fd
 
-        self.data['L1'][0] = l
+        self.data['Lt1'][0] = l
         self.data['C1'][0] = c
     
-    def _calculateBearings2Attr(self):
+        print(self.data)
+    
+    def _calculateBearings2Attr(self, data):
+        if data is not None:
+            for key, value in data.items():
+                    if key in self.data:
+                        self.data[key] = value
+
         nwe = self.data['nwe'][0]
         lh = self.data['Lh2'][0]
         fd = self.data['fd2'][0]
@@ -97,7 +130,7 @@ class MainWindowController:
         l = 60*lh*nwe/np.power(10,6)
         c = f1*np.power(l,1/p)*ft/fd
 
-        self.data['L2'][0] = l
+        self.data['Lt2'][0] = l
         self.data['C2'][0] = c
 
     def _calculateInputShaftAttr(self, data = None):
@@ -149,3 +182,7 @@ class MainWindowController:
         self.data['de'][0] = max(self.d) + 2 * e
         self.data['Ra'][0] = Ra
         self.data['Rb'][0] = Rb
+
+        print("Input shaft parameters CALCULATED")
+        print(self.data)
+

@@ -16,14 +16,9 @@ from PyQt6.QtWidgets import (
 )
 
 class MainWindow(QMainWindow):
-    updatedShaftDataSignal = pyqtSignal(dict)
-    updatedSupportBearingsSignal = pyqtSignal()
-    updatedCycloBearingsSignal = pyqtSignal(dict)
-
     def __init__(self):
         super().__init__()
         # Set signals 
-        self.signals = [self.updatedShaftDataSignal, self.updatedSupportBearingsSignal, self.updatedCycloBearingsSignal]
         self.initUI()
     
     def setData(self, data):
@@ -71,15 +66,8 @@ class MainWindow(QMainWindow):
 
         # Check if the tab is initially filled
         self.tabs[self.tabWidget.currentIndex()].check_state()
-    
-    def updateData(self):
-        current_index = self.tabWidget.currentIndex()
-        tabData = self.tabs[self.tabWidget.currentIndex()].getData()
-        print(tabData)
-        self.signals[current_index].emit(tabData)
 
     def next_tab(self):
-        self.updateData()
         current_index = self.tabWidget.currentIndex()
         next_index = current_index + 1
         # Check if we're not on the last tab
@@ -89,17 +77,19 @@ class MainWindow(QMainWindow):
                 # Enable the next tab if it's not already enabled
                 self.tabWidget.setTabEnabled(next_index, True)
             # Move to the next tab
+            self.tabs[current_index].updateData()
             self.tabWidget.setCurrentIndex(next_index)
 
     def on_tab_change(self, index):
         print("----------------Tab changed")
         # Check if the tab is initially filled
         self.tabs[index].check_state()
+        self.tabs[index].updateTab()
         
     def check_next_tab_button(self, enableButton = False, disableNextTabs = False):
-        print(f"BUTTON ENABLED: {enableButton}")
+        # print(f"BUTTON ENABLED: {enableButton}")
         if enableButton:
-            print("\"Next Tab\" button enabled")
+            # print("\"Next Tab\" button enabled")
             self.nextTabButton.setEnabled(True)
         else:
             self.nextTabButton.setEnabled(False)
@@ -121,6 +111,9 @@ class TabBase(QWidget, metaclass=ABCQWidgetMeta):
 
         self.lineEdits = {}
         self.itemsToSelect = {}
+        
+        self.valueLabels = {}
+
         self.initUI()
 
     @abstractmethod
@@ -128,10 +121,17 @@ class TabBase(QWidget, metaclass=ABCQWidgetMeta):
         """Initialize the user interface for the tab."""
         pass
     
+    def updateTab(self):
+        pass
+    
     def get_state(self):
-        line_edit_states = [line_edit.text() for line_edit in self.findChildren(QLineEdit)]
-        combo_box_states = [combo_box.currentIndex() for combo_box in self.findChildren(QComboBox)]
-        return line_edit_states, combo_box_states
+        inputs_states =  [line_edit.text() for line_edit in self.line_edits]
+        inputs_states += [combo_box.currentIndex() for combo_box in self.combo_boxes]
+
+        if ('' in inputs_states or -1 in inputs_states) or not all(item is not None for item in self.itemsToSelect.values()):
+            return None
+        else:
+            return inputs_states
 
     def setup_state_tracking(self):
         self.line_edits = self.findChildren(QLineEdit)
@@ -146,31 +146,37 @@ class TabBase(QWidget, metaclass=ABCQWidgetMeta):
             combo_box.currentIndexChanged.connect(self.check_state)
 
     def check_state(self):
-        # Check if all inputs are provided
-        print(f"items to select {self.itemsToSelect}")
-        all_filled = all(line_edit.text() for line_edit in self.line_edits) and \
-                    all(combo_box.currentIndex() != -1 for combo_box in self.combo_boxes) and \
-                    all(item is not None for item in self.itemsToSelect.values())
-
+        state_changed = False
         current_state = self.get_state()
-        state_changed = current_state != self.original_state
+
+        # Check if all inputs are provided
+        all_filled = False if current_state == None else True
+
+        print(f"currentstate: {current_state}")
         if all_filled:
+            current_state = self.get_state()
+            if self.original_state:
+                state_changed = current_state != self.original_state
+            self.original_state = current_state
+
             if state_changed:
-                self.original_state = current_state
-                print(f"state_changed: {state_changed}")
-                print("1.1. The state of at least on input changed but all of them are provided")
+                # print(f"state_changed: {state_changed}")
+                # print("1.1. The state of at least on input changed but all of them are provided")
                 self.on_click_callback(True, True)
             else:
-                print("1.2. All inputs are provided")
+                # print("1.2. All inputs are provided")
                 self.on_click_callback(True, False)
         else:
-                print("2. At least one input is not provided")
-                self.on_click_callback(False, True)
+            # print("2. At least one input is not provided")
+            self.on_click_callback(False, True)
 class Tab(TabBase):
+    updatedDataSignal = pyqtSignal(dict)
+
     def _setTabData(self):
         attributesToAcquire = ['L', 'L1', 'L2', 'LA', 'LB', 'Materiał', 'xz']
-        self.itemsToSelect['Materiał'] = None
         self.tabData = {key: self._window.data[key] for key in attributesToAcquire}
+
+        self.itemsToSelect['Materiał'] = None
 
     def initUI(self):
         self._setTabData()
@@ -182,14 +188,6 @@ class Tab(TabBase):
         self._viewComp3()
 
         self.setup_state_tracking()
-    
-    def getData(self):
-        for attribute, lineEdit in self.lineEdits.items():
-            text = lineEdit.text()
-            value = literal_eval(text)
-            self.tabData[attribute][0] = value
-        
-        return self.tabData
 
     def _viewComp1(self):
         comp1Layout = QVBoxLayout()
@@ -242,33 +240,216 @@ class Tab(TabBase):
         self.tabData['Materiał'] = itemData
         self.itemsToSelect['Materiał'] = True
         self.check_state()
+    
+    def getData(self):
+        print(f"Line edits: {self.lineEdits}")
+        for attribute, lineEdit in self.lineEdits.items():
+            text = lineEdit.text()
+            value = literal_eval(text)
+            self.tabData[attribute][0] = value
+        
+        return self.tabData
+    
+    def updateData(self):
+        tabData = self.getData()
+        self.updatedDataSignal.emit(tabData)
 
 class SplitTab(TabBase):
-   def initUI(self):
+    updatedDataSignal = pyqtSignal(dict)
+    updatedBearings1DataSignal = pyqtSignal(dict)
+    updatedBearings2DataSignal = pyqtSignal(dict)
+
+    def _setTabData(self):
+            attributesToAcquire = ['Lh1', 'fd1', 'ft1', 'Łożyska1']
+            attributesToAcquire += ['Lh2', 'fd2', 'ft2', 'Łożyska2']
+            self.tabData = {key: self._window.data[key] for key in attributesToAcquire}
+            print(self.tabData)
+
+            self.itemsToSelect['Łożyska1'] = None
+            self.itemsToSelect['Łożyska2'] = None
+
+    def initUI(self):
         super().initUI()  # Initialize the UI from the parent class
+
+        self._setTabData()
 
         # Retrieve the layout set by the parent class
         self.setLayout(QVBoxLayout())
 
         # Create the left and right sections as QVBoxLayouts
-        left_layout = QVBoxLayout()
-        right_layout = QVBoxLayout()
-
-        # Add widgets to the left layout
-        left_layout.addWidget(QLineEdit("text"))
-
-        # Add widgets to the right layout
-        right_layout.addWidget(QLineEdit("text"))
+        self.left_layout = QVBoxLayout()
+        self.right_layout = QVBoxLayout()
 
         # Create a horizontal layout to hold the two sections
         h_layout = QHBoxLayout()
-        h_layout.addLayout(left_layout)
-        h_layout.addLayout(right_layout)
+        h_layout.addLayout(self.left_layout)
+        h_layout.addLayout(self.right_layout)
 
         # Add the horizontal layout to the main layout
         self.layout().addLayout(h_layout)
 
+        self.viewSection1()
+        self.viewSection2()
+
         self.setup_state_tracking()
+        self.setup_layouts_state_tracking()
+
+    def viewSection1(self):
+        ds = createDataDisplayRow(self, 'ds','Średnica wału', 'd<sub>s</sub>')
+        lh = createDataInputRow(self, 'Lh1', 'trwałość godzinowa łożyska', 'f<sub>d</sub>')
+        fd = createDataInputRow(self, 'ft1', 'współczynnik zależny od zmiennych obciążeń dynamicznych', 'f<sub>d</sub>')
+        ft = createDataInputRow(self, 'fd1', 'współczynnik zależny od temperatury pracy łozyska', 'f<sub>t</sub>')
+        # Set 
+        self.SelectBearingBtn1 = QPushButton("Wybierz łożysko")
+        self.SelectBearingBtn1.setEnabled(False)
+        self.SelectBearingBtn1.clicked.connect(self.updateBearings1Data)
+
+        self.left_layout.addLayout(ds)
+        self.left_layout.addLayout(lh)
+        self.left_layout.addLayout(fd)
+        self.left_layout.addLayout(ft)
+        self.left_layout.addWidget(self.SelectBearingBtn1)
+
+    def setup_layouts_state_tracking(self):
+        self.left_line_edits =  [le for le in self.line_edits if self.is_widget_in_layout(le, self.left_layout)]
+        self.right_line_edits =  [le for le in self.line_edits if self.is_widget_in_layout(le, self.right_layout)]
+
+        self.left_layout_original_state = self.get_layout_state(self.left_line_edits)
+        self.right_layout_original_state = self.get_layout_state(self.right_line_edits)
+
+        for line_edit in self.left_line_edits:
+            line_edit.textChanged.connect(self.check_left_layout_state)
+
+        for line_edit in self.right_line_edits:
+            line_edit.textChanged.connect(self.check_right_layout_state)
+
+    def get_layout_state(self, line_edits):
+        layout_input_states = [line_edit.text() for line_edit in line_edits]
+        print(layout_input_states)
+        if '' in layout_input_states:
+            return None
+        else:
+            return layout_input_states
+
+    def is_widget_in_layout(self, widget, layout):
+            for i in range(layout.count()):
+                item = layout.itemAt(i)
+                if item.widget() == widget:
+                    return True
+                elif item.layout() and self.is_widget_in_layout(widget, item.layout()):
+                    return True
+            return False
+    
+    def check_left_layout_state(self):
+        print("Checking left layout state")
+        state_changed = False
+        current_state = self.get_layout_state(self.left_line_edits)
+        # Check if all inputs are provided
+        all_filled = False if current_state == None else True
+
+        if all_filled:
+            current_state = self.get_state()
+            if self.original_state:
+                state_changed = current_state != self.original_state
+            self.original_state = current_state
+
+            if state_changed:
+                self.left_layout_original_state = current_state
+                print(f"state_changed: {state_changed}")
+                print("1.1. The state of at least on input changed but all of them are provided")
+                self.SelectBearingBtn1.setEnabled(False)
+            else:
+                print("1.2. All inputs are provided")
+                self.SelectBearingBtn1.setEnabled(True)
+        else:
+                print("2. At least one input is not provided")
+                self.SelectBearingBtn1.setEnabled(False)
+    
+    def check_right_layout_state(self):
+        print("Checking right layout state")
+        state_changed = False
+        current_state = self.get_layout_state(self.right_line_edits)
+        # Check if all inputs are provided
+        all_filled = False if current_state == None else True
+
+        if all_filled:
+            current_state = self.get_state()
+            if self.original_state:
+                state_changed = current_state != self.original_state
+            self.original_state = current_state
+
+            if state_changed:
+                self.right_layout_original_state = current_state
+                print(f"state_changed: {state_changed}")
+                print("1.1. The state of at least on input changed but all of them are provided")
+                self.SelectBearingBtn2.setEnabled(False)
+            else:
+                print("1.2. All inputs are provided")
+                self.SelectBearingBtn2.setEnabled(True)
+        else:
+                print("2. At least one input is not provided")
+                self.SelectBearingBtn2.setEnabled(False)
+    
+    def viewSection2(self):
+        de = createDataDisplayRow(self, 'de','Średnica wału', 'd<sub>s</sub>')
+        lh = createDataInputRow(self, 'Lh2', 'trwałość godzinowa łożyska', 'f<sub>d</sub>')
+        fd = createDataInputRow(self, 'ft2', 'współczynnik zależny od zmiennych obciążeń dynamicznych', 'f<sub>d</sub>')
+        ft = createDataInputRow(self, 'fd2', 'współczynnik zależny od temperatury pracy łozyska', 'f<sub>t</sub>')
+
+        # Set 
+        self.SelectBearingBtn2 = QPushButton("Wybierz łożysko")
+        self.SelectBearingBtn2.setEnabled(False)
+        self.SelectBearingBtn2.clicked.connect(self.updateBearings2Data)
+
+
+        self.right_layout.addLayout(de)
+        self.right_layout.addLayout(lh)
+        self.right_layout.addLayout(fd)
+        self.right_layout.addLayout(ft)
+        self.right_layout.addWidget(self.SelectBearingBtn2)
+    
+    def updateViewedBearing1(self, itemData):
+        self.SelectBearingBtn1.setText(itemData['kod'][0])
+        self.tabData['Łożyska1'] = itemData
+        self.itemsToSelect['Łożyska1'] = True
+        self.check_state()
+
+    def updateViewedBearing2(self, itemData):
+        self.SelectBearingBtn2.setText(itemData['kod'][0])
+        self.tabData['Łożyska2'] = itemData
+        self.itemsToSelect['Łożyska2'] = True
+        self.check_state()
+    
+    def getData(self):
+        for idx, lineedit in self.lineEdits.items():
+            print(lineedit.text())
+
+        for attribute, lineEdit in self.lineEdits.items():
+            text = lineEdit.text()
+            value = None if text == "" else literal_eval(text)
+            self.tabData[attribute][0] = value
+        
+        return self.tabData
+    
+    def updateBearings1Data(self):
+        tabData = self.getData()
+        print(tabData)
+        self.updatedBearings1DataSignal.emit(tabData)
+
+    def updateBearings2Data(self):
+        tabData = self.getData()
+        self.updatedBearings2DataSignal.emit(tabData)
+
+    def updateData(self):
+        tabData = self.getData()
+        self.updatedDataSignal.emit(tabData)
+    
+    def updateTab(self):
+        print("LABELS")
+        for key, value in self.valueLabels.items():
+            value = self._window.data[key][0]
+            self.valueLabels[key].setText(f'{value}')
+        print(self.valueLabels)
 
 def createDataInputRow(tab: TabBase, attribute, description, symbol):
     # Set Layout of the row
@@ -296,5 +477,20 @@ def createDataInputRow(tab: TabBase, attribute, description, symbol):
     layout.addWidget(unitsLabel)
     # Save the LineEdit
     tab.lineEdits[attribute] = lineEdit
+
+    return layout
+
+def createDataDisplayRow(tab: TabBase, attribute, description, symbol):
+    layout = QHBoxLayout()
+    descriptionlabel = QLabel(description)
+    attributeLabel = QLabel(symbol)
+    valueLabel = QLabel(tab._window.data[attribute][0] if tab._window.data[attribute][0] is not None else '')
+    unitsLabel = QLabel(attribute[1])
+    layout.addWidget(descriptionlabel)
+    layout.addWidget(attributeLabel)
+    layout.addWidget(valueLabel)
+    layout.addWidget(unitsLabel)
+
+    tab.valueLabels[attribute] = valueLabel
 
     return layout
