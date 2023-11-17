@@ -27,6 +27,7 @@ class MainWindowController:
         self.window.tabs[1].updatedBearings1DataSignal.connect(self.openBearings1Window)
         self.window.tabs[1].updatedBearings2DataSignal.connect(self.openBearings2Window)
         self.window.tabs[0].updatedDataSignal.connect(self._calculateInputShaftAttr)
+        self.window.tabs[1].updatedDataSignal.connect(self._updateBearingsData)
         # self.window.updatedSupportBearingsSignal.connect(self._calculateBearings1Attr)
         # self.window.updatedCycloBearingsSignal.connect(self._calculateBearings2Attr)
         pass
@@ -110,8 +111,6 @@ class MainWindowController:
         self.data['Lt1'][0] = l
         self.data['C1'][0] = c
     
-        print(self.data)
-    
     def _calculateBearings2Attr(self, data):
         if data is not None:
             for key, value in data.items():
@@ -133,7 +132,7 @@ class MainWindowController:
         self.data['Lt2'][0] = l
         self.data['C2'][0] = c
 
-    def _calculateInputShaftAttr(self, data = None):
+    def _calculateInputShaftAttr(self, data):
         if data is not None:
             for key, value in data.items():
                     if key in self.data:
@@ -183,6 +182,8 @@ class MainWindowController:
         self.data['Ra'][0] = Ra
         self.data['Rb'][0] = Rb
 
-        print("Input shaft parameters CALCULATED")
-        print(self.data)
-
+    def _updateBearingsData(self, data):
+        if data is not None:
+            for key, value in data.items():
+                if key in self.data:
+                    self.data[key] = value
