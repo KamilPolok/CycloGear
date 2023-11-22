@@ -18,7 +18,7 @@ def main():
         'Rb':[None, 'obr/min'],
         'F1': [100, 'N'],
         'F2': [-100, 'N'],
-        'Mo': [9.55, 'Nm'],
+        'Mwe': [9.55, 'Nm'],
         'L': [None, 'mm'],
         'LA': [None, 'mm'],
         'LB': [None, 'mm'],

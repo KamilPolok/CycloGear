@@ -145,7 +145,7 @@ class MainWindowController:
         L2 = self.data['L2'][0]
         F1 = self.data['F1'][0]
         F2 = self.data['F2'][0]
-        Mo = self.data['Mo'][0]
+        Mwe = self.data['Mwe'][0]
         Zgo = self.data['Materiał']['Zgo'][0]
         xz = self.data['xz'][0]
         e = self.data['e'][0]
@@ -167,7 +167,7 @@ class MainWindowController:
 
         self.Mg = np.array([MgP, MgA, Mg1, Mg2,MgB, MgK])
         # Momenty skręcające
-        self.Ms = np.array([Mo, Mo, Mo, Mo, 0, 0])
+        self.Ms = np.array([Mwe, Mwe, Mwe, Mwe, 0, 0])
         # Momenty zastępcze
         wsp_redukcyjny = 2 * np.sqrt(3)
 

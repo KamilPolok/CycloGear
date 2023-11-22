@@ -11,6 +11,7 @@ from PyQt6.QtWidgets import (
     QPushButton, 
     QLabel,
     QLineEdit,
+    QScrollArea
 )
 
 class MainWindow(QMainWindow):
@@ -40,6 +41,10 @@ class MainWindow(QMainWindow):
         split_tab = SplitTab(self, self.check_next_tab_button)
         self.tabs.append(split_tab)
         self.tabWidget.addTab(split_tab, "Dobór łożysk")
+        # Adding tab3
+        tab3 = Tab3(self, self.check_next_tab_button)
+        self.tabs.append(tab3)
+        self.tabWidget.addTab(tab3, "Wyniki obliczeń")
         # Adding the rest of the tabs
         self.nextTabButton = QPushButton("Next Tab", self)
         self.nextTabButton.clicked.connect(self.next_tab)
@@ -227,10 +232,9 @@ class Tab(TabBase):
         self.layout().addLayout(componentLayout)
     
     def updateViewedMaterial(self, itemData):
-        print(itemData)
-        self.SelectMaterialBtn.setText(str(itemData['Materiał'][0]))
+        self.SelectMaterialBtn.setText(str(itemData['Oznaczenie'][0]))
         self.tabData['Materiał'] = itemData
-        self.itemsToSelect['Materiał'] = str(itemData['Materiał'][0])
+        self.itemsToSelect['Materiał'] = str(itemData['Oznaczenie'][0])
         self.check_state()
     
     def getData(self):
@@ -281,7 +285,7 @@ class SplitTab(TabBase):
 
     def viewSection1(self):
         sectionLabel = QLabel("Łożyska osadzone na wale:")
-        ds = createDataDisplayRow(self, 'ds','Obliczona średnica wału', 'd<sub>s</sub>')
+        ds = createDataDisplayRow(self, 'ds', self._window.data['ds'], 'd<sub>s</sub>', 'Obliczona średnica wału')
         lh = createDataInputRow(self, 'Lh1', 'Trwałość godzinowa łożyska', 'L<sub>h</sub>')
         fd = createDataInputRow(self, 'ft1', 'Współczynnik zależny od zmiennych obciążeń dynamicznych', 'f<sub>d</sub>')
         ft = createDataInputRow(self, 'fd1', 'Współczynnik zależny od temperatury pracy łożyska', 'f<sub>t</sub>')
@@ -305,7 +309,7 @@ class SplitTab(TabBase):
 
     def viewSection2(self):
         sectionLabel = QLabel("Łożyska osadzone na wykorbieniach:")
-        de = createDataDisplayRow(self, 'de','Obliczona średnica wykorbienia', 'd<sub>e</sub>')
+        de = createDataDisplayRow(self, 'de', self._window.data['de'], 'd<sub>e</sub>', 'Obliczona średnica wykorbienia')
         lh = createDataInputRow(self, 'Lh2', 'Trwałość godzinowa łożyska', 'L<sub>h</sub>')
         fd = createDataInputRow(self, 'ft2', 'Współczynnik zależny od zmiennych obciążeń dynamicznych', 'f<sub>d</sub>')
         ft = createDataInputRow(self, 'fd2', 'Współczynnik zależny od temperatury pracy łozyska', 'f<sub>t</sub>')
@@ -326,7 +330,6 @@ class SplitTab(TabBase):
         self.right_layout.addLayout(fd)
         self.right_layout.addLayout(ft)
         self.right_layout.addLayout(btnLayout)
-
 
     def setup_layouts_state_tracking(self):
         self.left_line_edits =  [le for le in self.line_edits if self.is_widget_in_layout(le, self.left_layout)]
@@ -459,8 +462,73 @@ class SplitTab(TabBase):
         for key, value in self.valueLabels.items():
             if value != self._window.data[key][0]:
                 value = self._window.data[key][0]
-                self.valueLabels[key].setText(f'{value:.2f}')
+                self.valueLabels[key].setText(formatValue(value))
 
+class Tab3(TabBase):
+    def initUI(self):
+        self.setLayout(QVBoxLayout())
+        
+        self._viewTab1()
+
+    def _viewTab1(self):
+        # Create a QScrollArea
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+
+        # Create a content widget for the scroll area
+        content_widget = QWidget()
+
+        self.tabLayout = QVBoxLayout(content_widget)
+
+        scroll_area.setWidget(content_widget)
+        label = QLabel("Dane")
+
+        generalDataLabel = QLabel("Ogólne")
+        nwe = createDataDisplayRow(self, 'nwe', self._window.data['nwe'], 'n<sub>we</sub>', 'Prędkość obrotowa wejściowa')
+        mwe = createDataDisplayRow(self, 'Mwe', self._window.data['Mwe'], 'M<sub>we</sub>', 'Moment obrotowy wejściowy')
+        dimensionsLabel = QLabel("Wymiary")
+        l = createDataDisplayRow(self, 'L',  self._window.data['L'], 'L', 'Długość wału',)
+        e = createDataDisplayRow(self, 'e',  self._window.data['e'], 'e', 'Mimośród')
+        supportCoordinatesLabel = QLabel("Współrzędne podpór")
+        pinSupport = createDataDisplayRow(self, 'LA', self._window.data['LA'], 'L<sub>A</sub>', 'Podpora stała A',)
+        rollerSupport = createDataDisplayRow(self, 'LB', self._window.data['LB'], 'L<sub>B</sub>', 'Podpora przesuwna B')
+        cycloDiscCoordinatesLabel = QLabel("Współrzędne kół obiegowych")
+        cycloDisc1 = createDataDisplayRow(self, 'L1', self._window.data['L1'], 'L<sub>1</sub>', 'Tarcza obiegowa 1')
+        cycloDisc2 = createDataDisplayRow(self, 'L2', self._window.data['L2'], 'L<sub>2</sub>', 'Tarcza obiegowa 2')
+        materialsLabel = QLabel("Materiał")
+        self.tabLayout.addWidget(label)
+        self.tabLayout.addWidget(generalDataLabel)
+        self.tabLayout.addLayout(nwe)
+        self.tabLayout.addLayout(mwe)
+        self.tabLayout.addWidget(dimensionsLabel)
+        self.tabLayout.addLayout(l)
+        self.tabLayout.addLayout(e)
+        self.tabLayout.addWidget(supportCoordinatesLabel)
+        self.tabLayout.addLayout(pinSupport)
+        self.tabLayout.addLayout(rollerSupport)
+        self.tabLayout.addWidget(cycloDiscCoordinatesLabel)
+        self.tabLayout.addLayout(cycloDisc1)
+        self.tabLayout.addLayout(cycloDisc2)
+        self.tabLayout.addWidget(materialsLabel)
+
+        self.layout().addWidget(scroll_area)
+         
+    def updateTab(self):
+        addData = True 
+        for key, value in self.valueLabels.items():
+            if key in self._window.data and value != self._window.data[key][0]:
+                value = self._window.data[key][0]
+                self.valueLabels[key].setText(formatValue(value))
+            elif key in self._window.data['Materiał']:
+                addData = False
+                value = self._window.data['Materiał'][key][0]
+                self.valueLabels[key].setText(formatValue(value))
+        
+        if addData:
+            for key, value in self._window.data['Materiał'].items():
+                attribute = createDataDisplayRow(self, key, value, key)
+                self.tabLayout.addLayout(attribute)
+    
 def createDataInputRow(tab: TabBase, attribute, description, symbol):
     # Set Layout of the row
     layout = QHBoxLayout()
@@ -496,7 +564,9 @@ def createDataInputRow(tab: TabBase, attribute, description, symbol):
 
     return layout
 
-def createDataDisplayRow(tab: TabBase, attribute, description, symbol):
+def createDataDisplayRow(tab: TabBase, attribute, data, symbol, description = ''):
+    value = data[0]
+    unit = data[-1]
     # Set Layout of the row
     layout = QHBoxLayout()
     # Create description label
@@ -504,16 +574,15 @@ def createDataDisplayRow(tab: TabBase, attribute, description, symbol):
     descriptionlabel.setFixedWidth(150)
     descriptionlabel.setWordWrap(True)
     # Create symbol label
-    symbolLabel = QLabel(symbol)
     symbolLabel = QLabel(f'{symbol} = ')
     symbolLabel.setFixedWidth(20)
     # Create label that holds the value of the attribute
-    valueLabel = QLineEdit(tab._window.data[attribute][0] if tab._window.data[attribute][0] is not None else '')
+    valueLabel = QLineEdit(formatValue(value) if value is not None else '')
     valueLabel.setReadOnly(True)
     valueLabel.setFixedWidth(80)
     # Create units label
-    unitsLabel = QLabel(tab._window.data[attribute][-1])
-    unitsLabel.setFixedWidth(20)
+    unitsLabel = QLabel(unit)
+    unitsLabel.setFixedWidth(40)
     
     layout.addWidget(descriptionlabel)
     layout.addWidget(symbolLabel)
@@ -523,3 +592,11 @@ def createDataDisplayRow(tab: TabBase, attribute, description, symbol):
     tab.valueLabels[attribute] = valueLabel
 
     return layout
+
+def formatValue(var):
+    if isinstance(var, float):
+        return f"{var:.2f}"
+    elif isinstance(var, int):
+        return str(var)
+    else:
+        return str(var) 
