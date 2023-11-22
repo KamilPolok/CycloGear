@@ -468,20 +468,23 @@ class Tab3(TabBase):
     def initUI(self):
         self.setLayout(QVBoxLayout())
         
-        self._viewTab1()
+        self.subtabWidget = QTabWidget(self)
+        self.layout().addWidget(self.subtabWidget)
 
-    def _viewTab1(self):
-        # Create a QScrollArea
-        scroll_area = QScrollArea()
-        scroll_area.setWidgetResizable(True)
+        self.addDataSubtab()
+        self.addResultsSubtab()
 
-        # Create a content widget for the scroll area
-        content_widget = QWidget()
-
-        self.tabLayout = QVBoxLayout(content_widget)
-
-        scroll_area.setWidget(content_widget)
-        label = QLabel("Dane")
+    def addDataSubtab(self):
+        # Create a QScrollArea for the data tab
+        dataSubtab = QScrollArea()
+        dataSubtab.setWidgetResizable(True)
+        self.subtabWidget.addTab(dataSubtab, 'Dane')
+        # Create a contents widget for the scroll area
+        contentWidget = QWidget()
+        # Set the content widget layout - this is basically the layout of the dataSubtab
+        self.dataSubtabLayout = QVBoxLayout(contentWidget)
+        # set the content widget as widget of scroll area
+        dataSubtab.setWidget(contentWidget)
 
         generalDataLabel = QLabel("Ogólne")
         nwe = createDataDisplayRow(self, 'nwe', self._window.data['nwe'], 'n<sub>we</sub>', 'Prędkość obrotowa wejściowa')
@@ -496,23 +499,66 @@ class Tab3(TabBase):
         cycloDisc1 = createDataDisplayRow(self, 'L1', self._window.data['L1'], 'L<sub>1</sub>', 'Tarcza obiegowa 1')
         cycloDisc2 = createDataDisplayRow(self, 'L2', self._window.data['L2'], 'L<sub>2</sub>', 'Tarcza obiegowa 2')
         materialsLabel = QLabel("Materiał")
-        self.tabLayout.addWidget(label)
-        self.tabLayout.addWidget(generalDataLabel)
-        self.tabLayout.addLayout(nwe)
-        self.tabLayout.addLayout(mwe)
-        self.tabLayout.addWidget(dimensionsLabel)
-        self.tabLayout.addLayout(l)
-        self.tabLayout.addLayout(e)
-        self.tabLayout.addWidget(supportCoordinatesLabel)
-        self.tabLayout.addLayout(pinSupport)
-        self.tabLayout.addLayout(rollerSupport)
-        self.tabLayout.addWidget(cycloDiscCoordinatesLabel)
-        self.tabLayout.addLayout(cycloDisc1)
-        self.tabLayout.addLayout(cycloDisc2)
-        self.tabLayout.addWidget(materialsLabel)
+        self.dataSubtabLayout.addWidget(generalDataLabel)
+        self.dataSubtabLayout.addLayout(nwe)
+        self.dataSubtabLayout.addLayout(mwe)
+        self.dataSubtabLayout.addWidget(dimensionsLabel)
+        self.dataSubtabLayout.addLayout(l)
+        self.dataSubtabLayout.addLayout(e)
+        self.dataSubtabLayout.addWidget(supportCoordinatesLabel)
+        self.dataSubtabLayout.addLayout(pinSupport)
+        self.dataSubtabLayout.addLayout(rollerSupport)
+        self.dataSubtabLayout.addWidget(cycloDiscCoordinatesLabel)
+        self.dataSubtabLayout.addLayout(cycloDisc1)
+        self.dataSubtabLayout.addLayout(cycloDisc2)
+        self.dataSubtabLayout.addWidget(materialsLabel)
+    
+    def addResultsSubtab(self):
+        # Create a QScrollArea for the data tab
+        resultsSubtab = QScrollArea()
+        resultsSubtab.setWidgetResizable(True)
+        self.subtabWidget.addTab(resultsSubtab, 'Wyniki')
+        # Create a contents widget for the scroll area
+        contentWidget = QWidget()
+        # Set the content widget layout - this is basically the layout of the dataSubtab
+        self.resultsSubtabLayout = QVBoxLayout(contentWidget)
+        # set the content widget as widget of scroll area
+        resultsSubtab.setWidget(contentWidget)
 
-        self.layout().addWidget(scroll_area)
-         
+        dimensionsLabel = QLabel("Wymiary")
+        ds = createDataDisplayRow(self, 'ds',  self._window.data['ds'], 'd<sub>s</sub>', 'Średnica wału')
+        de = createDataDisplayRow(self, 'de',  self._window.data['de'], 'd<sub>e</sub>', 'Średnica wykorbienia')
+
+        Łożyska1 = QLabel("Łożyska")
+
+        self.resultsSubtabLayout.addWidget(dimensionsLabel)
+        self.resultsSubtabLayout.addLayout(ds)
+        self.resultsSubtabLayout.addLayout(de)
+        self.resultsSubtabLayout.addWidget(Łożyska1)
+
+    def addChartSubtab(self):
+        # Create a QScrollArea for the data tab
+        resultsSubtab = QScrollArea()
+        resultsSubtab.setWidgetResizable(True)
+        self.subtabWidget.addTab(resultsSubtab, 'Wyniki')
+        # Create a contents widget for the scroll area
+        contentWidget = QWidget()
+        # Set the content widget layout - this is basically the layout of the dataSubtab
+        self.resultsSubtabLayout = QVBoxLayout(contentWidget)
+        # set the content widget as widget of scroll area
+        resultsSubtab.setWidget(contentWidget)
+
+        dimensionsLabel = QLabel("Wymiary")
+        ds = createDataDisplayRow(self, 'ds',  self._window.data['ds'], 'd<sub>s</sub>', 'Średnica wału')
+        de = createDataDisplayRow(self, 'de',  self._window.data['de'], 'd<sub>e</sub>', 'Średnica wykorbienia')
+
+        Łożyska1 = QLabel("Łożyska")
+
+        self.resultsSubtabLayout.addWidget(dimensionsLabel)
+        self.resultsSubtabLayout.addLayout(ds)
+        self.resultsSubtabLayout.addLayout(de)
+        self.resultsSubtabLayout.addWidget(Łożyska1)
+
     def updateTab(self):
         addData = True 
         for key, value in self.valueLabels.items():
@@ -527,7 +573,14 @@ class Tab3(TabBase):
         if addData:
             for key, value in self._window.data['Materiał'].items():
                 attribute = createDataDisplayRow(self, key, value, key)
-                self.tabLayout.addLayout(attribute)
+                self.dataSubtabLayout.addLayout(attribute)
+            for key, value in self._window.data['Łożyska1'].items():
+                attribute = createDataDisplayRow(self, key, value, key)
+                self.resultsSubtabLayout.addLayout(attribute)
+            for key, value in self._window.data['Łożyska2'].items():
+                attribute = createDataDisplayRow(self, key, value, key)
+                self.resultsSubtabLayout.addLayout(attribute)
+
     
 def createDataInputRow(tab: TabBase, attribute, description, symbol):
     # Set Layout of the row
