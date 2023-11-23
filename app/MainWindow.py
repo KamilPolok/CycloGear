@@ -14,6 +14,8 @@ from PyQt6.QtWidgets import (
     QScrollArea
 )
 
+from ChartView import Chart
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -23,6 +25,9 @@ class MainWindow(QMainWindow):
     def setData(self, data):
         # Set data needed for or from GUI
         self.data = data
+
+    def setChartData(self, data):
+        self.tabs[2].createPlots(data)
 
     def initUI(self):
         self.setWindowTitle("Mechkonstruktor 2.0")
@@ -473,6 +478,7 @@ class Tab3(TabBase):
 
         self.addDataSubtab()
         self.addResultsSubtab()
+        self.addChartSubtab()
 
     def addDataSubtab(self):
         # Create a QScrollArea for the data tab
@@ -537,27 +543,11 @@ class Tab3(TabBase):
         self.resultsSubtabLayout.addWidget(Łożyska1)
 
     def addChartSubtab(self):
-        # Create a QScrollArea for the data tab
-        resultsSubtab = QScrollArea()
-        resultsSubtab.setWidgetResizable(True)
-        self.subtabWidget.addTab(resultsSubtab, 'Wyniki')
-        # Create a contents widget for the scroll area
-        contentWidget = QWidget()
-        # Set the content widget layout - this is basically the layout of the dataSubtab
-        self.resultsSubtabLayout = QVBoxLayout(contentWidget)
-        # set the content widget as widget of scroll area
-        resultsSubtab.setWidget(contentWidget)
-
-        dimensionsLabel = QLabel("Wymiary")
-        ds = createDataDisplayRow(self, 'ds',  self._window.data['ds'], 'd<sub>s</sub>', 'Średnica wału')
-        de = createDataDisplayRow(self, 'de',  self._window.data['de'], 'd<sub>e</sub>', 'Średnica wykorbienia')
-
-        Łożyska1 = QLabel("Łożyska")
-
-        self.resultsSubtabLayout.addWidget(dimensionsLabel)
-        self.resultsSubtabLayout.addLayout(ds)
-        self.resultsSubtabLayout.addLayout(de)
-        self.resultsSubtabLayout.addWidget(Łożyska1)
+        self.chartTab = Chart()
+        self.subtabWidget.addTab(self.chartTab, 'Wykresy')
+    
+    def createPlots(self, chartData):
+        self.chartTab.createPlots(chartData)
 
     def updateTab(self):
         addData = True 

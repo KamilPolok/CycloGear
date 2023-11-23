@@ -5,79 +5,95 @@ from matplotlib.backends.backend_qtagg import (
     FigureCanvasQTAgg,
     NavigationToolbar2QT as NavigationToolbar
 )
-from PyQt6.QtWidgets import QDialog, QVBoxLayout, QComboBox
+from PyQt6.QtWidgets import QComboBox, QVBoxLayout, QWidget
+from PyQt6.QtCore import Qt
 
-class Chart(QDialog):
-    def __init__(self, z, F, Mg, Ms, Mz, d):
-        self._points = ['A', 'T1', 'T2', 'B']
-        self._z = z
-        self._y = {'Mg': [Mg, 'Mg(z)', 'Moment gnący Mg [Nm]'],
-                   'Ms': [Ms, 'Ms(z)', 'Moment skręcający Ms [Nm]'],
-                   'Mz': [Mz, 'Mz(z)', 'Moment zastępczy Mz[Nm]'],
-                   'd':  [d, 'd(z)', 'Średnica d [mm]']
-                   }
-        self._F = F
+class Chart(QWidget):
+    def __init__(self):
         super().__init__()
 
-        # Set active plot
-        self.activePlot = self._y['d']
-
+        # Init UI
         self.initUI()
-        self.plot()
+
+        # Set the focus policy to accept focus and then set focus
+        self.canvas.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.canvas.setFocus()
 
     def initUI(self):
-        # Set Window Parameters
-        self.resize(800,400)
         # Set layout 
         layout = QVBoxLayout()
         self.setLayout(layout)
         # Set plot selector
-        self.activePlotSelector = QComboBox()
-        for key, value in self._y.items():
-            self.activePlotSelector.addItem(value[1])
-        self.activePlotSelector.setCurrentText(self.activePlot[1])
-        self.activePlotSelector.currentTextChanged.connect(self.switchPlot)
         # Set canvas, figure and axes
-        self.figure, self.ax = plt.subplots()
+        self.figure, self.ax = plt.subplots(constrained_layout=True)
         self.canvas = FigureCanvasQTAgg(self.figure)
         # Set toolbar
-        self.toolbar = NavigationToolbar(self.canvas, self)
-        layout.addWidget(self.activePlotSelector)
+        self.toolbar = CustomToolbar(self.canvas, self)
+        self.toolbar.activePlotSelector.currentTextChanged.connect(self.switchPlot)
+        # Create and store the cursor object
+        self.cursor = mplcursors.cursor(self.ax, hover=False)
+
         layout.addWidget(self.toolbar)
         layout.addWidget(self.canvas)
 
-        mplcursors.cursor(self.ax, hover=True)
+    def createPlots(self, data):
+        self._z = data['z']
 
-    def plot(self):
-        self.ax.cla()
+        self._y = {'Mg': [data['Mg'], 'Mg(z)', 'Moment gnący Mg [Nm]'],
+                   'Ms': [data['Ms'], 'Ms(z)', 'Moment skręcający Ms [Nm]'],
+                   'Mz': [data['Mz'], 'Mz(z)', 'Moment zastępczy Mz[Nm]'],
+                   'd':  [data['d'], 'd(z)', 'Średnica d [mm]']
+                   }
         
-        self.ax.plot(self._z, self.activePlot[0], color='darkorange')
-        self.ax
-        self.ax.set_title(self.activePlot[1], pad=15)
-        self.ax.set_xlabel("Współrzędna z [mm]")
-        self.ax.set_ylabel(self.activePlot[2])
+        self._F = data['F']
+        
+        self.plots = {}
+        for key, value in self._y.items():
+           self.plots[value[1]] = {
+                "x": self._z,
+                "y": value[0],
+                "title": value[1],
+                "xlabel": "Współrzędna z [mm]",
+                "ylabel": value[2]
+            }
 
-        self.ax.grid(True)
-        self.ax.grid(True, which='major', linestyle='-', linewidth='0.5', color='black')  # Major gridlines
-        self.ax.grid(True, which='minor', linestyle=':', linewidth='0.5', color='gray')   # Minor gridlines
-        self.ax.minorticks_on()  # Enable minor ticks
+        self.toolbar.activePlotSelector.currentTextChanged.disconnect()
+        self.toolbar.updatePlotSelector([plot[1] for plot in self._y.values()])
+        self.switchPlot(self.toolbar.activePlotSelector.currentText())
+        self.toolbar.activePlotSelector.currentTextChanged.connect(self.switchPlot)
+    
+    def switchPlot(self, selectedPlot):
+        self.cursor.remove()
+        plot_info = self.plots[selectedPlot]
+        self.ax.clear()
+        self.ax.plot(plot_info["x"], plot_info["y"], color='royalblue')
+        self.ax.set_title(plot_info["title"], pad=7)
+        self.ax.set_xlabel(plot_info["xlabel"])
+        self.ax.set_ylabel(plot_info["ylabel"])
+        self.ax.grid(True, which='major', linestyle='-', linewidth='0.5', color='black')
+        self.ax.grid(True, which='minor', linestyle=':', linewidth='0.5', color='gray')
+        self.ax.minorticks_on()
         self.ax.autoscale_view()
         self.ax.set_xlim([0, self._z[-1]])
 
-        # Plot points on the x-axis
-
-        self.ax.scatter(self._z[1:-1], self.activePlot[0][1:-1], color='red', s=25, zorder=5)  # s is the size of the points
-
-        for label, z, y  in zip(self._points, self._z[1:-1], self.activePlot[0][1:-1]):
-            self.ax.annotate(f"{label }({z},{y:.2f})", (z, y), textcoords="offset points", xytext=(0,10), ha='center', fontsize=8, weight='bold', color='red')
-
+        self.cursor = mplcursors.cursor(self.ax, hover=False)
+        self.cursor.connect("add", lambda sel: sel.annotation.set(
+            text=f'({sel.target[0]:.2f}; {sel.target[1]:.2f})',
+            fontsize=8,
+            fontweight='bold',
+            color="black",
+            backgroundcolor="cornflowerblue",
+            alpha=0.7
+        ))
         self.canvas.draw()
-    
-    def switchPlot(self, selectedPlot):
-        if selectedPlot is not self.activePlot[1]:
-            for key, plot in self._y.items():
-                if plot[1] == selectedPlot:
-                    self.activePlot = plot
 
-            print(self.activePlot)
-            self.plot()
+class CustomToolbar(NavigationToolbar):
+    def __init__(self, canvas,  parent=None, coordinates=False):
+        super(CustomToolbar, self).__init__(canvas, parent, coordinates)
+        self.activePlotSelector = QComboBox()
+        self.addWidget(self.activePlotSelector)
+ 
+    def updatePlotSelector(self, plots):
+        self.activePlotSelector.clear()
+        for plot in plots:
+            self.activePlotSelector.addItem(plot)

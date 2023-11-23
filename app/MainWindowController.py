@@ -1,4 +1,5 @@
 import numpy as np
+from sympy import symbols, Piecewise
 
 from ChartView import Chart
 from MainWindow import MainWindow
@@ -22,7 +23,6 @@ class MainWindowController:
         self.window.initTabs()
 
     def _connectSignalsAndSlots(self):
-        # self.window.viewChartBtn.clicked.connect(self.displayChart)
         self.window.tabs[0].SelectMaterialBtn.clicked.connect(self.openMaterialsWindow)
         self.window.tabs[1].updatedBearings1DataSignal.connect(self.openBearings1Window)
         self.window.tabs[1].updatedBearings2DataSignal.connect(self.openBearings2Window)
@@ -31,10 +31,6 @@ class MainWindowController:
         # self.window.updatedSupportBearingsSignal.connect(self._calculateBearings1Attr)
         # self.window.updatedCycloBearingsSignal.connect(self._calculateBearings2Attr)
         pass
-
-    def displayChart(self):
-        self.chart = Chart(self.z, self.F, self.Mg, self.Ms, self.Mz, self.d)
-        self.chart.exec()
 
     def openMaterialsWindow(self):
         # # Get acces to the database
@@ -106,7 +102,7 @@ class MainWindowController:
         rb = self.data['Rb'][0]
 
         l = 60*lh*nwe/np.power(10,6)
-        c = ra*np.power(l,1/p)*ft/fd
+        c = ra*np.power(l,1/p)*ft/fd/ 1000 # kN
 
         self.data['Lt1'][0] = l
         self.data['C1'][0] = c
@@ -126,18 +122,33 @@ class MainWindowController:
         f1 = self.data['F1'][0]
         f2 = self.data['F2'][0]
 
-        l = 60*lh*nwe/np.power(10,6)
-        c = f1*np.power(l,1/p)*ft/fd
+        l = 60 * lh * nwe / np.power(10, 6)
+        c = f1 * np.power(l, 1 / p) * ft / fd/ 1000 # kN
 
         self.data['Lt2'][0] = l
         self.data['C2'][0] = c
-
-    def _calculateInputShaftAttr(self, data):
+    
+    def _updateBearingsData(self, data):
         if data is not None:
             for key, value in data.items():
-                    if key in self.data:
-                        self.data[key] = value
+                if key in self.data:
+                    self.data[key] = value
 
+    def calcMg(self, L, LA, LB, L1, L2, F1, F2, Ra, Rb):
+        z = symbols('z')
+        
+
+    def calcMs(self, L, L2, Mwe):
+        z = symbols('z')
+       
+         
+    def _calculateInputShaftAttr(self, data):
+        # Save received data 
+        for key, value in data.items():
+                if key in self.data:
+                    self.data[key] = value
+
+        # Get data
         L = self.data['L'][0]
         LA = self.data['LA'][0]
         LB = self.data['LB'][0]
@@ -150,40 +161,70 @@ class MainWindowController:
         xz = self.data['xz'][0]
         e = self.data['e'][0]
 
-        self.z = [0, LA, L1, L2, LB, L]
-
-        # Reakcje podporowe
+        # Calculate support reactions
         Rb = (-F1*L1-F2*L2)/(LB-LA)
         Ra = -F1-F2-Rb
 
-        self.F = [0, Ra, F1, F2, Rb, 0]
-        # Momenty gnące
-        MgP = 0
-        MgA = 0*(LA)
-        Mg1 = -Ra*(L1-LA)
-        Mg2 = -Ra*(L2-LA)-F1*(L2-L1)
-        MgB = -Ra*(LB-LA)-F1*(LB-L1)-F2*(LB-L2)
-        MgK = -Ra*(L-LA)-F1*(L-L1)-F2*(L-L2)-Rb*(L-LB)
+        # Create Force and reaction list
+        F = [Ra, F1, F2, Rb]
 
-        self.Mg = np.array([MgP, MgA, Mg1, Mg2,MgB, MgK])
-        # Momenty skręcające
-        self.Ms = np.array([Mwe, Mwe, Mwe, Mwe, 0, 0])
-        # Momenty zastępcze
-        wsp_redukcyjny = 2 * np.sqrt(3)
+        # Create z arguments
+        key_points = [0, LA, L1, L2, LB, L]
+        z = symbols('z')
+        zVals = np.union1d(key_points, np.linspace(0, L, 50))
 
-        self.Mz = np.sqrt(np.power(self.Mg, 2) + np.power(wsp_redukcyjny / 2 * self.Ms, 2))
-        # Średnica wału
+        # Calculate bending moment Mg
+        # Calculate subfunctions of bending moment
+        Mg0_A = 0                                                                           # for  0 <= x < LA
+        MgA_1 = -Ra * (z - LA) * 0.001                                                      # for LA <= z < L1
+        Mg1_2 = (-Ra * (z - LA) - F1 * (z - L1)) * 0.001                                    # for L1 <= z < L2
+        Mg2_B = (-Ra * (z - LA) - F1 * (z - L1) - F2 * (z - L2) ) * 0.001                   # for L2 <= z < LB
+        MgB_K = (-Ra * (z - LA) - F1 * (z - L1) - F2 * (z - L2) - Rb * (z - LB) ) * 0.001   # for LB <= z <= L
+        # Create the piecewise function - connect the subfunctions in one function
+        MgFunction = Piecewise(
+            (Mg0_A, z < LA),
+            (MgA_1, z < L1),
+            (Mg1_2, z < L2),
+            (Mg2_B, z < LB),
+            (MgB_K, z <= L)
+            )
+        # Create Mg values
+        Mg = [MgFunction.subs(z, val).evalf() for val in zVals]
+        Mg = np.array([round(float(val), 2) for val in Mg])
+
+        # Calculate torque Ms
+        # Calculate subfunctions of torque Ms
+        MsFunction = Piecewise(
+            (Mwe, z < L2),
+            (0, z <= L)
+        )
+        # Create Ms values
+        Ms = [MsFunction.subs(z, val).evalf() for val in zVals]
+        Ms = np.array([round(float(val), 2) for val in Ms]) 
+
+        # Calculate equivalent moment Mz
+        reductionFactor = 2 * np.sqrt(3)
+        Mz = np.sqrt(np.power(Mg, 2) + np.power(reductionFactor / 2 * Ms, 2))
+        Mz = np.array([round(float(val), 2) for val in Mz])
+
+        # Calulate shaft diameter d
         kgo = Zgo/xz
-        self.d = np.power(32*self.Mz/(np.pi*kgo*1000000), 1/3)*1000
+        d = np.power(32*Mz/(np.pi*kgo*1000000), 1/3)*1000
+        d = np.array([round(float(val), 2) for val in d])
 
         # Safe the calculated parameters
-        self.data['ds'][0] = max(self.d)
-        self.data['de'][0] = max(self.d) + 2 * e
+        self.data['ds'][0] = max(d)
+        self.data['de'][0] = max(d) + 2 * e
         self.data['Ra'][0] = Ra
         self.data['Rb'][0] = Rb
 
-    def _updateBearingsData(self, data):
-        if data is not None:
-            for key, value in data.items():
-                if key in self.data:
-                    self.data[key] = value
+        # Set chart data
+        self.chartData = {'z' : zVals, 
+                          'F' : F,
+                          'Mg' : Mg, 
+                          'Ms' : Ms,
+                          'Mz' : Mz,
+                          'd' : d, 
+                          }
+        
+        self.window.setChartData(self.chartData)
