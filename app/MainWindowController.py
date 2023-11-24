@@ -60,7 +60,7 @@ class MainWindowController:
         availableTables = dbHandler.getAvailableTables(tablesGroupName)
         # Specify the limits for the group of tables
         limits = dbHandler.getTableItemsFilters(tablesGroupName)
-        limits['Dw']['min'] = self.data['ds'][0]
+        limits['Dw']['min'] = self.data['dsc'][0]
         limits['C']['min'] = self.data['C1'][0]
         # Setup the controller for the subwindow
         viewSelectItemsCtrl = ViewSelectItemController(dbHandler, subWindow, availableTables, limits)
@@ -79,7 +79,7 @@ class MainWindowController:
         availableTables = dbHandler.getAvailableTables(tablesGroupName)
         # Specify the limits for the group of tables
         limits = dbHandler.getTableItemsFilters(tablesGroupName)
-        limits['Dw']['min'] = self.data['de'][0]
+        limits['Dw']['min'] = self.data['dec'][0]
         limits['C']['min'] = self.data['C2'][0]
         # Setup the controller for the subwindow
         viewSelectItemsCtrl = ViewSelectItemController(dbHandler, subWindow, availableTables, limits)
@@ -213,8 +213,8 @@ class MainWindowController:
         d = np.array([round(float(val), 2) for val in d])
 
         # Safe the calculated parameters
-        self.data['ds'][0] = max(d)
-        self.data['de'][0] = max(d) + 2 * e
+        self.data['dsc'][0] = max(d)
+        self.data['dec'][0] = max(d) + 2 * e
         self.data['Ra'][0] = Ra
         self.data['Rb'][0] = Rb
 

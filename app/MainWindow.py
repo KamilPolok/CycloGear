@@ -264,7 +264,7 @@ class SplitTab(TabBase):
         self.setup_layouts_state_tracking()
 
     def _setTabData(self):
-        attributesToAcquire = ['Lh1', 'fd1', 'ft1', 'Łożyska1']
+        attributesToAcquire = ['Lh1', 'fd1', 'ft1', 'Łożyska1', 'de', 'ds']
         attributesToAcquire += ['Lh2', 'fd2', 'ft2', 'Łożyska2']
         self.tabData = {key: self._window.data[key] for key in attributesToAcquire}
 
@@ -290,7 +290,7 @@ class SplitTab(TabBase):
 
     def viewSection1(self):
         sectionLabel = QLabel("Łożyska osadzone na wale:")
-        ds = createDataDisplayRow(self, 'ds', self._window.data['ds'], 'd<sub>s</sub>', 'Obliczona średnica wału')
+        ds = createDataDisplayRow(self, 'dsc', self._window.data['dsc'], 'd<sub>s</sub>', 'Obliczona średnica wału')
         lh = createDataInputRow(self, 'Lh1', 'Trwałość godzinowa łożyska', 'L<sub>h</sub>')
         fd = createDataInputRow(self, 'ft1', 'Współczynnik zależny od zmiennych obciążeń dynamicznych', 'f<sub>d</sub>')
         ft = createDataInputRow(self, 'fd1', 'Współczynnik zależny od temperatury pracy łożyska', 'f<sub>t</sub>')
@@ -314,7 +314,7 @@ class SplitTab(TabBase):
 
     def viewSection2(self):
         sectionLabel = QLabel("Łożyska osadzone na wykorbieniach:")
-        de = createDataDisplayRow(self, 'de', self._window.data['de'], 'd<sub>e</sub>', 'Obliczona średnica wykorbienia')
+        de = createDataDisplayRow(self, 'dec', self._window.data['dec'], 'd<sub>e</sub>', 'Obliczona średnica wykorbienia')
         lh = createDataInputRow(self, 'Lh2', 'Trwałość godzinowa łożyska', 'L<sub>h</sub>')
         fd = createDataInputRow(self, 'ft2', 'Współczynnik zależny od zmiennych obciążeń dynamicznych', 'f<sub>d</sub>')
         ft = createDataInputRow(self, 'fd2', 'Współczynnik zależny od temperatury pracy łozyska', 'f<sub>t</sub>')
@@ -430,6 +430,7 @@ class SplitTab(TabBase):
         self.tabData['Łożyska1'] = itemData
         # Mark, that the item to select was selected
         self.itemsToSelect['Łożyska1'] = str(itemData['kod'][0])
+        self.tabData['ds'][0] = str(itemData['Dw'][0])
         # Check if the state changed - the purpose here is to confirm
         # ...that item to select was indeed selected
         self.check_state()
@@ -439,6 +440,7 @@ class SplitTab(TabBase):
         self.tabData['Łożyska2'] = itemData
         # Mark, that the item to select was selected
         self.itemsToSelect['Łożyska2'] = str(itemData['kod'][0])
+        self.tabData['de'][0] = str(itemData['Dw'][0])
         # Check if the state changed - the purpose here is to confirm
         # ...that item to select was indeed selected
         self.check_state()
@@ -570,7 +572,6 @@ class Tab3(TabBase):
             for key, value in self._window.data['Łożyska2'].items():
                 attribute = createDataDisplayRow(self, key, value, key)
                 self.resultsSubtabLayout.addLayout(attribute)
-
     
 def createDataInputRow(tab: TabBase, attribute, description, symbol):
     # Set Layout of the row
