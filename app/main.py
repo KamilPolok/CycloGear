@@ -10,47 +10,46 @@ from MainWindow import MainWindow
 from MainWindowController import MainWindowController
 
 def main():
-    dbApp = QApplication([])
+    cyclo_app = QApplication([])
 
     data = {
         'nwe':[1500, 'obr/min'],
-        'Ra':[None, 'obr/min'],
-        'Rb':[None, 'obr/min'],
-        'F1': [100, 'N'],
-        'F2': [-100, 'N'],
-        'Mwe': [9.55, 'Nm'],
-        'L': [None, 'mm'],
-        'LA': [None, 'mm'],
-        'LB': [None, 'mm'],
-        'L1': [None, 'mm'],
-        'L2': [None, 'mm'],
+        'Ra':[None, 'N'],
+        'Rb':[None, 'N'],
+        'F': [5254.561, 'N'],
+        'Mwe': [26.67, 'Nm'],
+        'L': [80, 'mm'],
+        'LA': [38, 'mm'],
+        'LB': [75, 'mm'],
+        'L1': [47, 'mm'],
+        'L2': [64, 'mm'],
         'e': [10, 'mm'],
         'dsc': [None, 'mm'],
         'ds': [None, 'mm'],
         'dec': [None, 'mm'],
         'de': [None, 'mm'],
         'Materiał' : [None],
-        'xz': [None, ''],
-        'Łożyska1': [None],
-        'Lh1': [None, 'h'],
-        'Lt1': [None, ''],
-        'C1': [None, ''],
-        'fd1': [None, ''],
-        'ft1': [None, ''],
-        'Łożyska2': [None],
-        'Lh2': [None, 'h'],
-        'Lt2': [None, ''],
-        'C2': [None, ''],
-        'fd2': [None, ''],
-        'ft2': [None, ''],
+        'xz': [1, ''],
+        'Łożyska_podporowe': [None],
+        'Lhp': [10000, 'h'],
+        'Lrp': [None, 'obr'],
+        'Cr': [None, 'kN'],
+        'fdp': [1.80, ''],
+        'ftp': [1.00, ''],
+        'Łożyska_centralne': [None],
+        'Lhc': [10, 'h'],
+        'Ltc': [None, 'obr'],
+        'Cc': [None, 'kN'],
+        'fdc': [1.00, ''],
+        'ftc': [1.00, ''],
         }
 
-    mainWindow = MainWindow()
+    main_window = MainWindow()
 
-    mainWindowCtrl = MainWindowController(data, mainWindow)
-    mainWindow.show()
+    main_window_controller = MainWindowController(data, main_window)
+    main_window.show()
 
-    sys.exit(dbApp.exec())
+    sys.exit(cyclo_app.exec())
 
 if __name__ == "__main__":
     main()

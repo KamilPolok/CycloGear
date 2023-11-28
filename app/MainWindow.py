@@ -3,644 +3,774 @@ from abc import ABCMeta, abstractmethod
 from PyQt6.QtGui import QRegularExpressionValidator
 from PyQt6.QtCore import QRegularExpression, pyqtSignal
 from PyQt6.QtWidgets import (
-    QMainWindow,
-    QTabWidget,
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QPushButton, 
-    QLabel,
-    QLineEdit,
-    QScrollArea
+    QMainWindow, QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, 
+    QLabel, QLineEdit, QScrollArea
 )
 
 from ChartView import Chart
 
 class MainWindow(QMainWindow):
+    """
+    Main window class for the application.
+    """
     def __init__(self):
         super().__init__()
-        # Set signals 
-        self.initUI()
+        self.init_ui()
     
-    def setData(self, data):
-        # Set data needed for or from GUI
+    def set_data(self, data):
+        """
+        Set data needed for or from GUI.
+        """
         self.data = data
 
-    def setChartData(self, data):
-        self.tabs[2].createPlots(data)
+    def set_chart_data(self, data):
+        """
+        Set data for the chart tab.
+        """
+        self.tabs[2].create_plots(data)
 
-    def initUI(self):
-        self.setWindowTitle("Mechkonstruktor 2.0")
-
-        self.tabWidget = QTabWidget(self)
-        self.setCentralWidget(self.tabWidget)
+    def init_ui(self):
+        """
+        Initialize the user interface.
+        """
+        self.setWindowTitle('CycloDesign')
+        self._tab_widget = QTabWidget(self)
+        self.setCentralWidget(self._tab_widget)
     
-    def initTabs(self):
-
+    def init_tabs(self):
+        """
+        Initialize tabs in the main window.
+        """
         self.tabs = []
-        # Adding a regular tab
-        regular_tab = Tab(self, self.check_next_tab_button)
-        self.tabs.append(regular_tab)
-        self.tabWidget.addTab(regular_tab, "Założenia wstępne")
-        # Adding a split tab
-        split_tab = SplitTab(self, self.check_next_tab_button)
-        self.tabs.append(split_tab)
-        self.tabWidget.addTab(split_tab, "Dobór łożysk")
-        # Adding tab3
-        tab3 = Tab3(self, self.check_next_tab_button)
+
+        # Add tabs
+        tab1 = PreliminaryDataTab(self, self.update_accsess_to_next_tabs)
+        self.tabs.append(tab1)
+        self._tab_widget.addTab(tab1, 'Założenia wstępne')
+
+        tab2 = BearingsTab(self, self.update_accsess_to_next_tabs)
+        self.tabs.append(tab2)
+        self._tab_widget.addTab(tab2, 'Dobór łożysk')
+
+        tab3 = ResultsTab(self, self.update_accsess_to_next_tabs)
         self.tabs.append(tab3)
-        self.tabWidget.addTab(tab3, "Wyniki obliczeń")
-        # Adding the rest of the tabs
-        self.nextTabButton = QPushButton("Next Tab", self)
-        self.nextTabButton.clicked.connect(self.next_tab)
+        self._tab_widget.addTab(tab3, 'Wyniki obliczeń')
+
         # Disable all tabs except the first one
-        for i in range(1, self.tabWidget.count()):
-            self.tabWidget.setTabEnabled(i, False)
+        for i in range(1, self._tab_widget.count()):
+            self._tab_widget.setTabEnabled(i, False)
 
-        self.tabWidget.currentChanged.connect(self.on_tab_change)
-        # Layout for the button below the tabs
+        self._tab_widget.currentChanged.connect(self.on_tab_change)
+
+        # Add next tab button below the tabs
+        self._next_tab_button = QPushButton('Dalej', self)
+        self._next_tab_button.clicked.connect(self.next_tab)
+
         layout = QVBoxLayout()
-        layout.addWidget(self.tabWidget)
-        layout.addWidget(self.nextTabButton)
 
-        container = QWidget()
-        container.setLayout(layout)
-        self.setCentralWidget(container)
+        layout.addWidget(self._tab_widget)
+        layout.addWidget(self._next_tab_button)
+        
+        central_widget = QWidget()
+        central_widget.setLayout(layout)
+        self.setCentralWidget(central_widget)
+
         # Check if the tab is initially filled
-        self.tabs[self.tabWidget.currentIndex()].check_state()
+        self.tabs[self._tab_widget.currentIndex()].check_state()
 
     def next_tab(self):
-        current_index = self.tabWidget.currentIndex()
+        """
+        Move to the next tab.
+        """
+        current_index = self._tab_widget.currentIndex()
         next_index = current_index + 1
-        # Check if we're not on the last tab
-        if next_index < self.tabWidget.count():
-            # Check if the current tab's button has been clicked or if the next tab is already enabled
-            if not self.tabWidget.isTabEnabled(next_index):
-                # Enable the next tab if it's not already enabled
-                self.tabWidget.setTabEnabled(next_index, True)
-            # Move to the next tab
-            self.tabs[current_index].updateData()
-            self.tabWidget.setCurrentIndex(next_index)
+
+        # Check if current tab is not the last one
+        if next_index < self._tab_widget.count():
+            # Enable next tab if it wasn't anabled earlier
+            if not self._tab_widget.isTabEnabled(next_index):
+                self._tab_widget.setTabEnabled(next_index, True)
+            # Update data with curret tab data
+            self.tabs[current_index].update_data()
+            self._tab_widget.setCurrentIndex(next_index)
 
     def on_tab_change(self, index):
-        # Check if the tab is initially filled
+        """
+        Handle tab change event.
+        """
+        # Check if all the inputs are provided
         self.tabs[index].check_state()
-        self.tabs[index].updateTab()
+        # Update tab GUI
+        self.tabs[index].update_tab()
         
-    def check_next_tab_button(self, enableButton = False, disableNextTabs = False):
-        if enableButton:
-            self.nextTabButton.setEnabled(True)
+    def update_accsess_to_next_tabs(self, enable_next_tab_button=False, disable_next_tabs=False):
+        """
+        Check and update the state of the next tab button.
+        """
+        if enable_next_tab_button:
+            self._next_tab_button.setEnabled(True)
         else:
-            self.nextTabButton.setEnabled(False)
-        if disableNextTabs:
+            self._next_tab_button.setEnabled(False)
+
+        if disable_next_tabs:
             self.disable_next_tabs()
 
     def disable_next_tabs(self):
-        for i in range(self.tabWidget.currentIndex() + 1, self.tabWidget.count()):
-            self.tabWidget.setTabEnabled(i, False)
+        """
+        Disable all tabs following the current tab.
+        """
+        for i in range(self._tab_widget.currentIndex() + 1, self._tab_widget.count()):
+            self._tab_widget.setTabEnabled(i, False)
 
 class ABCQWidgetMeta(ABCMeta, type(QWidget)):
     pass
 
-class TabBase(QWidget, metaclass=ABCQWidgetMeta):
+class Tab(QWidget, metaclass=ABCQWidgetMeta):
     def __init__(self, window: MainWindow, on_click_callback):
+        """
+        Initialize a base tab for the application.
+
+        Args:
+            window (MainWindow): The main window instance.
+            on_click_callback (function): Callback function to be called on state change.
+        """
         super().__init__()
         self._window = window
-        self.on_click_callback = on_click_callback
-        # Set the inputs and labels dicts to enable tracking of them 
-        self.lineEdits = {}
-        self.itemsToSelect = {}
-        
-        self.valueLabels = {}
-        # init UI
-        self.initUI()
+        self._on_click_callback = on_click_callback
+        # Set the inputs list and dict - to track their state and verify if all inputs were provided in current tab 
+        self._line_edits_states = {}
+        self._items_to_select_states = {}
+        # Set the dict of line edits that hold provided by user attribute values
+        self.input_values = {}
+        # Set the dict of (read only) line edits that hold displayed to user values 
+        self.output_values = {}
+
+        self.init_ui()
         self.setup_state_tracking()
 
     @abstractmethod
-    def initUI(self):
-        """Initialize the user interface for the tab."""
+    def init_ui(self):
+        """Initialize the user interface for the tab. Must be overridden in subclasses."""
         pass
     
-    def updateTab(self):
+    def update_tab(self):
+        """Update the tab. This method can be overridden in subclasses to provide specific update logic."""
         pass
     
     def get_state(self):
-        # get all inputs states
-        inputs_states =  [line_edit.text() for line_edit in self.line_edits]
-        inputs_states +=  [item for item in self.itemsToSelect.values()]
-        # Check if any of the inputs was not provided
-        if ('' in inputs_states):
-            # ...if yes, return None
-            return None
-            # ...if no, return them
-        else:
-            return inputs_states
+        """
+        Retrieve the current state of all inputs in the tab.
 
+        Returns:
+            list or None: A list of input states if all inputs are filled, otherwise None.
+        """
+        inputs_states = [line_edit.text() for line_edit in self._line_edits_states]
+        inputs_states += [item for item in self._items_to_select_states.values()]
+        return None if '' in inputs_states else inputs_states
+    
     def setup_state_tracking(self):
-        # Get all the inputs to track if they are provided
-        self.line_edits = self.findChildren(QLineEdit)
-        # Set the original state
-        self.original_state = self.get_state()
-        # Connect the inputs with function that will get their state if it will change
-        for line_edit in self.line_edits:
+        """
+        Set up tracking for the state of input fields.
+        Connects textChanged signals of QLineEdit widgets to the check_state method.
+        """
+        self._line_edits_states = self.findChildren(QLineEdit)
+        
+        for line_edit in self._line_edits_states:
             line_edit.textChanged.connect(self.check_state)
 
+        self._original_state = self.get_state()
+
     def check_state(self):
-        # This function gets invoked when the state of a input was changed
-        # ...and on switching to another tab
-         
-        # Get current state of inputs
-        state_changed = False
+        """
+        Check the current state of inputs and invoke the callback function with appropriate arguments.
+        This function is called whenever an input field's text is changed and on switching tab
+        """
         current_state = self.get_state()
-        # Check if all inputs are provided
-        all_filled = False if current_state == None else True
+        all_filled = current_state is not None
 
         if all_filled:
-            # Check if originally all inputs were provided
-            if self.original_state:
-                # ...if yes, check if the state changed
-                state_changed = current_state != self.original_state
-            # Set the current state as original state
-            self.original_state = current_state
-
-            if state_changed:
-                # All inputs were provided but at least one of them was changed 
-                self.on_click_callback(True, True)
-            else:
-                # All inputs were provided no one of them was changed
-                self.on_click_callback(True, False)
+            state_changed = current_state != self._original_state
+            self._original_state = current_state
+            self._on_click_callback(True, state_changed)
         else:
-            # At least one input is not provided
-            self.on_click_callback(False, True)
-class Tab(TabBase):
-    updatedDataSignal = pyqtSignal(dict)
+            self._on_click_callback(False, True)
 
-    def _setTabData(self):
-        attributesToAcquire = ['L', 'L1', 'L2', 'LA', 'LB', 'Materiał', 'xz']
-        self.tabData = {key: self._window.data[key] for key in attributesToAcquire}
+class PreliminaryDataTab(Tab):
+    updated_data_signal = pyqtSignal(dict)
 
-        self.itemsToSelect['Materiał'] = ''
+    def _set_tab_data(self):
+        """
+        Initialize tab data from the main window's data.
+        """
+        attributes_to_acquire = ['L', 'L1', 'L2', 'LA', 'LB', 'Materiał', 'xz']
+        self.tab_data = {attr: self._window.data[attr] for attr in attributes_to_acquire}
+        self._items_to_select_states['Materiał'] = ''
 
-    def initUI(self):
-        self._setTabData()
+    def init_ui(self):
+        """
+        Initialize the user interface for this tab.
+        """
+        self._set_tab_data()
 
         self.setLayout(QVBoxLayout())
-        
-        self._viewComp1()
-        self._viewComp2()
-        self._viewComp3()
 
-    def _viewComp1(self):
-        comp1Layout = QVBoxLayout()
-        compLabel = QLabel("Wymiary:")
+        self._view_dimensions_component()
+        self._view_material_stength_component()
+        self._view_material_component()
 
-        shaftLength = createDataInputRow(self, 'L','Długość wału', 'L')
+    def _view_dimensions_component(self):
+        """
+        Create and layout the dimensions component of the tab.
+        """
+        component_layout = QVBoxLayout()
+        component_label = QLabel('Wymiary:')
 
-        supportCoordinatesLabel = QLabel("Współrzędne podpór:")
-        pinSupport = createDataInputRow(self, 'LA', 'Podpora stała A', 'L<sub>A</sub>')
-        rollerSupport = createDataInputRow(self, 'LB','Podpora przesuwna B', 'L<sub>B</sub>')
+        shaft_length = create_data_input_row(self, 'L', 'Długość wału wejściowego', 'L')
 
-        cycloDiscCoordinatesLabel = QLabel("Współrzędne tarcz obiegowych:")
-        cycloDisc1 = createDataInputRow(self, 'L1', 'Tarcza obiegowa 1', 'L<sub>1</sub>')
-        cycloDisc2 = createDataInputRow(self, 'L2','Tarcza obiegowa 2', 'L<sub>2</sub>')
-   
-        comp1Layout.addWidget(compLabel) 
-        comp1Layout.addLayout(shaftLength)
-        comp1Layout.addWidget(supportCoordinatesLabel)
-        comp1Layout.addLayout(pinSupport)
-        comp1Layout.addLayout(rollerSupport)
-        comp1Layout.addWidget(cycloDiscCoordinatesLabel)
-        comp1Layout.addLayout(cycloDisc1)
-        comp1Layout.addLayout(cycloDisc2)
-        
-        self.layout().addLayout(comp1Layout)
+        support_coordinates_label = QLabel('Współrzędne podpór:')
+        pin_support = create_data_input_row(self, 'LA', 'Podpora stała A', 'L<sub>A</sub>')
+        roller_support = create_data_input_row(self, 'LB', 'Podpora przesuwna B', 'L<sub>B</sub>')
 
-    def _viewComp2(self):
-        comp2Layout = QVBoxLayout()
-        compLabel = QLabel("Współczynnik bezpieczeństwa:")
-        fos = createDataInputRow(self, 'xz', "", "x<sub>z</sub>")
+        cyclo_disc_coordinates_label = QLabel('Współrzędne tarcz obiegowych:')
+        cyclo_disc1 = create_data_input_row(self, 'L1', 'Tarcza obiegowa 1', 'L<sub>1</sub>')
+        cyclo_disc2 = create_data_input_row(self, 'L2', 'Tarcza obiegowa 2', 'L<sub>2</sub>')
 
-        comp2Layout.addWidget(compLabel)
-        comp2Layout.addLayout(fos)
+        component_layout.addWidget(component_label)
+        component_layout.addLayout(shaft_length)
+        component_layout.addWidget(support_coordinates_label)
+        component_layout.addLayout(pin_support)
+        component_layout.addLayout(roller_support)
+        component_layout.addWidget(cyclo_disc_coordinates_label)
+        component_layout.addLayout(cyclo_disc1)
+        component_layout.addLayout(cyclo_disc2)
 
-        self.layout().addLayout(comp2Layout)
+        self.layout().addLayout(component_layout)
 
-    def _viewComp3(self):
-        componentLayout = QHBoxLayout()
-        componentLabel = QLabel("Materiał:")
+    def _view_material_stength_component(self):
+        """
+        Create and layout the  component of the tab.
+        """
+        component_layout = QVBoxLayout()
+        component_label = QLabel('Współczynnik bezpieczeństwa:')
 
-        self.SelectMaterialBtn = QPushButton("Wybierz Materiał")
+        factor_of_safety = create_data_input_row(self, 'xz', '', 'x<sub>z</sub>')
 
-        componentLayout.addWidget(componentLabel)
-        componentLayout.addWidget(self.SelectMaterialBtn)
+        component_layout.addWidget(component_label)
+        component_layout.addLayout(factor_of_safety)
 
-        self.layout().addLayout(componentLayout)
-    
-    def updateViewedMaterial(self, itemData):
-        self.SelectMaterialBtn.setText(str(itemData['Oznaczenie'][0]))
-        self.tabData['Materiał'] = itemData
-        self.itemsToSelect['Materiał'] = str(itemData['Oznaczenie'][0])
+        self.layout().addLayout(component_layout)
+
+    def _view_material_component(self):
+        """
+        Create and layout the third co mponent of the tab.
+        """
+        component_layout = QHBoxLayout()
+        component_label = QLabel('Materiał:')
+
+        self.select_material_button = QPushButton('Wybierz Materiał')
+
+        component_layout.addWidget(component_label)
+        component_layout.addWidget(self.select_material_button)
+
+        self.layout().addLayout(component_layout)
+
+    def update_viewed_material(self, item_data):
+        """
+        Update the displayed material information.
+
+        :param item_data: Dictionary containing material data.
+        """
+        self.select_material_button.setText(str(item_data['Oznaczenie'][0]))
+        self.tab_data['Materiał'] = item_data
+
+        self._items_to_select_states['Materiał'] = str(item_data['Oznaczenie'][0])
         self.check_state()
-    
-    def getData(self):
-        for attribute, lineEdit in self.lineEdits.items():
-            text = lineEdit.text()
-            value = literal_eval(text)
-            self.tabData[attribute][0] = value
-        
-        return self.tabData
-    
-    def updateData(self):
-        tabData = self.getData()
-        self.updatedDataSignal.emit(tabData)
 
-class SplitTab(TabBase):
-    updatedDataSignal = pyqtSignal(dict)
-    updatedBearings1DataSignal = pyqtSignal(dict)
-    updatedBearings2DataSignal = pyqtSignal(dict)
+    def get_data(self):
+        """
+        Retrieve data from the input fields.
+
+        :return: Dictionary of the tab's data.
+        """
+        for attribute, line_edit in self.input_values.items():
+            text = line_edit.text()
+            value = literal_eval(text)
+            self.tab_data[attribute][0] = value
+
+        return self.tab_data
+
+    def update_data(self):
+        """
+        Emit a signal to update the tab's data.
+        """
+        tab_data = self.get_data()
+        self.updated_data_signal.emit(tab_data)
+
+class BearingsTab(Tab):
+    updated_data_signal = pyqtSignal(dict)
+    updated_support_bearings_data_signal = pyqtSignal(dict)
+    updated_central_bearings_data_signal = pyqtSignal(dict)
 
     def __init__(self, window: MainWindow, on_click_callback):
+        """
+        Initialize the BearingsTab with state tracking in the sublayouts.
+        """
         super().__init__(window, on_click_callback)
-        self.setup_layouts_state_tracking()
+        self.setup_sublayouts_state_tracking()
 
-    def _setTabData(self):
-        attributesToAcquire = ['Lh1', 'fd1', 'ft1', 'Łożyska1', 'de', 'ds']
-        attributesToAcquire += ['Lh2', 'fd2', 'ft2', 'Łożyska2']
-        self.tabData = {key: self._window.data[key] for key in attributesToAcquire}
+    def _set_tab_data(self):
+        """
+        Set the initial data for the tab from the main window's data.
+        """
+        attributes_to_acquire = ['Lhp', 'fdp', 'ftp', 'Łożyska_podporowe', 'ds',
+                                 'Lhc', 'fdc', 'ftc', 'Łożyska_centralne', 'de',]
+        self.tab_data = {attr: self._window.data[attr] for attr in attributes_to_acquire}
+        self._items_to_select_states['Łożyska_podporowe'] = ''
+        self._items_to_select_states['Łożyska_centralne'] = ''
 
-        self.itemsToSelect['Łożyska1'] = ''
-        self.itemsToSelect['Łożyska2'] = ''
-
-    def initUI(self):
-        self._setTabData()
+    def init_ui(self):
+        """
+        Initialize the user interface for this tab.
+        """
+        self._set_tab_data()
 
         self.setLayout(QVBoxLayout())
-        # Create the left and right sections as QVBoxLayouts
-        self.left_layout = QVBoxLayout()
-        self.right_layout = QVBoxLayout()
-        # Create a horizontal layout to hold the two sections
-        h_layout = QHBoxLayout()
-        h_layout.addLayout(self.left_layout)
-        h_layout.addLayout(self.right_layout)
-        # Add the horizontal layout to the main layout
-        self.layout().addLayout(h_layout)
 
-        self.viewSection1()
-        self.viewSection2()
+        self.component_layout = QHBoxLayout()
+        self.layout().addLayout(self.component_layout)
 
-    def viewSection1(self):
-        sectionLabel = QLabel("Łożyska osadzone na wale:")
-        ds = createDataDisplayRow(self, 'dsc', self._window.data['dsc'], 'd<sub>s</sub>', 'Obliczona średnica wału')
-        lh = createDataInputRow(self, 'Lh1', 'Trwałość godzinowa łożyska', 'L<sub>h</sub>')
-        fd = createDataInputRow(self, 'ft1', 'Współczynnik zależny od zmiennych obciążeń dynamicznych', 'f<sub>d</sub>')
-        ft = createDataInputRow(self, 'fd1', 'Współczynnik zależny od temperatury pracy łożyska', 'f<sub>t</sub>')
-        # Set button for selecting first type of bearing
-        btnLayout = QHBoxLayout()
-        btnLabel = QLabel("Łożysko:")
+        # Create UI sections for bearings
+        self.view_support_bearings_section()
+        self.view_central_bearings_section()
 
-        self.SelectBearingBtn1 = QPushButton("Wybierz łożysko")
-        self.SelectBearingBtn1.setEnabled(False)
-        self.SelectBearingBtn1.clicked.connect(self.updateBearings1Data)
+    def view_support_bearings_section(self):
+        """
+        Create and layout the UI components for the support bearings section.
+        """
+        self.support_bearings_section_layout = QVBoxLayout()
+        section_label = QLabel('Łożyska podporowe:')
 
-        btnLayout.addWidget(btnLabel)
-        btnLayout.addWidget(self.SelectBearingBtn1)
+        # Create data display and input rows
+        ds = create_data_display_row(self, 'dsc', self._window.data['dsc'], 'd<sub>s</sub>', 'Obliczona średnica wału wejściowego')
+        lh = create_data_input_row(self, 'Lhp', 'Trwałość godzinowa łożyska', 'L<sub>h</sub>')
+        fd = create_data_input_row(self, 'ftp', 'Współczynnik zależny od zmiennych obciążeń dynamicznych', 'f<sub>d</sub>')
+        ft = create_data_input_row(self, 'fdp', 'Współczynnik zależny od temperatury pracy łożyska', 'f<sub>t</sub>')
 
-        self.left_layout.addWidget(sectionLabel)
-        self.left_layout.addLayout(ds)
-        self.left_layout.addLayout(lh)
-        self.left_layout.addLayout(fd)
-        self.left_layout.addLayout(ft)
-        self.left_layout.addLayout(btnLayout)
+        # Create button for bearing selection
+        button_layout = QHBoxLayout()
+        button_label = QLabel('Łożysko:')
+        self._select_support_bearings_button = QPushButton('Wybierz łożysko')
+        self._select_support_bearings_button.setEnabled(False)
+        self._select_support_bearings_button.clicked.connect(self.update_selected_support_bearing_data)
 
-    def viewSection2(self):
-        sectionLabel = QLabel("Łożyska osadzone na wykorbieniach:")
-        de = createDataDisplayRow(self, 'dec', self._window.data['dec'], 'd<sub>e</sub>', 'Obliczona średnica wykorbienia')
-        lh = createDataInputRow(self, 'Lh2', 'Trwałość godzinowa łożyska', 'L<sub>h</sub>')
-        fd = createDataInputRow(self, 'ft2', 'Współczynnik zależny od zmiennych obciążeń dynamicznych', 'f<sub>d</sub>')
-        ft = createDataInputRow(self, 'fd2', 'Współczynnik zależny od temperatury pracy łozyska', 'f<sub>t</sub>')
-        # Set button for selecting second type of bearing
-        btnLayout = QHBoxLayout()
-        btnLabel = QLabel("Łożysko:")
+        button_layout.addWidget(button_label)
+        button_layout.addWidget(self._select_support_bearings_button)
 
-        self.SelectBearingBtn2 = QPushButton("Wybierz łożysko")
-        self.SelectBearingBtn2.setEnabled(False)
-        self.SelectBearingBtn2.clicked.connect(self.updateBearings2Data)
+        self.support_bearings_section_layout.addWidget(section_label)
+        self.support_bearings_section_layout.addLayout(ds)
+        self.support_bearings_section_layout.addLayout(lh)
+        self.support_bearings_section_layout.addLayout(fd)
+        self.support_bearings_section_layout.addLayout(ft)
+        self.support_bearings_section_layout.addLayout(button_layout)
 
-        btnLayout.addWidget(btnLabel)
-        btnLayout.addWidget(self.SelectBearingBtn2)
+        self.component_layout.addLayout(self.support_bearings_section_layout)
 
-        self.right_layout.addWidget(sectionLabel)
-        self.right_layout.addLayout(de)
-        self.right_layout.addLayout(lh)
-        self.right_layout.addLayout(fd)
-        self.right_layout.addLayout(ft)
-        self.right_layout.addLayout(btnLayout)
+    def view_central_bearings_section(self):
+        """
+        Create and layout the UI components for the central bearings section.
+        """
+        self.central_bearings_section_layout = QVBoxLayout()
+        section_label = QLabel('Łożyska centralne:')
 
-    def setup_layouts_state_tracking(self):
-        self.left_line_edits =  [le for le in self.line_edits if self.is_widget_in_layout(le, self.left_layout)]
-        self.right_line_edits =  [le for le in self.line_edits if self.is_widget_in_layout(le, self.right_layout)]
+        # Create data display and input rows
+        de = create_data_display_row(self, 'dec', self._window.data['dec'], 'd<sub>e</sub>', 'Obliczona średnica wykorbienia')
+        lh = create_data_input_row(self, 'Lhc', 'Trwałość godzinowa łożyska', 'L<sub>h</sub>')
+        fd = create_data_input_row(self, 'ftc', 'Współczynnik zależny od zmiennych obciążeń dynamicznych', 'f<sub>d</sub>')
+        ft = create_data_input_row(self, 'fdc', 'Współczynnik zależny od temperatury pracy', 'f<sub>t</sub>')
 
-        self.left_layout_original_state = self.get_layout_state(self.left_line_edits)
-        self.right_layout_original_state = self.get_layout_state(self.right_line_edits)
+        # Create button for bearing selection
+        button_layout = QHBoxLayout()
+        button_label = QLabel('Łożysko:')
 
-        for line_edit in self.left_line_edits:
-            line_edit.textChanged.connect(self.check_left_layout_state)
+        self._select_central_bearings_button = QPushButton('Wybierz łożysko')
+        self._select_central_bearings_button.setEnabled(False)
+        self._select_central_bearings_button.clicked.connect(self.update_selected_central_bearing_data)
 
-        for line_edit in self.right_line_edits:
-            line_edit.textChanged.connect(self.check_right_layout_state)
+        button_layout.addWidget(button_label)
+        button_layout.addWidget(self._select_central_bearings_button)
+
+        self.central_bearings_section_layout.addWidget(section_label)
+        self.central_bearings_section_layout.addLayout(de)
+        self.central_bearings_section_layout.addLayout(lh)
+        self.central_bearings_section_layout.addLayout(fd)
+        self.central_bearings_section_layout.addLayout(ft)
+        self.central_bearings_section_layout.addLayout(button_layout)
+
+        self.component_layout.addLayout(self.central_bearings_section_layout)
 
     def get_layout_state(self, line_edits):
+        """
+        Get the current state of a layout based on the text in its line edits.
+
+        Args:
+            line_edits (list): List of QLineEdit objects.
+
+        Returns:
+            list/None: List of text from each QLineEdit if none are empty, else None.
+        """
         layout_input_states = [line_edit.text() for line_edit in line_edits]
-        if '' in layout_input_states:
-            return None
-        else:
-            return layout_input_states
+        return None if '' in layout_input_states else layout_input_states
+
+    def setup_sublayouts_state_tracking(self):
+        """
+        Setup state tracking for the sublayouts in the tab.
+        This involves identifying line edits in each section and setting up their initial state.
+        """
+        self._support_bearings_line_edits = [le for le in self._line_edits_states if self.is_widget_in_layout(le, self.support_bearings_section_layout)]
+        self._central_bearings_line_edits = [le for le in self._line_edits_states if self.is_widget_in_layout(le, self.central_bearings_section_layout)]
+
+        self.support_bearings_section_layout_original_state = self.get_layout_state(self._support_bearings_line_edits)
+        self._central_bearings_section_layout_original_state = self.get_layout_state(self._central_bearings_line_edits)
+
+        for line_edit in self._support_bearings_line_edits:
+            line_edit.textChanged.connect(self.check_support_bearings_section_layout_state)
+
+        for line_edit in self._central_bearings_line_edits:
+            line_edit.textChanged.connect(self.check_central_bearings_section_layout_state)
 
     def is_widget_in_layout(self, widget, layout):
-            for i in range(layout.count()):
-                item = layout.itemAt(i)
-                if item.widget() == widget:
-                    return True
-                elif item.layout() and self.is_widget_in_layout(widget, item.layout()):
-                    return True
-            return False
-    
-    def check_left_layout_state(self):
-        # This function checks the state of the left layout in the tab
+        """
+        Check if a given widget is in a specified layout.
 
-        # Get current state of inputs
-        state_changed = False
-        current_state = self.get_layout_state(self.left_line_edits)
-        # Check if all inputs are provided
-        all_filled = False if current_state == None else True
+        Args:
+            widget (QWidget): The widget to check.
+            layout (QLayout): The layout to search within.
+
+        Returns:
+            bool: True if the widget is in the layout, False otherwise.
+        """
+        for i in range(layout.count()):
+            item = layout.itemAt(i)
+            if item.widget() == widget:
+                return True
+            elif item.layout() and self.is_widget_in_layout(widget, item.layout()):
+                return True
+        return False
+    
+    def check_support_bearings_section_layout_state(self):
+        """
+        Check the state of the support bearings section layout and update the UI accordingly.
+        Enables or disables the selection button based on whether all inputs are filled.
+        """
+        current_state = self.get_layout_state(self._support_bearings_line_edits)
+        all_filled = current_state is not None
+        state_changed = current_state != self.support_bearings_section_layout_original_state
 
         if all_filled:
-            # Check if originally all inputs were provided
-            if self.left_layout_original_state:
-                # ...if yes, check if the state changed
-                state_changed = current_state != self.left_layout_original_state
-            # Set the current state as original state
-            self.left_layout_original_state = current_state
-
+            self.support_bearings_section_layout_original_state = current_state
+            self._select_support_bearings_button.setEnabled(True)
             if state_changed:
-                # All inputs were provided but at least one of them was changed
-                self.SelectBearingBtn1.setEnabled(True)
-                self.SelectBearingBtn1.setText("Wybierz Łożysko")
-                self.itemsToSelect['Łożyska1'] = ''
+                self._select_support_bearings_button.setText('Wybierz Łożysko')
+                self._items_to_select_states['Łożyska_podporowe'] = ''
                 self.check_state()
-            else:
-                # All inputs were provided no one of them was changed
-                self.SelectBearingBtn1.setEnabled(True)
         else:
-            # At least one input is not provided
-            self.SelectBearingBtn1.setEnabled(False)
+            self._select_support_bearings_button.setEnabled(False)
     
-    def check_right_layout_state(self):
-        # This function checks the state of the right layout in the tab
-
-        # Get current state of inputs
-        state_changed = False
-        current_state = self.get_layout_state(self.right_line_edits)
-        # Check if all inputs are provided
-        all_filled = False if current_state == None else True
+    def check_central_bearings_section_layout_state(self):
+        """
+        Check the state of the central bearings section layout and update the UI accordingly.
+        Enables or disables the selection button based on whether all inputs are filled.
+        """
+        current_state = self.get_layout_state(self._central_bearings_line_edits)
+        all_filled = current_state is not None
+        state_changed = current_state != self._central_bearings_section_layout_original_state
 
         if all_filled:
-            # Check if originally all inputs were provided
-            if self.right_layout_original_state:
-                # ...if yes, check if the state changed
-                state_changed = current_state != self.right_layout_original_state
-            # Set the current state as original state
-            self.right_layout_original_state = current_state
-
+            self._central_bearings_section_layout_original_state = current_state
+            self._select_central_bearings_button.setEnabled(True)
             if state_changed:
-                # All inputs were provided but at least one of them was changed
-                self.SelectBearingBtn2.setEnabled(True)
-                self.SelectBearingBtn2.setText("Wybierz Łożysko")
-                self.itemsToSelect['Łożyska2'] = ''
+                self._select_central_bearings_button.setText('Wybierz Łożysko')
+                self._items_to_select_states['Łożyska_centralne'] = ''
                 self.check_state()
-            else:
-                # All inputs were provided no one of them was changed
-                self.SelectBearingBtn2.setEnabled(True)
         else:
-            # At least one input is not provided
-            self.SelectBearingBtn2.setEnabled(False)
+            self._select_central_bearings_button.setEnabled(False)
     
-    def updateViewedBearing1(self, itemData):
-        self.SelectBearingBtn1.setText(str(itemData['kod'][0]))
-        self.tabData['Łożyska1'] = itemData
-        # Mark, that the item to select was selected
-        self.itemsToSelect['Łożyska1'] = str(itemData['kod'][0])
-        self.tabData['ds'][0] = str(itemData['Dw'][0])
-        # Check if the state changed - the purpose here is to confirm
-        # ...that item to select was indeed selected
+    def update_viewed_support_bearings_code(self, itemData):
+        """
+        Update the displayed code for the selected support bearing.
+
+        Args:
+            itemData (dict): Data of the selected item.
+        """
+        self._select_support_bearings_button.setText(str(itemData['kod'][0]))
+        self.tab_data['Łożyska_podporowe'] = itemData
+
+        self._items_to_select_states['Łożyska_podporowe'] = str(itemData['kod'][0])
+        self.tab_data['ds'][0] = str(itemData['Dw'][0])
         self.check_state()
 
-    def updateViewedBearing2(self, itemData):
-        self.SelectBearingBtn2.setText(str(itemData['kod'][0]))
-        self.tabData['Łożyska2'] = itemData
-        # Mark, that the item to select was selected
-        self.itemsToSelect['Łożyska2'] = str(itemData['kod'][0])
-        self.tabData['de'][0] = str(itemData['Dw'][0])
-        # Check if the state changed - the purpose here is to confirm
-        # ...that item to select was indeed selected
+    def update_viewed_central_bearings_code(self, itemData):
+        """
+        Update the displayed code for the selected central bearing.
+
+        Args:
+            itemData (dict): Data of the selected item.
+        """
+        self._select_central_bearings_button.setText(str(itemData['kod'][0]))
+        self.tab_data['Łożyska_centralne'] = itemData
+
+        self._items_to_select_states['Łożyska_centralne'] = str(itemData['kod'][0])
+        self.tab_data['de'][0] = str(itemData['Dw'][0])
         self.check_state()
     
     def getData(self):
-        for attribute, lineEdit in self.lineEdits.items():
-            text = lineEdit.text()
+        """
+        Retrieve and format the data from the input fields.
+
+        Returns:
+            dict: The formatted data from the tab.
+        """
+        for attribute, line_edit in self.input_values.items():
+            text = line_edit.text()
             value = None if text == "" else literal_eval(text)
-            self.tabData[attribute][0] = value
-        
-        return self.tabData
+            self.tab_data[attribute][0] = value
+        return self.tab_data
     
-    def updateBearings1Data(self):
-        tabData = self.getData()
-        self.updatedBearings1DataSignal.emit(tabData)
+    def update_selected_support_bearing_data(self):
+        """
+        Emit a signal with the updated data for the selected support bearing.
+        """
+        tab_data = self.getData()
+        self.updated_support_bearings_data_signal.emit(tab_data)
 
-    def updateBearings2Data(self):
-        tabData = self.getData()
-        self.updatedBearings2DataSignal.emit(tabData)
+    def update_selected_central_bearing_data(self):
+        """
+        Emit a signal with the updated data for the selected central bearing.
+        """
+        tab_data = self.getData()
+        self.updated_central_bearings_data_signal.emit(tab_data)
 
-    def updateData(self):
-        tabData = self.getData()
-        self.updatedDataSignal.emit(tabData)
+    def update_data(self):
+        """
+        Emit a signal with the updated data from the tab.
+        """
+        tab_data = self.getData()
+        self.updated_data_signal.emit(tab_data)
     
-    def updateTab(self):
-        for key, value in self.valueLabels.items():
+    def update_tab(self):
+        """
+        Update the tab with data from the main window.
+        """
+        for key, value in self.output_values.items():
             if value != self._window.data[key][0]:
                 value = self._window.data[key][0]
-                self.valueLabels[key].setText(formatValue(value))
+                self.output_values[key].setText(format_value(value))
 
-class Tab3(TabBase):
-    def initUI(self):
+class ResultsTab(Tab):
+    def init_ui(self):
+        """
+        Initialize the user interface for ResultsTab.
+        """
         self.setLayout(QVBoxLayout())
         
-        self.subtabWidget = QTabWidget(self)
-        self.layout().addWidget(self.subtabWidget)
+        self._subtab_widget = QTabWidget(self)
+        self.layout().addWidget(self._subtab_widget)
 
-        self.addDataSubtab()
-        self.addResultsSubtab()
-        self.addChartSubtab()
+        self.add_data_subtab()
+        self.add_results_subtab()
+        self.add_chart_subtab()
 
-    def addDataSubtab(self):
-        # Create a QScrollArea for the data tab
-        dataSubtab = QScrollArea()
-        dataSubtab.setWidgetResizable(True)
-        self.subtabWidget.addTab(dataSubtab, 'Dane')
-        # Create a contents widget for the scroll area
-        contentWidget = QWidget()
-        # Set the content widget layout - this is basically the layout of the dataSubtab
-        self.dataSubtabLayout = QVBoxLayout(contentWidget)
-        # set the content widget as widget of scroll area
-        dataSubtab.setWidget(contentWidget)
+    def add_data_subtab(self):
+        """
+        Add a subtab for displaying data.
+        """
+        subtab = QScrollArea()
+        subtab.setWidgetResizable(True)
+        self._subtab_widget.addTab(subtab, 'Dane')
 
-        generalDataLabel = QLabel("Ogólne")
-        nwe = createDataDisplayRow(self, 'nwe', self._window.data['nwe'], 'n<sub>we</sub>', 'Prędkość obrotowa wejściowa')
-        mwe = createDataDisplayRow(self, 'Mwe', self._window.data['Mwe'], 'M<sub>we</sub>', 'Moment obrotowy wejściowy')
-        dimensionsLabel = QLabel("Wymiary")
-        l = createDataDisplayRow(self, 'L',  self._window.data['L'], 'L', 'Długość wału',)
-        e = createDataDisplayRow(self, 'e',  self._window.data['e'], 'e', 'Mimośród')
-        supportCoordinatesLabel = QLabel("Współrzędne podpór")
-        pinSupport = createDataDisplayRow(self, 'LA', self._window.data['LA'], 'L<sub>A</sub>', 'Podpora stała A',)
-        rollerSupport = createDataDisplayRow(self, 'LB', self._window.data['LB'], 'L<sub>B</sub>', 'Podpora przesuwna B')
-        cycloDiscCoordinatesLabel = QLabel("Współrzędne kół obiegowych")
-        cycloDisc1 = createDataDisplayRow(self, 'L1', self._window.data['L1'], 'L<sub>1</sub>', 'Tarcza obiegowa 1')
-        cycloDisc2 = createDataDisplayRow(self, 'L2', self._window.data['L2'], 'L<sub>2</sub>', 'Tarcza obiegowa 2')
-        materialsLabel = QLabel("Materiał")
-        self.dataSubtabLayout.addWidget(generalDataLabel)
-        self.dataSubtabLayout.addLayout(nwe)
-        self.dataSubtabLayout.addLayout(mwe)
-        self.dataSubtabLayout.addWidget(dimensionsLabel)
-        self.dataSubtabLayout.addLayout(l)
-        self.dataSubtabLayout.addLayout(e)
-        self.dataSubtabLayout.addWidget(supportCoordinatesLabel)
-        self.dataSubtabLayout.addLayout(pinSupport)
-        self.dataSubtabLayout.addLayout(rollerSupport)
-        self.dataSubtabLayout.addWidget(cycloDiscCoordinatesLabel)
-        self.dataSubtabLayout.addLayout(cycloDisc1)
-        self.dataSubtabLayout.addLayout(cycloDisc2)
-        self.dataSubtabLayout.addWidget(materialsLabel)
+        content_widget = QWidget()
+        self.data_subtab_layout = QVBoxLayout(content_widget)
+        subtab.setWidget(content_widget)
+
+        generalDataLabel = QLabel('Ogólne:')
+        nwe = create_data_display_row(self, 'nwe', self._window.data['nwe'], 'n<sub>we</sub>', 'Prędkość obrotowa wejściowa')
+        mwe = create_data_display_row(self, 'Mwe', self._window.data['Mwe'], 'M<sub>we</sub>', 'Moment obrotowy wejściowy')
+        dimensionsLabel = QLabel('Wymiary:')
+        l = create_data_display_row(self, 'L',  self._window.data['L'], 'L', 'Długość wału',)
+        e = create_data_display_row(self, 'e',  self._window.data['e'], 'e', 'Mimośród')
+        supportCoordinatesLabel = QLabel('Współrzędne podpór:')
+        pinSupport = create_data_display_row(self, 'LA', self._window.data['LA'], 'L<sub>A</sub>', 'Podpora stała A',)
+        rollerSupport = create_data_display_row(self, 'LB', self._window.data['LB'], 'L<sub>B</sub>', 'Podpora przesuwna B')
+        cycloDiscCoordinatesLabel = QLabel('Współrzędne kół obiegowych:')
+        cycloDisc1 = create_data_display_row(self, 'L1', self._window.data['L1'], 'L<sub>1</sub>', 'Tarcza obiegowa 1')
+        cycloDisc2 = create_data_display_row(self, 'L2', self._window.data['L2'], 'L<sub>2</sub>', 'Tarcza obiegowa 2')
+        materialsLabel = QLabel('Materiał:')
+        
+        self.data_subtab_layout.addWidget(generalDataLabel)
+        self.data_subtab_layout.addLayout(nwe)
+        self.data_subtab_layout.addLayout(mwe)
+        self.data_subtab_layout.addWidget(dimensionsLabel)
+        self.data_subtab_layout.addLayout(l)
+        self.data_subtab_layout.addLayout(e)
+        self.data_subtab_layout.addWidget(supportCoordinatesLabel)
+        self.data_subtab_layout.addLayout(pinSupport)
+        self.data_subtab_layout.addLayout(rollerSupport)
+        self.data_subtab_layout.addWidget(cycloDiscCoordinatesLabel)
+        self.data_subtab_layout.addLayout(cycloDisc1)
+        self.data_subtab_layout.addLayout(cycloDisc2)
+        self.data_subtab_layout.addWidget(materialsLabel)
+
+    def add_results_subtab(self):
+        """
+        Add a subtab for displaying results.
+        """
+        subtab = QScrollArea()
+        subtab.setWidgetResizable(True)
+        self._subtab_widget.addTab(subtab, 'Wyniki')
+
+        content_widget = QWidget()
+        self.results_subtab_layout = QVBoxLayout(content_widget)
+        subtab.setWidget(content_widget)
+
+        dimensionsLabel = QLabel('Wymiary')
+        ds = create_data_display_row(self, 'ds',  self._window.data['ds'], 'd<sub>s</sub>', 'Średnica wału')
+        de = create_data_display_row(self, 'de',  self._window.data['de'], 'd<sub>e</sub>', 'Średnica wykorbienia')
+
+        Łożyska1 = QLabel('Łożyska')
+
+        self.results_subtab_layout.addWidget(dimensionsLabel)
+        self.results_subtab_layout.addLayout(ds)
+        self.results_subtab_layout.addLayout(de)
+        self.results_subtab_layout.addWidget(Łożyska1)
+
+    def add_chart_subtab(self):
+        """
+        Add a subtab for displaying charts.
+        """
+        self._chart_tab = Chart()
+        self._subtab_widget.addTab(self._chart_tab, 'Wykresy')
     
-    def addResultsSubtab(self):
-        # Create a QScrollArea for the data tab
-        resultsSubtab = QScrollArea()
-        resultsSubtab.setWidgetResizable(True)
-        self.subtabWidget.addTab(resultsSubtab, 'Wyniki')
-        # Create a contents widget for the scroll area
-        contentWidget = QWidget()
-        # Set the content widget layout - this is basically the layout of the dataSubtab
-        self.resultsSubtabLayout = QVBoxLayout(contentWidget)
-        # set the content widget as widget of scroll area
-        resultsSubtab.setWidget(contentWidget)
+    def create_plots(self, chart_data):
+        """
+        Create plots in the chart tab.
 
-        dimensionsLabel = QLabel("Wymiary")
-        ds = createDataDisplayRow(self, 'ds',  self._window.data['ds'], 'd<sub>s</sub>', 'Średnica wału')
-        de = createDataDisplayRow(self, 'de',  self._window.data['de'], 'd<sub>e</sub>', 'Średnica wykorbienia')
+        :param chart_data: Data to be used for plotting.
+        """
+        self._chart_tab.create_plots(chart_data)
 
-        Łożyska1 = QLabel("Łożyska")
-
-        self.resultsSubtabLayout.addWidget(dimensionsLabel)
-        self.resultsSubtabLayout.addLayout(ds)
-        self.resultsSubtabLayout.addLayout(de)
-        self.resultsSubtabLayout.addWidget(Łożyska1)
-
-    def addChartSubtab(self):
-        self.chartTab = Chart()
-        self.subtabWidget.addTab(self.chartTab, 'Wykresy')
-    
-    def createPlots(self, chartData):
-        self.chartTab.createPlots(chartData)
-
-    def updateTab(self):
+    def update_tab(self):
         addData = True 
-        for key, value in self.valueLabels.items():
+        for key, value in self.output_values.items():
             if key in self._window.data and value != self._window.data[key][0]:
                 value = self._window.data[key][0]
-                self.valueLabels[key].setText(formatValue(value))
+                self.output_values[key].setText(format_value(value))
             elif key in self._window.data['Materiał']:
                 addData = False
                 value = self._window.data['Materiał'][key][0]
-                self.valueLabels[key].setText(formatValue(value))
+                self.output_values[key].setText(format_value(value))
         
         if addData:
             for key, value in self._window.data['Materiał'].items():
-                attribute = createDataDisplayRow(self, key, value, key)
-                self.dataSubtabLayout.addLayout(attribute)
-            for key, value in self._window.data['Łożyska1'].items():
-                attribute = createDataDisplayRow(self, key, value, key)
-                self.resultsSubtabLayout.addLayout(attribute)
-            for key, value in self._window.data['Łożyska2'].items():
-                attribute = createDataDisplayRow(self, key, value, key)
-                self.resultsSubtabLayout.addLayout(attribute)
+                attribute = create_data_display_row(self, key, value, key)
+                self.data_subtab_layout.addLayout(attribute)
+            for key, value in self._window.data['Łożyska_podporowe'].items():
+                attribute = create_data_display_row(self, key, value, key)
+                self.results_subtab_layout.addLayout(attribute)
+            for key, value in self._window.data['Łożyska_centralne'].items():
+                attribute = create_data_display_row(self, key, value, key)
+                self.results_subtab_layout.addLayout(attribute)
     
-def createDataInputRow(tab: TabBase, attribute, description, symbol):
-    # Set Layout of the row
-    layout = QHBoxLayout()
-    # Create description label
-    descriptionlabel = QLabel()
-    descriptionlabel = QLabel(description)
-    descriptionlabel.setFixedWidth(150)
-    descriptionlabel.setWordWrap(True) 
-    # Create symbol label
-    symbolLabel = QLabel(f'{symbol} = ')
-    symbolLabel.setFixedWidth(20)
-    # Create LineEdit
-    lineEdit = QLineEdit()
-    lineEdit.setFixedWidth(80)
-    # Fill in the Line Edit if attribute already has a value
-    value = tab.tabData[attribute][0]
-    if value is not None:
-        lineEdit.setText(f'{value}')
-    # Set input validation for LineEdit
-    regex = QRegularExpression("^(0|[1-9][0-9]{0,6})(\.[0-9]{1,4})?$")
-    inputValidator = QRegularExpressionValidator(regex, lineEdit)
-    lineEdit.setValidator(inputValidator)
-    # Create units label
-    unitsLabel = QLabel(tab.tabData[attribute][-1])
-    unitsLabel.setFixedWidth(20)
+def create_data_input_row(tab: Tab, attribute: str, description: str, symbol: str) -> QHBoxLayout:
+    """
+    Create a row for data input with description, symbol, and input field.
 
-    layout.addWidget(descriptionlabel)
-    layout.addWidget(symbolLabel)
-    layout.addWidget(lineEdit)
-    layout.addWidget(unitsLabel)
-    # Save the LineEdit
-    tab.lineEdits[attribute] = lineEdit
+    :param tab: The tab where the row will be added.
+    :param attribute: The attribute name corresponding to the data.
+    :param description: The description of the attribute.
+    :param symbol: The symbol representing the attribute.
+    :return: A QHBoxLayout containing the created widgets.
+    """
+    layout = QHBoxLayout()
+
+    # Description label
+    description_label = QLabel(description)
+    description_label.setFixedWidth(150)
+    description_label.setWordWrap(True)
+
+    # Symbol label
+    symbol_label = QLabel(f'{symbol} = ')
+    symbol_label.setFixedWidth(50)
+
+    # Line edit for input
+    line_edit = QLineEdit()
+    line_edit.setFixedWidth(80)
+    if (value := tab.tab_data[attribute][0]) is not None:
+        line_edit.setText(str(value))
+
+    # Input validation
+    regex = QRegularExpression('^(0|[1-9][0-9]{0,6})(\.[0-9]{1,4})?$')
+    line_edit.setValidator(QRegularExpressionValidator(regex, line_edit))
+
+    # Units label
+    units_label = QLabel(tab.tab_data[attribute][-1])
+    units_label.setFixedWidth(50)
+
+    # Assemble the layout
+    layout.addWidget(description_label)
+    layout.addWidget(symbol_label)
+    layout.addWidget(line_edit)
+    layout.addWidget(units_label)
+
+    # Save the line_edit for later reference
+    tab.input_values[attribute] = line_edit
 
     return layout
 
-def createDataDisplayRow(tab: TabBase, attribute, data, symbol, description = ''):
-    value = data[0]
-    unit = data[-1]
-    # Set Layout of the row
-    layout = QHBoxLayout()
-    # Create description label
-    descriptionlabel = QLabel(description)
-    descriptionlabel.setFixedWidth(150)
-    descriptionlabel.setWordWrap(True)
-    # Create symbol label
-    symbolLabel = QLabel(f'{symbol} = ')
-    symbolLabel.setFixedWidth(20)
-    # Create label that holds the value of the attribute
-    valueLabel = QLineEdit(formatValue(value) if value is not None else '')
-    valueLabel.setReadOnly(True)
-    valueLabel.setFixedWidth(80)
-    # Create units label
-    unitsLabel = QLabel(unit)
-    unitsLabel.setFixedWidth(40)
-    
-    layout.addWidget(descriptionlabel)
-    layout.addWidget(symbolLabel)
-    layout.addWidget(valueLabel)
-    layout.addWidget(unitsLabel)
-    # Save the label
-    tab.valueLabels[attribute] = valueLabel
+def create_data_display_row(tab: Tab, attribute: str, data: list, symbol: str, description: str = '') -> QHBoxLayout:
+    """
+    Create a row for displaying data with description, symbol, and a read-only field.
 
+    :param tab: The tab where the row will be added.
+    :param attribute: The attribute name corresponding to the data.
+    :param data: The data list containing the value and unit.
+    :param symbol: The symbol representing the attribute.
+    :param description: The description of the attribute.
+    :return: A QHBoxLayout containing the created widgets.
+    """
+    layout = QHBoxLayout()
+
+    # Description label
+    description_label = QLabel(description)
+    description_label.setFixedWidth(150)
+    description_label.setWordWrap(True)
+
+    # Symbol label
+    symbol_label = QLabel(f'{symbol} = ')
+    symbol_label.setFixedWidth(50)
+
+    # Value label (read-only)
+    value_label = QLineEdit(format_value(data[0]) if data[0] is not None else '')
+    value_label.setReadOnly(True)
+    value_label.setFixedWidth(80)
+
+    # Units label
+    units_label = QLabel(data[-1])
+    units_label.setFixedWidth(50)
+
+    layout.addWidget(description_label)
+    layout.addWidget(symbol_label)
+    layout.addWidget(value_label)
+    layout.addWidget(units_label)
+
+    # Save the label for later reference
+    tab.output_values[attribute] = value_label
     return layout
 
-def formatValue(var):
-    if isinstance(var, float):
-        return f"{var:.2f}"
-    elif isinstance(var, int):
-        return str(var)
-    else:
-        return str(var) 
+def format_value(var) -> str:
+    """
+    Format a variable for display.
+
+    :param var: The variable to format.
+    :return: A string representation of the variable.
+    """
+    return f'{var:.2f}' if isinstance(var, float) else str(var)
