@@ -1,10 +1,10 @@
 import mplcursors
-
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qtagg import (
     FigureCanvasQTAgg,
     NavigationToolbar2QT as NavigationToolbar
 )
+
 from PyQt6.QtWidgets import QComboBox, QVBoxLayout, QWidget
 from PyQt6.QtCore import Qt
 

@@ -6,8 +6,8 @@ sys.path.append(root_directory)
 
 from PyQt6.QtWidgets import QApplication
 
-from MainWindow import MainWindow
-from MainWindowController import MainWindowController
+from MainWindow.view.MainWindow import MainWindow
+from MainWindow.controller.MainWindowController import MainWindowController
 
 def main():
     cyclo_app = QApplication([])

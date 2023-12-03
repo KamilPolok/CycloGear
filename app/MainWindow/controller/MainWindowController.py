@@ -1,8 +1,7 @@
 import numpy as np
 from sympy import symbols, Piecewise
 
-from ChartView import Chart
-from MainWindow import MainWindow
+from MainWindow.view import MainWindow
 
 from DbHandler.controller.DBController import ViewSelectItemController
 from DbHandler.model.DatabaseHandler import DatabaseHandler
