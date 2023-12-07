@@ -97,23 +97,30 @@ class ResultsTab(Tab):
         self._chart_tab.create_plots(chart_data)
 
     def update_tab(self):
+
         addData = True 
-        for key, value in self.output_values.items():
-            if key in self._window.data and value != self._window.data[key][0]:
-                value = self._window.data[key][0]
-                self.output_values[key].setText(format_value(value))
-            elif key in self._window.data['Materiał']:
-                addData = False
-                value = self._window.data['Materiał'][key][0]
-                self.output_values[key].setText(format_value(value))
-        
+        for key_tuple, value_label in self.output_values.items():
+            # Check if the key is a tuple (indicating a parent-child relationship)
+            if isinstance(key_tuple, tuple):
+                parent_key, attribute = key_tuple
+                if parent_key in self._window.data and attribute in self._window.data[parent_key]:
+                    addData = False
+                    new_value = self._window.data[parent_key][attribute][0]
+                    value_label.setText(format_value(new_value))
+            else:
+                # Handle keys without a parent
+                attribute = key_tuple
+                if attribute in self._window.data:
+                    new_value = self._window.data[attribute][0]
+                    value_label.setText(format_value(new_value))
+            
         if addData:
             for key, value in self._window.data['Materiał'].items():
-                attribute = create_data_display_row(self, key, value, key)
+                attribute = create_data_display_row(self, ('Materiał', key), value, key)
                 self.data_subtab_layout.addLayout(attribute)
             for key, value in self._window.data['Łożyska_podporowe'].items():
-                attribute = create_data_display_row(self, key, value, key)
+                attribute = create_data_display_row(self, ('Łożyska_podporowe', key), value, key)
                 self.results_subtab_layout.addLayout(attribute)
             for key, value in self._window.data['Łożyska_centralne'].items():
-                attribute = create_data_display_row(self, key, value, key)
+                attribute = create_data_display_row(self, ('Łożyska_centralne', key), value, key)
                 self.results_subtab_layout.addLayout(attribute)

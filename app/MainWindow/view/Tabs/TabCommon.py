@@ -54,7 +54,7 @@ def create_data_input_row(tab: Tab, attribute: str, description: str, symbol: st
 
     return layout
 
-def create_data_display_row(tab: Tab, attribute: str, data: list, symbol: str, description: str = '') -> QHBoxLayout:
+def create_data_display_row(tab: Tab, attribute: tuple, data: list, symbol: str, description: str = '') -> QHBoxLayout:
     """
     Create a row for displaying data with description, symbol, and a read-only field.
 
