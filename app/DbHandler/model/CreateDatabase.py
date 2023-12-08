@@ -12,48 +12,33 @@ sys.path.append(root_directory)
 from config import DATA_DIR, DATABASE_NAME
 
 database_tables = [
-    {
-        "item":  "łożyska",
-        "group": "wał wejściowy",
-        "type": "kulkowe",
-        "name": "łożyska-wał wejściowy-kulkowe",
-        "csvName": "wwe_kulkowe.csv",
-        "headers": ["kod", "Dw [mm]", "Dz [mm]", "B [mm]", "C [kN]", "C0 [kN]", "n max [obr/min]"],
-        "types": ['TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'REAL', 'REAL', 'INTEGER']
+    {   
+        "name": "wał wejściowy-łożyska-podporowe-kulkowe",
+        "csvName": "wal_wejsciowy-lozyska-podporowe-kulkowe.csv",
+        "headers": ["Kod", "Dw [mm]", "Dz [mm]", "B [mm]", "C [kN]", "C0 [kN]", "n max [obr/min]", "elementy toczne"],
+        "types": ['TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'REAL', 'REAL', 'INTEGER', 'TEXT']
     },
     {
-        "item":  "łożyska",
-        "group": "wał wejściowy",
-        "type": "walcowe",
-        "name": "łożyska-wał wejściowy-walcowe",
-        "csvName": "wwe_walcowe.csv",
-        "headers": ["kod", "Dw [mm]", "Dz [mm]", "B [mm]", "C [kN]", "C0 [kN]", "n max [obr/min]"],
-        "types": ['TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'REAL', 'REAL', 'INTEGER']
+        "name": "wał wejściowy-łożyska-podporowe-walcowe",
+        "csvName": "wal_wejsciowy-lozyska-podporowe-walcowe.csv",
+        "headers": ["Kod", "Dw [mm]", "Dz [mm]", "B [mm]", "C [kN]", "C0 [kN]", "n max [obr/min]", "elementy toczne"],
+        "types": ['TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'REAL', 'REAL', 'INTEGER', 'TEXT']
     },
     {
-        "item":  "łożyska",
-        "group": "tarcza",
-        "type": "walcowe",
-        "name": "łożyska-tarcza-walcowe",
-        "csvName": "tarcza_walcowe.csv",
-        "headers": ["kod", "Dw [mm]", "E [mm]", "B [mm]", "C [kN]", "C0 [kN]", "n max [obr/min]"],
-        "types": ['TEXT', 'INTEGER', 'REAL', 'INTEGER', 'REAL', 'REAL', 'INTEGER']
+        "name": "wał wejściowy-łożyska-centralne-walcowe",
+        "csvName": "wal_wejsciowy-lozyska-centralne-walcowe.csv",
+        "headers": ["Kod", "Dw [mm]", "Dz [mm]", "B [mm]", "E [mm]","C [kN]", "C0 [kN]", "n max [obr/min]", "elementy toczne"],
+        "types": ['TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'REAL', 'REAL', 'REAL', 'INTEGER', 'TEXT']
     },
     {
-        "item":  "łożyska",
-        "group": "tarcza",
-        "type": "igiełkowe",
-        "name": "łożyska-tarcza-igiełkowe",
-        "csvName": "tarcza_igielkowe.csv",
-        "headers": ["kod", "Dw [mm]", "E [mm]", "B [mm]", "C [kN]", "C0 [kN]", "n max [obr/min]"],
-        "types": ['TEXT', 'INTEGER', 'REAL', 'INTEGER', 'REAL', 'REAL', 'INTEGER']
+        "name": "wał wejściowy-łożyska-centralne-igiełkowe",
+        "csvName": "wal_wejsciowy-lozyska-centralne-igielkowe.csv",
+        "headers": ["Kod", "Dw [mm]", "Dz [mm]", "B [mm]", "E [mm]","C [kN]", "C0 [kN]", "n max [obr/min]", "elementy toczne"],
+        "types": ['TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'REAL', 'REAL', 'REAL', 'INTEGER', 'TEXT']
     },
     {
-        "item":  "wał bierny: materiały",
-        # "group": "tarcza",
-        # "type": "igiełkowe",
-        "name": "wał bierny: materiały",
-        "csvName": "wwe_materiały.csv",
+        "name": "wał wejściowy-materiały",
+        "csvName": "wal_wejsciowy-materialy.csv",
         "headers": [ "Oznaczenie", "Obróbka", "Rm [MPa]", "Re [MPa]", "Zgj [MPa]", "Zgo [MPa]", "Zsj [MPa]", "Zso [MPa]", "E [MPa]", "G [MPa]", "g [kg/m3]" ],
         "types": [ 'TEXT', 'TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER' ]
     },

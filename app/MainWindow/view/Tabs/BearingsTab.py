@@ -204,10 +204,10 @@ class BearingsTab(Tab):
         Args:
             itemData (dict): Data of the selected item.
         """
-        self._select_support_bearings_button.setText(str(itemData['kod'][0]))
+        self._select_support_bearings_button.setText(str(itemData['Kod'][0]))
         self.tab_data['Łożyska_podporowe'] = itemData
 
-        self._items_to_select_states['Łożyska_podporowe'] = str(itemData['kod'][0])
+        self._items_to_select_states['Łożyska_podporowe'] = str(itemData['Kod'][0])
         self.tab_data['ds'][0] = str(itemData['Dw'][0])
         self.check_state()
 
@@ -218,10 +218,10 @@ class BearingsTab(Tab):
         Args:
             itemData (dict): Data of the selected item.
         """
-        self._select_central_bearings_button.setText(str(itemData['kod'][0]))
+        self._select_central_bearings_button.setText(str(itemData['Kod'][0]))
         self.tab_data['Łożyska_centralne'] = itemData
 
-        self._items_to_select_states['Łożyska_centralne'] = str(itemData['kod'][0])
+        self._items_to_select_states['Łożyska_centralne'] = str(itemData['Kod'][0])
         self.tab_data['de'][0] = str(itemData['Dw'][0])
         self.check_state()
     

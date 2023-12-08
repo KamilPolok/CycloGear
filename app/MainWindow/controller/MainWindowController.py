@@ -55,7 +55,7 @@ class MainWindowController:
         db_handler = DatabaseHandler()
         subwindow = Window()
         subwindow.setWindowTitle("Dobór materiału")
-        tables_group_name = 'wał bierny: materiały'
+        tables_group_name = 'wał wejściowy-materiały'
         available_tables = db_handler.getAvailableTables(tables_group_name)
         limits = db_handler.getTableItemsFilters(tables_group_name)
         view_select_items_ctrl = ViewSelectItemController(db_handler, subwindow, available_tables, limits)
@@ -79,7 +79,7 @@ class MainWindowController:
         subwindow = Window()
         subwindow.setWindowTitle("Dobór łożyska podporowego")
         # Specify the group name of the tables you want to take for consideration
-        tables_group_name = 'łożyska-wał wejściowy'
+        tables_group_name = 'wał wejściowy-łożyska-podporowe'
         available_tables = db_handler.getAvailableTables(tables_group_name)
         # Specify the limits for the group of tables
         limits = db_handler.getTableItemsFilters(tables_group_name)
@@ -107,7 +107,7 @@ class MainWindowController:
         subwindow = Window()
         subwindow.setWindowTitle("Dobór łożyska centralnego")
         # Specify the group name of the tables you want to take for consideration
-        tables_group_name = 'łożyska-tarcza'
+        tables_group_name = 'wał wejściowy-łożyska-centralne'
         available_tables = db_handler.getAvailableTables(tables_group_name)
         # Specify the limits for the group of tables
         limits = db_handler.getTableItemsFilters(tables_group_name)
