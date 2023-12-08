@@ -42,6 +42,24 @@ database_tables = [
         "headers": [ "Oznaczenie", "Obróbka", "Rm [MPa]", "Re [MPa]", "Zgj [MPa]", "Zgo [MPa]", "Zsj [MPa]", "Zso [MPa]", "E [MPa]", "G [MPa]", "g [kg/m3]" ],
         "types": [ 'TEXT', 'TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER' ]
     },
+    {
+        "name": "wał wejściowy-elementy toczne-kulki",
+        "csvName": "wal_wejsciowy-elementy_toczne-kulki.csv",
+        "headers": [ "Kod", "D" ],
+        "types": [ 'STRING', 'INTEGER']
+    },
+    {
+        "name": "wał wejściowy-elementy toczne-wałeczki",
+        "csvName": "wal_wejsciowy-elementy_toczne-waleczki.csv",
+        "headers": [ "Kod", "D" ],
+        "types": [ 'STRING', 'INTEGER']
+    },
+    {
+        "name": "wał wejściowy-elementy toczne-igiełki",
+        "csvName": "wal_wejsciowy-elementy_toczne-igielki.csv",
+        "headers": [ "Kod", "D" ],
+        "types": [ 'STRING', 'INTEGER']
+    }
 ]
 
 class DatabaseCreator:

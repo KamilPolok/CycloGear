@@ -1,3 +1,4 @@
+import math
 import numpy as np
 from sympy import symbols, Piecewise
 
@@ -41,14 +42,17 @@ class MainWindowController:
         actions or handlers.
         """
         self._window.tabs[0].select_material_button.clicked.connect(self._open_materials_db_window)
-        self._window.tabs[0].updated_data_signal.connect(self._calculateInputShaftAttr)
+        self._window.tabs[0].updated_data_signal.connect(self._calculate_input_shaft_attributes)
         self._window.tabs[1].updated_support_bearings_data_signal.connect(self._open_support_bearings_db_window)
         self._window.tabs[1].updated_central_bearings_data_signal.connect(self._open_central_bearings_db_window)
-        self._window.tabs[1].updated_data_signal.connect(self._update_data)
+        self._window.tabs[1].updated_data_signal.connect(self._calculate_bearings_attributes)
+        self._window.tabs[2].updated_support_bearings_rolling_element_data_signal.connect(self._open_support_bearings_rolling_elements_db_window)
+        self._window.tabs[2].updated_central_bearings_rolling_element_data_signal.connect(self._open_central_bearings_rolling_elements_db_window)
+        self._window.tabs[2].updated_data_signal.connect(self._calculate_power_loss)
 
     def _open_materials_db_window(self):
         """
-        Open the materials database _window.
+        Open the materials database window.
 
         This method is triggered when the user wants to select a material from the database.
         """
@@ -71,9 +75,9 @@ class MainWindowController:
 
         :param data: Data used for calculating bearing attributes.
         """
-        self._calculate_support_bearings_attributes(data)
+        self._calculate_support_bearings_load_capacity(data)
 
-        # # Get acces to the database
+        # Get acces to the database
         db_handler = DatabaseHandler()
         # Create a subwindow that views GUI for the DatabaseHandler
         subwindow = Window()
@@ -99,7 +103,7 @@ class MainWindowController:
 
         :param data: Data used for calculating bearing attributes.
         """
-        self._calculate_central_bearings_attributes(data)
+        self._calculate_central_bearings_load_capacity(data)
 
         # # Get acces to the database
         db_handler = DatabaseHandler()
@@ -118,9 +122,61 @@ class MainWindowController:
         subwindow.itemDataSignal.connect(self._window.tabs[1].update_viewed_central_bearings_code)
         subwindow.exec()
 
-    def _calculate_support_bearings_attributes(self, data):
+    def _open_support_bearings_rolling_elements_db_window(self, data):
         """
-        Calculate attributes for the support bearings.
+        Open the support bearings rolling_elements database window.
+
+        This method is triggered when the user wants to select rolling elements for a support bearing from the database.
+        It first calculates rolling elements attributes based on provided data.
+
+        :param data: Data used for calculating bearing diameter.
+        """
+        # Get acces to the database
+        db_handler = DatabaseHandler()
+        # Create a subwindow that views GUI for the DatabaseHandler
+        subwindow = Window()
+        subwindow.setWindowTitle("Dobór elementu tocznego")
+        # Specify the group name of the tables you want to take for consideration
+        tables_group_name = f"wał wejściowy-elementy toczne-{self._data['Łożyska_podporowe']['elementy toczne'][0]}"
+        available_tables = db_handler.getAvailableTables(tables_group_name)
+        # Specify the limits for the group of tables
+        limits = db_handler.getTableItemsFilters(tables_group_name)
+        limits['D']['min'] = math.floor(self._data['dwpc'][0]) - 1
+        limits['D']['max'] = math.ceil(self._data['dwpc'][0]) + 1
+        # Setup the controller for the subwindow
+        view_select_items_ctrl = ViewSelectItemController(db_handler, subwindow, available_tables, limits)
+        subwindow.itemDataSignal.connect(self._window.tabs[2].update_viewed_support_bearings_rolling_element_code)
+        subwindow.exec()
+
+    def _open_central_bearings_rolling_elements_db_window(self, data):
+        """
+        Open the central bearings rolling_elements database window.
+
+        This method is triggered when the user wants to select rolling elements for a central bearing from the database.
+        It first calculates rolling elements attributes based on provided data.
+
+        :param data: Data used for calculating bearing diameter.
+        """
+        # Get acces to the database
+        db_handler = DatabaseHandler()
+        # Create a subwindow that views GUI for the DatabaseHandler
+        subwindow = Window()
+        subwindow.setWindowTitle("Dobór elementu tocznego")
+        # Specify the group name of the tables you want to take for consideration
+        tables_group_name = f"wał wejściowy-elementy toczne-{self._data['Łożyska_centralne']['elementy toczne'][0]}"
+        available_tables = db_handler.getAvailableTables(tables_group_name)
+        # Specify the limits for the group of tables
+        limits = db_handler.getTableItemsFilters(tables_group_name)
+        limits['D']['min'] = math.floor(self._data['dwcc'][0]) - 1
+        limits['D']['max'] = math.ceil(self._data['dwcc'][0]) + 1
+        # Setup the controller for the subwindow
+        view_select_items_ctrl = ViewSelectItemController(db_handler, subwindow, available_tables, limits)
+        subwindow.itemDataSignal.connect(self._window.tabs[2].update_viewed_central_bearings_rolling_element_code)
+        subwindow.exec()
+
+    def _calculate_support_bearings_load_capacity(self, data):
+        """
+        Calculate load capacity of the support bearings.
 
         This method calculates the life and capacity of the first set of bearings based on the provided data.
 
@@ -142,9 +198,9 @@ class MainWindowController:
         self._data['Lrp'][0] = l
         self._data['Cr'][0] = c
     
-    def _calculate_central_bearings_attributes(self, data):
+    def _calculate_central_bearings_load_capacity(self, data):
         """
-        Calculate attributes for the central bearings.
+        Calculate load capacity of central bearings.
 
         This method calculates the life and capacity of the second set of bearings based on the provided data.
 
@@ -165,20 +221,8 @@ class MainWindowController:
 
         self._data['Ltc'][0] = l
         self._data['Cc'][0] = c
-    
-    def _update_data(self, data):
-        """
-        Update bearings data in the model.
-
-        This method is used to update the model with new data for bearings.
-
-        :param data: New data to be updated in the model.
-        """
-        for key, value in data.items():
-            if key in self._data:
-                self._data[key] = value 
          
-    def _calculateInputShaftAttr(self, data):
+    def _calculate_input_shaft_attributes(self, data):
         """
         Calculate attributes for the input shaft.
 
@@ -254,3 +298,75 @@ class MainWindowController:
             'd': d
         }
         self._window.set_chart_data(self.chartData)
+
+    def _calculate_bearings_attributes(self, data):
+        """
+        Calculate attributes of support and central bearings.
+
+        :param data: Data used for calculating bearing attributes.
+        """
+        self._update_data(data)
+
+        # Calculate support bearings attributes
+        Dw = self._data['Łożyska_podporowe']['Dw'][0]
+        Dz = self._data['Łożyska_podporowe']['Dz'][0]
+
+        dw = 0.25 * (Dz - Dw)
+
+        self._data['dwpc'][0] = dw
+
+        # Calculate central bearings attributes
+        Dw = self._data['Łożyska_centralne']['Dw'][0]
+        Dz = self._data['Łożyska_centralne']['E'][0]
+
+        dw = 0.25 * (Dz - Dw)
+
+        self._data['dwcc'][0] = dw
+
+    def _calculate_power_loss(self, data):
+        """
+        Calculate power loss.
+
+        :param data: Data used for calculating power loss.
+        """
+        self._update_data(data)
+
+        w0 = self._data['w0'][0]
+        e = self._data['e'][0]
+        f = self._data['f'][0]
+        rw1 = self._data['rw1'][0]
+        Ra = self._data['Ra'][0]
+        F = self._data['F'][0]
+
+        # Calculate power loss in support bearings
+        dw = self._data['Toczne_podporowych']['D'][0]
+        Dw = self._data['Łożyska_podporowe']['Dw'][0]
+
+        S = dw / 2
+        Np = f * 0.001 * w0 * (1 + (Dw + 2 * S) / dw) * (1 + e / rw1) * 4 * Ra / np.pi
+
+        self._data['Sp'][0] = S
+        self._data['Np'][0] = Np
+
+        # Calculate power loss in central bearings
+        dw = self._data['Toczne_centralnych']['D'][0]
+        Dw = self._data['Łożyska_centralne']['Dw'][0]
+        Dz = self._data['Łożyska_centralne']['Dz'][0]
+
+        S = 0.15 * (Dz - Dw)
+        Nc = f * 0.001 * w0 * (1 + (Dw + 2 * S) / dw) * (1 + e / rw1) * 4 * F / np.pi
+
+        self._data['Sc'][0] = S
+        self._data['Nc'][0] = Nc
+
+    def _update_data(self, data):
+        """
+        Update bearings data in the model.
+
+        This method is used to update the model with new data for bearings.
+
+        :param data: New data to be updated in the model.
+        """
+        for key, value in data.items():
+            if key in self._data:
+                self._data[key] = value 

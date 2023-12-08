@@ -18,7 +18,7 @@ class MainWindow(QMainWindow):
         """
         Set data for the chart tab.
         """
-        self.tabs[2].create_plots(data)
+        self.tabs[3].create_plots(data)
 
     def init_ui(self):
         """
@@ -29,12 +29,13 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self._tab_widget)
     
     def init_tabs(self):
-        from .Tabs.BearingsTab import BearingsTab
-        from .Tabs.PreliminaryDataTab import PreliminaryDataTab
-        from .Tabs.ResultsTab import ResultsTab
         """
         Initialize tabs in the main window.
         """
+        from .Tabs.BearingsTab import BearingsTab
+        from .Tabs.PreliminaryDataTab import PreliminaryDataTab
+        from .Tabs.ResultsTab import ResultsTab
+        from .Tabs.PowerLossTab import PowerLossTab
         self.tabs = []
 
         # Add tabs
@@ -46,9 +47,14 @@ class MainWindow(QMainWindow):
         self.tabs.append(tab2)
         self._tab_widget.addTab(tab2, 'Dobór łożysk')
 
-        tab3 = ResultsTab(self, self.update_access_to_next_tabs)
+        tab3 = PowerLossTab(self, self.update_access_to_next_tabs)
         self.tabs.append(tab3)
-        self._tab_widget.addTab(tab3, 'Wyniki obliczeń')
+        self._tab_widget.addTab(tab3, 'Straty Mocy')
+
+        tab4 = ResultsTab(self, self.update_access_to_next_tabs)
+        self.tabs.append(tab4)
+        self._tab_widget.addTab(tab4, 'Wyniki obliczeń')
+        
 
         # Disable all tabs except the first one
         for i in range(1, self._tab_widget.count()):
