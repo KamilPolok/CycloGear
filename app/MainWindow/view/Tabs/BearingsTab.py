@@ -208,7 +208,7 @@ class BearingsTab(Tab):
         self.tab_data['Łożyska_podporowe'] = itemData
 
         self._items_to_select_states['Łożyska_podporowe'] = str(itemData['Kod'][0])
-        self.tab_data['ds'][0] = str(itemData['Dw'][0])
+        self.tab_data['ds'][0] = itemData['Dw'][0]
         self.check_state()
 
     def update_viewed_central_bearings_code(self, itemData):
@@ -222,7 +222,7 @@ class BearingsTab(Tab):
         self.tab_data['Łożyska_centralne'] = itemData
 
         self._items_to_select_states['Łożyska_centralne'] = str(itemData['Kod'][0])
-        self.tab_data['de'][0] = str(itemData['Dw'][0])
+        self.tab_data['de'][0] = itemData['Dw'][0]
         self.check_state()
     
     def getData(self):

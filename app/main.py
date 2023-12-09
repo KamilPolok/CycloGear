@@ -18,16 +18,16 @@ def main():
         'w0':[78,54, 'rad/s'],          # Prędkość kątowa wejściowa
         'Mwe': [26.67, 'Nm'],           # Moment wejściowy
         # Zadane wymiary wału
-        'L': [80, 'mm'],                # Długość wału
-        'LA': [38, 'mm'],               # Wsp podpory nieruchomej A
-        'LB': [75, 'mm'],               # Wsp podpory ruchomej B
-        'L1': [47, 'mm'],               # Wsp koła obiegowego 1
-        'L2': [64, 'mm'],               # Wsp koła obiegowego 2
-        'e': [10, 'mm'],                # Mimośród
+        'L': [37, 'mm'],                # Odległość pomiędzy podporami
+        'L1': [9, 'mm'],                # Wsp koła obiegowego 1
+        'L2': [None, 'mm'],             # Wsp koła obiegowego 2
+        'e': [3, 'mm'],                 # Mimośród
+        'B': [17, 'mm'],                # Grubość koła obiegowego
+        'x': [5, 'mm'],                 # Odległość pomiędzy dwoma kołami obiegowymi
         # Reakcje podporowe i siły działające na wał
         'Ra':[None, 'N'],               # Reakcja w podporze nieruchomej
         'Rb':[None, 'N'],               # Reakcja w podporze ruchomej
-        'F': [5254.56, 'N'],           # Siła pochodząca od koła obiegowego
+        'F': [5254.56, 'N'],            # Siła pochodząca od koła obiegowego
         # Obliczone i dobrane średnice
         'dsc': [None, 'mm'],            # Średnica wału wejściowego - obliczona
         'ds': [None, 'mm'],             # Średnica wału wejściowego - dostosowana do łożyska
@@ -53,7 +53,7 @@ def main():
         'fdc': [1.00, ''],              # Współczynnik zależny od zmiennych obciążeń dynamicznych
         'ftc': [1.00, ''],              # Współczynnik zależny od temperatury pracy łożyska
         # Straty mocy
-        'f': [0.01, 'mm'],               # Luz w łożysku - nie jestem pewien
+        'f': [0.01, 'mm'],              # Luz w łożysku - nie jestem pewien
         'rw1': [99, 'mm'],              # Promień koła toczengo (koło obiegowe)
         'dwpc': [None, 'mm'],           # Średnica elementu tocznego ł. podporowych - obliczona
         'Toczne_podporowych': [None],   # Element toczny ł. podporowych

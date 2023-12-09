@@ -13,7 +13,7 @@ class PreliminaryDataTab(Tab):
         """
         Initialize tab data from the main window's data.
         """
-        attributes_to_acquire = ['L', 'L1', 'L2', 'LA', 'LB', 'Materiał', 'xz']
+        attributes_to_acquire = ['L', 'L1', 'Materiał', 'xz']
         self.tab_data = {attr: self._window.data[attr] for attr in attributes_to_acquire}
         self._items_to_select_states['Materiał'] = ''
 
@@ -36,24 +36,12 @@ class PreliminaryDataTab(Tab):
         component_layout = QVBoxLayout()
         component_label = QLabel('Wymiary:')
 
-        shaft_length = create_data_input_row(self, 'L', 'Długość wału wejściowego', 'L')
-
-        support_coordinates_label = QLabel('Współrzędne podpór:')
-        pin_support = create_data_input_row(self, 'LA', 'Podpora stała A', 'L<sub>A</sub>')
-        roller_support = create_data_input_row(self, 'LB', 'Podpora przesuwna B', 'L<sub>B</sub>')
-
-        cyclo_disc_coordinates_label = QLabel('Współrzędne tarcz obiegowych:')
-        cyclo_disc1 = create_data_input_row(self, 'L1', 'Tarcza obiegowa 1', 'L<sub>1</sub>')
-        cyclo_disc2 = create_data_input_row(self, 'L2', 'Tarcza obiegowa 2', 'L<sub>2</sub>')
+        supports_distance = create_data_input_row(self, 'L', 'Odległość pomiędzy podporami', 'L')
+        cyclo_disc1 = create_data_input_row(self, 'L1', 'Współrzędne koła obiegowego 1', 'L<sub>1</sub>')
 
         component_layout.addWidget(component_label)
-        component_layout.addLayout(shaft_length)
-        component_layout.addWidget(support_coordinates_label)
-        component_layout.addLayout(pin_support)
-        component_layout.addLayout(roller_support)
-        component_layout.addWidget(cyclo_disc_coordinates_label)
+        component_layout.addLayout(supports_distance)
         component_layout.addLayout(cyclo_disc1)
-        component_layout.addLayout(cyclo_disc2)
 
         self.layout().addLayout(component_layout)
 

@@ -234,41 +234,43 @@ class MainWindowController:
         self._update_data(data)
 
         # Extract necessary data from the model
-        L, LA, LB, L1, L2 = self._data['L'][0], self._data['LA'][0], self._data['LB'][0], self._data['L1'][0], self._data['L2'][0]
-        F1, F2, Mwe = self._data['F'][0], - self._data['F'][0], self._data['Mwe'][0]
-        Zgo, xz, e = self._data['Materiał']['Zgo'][0], self._data['xz'][0], self._data['e'][0]
+        L, L1,= self._data['L'][0], self._data['L1'][0]
+        x, e, B = self._data['x'][0], self._data['e'][0], self._data['B'][0]
+        F, Mwe = self._data['F'][0], self._data['Mwe'][0]
+        Zgo, xz = self._data['Materiał']['Zgo'][0], self._data['xz'][0]
+
+        # Calculate coordinate of second cyclo disc
+        L2 = L1 + B + x
 
         # Calculate support reactions
-        Rb = (-F1 * L1 - F2 * L2) / (LB - LA)
-        Ra = -F1 - F2 - Rb
+        Rb = (F * (L2 - L1)) / L  # Pin support
+        Ra = Rb                   # Roller support
 
        # Create Force and reaction list
-        F = [Ra, F1, F2, Rb]
+        FVals = [Ra, F, F, Rb]
 
         # Create z arguments for chart data
-        key_points = [0, LA, L1, L2, LB, L]
+        key_points = [0, L1, L2, L]
         z = symbols('z')
-        zVals = np.union1d(key_points, np.linspace(0, L, 50))
+        zVals = np.union1d(key_points, np.linspace(0, L, 100))
 
-        # Calculate bending moment Mg [Nm]
-        Mg0_A = 0                                                                           # for  0 <= x < LA
-        MgA_1 = -Ra * (z - LA) * 0.001                                                      # for LA <= z < L1
-        Mg1_2 = (-Ra * (z - LA) - F1 * (z - L1)) * 0.001                                    # for L1 <= z < L2
-        Mg2_B = (-Ra * (z - LA) - F1 * (z - L1) - F2 * (z - L2) ) * 0.001                   # for L2 <= z < LB
-        MgB_K = (-Ra * (z - LA) - F1 * (z - L1) - F2 * (z - L2) - Rb * (z - LB) ) * 0.001   # for LB <= z <= L
+        # Calculate bending moment Mg [Nm]                           
+        MgA_1 = Ra * z * 0.001
+        Mg1_2 = (Ra * z - F * (z - L1)) * 0.001
+        Mg2_B = ((Ra * z - F * (z - L1)) + F * (z - L2)) * 0.001
+
         MgFunction = Piecewise(
-            (Mg0_A, z < LA),
             (MgA_1, z < L1),
             (Mg1_2, z < L2),
-            (Mg2_B, z < LB),
-            (MgB_K, z <= L)
+            (Mg2_B, z <= L)
         )
         Mg = np.array([round(float(MgFunction.subs(z, val).evalf()), 2) for val in zVals])
 
         # Calculate torque Ms
         MsFunction = Piecewise(
-            (Mwe, z < L2),
-            (0, z <= L)
+            (0, z < L1),
+            (Mwe, z <= L),
+            
         )
         Ms = np.array([round(float(MsFunction.subs(z, val).evalf()), 2) for val in zVals])
 
@@ -283,6 +285,7 @@ class MainWindowController:
         d = np.array([round(float(val), 2) for val in d])
 
         # Save the calculated parameters
+        self._data['L2'][0] = L2
         self._data['dsc'][0] = max(d)
         self._data['dec'][0] = max(d) + 2 * e
         self._data['Ra'][0] = Ra
@@ -291,7 +294,7 @@ class MainWindowController:
         # Set chart data for visualization
         self.chartData = {
             'z': zVals, 
-            'F': F,
+            'F': FVals,
             'Mg': Mg, 
             'Ms': Ms,
             'Mz': Mz,
