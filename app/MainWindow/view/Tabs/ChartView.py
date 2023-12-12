@@ -5,8 +5,8 @@ from matplotlib.backends.backend_qtagg import (
     NavigationToolbar2QT as NavigationToolbar
 )
 
-from PyQt6.QtWidgets import QComboBox, QDialog, QVBoxLayout
-from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QCheckBox, QDialog, QVBoxLayout
+from PyQt6.QtCore import Qt, pyqtSignal
 
 class Chart(QDialog):
     """
@@ -44,7 +44,7 @@ class Chart(QDialog):
 
         # Create a custom toolbar with plot selector
         self._toolbar = CustomToolbar(self.canvas, self)
-        self._toolbar.active_plot_selector.currentTextChanged.connect(self._switch_plot)
+        self._toolbar.updated_selected_plots.connect(self._update_plot)
 
         # Create and store the cursor object for interactive data display
         self.cursor = mplcursors.cursor(self.ax, hover=False)
@@ -59,57 +59,78 @@ class Chart(QDialog):
 
         :param data: A dictionary containing the data for the plots.
         """
+
+        self._data = data
+
+        # Set data for every plot
         y = {
-            'Mg': [data['Mg'], 'Mg(z)', 'Moment gnący Mg [Nm]'],
-            'Ms': [data['Ms'], 'Ms(z)', 'Moment skręcający Ms [Nm]'],
-            'Mz': [data['Mz'], 'Mz(z)', 'Moment zastępczy Mz [Nm]'],
-            'dMz':  [data['dMz'], 'd(Mz)', 'Średnica minimalna ze względu na moment zastępczy dMz [mm]'],
-            'dMs':  [data['dMs'], 'd(Ms)', 'Średnica minimalna ze względu na moment skręcający dMs [mm]'],
-            'dqdop':  [data['dqdop'], 'd(q\')', 'Średnica minimalna ze względu na dopuszczalny kąt skręcenia dq\' [mm]'],
+            'Mg': [data['Mg'], 'Mg(z)', 'Moment gnący Mg [Nm]', 'blue'],
+            'Ms': [data['Ms'], 'Ms(z)', 'Moment skręcający Ms [Nm]', 'green'],
+            'Mz': [data['Mz'], 'Mz(z)', 'Moment zastępczy Mz [Nm]', 'orange'],
+            'dMz':  [data['dMz'], 'd(Mz)', 'Średnica minimalna ze względu na moment zastępczy dMz [mm]', 'purple'],
+            'dMs':  [data['dMs'], 'd(Ms)', 'Średnica minimalna ze względu na moment skręcający dMs [mm]', 'red'],
+            'dqdop':  [data['dqdop'], 'd(q\')', 'Średnica minimalna ze względu na dopuszczalny kąt skręcenia dq\' [mm]', 'black'],
         }
-        self._F = data['F']
+
+        self._F = self._data['F']
+
+        # Prepare z data
+        self._z = {
+            'z': self._data['z'],
+            'zlabel': 'Współrzędna z [mm]',
+        }
 
         # Prepare plot data for each plot type
         self._plots = {value[1]: {
-            'z': data['z'],
             'y': value[0],
             'title': value[1],
-            'xlabel': 'Współrzędna z [mm]',
-            'ylabel': value[2]
+            'ylabel': value[2],
+            'color': value[3]
         } for key, value in y.items()}
 
+        # Initialize variables to store the overall max and min values
+        self.overall_max = float('-inf')
+        self.overall_min = float('inf')
+
+        for key in y:
+            current_max = max(y[key][0])
+            current_min = min(y[key][0])
+
+            if current_max > self.overall_max:
+                self.overall_max = current_max
+            if current_min < self.overall_min:
+                self.overall_min = current_min
+        
         # Update the plot selector in the toolbar and connect the switch plot function
-        self._toolbar.active_plot_selector.currentTextChanged.disconnect()
         self._toolbar.update_plot_selector([plot['title'] for plot in self._plots.values()])
-        self._switch_plot(self._toolbar.active_plot_selector.currentText())
-        self._toolbar.active_plot_selector.currentTextChanged.connect(self._switch_plot)
+        self._update_plot()
     
-    def _switch_plot(self, selected_plot):
+    def _update_plot(self):
         """
         Switch the current plot based on the selected plot in the toolbar.
 
         :param selected_plot: The name of the plot to be displayed.
         """
-
         # Remove the annotations - this removes also cursor customization
         self.cursor.remove()
-
-        # Get the selected plot info
-        plot_info = self._plots[selected_plot]
 
         # Remove the previous plot
         self.ax.clear()
 
-        # Plot the new one
-        self.ax.plot(plot_info['z'], plot_info['y'], color='royalblue')
-        self.ax.set_title(plot_info['title'], pad=7)
-        self.ax.set_xlabel(plot_info['xlabel'])
-        self.ax.set_ylabel(plot_info['ylabel'])
+        # Set z and y axis limits
+        self.ax.set_xlim([0, self._data['L']])
+        self.ax.set_ylim(self.overall_min + 0.2 * self.overall_min, self.overall_max + 0.2 * self.overall_max)
+        self.ax.set_xlabel(self._z['zlabel'])
         self.ax.grid(True, which='major', linestyle='-', linewidth='0.5', color='black')
         self.ax.grid(True, which='minor', linestyle=':', linewidth='0.5', color='gray')
         self.ax.minorticks_on()
-        self.ax.autoscale_view()
-        self.ax.set_xlim([0, plot_info['z'][-1]])
+
+        # Plot selected plots
+        selected_plots = [key for key, checkbox in self._toolbar.checkboxes.items() if checkbox.isChecked()]
+
+        for plot_name in selected_plots:
+            plot_info = self._plots[plot_name]
+            self.ax.plot(self._z['z'], plot_info['y'], color=plot_info['color'])
 
         # Reinitialize the cursor for the new plot
         self.cursor = mplcursors.cursor(self.ax, hover=False)
@@ -118,12 +139,14 @@ class Chart(QDialog):
             fontsize=8,
             fontweight='bold',
             color='black',
-            backgroundcolor='cornflowerblue',
+            backgroundcolor='grey',
             alpha=0.7
         ))
+
         self.canvas.draw()
 
 class CustomToolbar(NavigationToolbar):
+    updated_selected_plots = pyqtSignal()
     """
     A custom toolbar class for the chart widget, extending the NavigationToolbar.
 
@@ -140,9 +163,8 @@ class CustomToolbar(NavigationToolbar):
         """
         super(CustomToolbar, self).__init__(canvas, parent, coordinates)
 
-        # Add a combo box for plot selection
-        self.active_plot_selector = QComboBox()
-        self.addWidget(self.active_plot_selector)
+        # Prepare checkboxes dict for plot selection
+        self.checkboxes = None
 
     def update_plot_selector(self, plots):
         """
@@ -150,6 +172,14 @@ class CustomToolbar(NavigationToolbar):
 
         :param plots: A list of plot names to be added to the plot selector.
         """
-        self.active_plot_selector.clear()
-        for plot in plots:
-            self.active_plot_selector.addItem(plot)
+        if self.checkboxes is None:
+            self.checkboxes = {}
+            for plot_name in plots:
+                checkbox = QCheckBox(plot_name)
+                checkbox.stateChanged.connect(self.plot_selection_changed)
+                self.addWidget(checkbox)
+                self.checkboxes[plot_name] = checkbox
+    
+    def plot_selection_changed(self):
+        # Emit the signal
+        self.updated_selected_plots.emit()

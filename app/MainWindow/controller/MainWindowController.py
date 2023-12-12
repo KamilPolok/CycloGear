@@ -313,7 +313,8 @@ class MainWindowController:
             'Mz': Mz,
             'dMz': dMz,
             'dMs': dMs,
-            'dqdop': dqdop
+            'dqdop': dqdop,
+            'L': self._data['L'][0],
         }
 
         self._window.set_chart_data(self.chart_data)
