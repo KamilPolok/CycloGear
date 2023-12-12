@@ -2,7 +2,6 @@ from PyQt6.QtWidgets import QTabWidget, QWidget, QVBoxLayout, QLabel, QScrollAre
 
 from .TabIf import Tab
 from .TabCommon import create_data_display_row, format_value
-from .ChartView import Chart
 
 class ResultsTab(Tab):
     def init_ui(self):
@@ -16,7 +15,6 @@ class ResultsTab(Tab):
 
         self.add_data_subtab()
         self.add_results_subtab()
-        self.add_chart_subtab()
 
     def add_data_subtab(self):
         """
@@ -79,23 +77,7 @@ class ResultsTab(Tab):
         self.results_subtab_layout.addLayout(de)
         self.results_subtab_layout.addWidget(Łożyska1)
 
-    def add_chart_subtab(self):
-        """
-        Add a subtab for displaying charts.
-        """
-        self._chart_tab = Chart()
-        self._subtab_widget.addTab(self._chart_tab, 'Wykresy')
-    
-    def create_plots(self, chart_data):
-        """
-        Create plots in the chart tab.
-
-        :param chart_data: Data to be used for plotting.
-        """
-        self._chart_tab.create_plots(chart_data)
-
     def update_tab(self):
-
         addData = True 
         for key_tuple, value_label in self.output_values.items():
             # Check if the key is a tuple (indicating a parent-child relationship)

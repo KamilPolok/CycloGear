@@ -33,6 +33,7 @@ class MainWindowController:
         """Initialize the view with necessary data and set up tabs."""
         self._window.set_data(self._data)
         self._window.init_tabs()
+        self._window.init_chart()
 
     def _connect_signals_and_slots(self):
         """
@@ -304,7 +305,7 @@ class MainWindowController:
         self._data['Rb'][0] = Rb
 
         # Set chart data for visualization
-        self.chartData = {
+        self.chart_data = {
             'z': zVals, 
             'F': FVals,
             'Mg': Mg, 
@@ -314,7 +315,8 @@ class MainWindowController:
             'dMs': dMs,
             'dqdop': dqdop
         }
-        self._window.set_chart_data(self.chartData)
+
+        self._window.set_chart_data(self.chart_data)
 
     def _calculate_bearings_attributes(self, data):
         """

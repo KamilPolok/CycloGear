@@ -38,6 +38,10 @@ class Tab(QWidget, metaclass=ABCQWidgetMeta):
     def update_tab(self):
         """Update the tab. This method can be overridden in subclasses to provide specific update logic."""
         pass
+
+    def update_data(self):
+        """Update the tab. This method can be overridden in subclasses to provide specific update logic."""
+        pass
     
     def get_state(self):
         """

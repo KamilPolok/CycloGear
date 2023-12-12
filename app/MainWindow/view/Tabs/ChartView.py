@@ -5,10 +5,10 @@ from matplotlib.backends.backend_qtagg import (
     NavigationToolbar2QT as NavigationToolbar
 )
 
-from PyQt6.QtWidgets import QComboBox, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import QComboBox, QDialog, QVBoxLayout
 from PyQt6.QtCore import Qt
 
-class Chart(QWidget):
+class Chart(QDialog):
     """
     A class representing a chart widget in a PyQt application.
 
@@ -30,6 +30,11 @@ class Chart(QWidget):
         """
         Initialize the user interface components for the chart widget.
         """
+        # Set window parameters
+        self.setWindowTitle("Wał wejściowy - Podgląd")
+        self.resize(800,500)
+
+        # Set layout
         layout = QVBoxLayout()
         self.setLayout(layout)
 

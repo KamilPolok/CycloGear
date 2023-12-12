@@ -1,5 +1,7 @@
 from PyQt6.QtWidgets import QMainWindow, QTabWidget, QWidget, QVBoxLayout, QPushButton
 
+from .Tabs.ChartView import Chart
+
 class MainWindow(QMainWindow):
     """
     Main window class for the application.
@@ -18,15 +20,15 @@ class MainWindow(QMainWindow):
         """
         Set data for the chart tab.
         """
-        self.tabs[3].create_plots(data)
+        self.chart.create_plots(data)
 
     def init_ui(self):
         """
         Initialize the user interface.
         """
         self.setWindowTitle('CycloDesign')
-        self._tab_widget = QTabWidget(self)
-        self.setCentralWidget(self._tab_widget)
+        self.setCentralWidget(QWidget())
+        self.centralWidget().setLayout(QVBoxLayout())
     
     def init_tabs(self):
         """
@@ -36,6 +38,8 @@ class MainWindow(QMainWindow):
         from .Tabs.PreliminaryDataTab import PreliminaryDataTab
         from .Tabs.ResultsTab import ResultsTab
         from .Tabs.PowerLossTab import PowerLossTab
+        
+        self._tab_widget = QTabWidget(self)
         self.tabs = []
 
         # Add tabs
@@ -66,17 +70,28 @@ class MainWindow(QMainWindow):
         self._next_tab_button = QPushButton('Dalej', self)
         self._next_tab_button.clicked.connect(self.next_tab)
 
-        layout = QVBoxLayout()
+        self.centralWidget().layout().addWidget(self._tab_widget)
+        self.centralWidget().layout().addWidget(self._next_tab_button)
 
-        layout.addWidget(self._tab_widget)
-        layout.addWidget(self._next_tab_button)
-        
-        central_widget = QWidget()
-        central_widget.setLayout(layout)
-        self.setCentralWidget(central_widget)
+    def init_chart(self):
+        # Add button for opening the chart
+        self.chart = Chart()
+        self.preview_button = QPushButton('Podgląd', self)
+        self.preview_button.clicked.connect(self._open_chart_window)
+        self.preview_button.setEnabled(False)
 
-        # Check if the tab is initially filled
+        self.centralWidget().layout().addWidget(self.preview_button)
+
+        # Check if the first tab is initially filled
         self.tabs[self._tab_widget.currentIndex()].check_state()
+
+    def _open_chart_window(self):
+        self.update_data()
+        self.chart.show()
+
+    def update_data(self):
+        current_index = self._tab_widget.currentIndex()
+        self.tabs[current_index].update_data()
 
     def next_tab(self):
         """
@@ -91,7 +106,7 @@ class MainWindow(QMainWindow):
             if not self._tab_widget.isTabEnabled(next_index):
                 self._tab_widget.setTabEnabled(next_index, True)
             # Update data with curret tab data
-            self.tabs[current_index].update_data()
+            self.update_data()
             self._tab_widget.setCurrentIndex(next_index)
 
     def on_tab_change(self, index):
@@ -109,8 +124,10 @@ class MainWindow(QMainWindow):
         """
         if enable_next_tab_button:
             self._next_tab_button.setEnabled(True)
+            self.preview_button.setEnabled(True)
         else:
             self._next_tab_button.setEnabled(False)
+            self.preview_button.setEnabled(False)
 
         if disable_next_tabs:
             self.disable_next_tabs()
