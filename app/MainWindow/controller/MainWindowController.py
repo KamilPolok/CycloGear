@@ -237,7 +237,8 @@ class MainWindowController:
         L, LA, LB, L1 = self._data['L'][0], self._data['LA'][0], self._data['LB'][0], self._data['L1'][0]
         x, e, B = self._data['x'][0], self._data['e'][0], self._data['B'][0]
         F, Mwe = self._data['F'][0], self._data['Mwe'][0]
-        Zgo, xz = self._data['Materiał']['Zgo'][0], self._data['xz'][0]
+        Zgo, Zsj, G = self._data['Materiał']['Zgo'][0], self._data['Materiał']['Zsj'][0], self._data['Materiał']['G'][0],
+        xz, qdop = self._data['xz'][0], self._data['qdop'][0]
 
         # Calculate coordinate of second cyclo disc
         L2 = L1 + B + x
@@ -277,21 +278,28 @@ class MainWindowController:
             
         )
         Ms = np.array([round(float(MsFunction.subs(z, val).evalf()), 2) for val in zVals])
-
-        # Calculate equivalent moment Mz
+        # Calculate equivalent bending moment Mz
         reductionFactor = 2 * np.sqrt(3)
         Mz = np.sqrt(np.power(Mg, 2) + np.power(reductionFactor / 2 * Ms, 2))
         Mz = np.array([round(float(val), 2) for val in Mz])
+        # Calculate minimal shaft diameter d - based on equivalent stress condition
+        kgo = Zgo / xz * 1000000
+        dMz = np.power(32 * Mz / (np.pi * kgo), 1/3) * 1000
+        dMz = np.array([round(float(val), 2) for val in dMz])
 
-        # Calculate shaft diameter d
-        kgo = Zgo / xz
-        d = np.power(32 * Mz / (np.pi * kgo * 1000000), 1/3) * 1000
-        d = np.array([round(float(val), 2) for val in d])
+        # Calculate minimal shaft diameter d - based on torsional strength condition
+        ksj = Zsj / xz * 1000000
+        dMs = np.sqrt(16 * Ms / (np.pi * ksj)) * 1000
+        dMs = np.array([round(float(val), 2) for val in dMs])
+
+        # Calculate minimal shaft diameter d - based allowable angle of twist condition
+        dqdop = np.sqrt(32 * Ms / (np.pi * G * 1000000 * qdop)) * 1000
+        dqdop = np.array([round(float(val), 2) for val in dqdop])
 
         # Save the calculated parameters
         self._data['L2'][0] = L2
-        self._data['dsc'][0] = max(d)
-        self._data['dec'][0] = max(d) + 2 * e
+        self._data['dsc'][0] = max(dMz + dMs)
+        self._data['dec'][0] = self._data['dsc'][0] + 2 * e
         self._data['Ra'][0] = Ra
         self._data['Rb'][0] = Rb
 
@@ -302,7 +310,9 @@ class MainWindowController:
             'Mg': Mg, 
             'Ms': Ms,
             'Mz': Mz,
-            'd': d
+            'dMz': dMz,
+            'dMs': dMs,
+            'dqdop': dqdop
         }
         self._window.set_chart_data(self.chartData)
 

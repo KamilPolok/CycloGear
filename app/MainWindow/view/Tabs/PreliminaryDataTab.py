@@ -13,7 +13,7 @@ class PreliminaryDataTab(Tab):
         """
         Initialize tab data from the main window's data.
         """
-        attributes_to_acquire = ['L', 'LA', 'LB', 'L1', 'Materiał', 'xz']
+        attributes_to_acquire = ['L', 'LA', 'LB', 'L1', 'Materiał', 'xz', 'qdop']
         self.tab_data = {attr: self._window.data[attr] for attr in attributes_to_acquire}
         self._items_to_select_states['Materiał'] = ''
 
@@ -54,12 +54,14 @@ class PreliminaryDataTab(Tab):
         Create and layout the  component of the tab.
         """
         component_layout = QVBoxLayout()
-        component_label = QLabel('Współczynnik bezpieczeństwa:')
+        component_label = QLabel('Pozostałe:')
 
-        factor_of_safety = create_data_input_row(self, 'xz', '', 'x<sub>z</sub>')
+        factor_of_safety = create_data_input_row(self, 'xz', 'Współczynnik bezpieczeństwa', 'x<sub>z</sub>')
+        allowable_angle_of_twist = create_data_input_row(self, 'qdop', 'Dopuszczalny jednostkowy kąt skręcenia wału', 'q\'')
 
         component_layout.addWidget(component_label)
         component_layout.addLayout(factor_of_safety)
+        component_layout.addLayout(allowable_angle_of_twist)
 
         self.layout().addLayout(component_layout)
 

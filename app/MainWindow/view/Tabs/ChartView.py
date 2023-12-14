@@ -58,7 +58,9 @@ class Chart(QWidget):
             'Mg': [data['Mg'], 'Mg(z)', 'Moment gnący Mg [Nm]'],
             'Ms': [data['Ms'], 'Ms(z)', 'Moment skręcający Ms [Nm]'],
             'Mz': [data['Mz'], 'Mz(z)', 'Moment zastępczy Mz [Nm]'],
-            'd':  [data['d'], 'd(z)', 'Średnica minimalna wału wejściowego d [mm]']
+            'dMz':  [data['dMz'], 'd(Mz)', 'Średnica minimalna ze względu na moment zastępczy dMz [mm]'],
+            'dMs':  [data['dMs'], 'd(Ms)', 'Średnica minimalna ze względu na moment skręcający dMs [mm]'],
+            'dqdop':  [data['dqdop'], 'd(q\')', 'Średnica minimalna ze względu na dopuszczalny kąt skręcenia dq\' [mm]'],
         }
         self._F = data['F']
 

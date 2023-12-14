@@ -35,9 +35,10 @@ def main():
         'ds': [None, 'mm'],             # Średnica wału wejściowego - dostosowana do łożyska
         'dec': [None, 'mm'],            # Średnica mimośrodu - obliczona
         'de': [None, 'mm'],             # Średnica mimośrodu - dostosowana do łożyska
-        # Dobrany materiał
+        # Dobrany materiał i parametry
         'Materiał' : [None],            # Materiał wału
         'xz': [1, ''],                  # Współczynnik bezpieczeństwa
+        'qdop': [0.00436, 'rad/m'],     # Dopuszczalny jednostkowy kąt skręcenia wału
         # Łożyska podporow
         'Łożyska_podporowe': [None],    # Łożyska podporowe
         'Lhp': [20000, 'h'],            # Trwałość godzinowa ł. podporowych
