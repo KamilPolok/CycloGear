@@ -54,7 +54,7 @@ class PowerLossTab(Tab):
 
         The other components do not depend on inputs in this component
         """
-        f = create_data_input_row(self, 'f', 'Luz', 'f')
+        f = create_data_input_row(self, 'f', 'Współczynnik tarcia tocznego', 'f')
 
         self.top_comonent_layout.addLayout(f)
 
