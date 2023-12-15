@@ -105,6 +105,25 @@ class Chart(QDialog):
         self._toolbar.update_plot_selector([plot['title'] for plot in self._plots.values()])
         self._update_plot()
     
+    def _draw_shaft_coordinates(self):
+        roller_support = self._data['LA']
+        pin_support = self._data['LB']
+        eccentric1_position = self._data['L1']
+        eccentric2_position = self._data['L2']
+        shaft_length = self._data['L']
+
+
+        # Define markers and corresponding labels
+        markers = [roller_support, eccentric1_position, eccentric2_position, pin_support, shaft_length]
+        labels = ['A', 'L1', 'L2', 'B', 'L']
+
+        # Draw markers
+        self.ax.scatter(markers, [0] * len(markers), color='black', s=8, zorder=5)
+
+        # Add labels for the markers
+        for marker, label in zip(markers, labels):
+            self.ax.annotate(label, (marker, 0), textcoords="offset points", xytext=(0, -15), ha='center')
+    
     def _update_plot(self):
         """
         Switch the current plot based on the selected plot in the toolbar.
@@ -116,6 +135,9 @@ class Chart(QDialog):
 
         # Remove the previous plot
         self.ax.clear()
+
+        # Draw shaft characteristic points
+        self._draw_shaft_coordinates()
 
         # Set z and y axis limits
         self.ax.set_xlim([0, self._data['L']])
