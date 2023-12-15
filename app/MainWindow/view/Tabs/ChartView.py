@@ -140,7 +140,8 @@ class Chart(QDialog):
         self._draw_shaft_coordinates()
 
         # Set z and y axis limits
-        self.ax.set_xlim([0, self._data['L']])
+        offset = 0.1 * self._data['L']
+        self.ax.set_xlim([0 - offset, self._data['L'] + offset])
         self.ax.set_ylim(self.overall_min + 0.2 * self.overall_min, self.overall_max + 0.2 * self.overall_max)
         self.ax.set_xlabel(self._z['zlabel'])
         self.ax.grid(True, which='major', linestyle='-', linewidth='0.5', color='black')
@@ -152,7 +153,13 @@ class Chart(QDialog):
 
         for plot_name in selected_plots:
             plot_info = self._plots[plot_name]
-            self.ax.plot(self._z['z'], plot_info['y'], color=plot_info['color'])
+            if plot_name.lower().startswith('d'):
+                self.ax.plot(self._z['z'], plot_info['y'], color=plot_info['color'])
+            else:
+                markerline, stemline, baseline = self.ax.stem(self._z['z'], plot_info['y'], linefmt=plot_info['color'], markerfmt='o', basefmt=" ")
+
+                plt.setp(stemline, linewidth = 0.7)
+                plt.setp(markerline, markersize = 3)
 
         # Reinitialize the cursor for the new plot
         self.cursor = mplcursors.cursor(self.ax, hover=False)
