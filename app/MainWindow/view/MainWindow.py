@@ -20,7 +20,7 @@ class MainWindow(QMainWindow):
         """
         Set data for the chart tab.
         """
-        self.chart.create_plots(data)
+        self.chart.init_plots(data)
 
     def init_ui(self):
         """
