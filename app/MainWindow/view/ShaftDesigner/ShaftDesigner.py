@@ -1,4 +1,5 @@
-from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import (QHBoxLayout, QMainWindow, QSizePolicy, QSpacerItem, QVBoxLayout, QWidget,
+                             QScrollArea)
 
 from .Chart import Chart
 
@@ -22,8 +23,30 @@ class ShaftDesigner(QMainWindow):
 
         # Set layout
         self.setCentralWidget(QWidget())
-        self.centralWidget().setLayout(QVBoxLayout())
+        self.centralWidget().setLayout(QHBoxLayout())
 
+        self._init_sidebar()
+        self._init_chart()
+
+    def _init_sidebar(self):
+        # Set sidebar
+        self.sidebar = QWidget()
+        self.sidebar_layout = QVBoxLayout(self.sidebar)
+        self.sidebar.setFixedWidth(200)  # Set the fixed width for the sidebar
+
+        # Add a spacer item at the end of the sidebar layout - keeps the contents alignet to the top
+        spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        self.sidebar_layout .addSpacerItem(spacer)
+
+        # Set a scroll area for the sidebar - make the sidebar scrollable
+        self.scroll_area = QScrollArea()
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setWidget(self.sidebar)
+        self.scroll_area.setFixedWidth(220)  # Slightly larger to accommodate scrollbar
+
+        self.centralWidget().layout().addWidget(self.scroll_area)
+
+    def _init_chart(self):
         # Add Chart
         self.chart = Chart()
         self.centralWidget().layout().addWidget(self.chart)
