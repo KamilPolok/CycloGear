@@ -1,5 +1,5 @@
-from PyQt6.QtWidgets import (QHBoxLayout, QMainWindow, QSizePolicy, QSpacerItem, QVBoxLayout, QWidget,
-                             QScrollArea)
+from PyQt6.QtWidgets import (QHBoxLayout, QMainWindow, QPushButton, QSizePolicy, QSpacerItem, QStyle,
+                             QVBoxLayout, QWidget, QScrollArea)
 
 from .Chart import Chart
 
@@ -22,13 +22,17 @@ class ShaftDesigner(QMainWindow):
         self.resize(800,500)
 
         # Set layout
-        self.setCentralWidget(QWidget())
-        self.centralWidget().setLayout(QHBoxLayout())
+        self.main_widget = QWidget()
+        self.main_layout = QHBoxLayout(self.main_widget)
+        self.setCentralWidget(self.main_widget)
 
         self._init_sidebar()
         self._init_chart()
 
     def _init_sidebar(self):
+        # Set layout for sidebar and toggle button
+        self.sidebar_section_layout  = QHBoxLayout()
+
         # Set sidebar
         self.sidebar = QWidget()
         self.sidebar_layout = QVBoxLayout(self.sidebar)
@@ -44,7 +48,27 @@ class ShaftDesigner(QMainWindow):
         self.scroll_area.setWidget(self.sidebar)
         self.scroll_area.setFixedWidth(220)  # Slightly larger to accommodate scrollbar
 
-        self.centralWidget().layout().addWidget(self.scroll_area)
+        # Set sidebar toggle button
+        self.toggle_button_layout = QVBoxLayout()
+
+        icon = self.style().standardIcon(QStyle.StandardPixmap.SP_FileDialogDetailedView)  # Example icon
+        self.toggle_button = QPushButton(icon, '')
+        self.toggle_button.setStyleSheet("""
+            QPushButton {
+                background-color: none;
+                border: none;
+            }                               
+        """)
+        self.toggle_button.setFixedWidth(50)
+        self.toggle_button.clicked.connect(self.toggle_sidebar)
+        self.toggle_button_layout.addWidget(self.toggle_button)
+        self.toggle_button_layout.addStretch(1)
+
+        self.main_layout.addWidget(self.scroll_area)
+        self.main_layout.addLayout(self.toggle_button_layout)
+
+    def toggle_sidebar(self):
+        self.scroll_area.setVisible(not self.scroll_area.isVisible())
 
     def _init_chart(self):
         # Add Chart
