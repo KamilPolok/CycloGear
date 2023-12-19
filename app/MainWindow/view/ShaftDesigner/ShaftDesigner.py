@@ -2,6 +2,7 @@ from PyQt6.QtWidgets import (QHBoxLayout, QMainWindow, QPushButton, QSizePolicy,
                              QVBoxLayout, QWidget, QScrollArea)
 
 from .Chart import Chart
+from .ShaftSectionDataEntry import ShaftSectionDataEntry
 
 class ShaftDesigner(QMainWindow):
     """
@@ -37,6 +38,14 @@ class ShaftDesigner(QMainWindow):
         self.sidebar = QWidget()
         self.sidebar_layout = QVBoxLayout(self.sidebar)
         self.sidebar.setFixedWidth(200)  # Set the fixed width for the sidebar
+
+        # Set contents of the sidebar
+        self.sections = {}
+        section_names = ['Mimośrody', 'Przed mimośrodami', 'Pomiędzy mimośrodami', 'Za mimośrodami']
+        for name in section_names:
+            section = ShaftSectionDataEntry(name, self)
+            self.sections[name] = section
+            self.sidebar_layout.addWidget(section)
 
         # Add a spacer item at the end of the sidebar layout - keeps the contents alignet to the top
         spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
