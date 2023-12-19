@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QMainWindow, QTabWidget, QWidget, QVBoxLayout, QPushButton
 
-from .Tabs.ChartView import Chart
+from .ShaftDesigner.ShaftDesigner import ShaftDesigner
 
 class MainWindow(QMainWindow):
     """
@@ -16,11 +16,11 @@ class MainWindow(QMainWindow):
         """
         self.data = data
 
-    def set_chart_data(self, data):
+    def set_shaft_designer_data(self, data):
         """
-        Set data for the chart tab.
+        Set data for the shaft designer
         """
-        self.chart.init_plots(data)
+        self.shaft_designer.update_data(data)
 
     def init_ui(self):
         """
@@ -73,11 +73,11 @@ class MainWindow(QMainWindow):
         self.centralWidget().layout().addWidget(self._tab_widget)
         self.centralWidget().layout().addWidget(self._next_tab_button)
 
-    def init_chart(self):
-        # Add button for opening the chart
-        self.chart = Chart()
+    def init_shaft_designer(self):
+        # Add button for opening the shaft designer
+        self.shaft_designer = ShaftDesigner()
         self.preview_button = QPushButton('Podgląd', self)
-        self.preview_button.clicked.connect(self._open_chart_window)
+        self.preview_button.clicked.connect(self._open_shaft_designer)
         self.preview_button.setEnabled(False)
 
         self.centralWidget().layout().addWidget(self.preview_button)
@@ -85,9 +85,9 @@ class MainWindow(QMainWindow):
         # Check if the first tab is initially filled
         self.tabs[self._tab_widget.currentIndex()].check_state()
 
-    def _open_chart_window(self):
+    def _open_shaft_designer(self):
         self.update_data()
-        self.chart.show()
+        self.shaft_designer.show()
 
     def update_data(self):
         current_index = self._tab_widget.currentIndex()

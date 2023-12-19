@@ -2,10 +2,10 @@ import mplcursors
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg, NavigationToolbar2QT as NavigationToolbar
 
-from PyQt6.QtWidgets import QCheckBox, QDialog, QVBoxLayout
+from PyQt6.QtWidgets import QCheckBox, QVBoxLayout, QWidget
 from PyQt6.QtCore import Qt, pyqtSignal
 
-class Chart(QDialog):
+class Chart(QWidget):
     """
     A class representing a chart widget in a PyQt application.
 
@@ -26,10 +26,6 @@ class Chart(QDialog):
         """
         Initialize the user interface components for the chart widget.
         """
-        # Set window parameters
-        self.setWindowTitle("Wał wejściowy - Podgląd")
-        self.resize(800,500)
-
         # Set layout
         layout = QVBoxLayout()
         self.setLayout(layout)
