@@ -1,6 +1,7 @@
 import mplcursors
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg, NavigationToolbar2QT as NavigationToolbar
+from matplotlib.patches import Rectangle
 
 from PyQt6.QtWidgets import QCheckBox, QVBoxLayout, QWidget
 from PyQt6.QtCore import Qt, pyqtSignal
@@ -13,11 +14,13 @@ class Chart(QWidget):
     including the plot selection and updating the plot display.
     """
      
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent=None):
+        super(Chart, self).__init__(parent)
+        self.shaft_attributes = {}
 
         self.active_plots = {}  # Dictionary to keep track of active plots
         self.markers_and_labels = []  # List to keep track of markers and labels
+        self.shaft_sections = []    # List to keep track of shaft sections
 
         # Initialize the user interface for the chart widget
         self._init_ui()
@@ -48,19 +51,6 @@ class Chart(QWidget):
         # Add the toolbar and canvas to the layout
         layout.addWidget(self._toolbar)
         layout.addWidget(self.canvas)
-
-    def init_plots(self, data):
-        """
-        Create and store plot data from the provided data dictionary.
-
-        :param data: A dictionary containing the data for the plots.
-        """
-
-        self._data = data
-
-        self._set_plots_data()
-        self._set_axes_limits()
-        self._draw_shaft_coordinates()
     
     def _set_plots_data(self):
         """
@@ -225,6 +215,91 @@ class Chart(QWidget):
                 backgroundcolor='grey',
                 alpha=0.7
             ))
+    
+    def draw_shaft(self, shaft_attributes = None):
+        # Save the shaft section attributtes
+        if shaft_attributes:
+            for key, attribute in shaft_attributes.items():
+                self.shaft_attributes[key] = attribute
+
+        # Clear existing sections
+        for rect in self.shaft_sections:
+            rect.remove()
+        self.shaft_sections.clear()
+
+        # Draw the eccentrics            
+        if 'Mimośrody' in self.shaft_attributes:
+            eccentric_width = self.shaft_attributes['Mimośrody']['l']
+            eccentric_diameter = self.shaft_attributes['Mimośrody']['d']
+
+            eccentric_offset = self._data['e']
+
+            eccentric1_position = self._data['L1']
+
+            if eccentric_width != self._data['B']:
+                length_between = self._data['x']
+                eccentric2_position = eccentric1_position + eccentric_width + length_between
+                self._data['L2'] = eccentric2_position
+                self._data['B'] = eccentric_width
+                self._draw_shaft_coordinates()
+            else:
+                eccentric2_position = self._data['L2']
+                
+            # Draw the first eccentric
+            eccentric1_start_z = eccentric1_position - eccentric_width / 2
+            eccentric1_start_y = eccentric_offset - eccentric_diameter / 2
+            eccentric1_rect = Rectangle((eccentric1_start_z, eccentric1_start_y), eccentric_width, eccentric_diameter, color='grey', linewidth=2, fill=False)
+            self.shaft_sections.append(eccentric1_rect)
+            self.ax.add_patch(eccentric1_rect)
+
+            # Draw the second eccentric
+            eccentric2_start_z = eccentric2_position - eccentric_width / 2
+            eccentric2_start_y = -eccentric_offset - eccentric_diameter / 2
+            eccentric2_rect = Rectangle((eccentric2_start_z, eccentric2_start_y), eccentric_width, eccentric_diameter, color='grey', linewidth=2, fill=False)
+            self.shaft_sections.append(eccentric2_rect)
+            self.ax.add_patch(eccentric2_rect)
+
+        if 'Przed mimośrodami' in self.shaft_attributes:
+            # Draw the shaft section before the first eccentric
+            length_before_first = self.shaft_attributes['Przed mimośrodami']['l']
+            diameter_before_first = self.shaft_attributes['Przed mimośrodami']['d']
+            start_before_first = eccentric1_start_z - length_before_first
+            rect_before_first = Rectangle((start_before_first, -diameter_before_first / 2), length_before_first, diameter_before_first, color='grey', linewidth=2, fill=False)
+            self.shaft_sections.append(rect_before_first)
+            self.ax.add_patch(rect_before_first)
+
+        if 'Pomiędzy mimośrodami' in self.shaft_attributes:
+            # Draw the shaft section between the eccentrics
+            length_between = self.shaft_attributes['Pomiędzy mimośrodami']['l']
+            diameter_between = self.shaft_attributes['Pomiędzy mimośrodami']['d']
+            start_between = eccentric1_start_z + eccentric_width
+            rect_between = Rectangle((start_between, -diameter_between / 2), length_between, diameter_between, color='grey', linewidth=2, fill=False)
+            self.shaft_sections.append(rect_between)
+            self.ax.add_patch(rect_between)
+
+        if 'Za mimośrodami' in self.shaft_attributes:
+            # Draw the shaft section after the second eccentric
+            length_after_second = self.shaft_attributes['Za mimośrodami']['l']
+            diameter_after_second = self.shaft_attributes['Za mimośrodami']['d']
+            start_after_second = eccentric2_start_z + eccentric_width
+            rect_after_second = Rectangle((start_after_second, -diameter_after_second / 2), length_after_second, diameter_after_second, color='grey', linewidth=2, fill=False)
+            self.shaft_sections.append(rect_after_second)
+            self.ax.add_patch(rect_after_second)
+        
+        self.canvas.draw()
+
+    def init_plots(self, data):
+        """
+        Create and store plot data from the provided data dictionary.
+
+        :param data: A dictionary containing the data for the plots.
+        """
+
+        self._data = data
+
+        self._set_plots_data()
+        self._set_axes_limits()
+        self._draw_shaft_coordinates()
 
 class CustomToolbar(NavigationToolbar):
     updated_selected_plots = pyqtSignal()

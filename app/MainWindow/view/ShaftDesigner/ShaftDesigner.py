@@ -27,8 +27,8 @@ class ShaftDesigner(QMainWindow):
         self.main_layout = QHBoxLayout(self.main_widget)
         self.setCentralWidget(self.main_widget)
 
-        self._init_sidebar()
         self._init_chart()
+        self._init_sidebar()
 
     def _init_sidebar(self):
         # Set layout for sidebar and toggle button
@@ -46,6 +46,7 @@ class ShaftDesigner(QMainWindow):
             section = ShaftSectionDataEntry(name, self)
             self.sections[name] = section
             self.sidebar_layout.addWidget(section)
+            section.attributes_signal.connect(self.chart.draw_shaft)
 
         # Add a spacer item at the end of the sidebar layout - keeps the contents alignet to the top
         spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
@@ -76,14 +77,29 @@ class ShaftDesigner(QMainWindow):
         self.main_layout.addWidget(self.scroll_area)
         self.main_layout.addLayout(self.toggle_button_layout)
 
-    def toggle_sidebar(self):
-        self.scroll_area.setVisible(not self.scroll_area.isVisible())
-
     def _init_chart(self):
         # Add Chart
         self.chart = Chart()
         self.centralWidget().layout().addWidget(self.chart)
-
+    
     def update_data(self, data):
+        # Set initial shaft attributes
+        self.shaft_attributes = { 
+            'Mimośrody': {'l': data['B'], 'd': data['de']},
+            'Przed mimośrodami': {'l': None, 'd': data['ds']},
+            'Pomiędzy mimośrodami': {'l': data['x'], 'd': data['ds']},
+            'Za mimośrodami': {'l': None, 'd': data['ds']},
+        }
+
+        # Set initial shaft sections input values to shaft initial attributes
+        for name, value in self.shaft_attributes.items():
+                self.sections[name].set_attributes(value)
+
+        self.sections['Pomiędzy mimośrodami'].set_read_only('l')
+
         # Init plots
         self.chart.init_plots(data)
+        self.chart.draw_shaft()
+
+    def toggle_sidebar(self):
+        self.scroll_area.setVisible(not self.scroll_area.isVisible())

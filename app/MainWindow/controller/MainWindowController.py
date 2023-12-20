@@ -318,7 +318,12 @@ class MainWindowController:
             'L1': self._data['L1'][0],
             'L2': self._data['L2'][0],
             'LA': self._data['LA'][0],
-            'LB': self._data['LB'][0]
+            'LB': self._data['LB'][0],
+            'ds': self._data['dsc'][0],
+            'de': self._data['dec'][0],
+            'B': self._data['B'][0],
+            'e': self._data['e'][0],
+            'x': self._data['x'][0]
         }
 
         self._window.set_shaft_designer_data(self.shaft_designer_data)

@@ -88,8 +88,8 @@ class ShaftSectionDataEntry(QWidget):
             if value is not None:
                 self.input_values[attribute].setText(str(value))
 
-        for attribute in readonly:
-                self.input_values[attribute].setReadOnly(True)
+    def set_read_only(self, attribute):
+        self.input_values[attribute].setReadOnly(True)
 
     def toggle(self, event):
         # Collapse or expand contents of section
