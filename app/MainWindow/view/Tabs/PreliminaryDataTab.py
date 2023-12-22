@@ -13,7 +13,7 @@ class PreliminaryDataTab(Tab):
         """
         Initialize tab data from the main window's data.
         """
-        attributes_to_acquire = ['L', 'L1', 'Materiał', 'xz']
+        attributes_to_acquire = ['L', 'LA', 'LB', 'L1', 'Materiał', 'xz']
         self.tab_data = {attr: self._window.data[attr] for attr in attributes_to_acquire}
         self._items_to_select_states['Materiał'] = ''
 
@@ -36,11 +36,15 @@ class PreliminaryDataTab(Tab):
         component_layout = QVBoxLayout()
         component_label = QLabel('Wymiary:')
 
-        supports_distance = create_data_input_row(self, 'L', 'Odległość pomiędzy podporami', 'L')
+        shaft_length = create_data_input_row(self, 'L', 'Długość wału wejściowego', 'L')
+        roller_support = create_data_input_row(self, 'LA', 'Współrzędne podpory przesuwnej', 'L<sub>A</sub>')
+        pin_support = create_data_input_row(self, 'LB', 'Współrzędne podpory nieprzesuwnej', 'L<sub>B</sub>')
         cyclo_disc1 = create_data_input_row(self, 'L1', 'Współrzędne koła obiegowego 1', 'L<sub>1</sub>')
 
         component_layout.addWidget(component_label)
-        component_layout.addLayout(supports_distance)
+        component_layout.addLayout(shaft_length)
+        component_layout.addLayout(roller_support)
+        component_layout.addLayout(pin_support)
         component_layout.addLayout(cyclo_disc1)
 
         self.layout().addLayout(component_layout)

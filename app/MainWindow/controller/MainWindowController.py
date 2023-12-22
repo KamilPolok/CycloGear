@@ -234,7 +234,7 @@ class MainWindowController:
         self._update_data(data)
 
         # Extract necessary data from the model
-        L, L1,= self._data['L'][0], self._data['L1'][0]
+        L, LA, LB, L1 = self._data['L'][0], self._data['LA'][0], self._data['LB'][0], self._data['L1'][0]
         x, e, B = self._data['x'][0], self._data['e'][0], self._data['B'][0]
         F, Mwe = self._data['F'][0], self._data['Mwe'][0]
         Zgo, xz = self._data['Materiał']['Zgo'][0], self._data['xz'][0]
@@ -243,26 +243,30 @@ class MainWindowController:
         L2 = L1 + B + x
 
         # Calculate support reactions
-        Rb = (F * (L2 - L1)) / L  # Pin support
+        Rb = (F * (L2 - L1)) / (LB - LA) # Pin support
         Ra = Rb                   # Roller support
 
        # Create Force and reaction list
-        FVals = [Ra, F, F, Rb]
+        FVals = [0, Ra, F, F, Rb, L]
 
         # Create z arguments for chart data
-        key_points = [0, L1, L2, L]
+        key_points = [LA, L1, L2, LB]
         z = symbols('z')
-        zVals = np.union1d(key_points, np.linspace(0, L, 100))
+        zVals = np.union1d(key_points, np.linspace(0, L, 400))
 
-        # Calculate bending moment Mg [Nm]                           
-        MgA_1 = Ra * z * 0.001
-        Mg1_2 = (Ra * z - F * (z - L1)) * 0.001
-        Mg2_B = ((Ra * z - F * (z - L1)) + F * (z - L2)) * 0.001
+        # Calculate bending moment Mg [Nm]
+        Mg0_A = 0          
+        MgA_1 = Ra * (z - LA) * 0.001 
+        Mg1_2 = (Ra * (z - LA) - F * (z - L1)) * 0.001
+        Mg2_B = (Ra * (z - LA) - F * (z - L1) + F * (z - L2)) * 0.001
+        MgB_K = 0
 
         MgFunction = Piecewise(
-            (MgA_1, z < L1),
-            (Mg1_2, z < L2),
-            (Mg2_B, z <= L)
+            (Mg0_A, z <= LA),
+            (MgA_1, z <= L1),
+            (Mg1_2, z <= L2),
+            (Mg2_B, z <= LB),
+            (MgB_K, z <= L)
         )
         Mg = np.array([round(float(MgFunction.subs(z, val).evalf()), 2) for val in zVals])
 

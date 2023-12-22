@@ -18,11 +18,13 @@ def main():
         'w0':[78,54, 'rad/s'],          # Prędkość kątowa wejściowa
         'Mwe': [26.67, 'Nm'],           # Moment wejściowy
         # Zadane wymiary wału
-        'L': [37, 'mm'],                # Odległość pomiędzy podporami
-        'L1': [9, 'mm'],                # Wsp koła obiegowego 1
-        'L2': [None, 'mm'],             # Wsp koła obiegowego 2
+        'L': [100, 'mm'],               # Całkowita długość wału wejściowego
+        'LA': [15, 'mm'],               # Wsp. podpory przesuwnej - A
+        'LB': [52, 'mm'],               # Wsp. podpory nieprzesuwnej - B
+        'L1': [24, 'mm'],               # Wsp. koła obiegowego 1
+        'L2': [None, 'mm'],             # Wsp. koła obiegowego 2
         'e': [3, 'mm'],                 # Mimośród
-        'B': [17, 'mm'],                # Grubość koła obiegowego
+        'B': [17, 'mm'],                # Długość koła obiegowego
         'x': [5, 'mm'],                 # Odległość pomiędzy dwoma kołami obiegowymi
         # Reakcje podporowe i siły działające na wał
         'Ra':[None, 'N'],               # Reakcja w podporze nieruchomej
