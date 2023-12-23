@@ -18,9 +18,10 @@ class Chart(QWidget):
         super(Chart, self).__init__(parent)
         self.shaft_attributes = {}
 
-        self.active_plots = {}  # Dictionary to keep track of active plots
+        self.active_plots = {}          # Dictionary to keep track of active plots
+        self.active_sections = {}       # Dictionary to keep track of shaft sections
+
         self.markers_and_labels = []  # List to keep track of markers and labels
-        self.shaft_sections = []    # List to keep track of shaft sections
 
         # Initialize the user interface for the chart widget
         self._init_ui()
@@ -223,70 +224,85 @@ class Chart(QWidget):
                 self.shaft_attributes[key] = attribute
 
         # Clear existing sections
-        for rect in self.shaft_sections:
-            rect.remove()
-        self.shaft_sections.clear()
+        for section in list(self.active_sections.keys()):
+            self.active_sections[section].remove()
+            del self.active_sections[section]
 
-        # Draw the eccentrics            
         if 'Mimośrody' in self.shaft_attributes:
-            eccentric_width = self.shaft_attributes['Mimośrody']['l']
-            eccentric_diameter = self.shaft_attributes['Mimośrody']['d']
-
-            eccentric_offset = self._data['e']
-
-            eccentric1_position = self._data['L1']
-
-            if eccentric_width != self._data['B']:
-                length_between = self._data['x']
-                eccentric2_position = eccentric1_position + eccentric_width + length_between
-                self._data['L2'] = eccentric2_position
-                self._data['B'] = eccentric_width
-                self._draw_shaft_coordinates()
-            else:
-                eccentric2_position = self._data['L2']
-                
-            # Draw the first eccentric
-            eccentric1_start_z = eccentric1_position - eccentric_width / 2
-            eccentric1_start_y = eccentric_offset - eccentric_diameter / 2
-            eccentric1_rect = Rectangle((eccentric1_start_z, eccentric1_start_y), eccentric_width, eccentric_diameter, color='grey', linewidth=2, fill=False)
-            self.shaft_sections.append(eccentric1_rect)
-            self.ax.add_patch(eccentric1_rect)
-
-            # Draw the second eccentric
-            eccentric2_start_z = eccentric2_position - eccentric_width / 2
-            eccentric2_start_y = -eccentric_offset - eccentric_diameter / 2
-            eccentric2_rect = Rectangle((eccentric2_start_z, eccentric2_start_y), eccentric_width, eccentric_diameter, color='grey', linewidth=2, fill=False)
-            self.shaft_sections.append(eccentric2_rect)
-            self.ax.add_patch(eccentric2_rect)
-
+            self.draw_eccentrics_section()
         if 'Przed mimośrodami' in self.shaft_attributes:
-            # Draw the shaft section before the first eccentric
-            length_before_first = self.shaft_attributes['Przed mimośrodami']['l']
-            diameter_before_first = self.shaft_attributes['Przed mimośrodami']['d']
-            start_before_first = eccentric1_start_z - length_before_first
-            rect_before_first = Rectangle((start_before_first, -diameter_before_first / 2), length_before_first, diameter_before_first, color='grey', linewidth=2, fill=False)
-            self.shaft_sections.append(rect_before_first)
-            self.ax.add_patch(rect_before_first)
-
+            self.draw_section_before_eccentricities()
         if 'Pomiędzy mimośrodami' in self.shaft_attributes:
-            # Draw the shaft section between the eccentrics
-            length_between = self.shaft_attributes['Pomiędzy mimośrodami']['l']
-            diameter_between = self.shaft_attributes['Pomiędzy mimośrodami']['d']
-            start_between = eccentric1_start_z + eccentric_width
-            rect_between = Rectangle((start_between, -diameter_between / 2), length_between, diameter_between, color='grey', linewidth=2, fill=False)
-            self.shaft_sections.append(rect_between)
-            self.ax.add_patch(rect_between)
-
+            self.draw_section_between_eccentricities()
         if 'Za mimośrodami' in self.shaft_attributes:
-            # Draw the shaft section after the second eccentric
-            length_after_second = self.shaft_attributes['Za mimośrodami']['l']
-            diameter_after_second = self.shaft_attributes['Za mimośrodami']['d']
-            start_after_second = eccentric2_start_z + eccentric_width
-            rect_after_second = Rectangle((start_after_second, -diameter_after_second / 2), length_after_second, diameter_after_second, color='grey', linewidth=2, fill=False)
-            self.shaft_sections.append(rect_after_second)
-            self.ax.add_patch(rect_after_second)
-        
+            self.draw_section_after_eccentricities()
+
         self.canvas.draw()
+
+    def draw_eccentrics_section(self):
+        section = 'Mimośrody'
+        length = self.shaft_attributes[section]['l']
+        diameter = self.shaft_attributes[section]['d']
+
+        offset = self._data['e']
+
+        eccentric1_position = self._data['L1']
+
+        if length != self._data['B']:
+            length_between = self._data['x']
+            eccentric2_position = eccentric1_position + length + length_between
+            self._data['L2'] = eccentric2_position
+            self._data['B'] = length
+            self._draw_shaft_coordinates()
+        else:
+            eccentric2_position = self._data['L2']
+            
+        # Draw the first eccentric
+        eccentric1_start_z = eccentric1_position - length / 2
+        eccentric1_start_y = offset - diameter / 2
+        eccentric1_section = Rectangle((eccentric1_start_z, eccentric1_start_y), length, diameter, color='grey', linewidth=2, fill=False)
+        self.active_sections[section + '1'] = eccentric1_section
+        self.ax.add_patch(eccentric1_section)
+
+        # Draw the second eccentric
+        eccentric2_start_z = eccentric2_position - length / 2
+        eccentric2_start_y = -offset - diameter / 2
+        eccentric2_section = Rectangle((eccentric2_start_z, eccentric2_start_y), length, diameter, color='grey', linewidth=2, fill=False)
+        self.active_sections[section + '2'] = eccentric2_section
+        self.ax.add_patch(eccentric2_section)
+
+    def draw_section_before_eccentricities(self):
+        # Draw the shaft section before the first eccentric
+        section ='Przed mimośrodami'
+        length = self.shaft_attributes[section]['l']
+        diameter = self.shaft_attributes[section]['d']
+        start_z = self._data['L1'] - self.shaft_attributes['Mimośrody']['l'] / 2 - length
+        start_y = -diameter / 2
+        before_section = Rectangle((start_z, start_y), length, diameter, color='grey', linewidth=2, fill=False)
+        self.active_sections[section] = before_section
+        self.ax.add_patch(before_section)
+
+    def draw_section_between_eccentricities(self):
+        # Draw the shaft section between the eccentrics
+        section ='Pomiędzy mimośrodami'
+        length = self.shaft_attributes[section]['l']
+        diameter = self.shaft_attributes[section]['d']
+        start_z = self._data['L1'] + self.shaft_attributes['Mimośrody']['l'] / 2
+        start_y = -diameter / 2
+        section_between = Rectangle((start_z, start_y), length, diameter, color='grey', linewidth=2, fill=False)
+        self.active_sections[section] = section_between
+        self.ax.add_patch(section_between)
+
+    def draw_section_after_eccentricities(self):
+        # Draw the shaft section after the second eccentric
+        section ='Za mimośrodami'
+        length = self.shaft_attributes[section]['l']
+        diameter = self.shaft_attributes[section]['d']
+        start_z = self._data['L2'] + self.shaft_attributes['Mimośrody']['l'] / 2
+        start_y = -diameter / 2
+        section_after = Rectangle((start_z, start_y), length, diameter, color='grey', linewidth=2, fill=False)
+        self.active_sections[section] = section_after
+        self.ax.add_patch(section_after)
 
     def init_plots(self, data):
         """
