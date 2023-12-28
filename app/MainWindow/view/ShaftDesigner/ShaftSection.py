@@ -7,7 +7,7 @@ from .ShaftSubsection import ShaftSubsection
 
 class ShaftSection(QWidget):
     subsection_data_signal = pyqtSignal(dict)
-    subsection_removed_signal = pyqtSignal(str, int)
+    remove_subsection_plot_signal = pyqtSignal(str, int)
 
     def __init__(self, name, parent=None):
         super().__init__(parent)
@@ -44,17 +44,17 @@ class ShaftSection(QWidget):
         self.toggle(None)
 
     def add_subsection(self):
-        self.subsection_count += 1
         subsection = ShaftSubsection(self.name, self.subsection_count, self)
         subsection.subsection_data_signal.connect(self.handle_subsection_data)
         subsection.remove_subsection_signal.connect(self.remove_subsection)
         self.subsections.append(subsection)
         self.subsections_layout.addWidget(subsection)
         self.update_remove_buttons_visibility()
+        self.subsection_count += 1
     
     def remove_subsection(self, subsection_number):
         # Find and remove the specific subsection
-        if len(self.subsections) > 1:
+        if len(self.subsections) > 0:
             subsection_to_remove = next((s for s in self.subsections if s.subsection_number == subsection_number), None)
             if subsection_to_remove:
                 self.subsections_layout.removeWidget(subsection_to_remove)
@@ -62,7 +62,7 @@ class ShaftSection(QWidget):
                 self.subsections = [s for s in self.subsections if s != subsection_to_remove]
         
             # Update the numbers and names of the remaining subsections
-                for i, subsection in enumerate(self.subsections, start=1):
+                for i, subsection in enumerate(self.subsections):
                     subsection.update_subsection_name(i)
 
             # Update the subsection count
@@ -71,7 +71,7 @@ class ShaftSection(QWidget):
             # Update the visibility of the remove buttons
             self.update_remove_buttons_visibility()
         
-        self.subsection_removed_signal.emit(self.name, subsection_number)
+        self.remove_subsection_plot_signal.emit(self.name, subsection_number)
     
     def update_remove_buttons_visibility(self):
         # Show the remove button only if there are more than one subsections

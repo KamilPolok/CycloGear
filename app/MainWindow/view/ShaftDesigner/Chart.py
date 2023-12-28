@@ -222,7 +222,7 @@ class Chart(QWidget):
         if shaft_attributes:
             for section_name, section in shaft_attributes.items():
                 if section_name in self.shaft_attributes:
-                    self.shaft_attributes[section_name].update(section)  # Merge nested dictionaries
+                    self.shaft_attributes[section_name].update(section)
                 else:
                     self.shaft_attributes[section_name] = section
 
@@ -244,8 +244,8 @@ class Chart(QWidget):
 
     def draw_eccentrics_section(self):
         section = 'Mimośrody'
-        length = self.shaft_attributes[section][1]['l']
-        diameter = self.shaft_attributes[section][1]['d']
+        length = self.shaft_attributes[section][0]['l']
+        diameter = self.shaft_attributes[section][0]['d']
 
         offset = self._data['e']
 
@@ -278,7 +278,7 @@ class Chart(QWidget):
         # Draw the shaft section before the first eccentric
         section ='Przed mimośrodami'
 
-        start_z = self._data['L1'] - self.shaft_attributes['Mimośrody'][1]['l'] / 2
+        start_z = self._data['L1'] - self.shaft_attributes['Mimośrody'][0]['l'] / 2
 
         for subsection_number, subsection_data in self.shaft_attributes[section].items():
             length = subsection_data['l']
@@ -292,9 +292,9 @@ class Chart(QWidget):
     def draw_section_between_eccentricities(self):
         # Draw the shaft section between the eccentrics
         section ='Pomiędzy mimośrodami'
-        length = self.shaft_attributes[section][1]['l']
-        diameter = self.shaft_attributes[section][1]['d']
-        start_z = self._data['L1'] + self.shaft_attributes['Mimośrody'][1]['l'] / 2
+        length = self.shaft_attributes[section][0]['l']
+        diameter = self.shaft_attributes[section][0]['d']
+        start_z = self._data['L1'] + self.shaft_attributes['Mimośrody'][0]['l'] / 2
         start_y = -diameter / 2
         section_between = Rectangle((start_z, start_y), length, diameter, color='grey', linewidth=2, fill=False)
         self.active_sections[section] = section_between
@@ -303,7 +303,7 @@ class Chart(QWidget):
     def draw_section_after_eccentricities(self):
         # Draw the shaft section after the second eccentric
         section ='Za mimośrodami'
-        start_z = self._data['L2'] + self.shaft_attributes['Mimośrody'][1]['l'] / 2
+        start_z = self._data['L2'] + self.shaft_attributes['Mimośrody'][0]['l'] / 2
 
         for subsection_number, subsection_data in self.shaft_attributes[section].items():
             length = subsection_data['l']
@@ -314,14 +314,14 @@ class Chart(QWidget):
             self.ax.add_patch(after_subsection)
             start_z += length  # Update start_z for the next subsection
 
-    def remove_subsection(self, section_name, subsection_number):
+    def remove_subsection_plot(self, section_name, subsection_number):
         # Remove the subsection from shaft_attributes
         if section_name in self.shaft_attributes and subsection_number in self.shaft_attributes[section_name]:
             del self.shaft_attributes[section_name][subsection_number]
 
             # Adjust the numbering of the remaining subsections
             new_subsections = {}
-            for num, data in enumerate(self.shaft_attributes[section_name].values(), start=1):
+            for num, data in enumerate(self.shaft_attributes[section_name].values()):
                 new_subsections[num] = data
             self.shaft_attributes[section_name] = new_subsections
         

@@ -45,9 +45,9 @@ class ShaftDesigner(QMainWindow):
         for name in section_names:
             section = ShaftSection(name, self)
             self.sections[name] = section
-            self.sidebar_layout.addWidget(section)
             section.subsection_data_signal.connect(self.chart.draw_shaft)
-            section.subsection_removed_signal.connect(self.chart.remove_subsection)
+            section.remove_subsection_plot_signal.connect(self.chart.remove_subsection_plot)
+            self.sidebar_layout.addWidget(section)
         
         # Disable option to add new subsections for sections below
         self.sections['Mimośrody'].set_add_subsection_button_visibility(False)

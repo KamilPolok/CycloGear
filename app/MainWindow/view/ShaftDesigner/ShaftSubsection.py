@@ -23,7 +23,8 @@ class ShaftSubsection(QWidget):
         self.main_layout.setContentsMargins(0, 0, 0, 0)
 
         # Set header
-        self.header = QLabel(f"Stopień {self.subsection_number}")
+        self.header = QLabel()
+        self._set_header()
         self.header.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.header.setFixedHeight(30)
         self.header.mousePressEvent = self.toggle
@@ -59,6 +60,9 @@ class ShaftSubsection(QWidget):
         self.expanded = True
         self.toggle(None)
     
+    def _set_header(self):
+        self.header.setText(f'{self.subsection_number + 1}.')
+          
     def _create_data_input_row(self, attribute, symbol):
         layout = QHBoxLayout()
         
@@ -106,7 +110,7 @@ class ShaftSubsection(QWidget):
     
     def update_subsection_name(self, new_number):
         self.subsection_number = new_number
-        self.header.setText(f"Stopień {self.subsection_number}")
+        self._set_header()
     
     def toggle(self, event):
         # Collapse or expand contents of section
@@ -120,7 +124,7 @@ class ShaftSubsection(QWidget):
         self.confirm_button.setEnabled(all(input.text() != '' for input in self.input_values.values()))
 
     def emit_data_signal(self):
-        self.subsection_data_signal.emit({ self.section_name: { self.subsection_number: {key: literal_eval(input.text()) for key, input in self.input_values.items()}}})
+        self.subsection_data_signal.emit({self.section_name: {self.subsection_number: {key: literal_eval(input.text()) for key, input in self.input_values.items()}}})
     
     def emit_remove_signal(self):
         self.remove_subsection_signal.emit(self.subsection_number)
