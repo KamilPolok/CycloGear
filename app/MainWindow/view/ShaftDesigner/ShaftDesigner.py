@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import (QHBoxLayout, QMainWindow, QPushButton, QSizePolicy,
                              QVBoxLayout, QWidget, QScrollArea)
 
 from .Chart import Chart
-from .ShaftSectionDataEntry import ShaftSectionDataEntry
+from .ShaftSection import ShaftSection
 
 class ShaftDesigner(QMainWindow):
     """
@@ -43,10 +43,18 @@ class ShaftDesigner(QMainWindow):
         self.sections = {}
         section_names = ['Mimośrody', 'Przed mimośrodami', 'Pomiędzy mimośrodami', 'Za mimośrodami']
         for name in section_names:
-            section = ShaftSectionDataEntry(name, self)
+            section = ShaftSection(name, self)
             self.sections[name] = section
             self.sidebar_layout.addWidget(section)
-            section.attributes_signal.connect(self.chart.draw_shaft)
+            section.subsection_data_signal.connect(self.chart.draw_shaft)
+            section.subsection_removed_signal.connect(self.chart.remove_subsection)
+        
+        # Disable option to add new subsections for sections below
+        self.sections['Mimośrody'].set_add_subsection_button_visibility(False)
+        self.sections['Pomiędzy mimośrodami'].set_add_subsection_button_visibility(False)
+
+        # Disable changing the default values of data entries in certain subsections belowe
+        self.sections['Pomiędzy mimośrodami'].subsections[0].set_read_only('l')
 
         # Add a spacer item at the end of the sidebar layout - keeps the contents alignet to the top
         spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
@@ -92,10 +100,9 @@ class ShaftDesigner(QMainWindow):
         }
 
         # Set initial shaft sections input values to shaft initial attributes
-        for name, value in self.shaft_attributes.items():
-                self.sections[name].set_attributes(value)
-
-        self.sections['Pomiędzy mimośrodami'].set_read_only('l')
+        for section_name, section in self.sections.items():
+            for subsection in section.subsections:
+                subsection.set_attributes(self.shaft_attributes[section_name])
 
         # Init plots
         self.chart.init_plots(data)
