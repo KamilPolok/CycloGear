@@ -44,6 +44,9 @@ class ShaftDesigner(QMainWindow):
         for name in self.section_names:
             section = ShaftSection(name, self)
             self.sections[name] = section
+            # Initially disable all sections except the 'Mimośrody' one:
+            if name != 'Mimośrody':
+                section.setEnabled(False)
             self.sidebar_layout.addWidget(section)
         
         # Disable option to add new subsections for sections below
@@ -121,12 +124,14 @@ class ShaftDesignerController:
                     self.shaft_sections[section_name] = section
 
     def _calculate_shaft_sections(self, shaft_subsection_attributes = None):
+        # Save subsection attrbutes
         if shaft_subsection_attributes:
             self._save_shaft_sections_attributes(shaft_subsection_attributes)
 
         # Prepare dict storing shaft subsections drawing attributes
         self.shaft_sections_plots_attributes = {section_name: {} for section_name in ['Mimośrody1', 'Mimośrody2', 'Przed mimośrodami', 'Pomiędzy mimośrodami', 'Za mimośrodami']}
-
+        
+        # Calculate shaft section attributes
         if 'Mimośrody' in self.shaft_sections:
             self._calculate_eccentrics_section()
         if 'Przed mimośrodami' in self.shaft_sections:
@@ -136,8 +141,14 @@ class ShaftDesignerController:
         if 'Za mimośrodami' in self.shaft_sections:
             self._calculate_section_after_eccentricities()
 
+        # Draw shaft
         self.shaft_designer.chart.draw_shaft(self.shaft_sections_plots_attributes)
-
+        
+        # If 'Mimośrody' section is calculated, enable other sections
+        if 'Mimośrody' in self.shaft_sections:
+            for section in self.shaft_designer.sections.values():
+                section.setEnabled(True)
+    
     def _calculate_eccentrics_section(self):
         section = 'Mimośrody'
         length = self.shaft_sections[section][0]['l']
