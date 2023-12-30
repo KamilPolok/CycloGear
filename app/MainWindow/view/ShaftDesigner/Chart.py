@@ -16,7 +16,6 @@ class Chart(QWidget):
      
     def __init__(self, parent=None):
         super(Chart, self).__init__(parent)
-        self.shaft_attributes = {}
 
         self.active_plots = {}          # Dictionary to keep track of active plots
         self.active_sections = {}       # Dictionary to keep track of shaft sections
@@ -216,117 +215,21 @@ class Chart(QWidget):
                 backgroundcolor='grey',
                 alpha=0.7
             ))
-    
-    def draw_shaft(self, shaft_attributes = None):
-        # Save the shaft section attributtes
-        if shaft_attributes:
-            for section_name, section in shaft_attributes.items():
-                if section_name in self.shaft_attributes:
-                    self.shaft_attributes[section_name].update(section)
-                else:
-                    self.shaft_attributes[section_name] = section
 
-        # Clear existing sections
+    def draw_shaft(self, shaft_subsections_drawing_attributes):
+        # Remove existing sections
         for section in list(self.active_sections.keys()):
             self.active_sections[section].remove()
             del self.active_sections[section]
 
-        if 'Mimośrody' in self.shaft_attributes:
-            self.draw_eccentrics_section()
-        if 'Przed mimośrodami' in self.shaft_attributes:
-            self.draw_section_before_eccentricities()
-        if 'Pomiędzy mimośrodami' in self.shaft_attributes:
-            self.draw_section_between_eccentricities()
-        if 'Za mimośrodami' in self.shaft_attributes:
-            self.draw_section_after_eccentricities()
+        # Draw new sections
+        for section_name, section in shaft_subsections_drawing_attributes.items():
+            for subsection_number, subsection in section.items():
+                subsection_plot = Rectangle(subsection[0], subsection[1], subsection[2], color='grey', linewidth=2, fill=False)
+                self.active_sections[f"{section_name}_{subsection_number}"] = subsection_plot
+                self.ax.add_patch(subsection_plot)
 
         self.canvas.draw()
-
-    def draw_eccentrics_section(self):
-        section = 'Mimośrody'
-        length = self.shaft_attributes[section][0]['l']
-        diameter = self.shaft_attributes[section][0]['d']
-
-        offset = self._data['e']
-
-        eccentric1_position = self._data['L1']
-
-        if length != self._data['B']:
-            length_between = self._data['x']
-            eccentric2_position = eccentric1_position + length + length_between
-            self._data['L2'] = eccentric2_position
-            self._data['B'] = length
-            self._draw_shaft_coordinates()
-        else:
-            eccentric2_position = self._data['L2']
-            
-        # Draw the first eccentric
-        eccentric1_start_z = eccentric1_position - length / 2
-        eccentric1_start_y = offset - diameter / 2
-        eccentric1_section = Rectangle((eccentric1_start_z, eccentric1_start_y), length, diameter, color='grey', linewidth=2, fill=False)
-        self.active_sections[section + '1'] = eccentric1_section
-        self.ax.add_patch(eccentric1_section)
-
-        # Draw the second eccentric
-        eccentric2_start_z = eccentric2_position - length / 2
-        eccentric2_start_y = -offset - diameter / 2
-        eccentric2_section = Rectangle((eccentric2_start_z, eccentric2_start_y), length, diameter, color='grey', linewidth=2, fill=False)
-        self.active_sections[section + '2'] = eccentric2_section
-        self.ax.add_patch(eccentric2_section)
-
-    def draw_section_before_eccentricities(self):
-        # Draw the shaft section before the first eccentric
-        section ='Przed mimośrodami'
-
-        start_z = self._data['L1'] - self.shaft_attributes['Mimośrody'][0]['l'] / 2
-
-        for subsection_number, subsection_data in self.shaft_attributes[section].items():
-            length = subsection_data['l']
-            diameter = subsection_data['d']
-            start_z -= length
-            start_y = -diameter / 2
-            before_subsection = Rectangle((start_z, start_y), length, diameter, color='grey', linewidth=2, fill=False)
-            self.active_sections[f"{section}_{subsection_number}"] = before_subsection
-            self.ax.add_patch(before_subsection)
-
-    def draw_section_between_eccentricities(self):
-        # Draw the shaft section between the eccentrics
-        section ='Pomiędzy mimośrodami'
-        length = self.shaft_attributes[section][0]['l']
-        diameter = self.shaft_attributes[section][0]['d']
-        start_z = self._data['L1'] + self.shaft_attributes['Mimośrody'][0]['l'] / 2
-        start_y = -diameter / 2
-        section_between = Rectangle((start_z, start_y), length, diameter, color='grey', linewidth=2, fill=False)
-        self.active_sections[section] = section_between
-        self.ax.add_patch(section_between)
-
-    def draw_section_after_eccentricities(self):
-        # Draw the shaft section after the second eccentric
-        section ='Za mimośrodami'
-        start_z = self._data['L2'] + self.shaft_attributes['Mimośrody'][0]['l'] / 2
-
-        for subsection_number, subsection_data in self.shaft_attributes[section].items():
-            length = subsection_data['l']
-            diameter = subsection_data['d']
-            start_y = -diameter / 2
-            after_subsection = Rectangle((start_z, start_y), length, diameter, color='grey', linewidth=2, fill=False)
-            self.active_sections[f"{section}_{subsection_number}"] = after_subsection
-            self.ax.add_patch(after_subsection)
-            start_z += length  # Update start_z for the next subsection
-
-    def remove_subsection_plot(self, section_name, subsection_number):
-        # Remove the subsection from shaft_attributes
-        if section_name in self.shaft_attributes and subsection_number in self.shaft_attributes[section_name]:
-            del self.shaft_attributes[section_name][subsection_number]
-
-            # Adjust the numbering of the remaining subsections
-            new_subsections = {}
-            for num, data in enumerate(self.shaft_attributes[section_name].values()):
-                new_subsections[num] = data
-            self.shaft_attributes[section_name] = new_subsections
-        
-            self.draw_shaft()
-        
 
     def init_plots(self, data):
         """

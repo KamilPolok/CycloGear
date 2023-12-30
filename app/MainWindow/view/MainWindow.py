@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QMainWindow, QTabWidget, QWidget, QVBoxLayout, QPushButton
 
-from .ShaftDesigner.ShaftDesigner import ShaftDesigner
+from .ShaftDesigner.ShaftDesigner import ShaftDesignerController
 
 class MainWindow(QMainWindow):
     """
@@ -20,7 +20,7 @@ class MainWindow(QMainWindow):
         """
         Set data for the shaft designer
         """
-        self.shaft_designer.update_data(data)
+        self.shaft_designer.set_initial_data(data)
 
     def init_ui(self):
         """
@@ -75,7 +75,7 @@ class MainWindow(QMainWindow):
 
     def init_shaft_designer(self):
         # Add button for opening the shaft designer
-        self.shaft_designer = ShaftDesigner()
+        self.shaft_designer = ShaftDesignerController()
         self.preview_button = QPushButton('Podgląd', self)
         self.preview_button.clicked.connect(self._open_shaft_designer)
         self.preview_button.setEnabled(False)
@@ -87,7 +87,7 @@ class MainWindow(QMainWindow):
 
     def _open_shaft_designer(self):
         self.update_data()
-        self.shaft_designer.show()
+        self.shaft_designer.shaft_designer.show()
 
     def update_data(self):
         current_index = self._tab_widget.currentIndex()
