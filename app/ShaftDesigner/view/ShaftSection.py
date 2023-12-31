@@ -9,8 +9,8 @@ class ShaftSection(QWidget):
     subsection_data_signal = pyqtSignal(dict)
     remove_subsection_plot_signal = pyqtSignal(str, int)
 
-    def __init__(self, name, parent=None):
-        super().__init__(parent)
+    def __init__(self, name):
+        super().__init__()
         self.name = name
         self.subsections = []
         self.subsection_count = 0

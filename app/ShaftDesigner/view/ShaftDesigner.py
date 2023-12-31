@@ -1,9 +1,5 @@
 from PyQt6.QtWidgets import (QHBoxLayout, QMainWindow, QPushButton, QSizePolicy, QSpacerItem, QStyle,
                              QVBoxLayout, QWidget, QScrollArea)
-
-from .Chart import Chart
-from .ShaftSection import ShaftSection
-
 class ShaftDesigner(QMainWindow):
     """
     A class representing chart and interface to design the shaft
@@ -26,14 +22,12 @@ class ShaftDesigner(QMainWindow):
         self.main_layout = QHBoxLayout(self.main_widget)
         self.setCentralWidget(self.main_widget)
 
-        self._init_chart()
-
-    def _init_chart(self):
+    def init_chart(self, chart):
         # Add Chart
-        self.chart = Chart()
-        self.centralWidget().layout().addWidget(self.chart)
+        self._chart = chart
+        self.centralWidget().layout().addWidget(self._chart)
     
-    def init_sidebar(self, section_names):
+    def init_sidebar(self, sections):
         # Set layout for sidebar and toggle button
         self.sidebar_section_layout  = QHBoxLayout()
 
@@ -43,21 +37,8 @@ class ShaftDesigner(QMainWindow):
         self.sidebar.setFixedWidth(200)  # Set the fixed width for the sidebar
 
         # Set contents of the sidebar
-        self.sections = {}
-        for name in section_names:
-            section = ShaftSection(name, self)
-            self.sections[name] = section
-            # Initially disable all sections except the 'Mimośrody' one:
-            if name != 'Mimośrody':
-                section.setEnabled(False)
+        for section in sections.values():
             self.sidebar_layout.addWidget(section)
-        
-        # Disable option to add new subsections for sections below
-        self.sections['Mimośrody'].set_add_subsection_button_visibility(False)
-        self.sections['Pomiędzy mimośrodami'].set_add_subsection_button_visibility(False)
-
-        # Disable changing the default values of data entries in certain subsections below
-        self.sections['Pomiędzy mimośrodami'].subsections[0].set_read_only('l')
 
         # Add a spacer item at the end of the sidebar layout - keeps the contents alignet to the top
         spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)

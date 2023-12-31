@@ -1,3 +1,6 @@
+from ShaftDesigner.view.Chart import Chart
+from ShaftDesigner.view.ShaftSection import ShaftSection
+
 class ShaftDesignerController:
     def __init__(self, view):
         self._shaft_designer = view
@@ -8,19 +11,40 @@ class ShaftDesignerController:
         # Prepare dict storing shaft sections attributes
         self.shaft_sections = {}
 
-        self._startup()
-    
-    def _connect_signals_and_slots(self):
-        for section in self._shaft_designer.sections.values():
-            section.subsection_data_signal.connect(self._calculate_shaft_sections)
-            section.remove_subsection_plot_signal.connect(self._remove_subsection_plot)
-    
-    def _startup(self):
+        # Prepare dict storing sidebar sections
+        self._sidebar_sections = {}
+
         self._init_ui()
         self._connect_signals_and_slots()
+    
+    def _connect_signals_and_slots(self):
+        for section in self._sidebar_sections.values():
+            section.subsection_data_signal.connect(self._calculate_shaft_sections)
+            section.remove_subsection_plot_signal.connect(self._remove_subsection_plot)
 
     def _init_ui(self):
-        self._shaft_designer.init_sidebar(self.section_names)
+        # Set an instance of chart
+        self._chart = Chart()
+        self._shaft_designer.init_chart(self._chart)
+
+        # Set instances of sidebar sections
+        for name in self.section_names:
+            section = ShaftSection(name)
+            self._sidebar_sections[name] = section
+        
+        # Initially disable all sections except the 'Mimośrody' one:
+        for section_name, section in self._sidebar_sections.items():
+            if section_name != 'Mimośrody':
+                section.setEnabled(False)
+
+        # Disable option to add new subsections for sections below
+        self._sidebar_sections['Mimośrody'].set_add_subsection_button_visibility(False)
+        self._sidebar_sections['Pomiędzy mimośrodami'].set_add_subsection_button_visibility(False)
+
+        # Disable changing the default values of data entries in certain subsections below
+        self._sidebar_sections['Pomiędzy mimośrodami'].subsections[0].set_read_only('l')
+
+        self._shaft_designer.init_sidebar(self._sidebar_sections)
     
     def _save_shaft_sections_attributes(self, shaft_subsection_attributes):
         if shaft_subsection_attributes:
@@ -49,11 +73,11 @@ class ShaftDesignerController:
             self._calculate_section_after_eccentricities()
 
         # Draw shaft
-        self._shaft_designer.chart.draw_shaft(self.shaft_sections_plots_attributes)
+        self._chart.draw_shaft(self.shaft_sections_plots_attributes)
         
-        # If 'Mimośrody' section is calculated, enable other sections
+        # If 'Mimośrody' section is calculated, enable other sections in sidebar
         if 'Mimośrody' in self.shaft_sections:
-            for section in self._shaft_designer.sections.values():
+            for section in self._sidebar_sections.values():
                 section.setEnabled(True)
     
     def _calculate_eccentrics_section(self):
@@ -73,7 +97,7 @@ class ShaftDesignerController:
             self._shaft_attributes['B'] = length
 
             # Redraw shaft coordinates
-            self._shaft_designer.chart._draw_shaft_coordinates()
+            self._chart._draw_shaft_coordinates()
         else:
             eccentric2_position = self._shaft_attributes['L2']
 
@@ -151,12 +175,12 @@ class ShaftDesignerController:
         }
 
         # Set initial shaft sections input values to shaft initial attributes
-        for section_name, section in self._shaft_designer.sections.items():
+        for section_name, section in self._sidebar_sections.items():
             for subsection in section.subsections:
                 subsection.set_attributes(self._initial_shaft_sections_attributes[section_name])
 
         # Init plots
-        self._shaft_designer.chart.init_plots(data)
+        self._chart.init_plots(data)
         # Redraw shaft section if anything is already drawn on the chart
         if self.shaft_sections:
             self._calculate_shaft_sections()
