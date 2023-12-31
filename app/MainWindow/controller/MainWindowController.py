@@ -33,7 +33,6 @@ class MainWindowController:
         """Initialize the view with necessary data and set up tabs."""
         self._window.set_data(self._data)
         self._window.init_tabs()
-        self._window.init_shaft_designer()
 
     def _connect_signals_and_slots(self):
         """

@@ -8,7 +8,7 @@ class MainWindow(QMainWindow):
     """
     def __init__(self):
         super().__init__()
-        self.init_ui()
+        self._init_ui()
     
     def set_data(self, data):
         """
@@ -22,13 +22,41 @@ class MainWindow(QMainWindow):
         """
         self.shaft_designer.set_initial_data(data)
 
-    def init_ui(self):
+    def _init_ui(self):
         """
         Initialize the user interface.
         """
+        # Set window attributes
         self.setWindowTitle('CycloDesign')
-        self.setCentralWidget(QWidget())
-        self.centralWidget().setLayout(QVBoxLayout())
+
+        # Set central widget
+        central_widget = QWidget(self)
+        self.setCentralWidget(central_widget)
+
+        # Set layouts 
+        self.main_layout = QVBoxLayout(central_widget)
+
+        self.tabs_section_layout = QVBoxLayout()
+        self.buttons_section_layout = QVBoxLayout()
+
+        self.main_layout.addLayout(self.tabs_section_layout)
+        self.main_layout.addLayout(self.buttons_section_layout)
+
+        # Init buttons
+        # Add button for opening next tab 
+        self._next_tab_button = QPushButton('Dalej', self)
+        self._next_tab_button.clicked.connect(self.next_tab)
+
+        # Add button for opening the shaft designer
+        self.preview_button = QPushButton('Podgląd', self)
+        self.preview_button.clicked.connect(self._open_shaft_designer)
+        self.preview_button.setEnabled(False)
+
+        self.buttons_section_layout.addWidget(self._next_tab_button)
+        self.buttons_section_layout.addWidget(self.preview_button)
+
+        # Init shaft designer
+        self._init_shaft_designer()
     
     def init_tabs(self):
         """
@@ -59,31 +87,20 @@ class MainWindow(QMainWindow):
         self.tabs.append(tab4)
         self._tab_widget.addTab(tab4, 'Wyniki obliczeń')
         
-
         # Disable all tabs except the first one
         for i in range(1, self._tab_widget.count()):
             self._tab_widget.setTabEnabled(i, False)
 
         self._tab_widget.currentChanged.connect(self.on_tab_change)
 
-        # Add next tab button below the tabs
-        self._next_tab_button = QPushButton('Dalej', self)
-        self._next_tab_button.clicked.connect(self.next_tab)
-
-        self.centralWidget().layout().addWidget(self._tab_widget)
-        self.centralWidget().layout().addWidget(self._next_tab_button)
-
-    def init_shaft_designer(self):
-        # Add button for opening the shaft designer
-        self.shaft_designer = ShaftDesignerController()
-        self.preview_button = QPushButton('Podgląd', self)
-        self.preview_button.clicked.connect(self._open_shaft_designer)
-        self.preview_button.setEnabled(False)
-
-        self.centralWidget().layout().addWidget(self.preview_button)
+        self.tabs_section_layout.addWidget(self._tab_widget)
 
         # Check if the first tab is initially filled
         self.tabs[self._tab_widget.currentIndex()].check_state()
+
+    def _init_shaft_designer(self):
+        # Set an instance of shaft designer controller
+        self.shaft_designer = ShaftDesignerController()
 
     def _open_shaft_designer(self):
         self.update_data()
