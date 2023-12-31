@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QMainWindow, QTabWidget, QWidget, QVBoxLayout, QPushButton
 
-from .ShaftDesigner.ShaftDesigner import ShaftDesignerController
-from .ShaftDesigner.ShaftDesigner import ShaftDesigner
+from ShaftDesigner.controller.ShaftDesignerController import ShaftDesignerController
+from ShaftDesigner.view.ShaftDesigner import ShaftDesigner
 
 class MainWindow(QMainWindow):
     """
