@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QMainWindow, QTabWidget, QWidget, QVBoxLayout, QPushButton
 
 from .ShaftDesigner.ShaftDesigner import ShaftDesignerController
+from .ShaftDesigner.ShaftDesigner import ShaftDesigner
 
 class MainWindow(QMainWindow):
     """
@@ -20,7 +21,7 @@ class MainWindow(QMainWindow):
         """
         Set data for the shaft designer
         """
-        self.shaft_designer.set_initial_data(data)
+        self.shaft_designer_controller.set_initial_data(data)
 
     def _init_ui(self):
         """
@@ -99,12 +100,15 @@ class MainWindow(QMainWindow):
         self.tabs[self._tab_widget.currentIndex()].check_state()
 
     def _init_shaft_designer(self):
+        # Set an instance of shaft designer
+        self.shaft_designer = ShaftDesigner()
+
         # Set an instance of shaft designer controller
-        self.shaft_designer = ShaftDesignerController()
+        self.shaft_designer_controller = ShaftDesignerController(self.shaft_designer)
 
     def _open_shaft_designer(self):
         self.update_data()
-        self.shaft_designer.shaft_designer.show()
+        self.shaft_designer.show()
 
     def update_data(self):
         current_index = self._tab_widget.currentIndex()

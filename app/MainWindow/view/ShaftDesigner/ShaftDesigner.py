@@ -12,9 +12,8 @@ class ShaftDesigner(QMainWindow):
     other components of the application and also for implementing
     the GUI for interactive shaft design
     """
-    def __init__(self, section_names):
+    def __init__(self):
         super().__init__()
-        self.section_names = section_names
         self._init_ui()
     
     def _init_ui(self):
@@ -28,9 +27,13 @@ class ShaftDesigner(QMainWindow):
         self.setCentralWidget(self.main_widget)
 
         self._init_chart()
-        self._init_sidebar()
 
-    def _init_sidebar(self):
+    def _init_chart(self):
+        # Add Chart
+        self.chart = Chart()
+        self.centralWidget().layout().addWidget(self.chart)
+    
+    def init_sidebar(self, section_names):
         # Set layout for sidebar and toggle button
         self.sidebar_section_layout  = QHBoxLayout()
 
@@ -41,7 +44,7 @@ class ShaftDesigner(QMainWindow):
 
         # Set contents of the sidebar
         self.sections = {}
-        for name in self.section_names:
+        for name in section_names:
             section = ShaftSection(name, self)
             self.sections[name] = section
             # Initially disable all sections except the 'Mimośrody' one:
@@ -85,16 +88,13 @@ class ShaftDesigner(QMainWindow):
         self.main_layout.addWidget(self.scroll_area)
         self.main_layout.addLayout(self.toggle_button_layout)
 
-    def _init_chart(self):
-        # Add Chart
-        self.chart = Chart()
-        self.centralWidget().layout().addWidget(self.chart)
-
     def toggle_sidebar(self):
         self.scroll_area.setVisible(not self.scroll_area.isVisible())
 
 class ShaftDesignerController:
-    def __init__(self):
+    def __init__(self, view):
+        self._shaft_designer = view
+
         # Set shaft sections names
         self.section_names = ['Mimośrody', 'Przed mimośrodami', 'Pomiędzy mimośrodami', 'Za mimośrodami']
 
@@ -104,7 +104,7 @@ class ShaftDesignerController:
         self._startup()
     
     def _connect_signals_and_slots(self):
-        for section in self.shaft_designer.sections.values():
+        for section in self._shaft_designer.sections.values():
             section.subsection_data_signal.connect(self._calculate_shaft_sections)
             section.remove_subsection_plot_signal.connect(self._remove_subsection_plot)
     
@@ -113,7 +113,7 @@ class ShaftDesignerController:
         self._connect_signals_and_slots()
 
     def _init_ui(self):
-        self.shaft_designer = ShaftDesigner(self.section_names)
+        self._shaft_designer.init_sidebar(self.section_names)
     
     def _save_shaft_sections_attributes(self, shaft_subsection_attributes):
         if shaft_subsection_attributes:
@@ -142,11 +142,11 @@ class ShaftDesignerController:
             self._calculate_section_after_eccentricities()
 
         # Draw shaft
-        self.shaft_designer.chart.draw_shaft(self.shaft_sections_plots_attributes)
+        self._shaft_designer.chart.draw_shaft(self.shaft_sections_plots_attributes)
         
         # If 'Mimośrody' section is calculated, enable other sections
         if 'Mimośrody' in self.shaft_sections:
-            for section in self.shaft_designer.sections.values():
+            for section in self._shaft_designer.sections.values():
                 section.setEnabled(True)
     
     def _calculate_eccentrics_section(self):
@@ -166,7 +166,7 @@ class ShaftDesignerController:
             self._shaft_attributes['B'] = length
 
             # Redraw shaft coordinates
-            self.shaft_designer.chart._draw_shaft_coordinates()
+            self._shaft_designer.chart._draw_shaft_coordinates()
         else:
             eccentric2_position = self._shaft_attributes['L2']
 
@@ -244,12 +244,12 @@ class ShaftDesignerController:
         }
 
         # Set initial shaft sections input values to shaft initial attributes
-        for section_name, section in self.shaft_designer.sections.items():
+        for section_name, section in self._shaft_designer.sections.items():
             for subsection in section.subsections:
                 subsection.set_attributes(self._initial_shaft_sections_attributes[section_name])
 
         # Init plots
-        self.shaft_designer.chart.init_plots(data)
+        self._shaft_designer.chart.init_plots(data)
         # Redraw shaft section if anything is already drawn on the chart
         if self.shaft_sections:
             self._calculate_shaft_sections()
