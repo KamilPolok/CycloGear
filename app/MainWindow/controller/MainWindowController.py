@@ -320,7 +320,8 @@ class MainWindowController:
             'LB': self._data['LB'][0],
             'ds': self._data['dsc'][0],
             'de': self._data['dec'][0],
-            'B': self._data['B'][0],
+            'B1': self._data['B'][0],
+            'B2': self._data['B'][0],
             'e': self._data['e'][0],
             'x': self._data['x'][0]
         }
