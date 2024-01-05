@@ -6,6 +6,7 @@ from .ShaftSubsection import ShaftSubsection
 
 class ShaftSection(QWidget):
     subsection_data_signal = pyqtSignal(dict)
+    add_subsection_signal = pyqtSignal()
     remove_subsection_plot_signal = pyqtSignal(str, int)
 
     def __init__(self, name):
@@ -13,6 +14,7 @@ class ShaftSection(QWidget):
         self.name = name
         self.subsections = []
         self.subsection_count = 0
+
         self._init_ui()
 
     def _init_ui(self):
@@ -51,6 +53,8 @@ class ShaftSection(QWidget):
         self.set_remove_subsection_buttons_visibile()
         self.set_add_subsection_button_enabled(False)
         self.subsection_count += 1
+        if self.subsection_count > 0:
+            self.add_subsection_signal.emit()
     
     def remove_subsection(self, subsection_number):
         # Find and remove the specific subsection
@@ -93,5 +97,10 @@ class ShaftSection(QWidget):
             if widget is not None:
                 widget.setVisible(self.expanded)
     
+    def set_limits(self, limits):
+        for subsection_number, attributes in limits.items():
+            for attribute, attribute_limits in attributes.items():
+                self.subsections[subsection_number].set_limits(attribute, attribute_limits)
+
     def handle_subsection_data(self, data):
         self.subsection_data_signal.emit(data)

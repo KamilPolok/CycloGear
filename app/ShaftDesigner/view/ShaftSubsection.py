@@ -14,6 +14,7 @@ class ShaftSubsection(QWidget):
         self.subsection_number = subsection_number
         self.expanded = False
         self.input_values = {}
+        self.limits = {}
 
         self._init_ui()
 
@@ -94,16 +95,48 @@ class ShaftSubsection(QWidget):
 
         # Save the line_edit for later reference
         self.input_values[attribute] = line_edit
+        self.limits[attribute] = {'min': None, 'max': None}
 
-        # Connect textChanged signal
+        # Connect signals and slots
         self.input_values[attribute].textChanged.connect(self.check_if_all_inputs_provided)
+        self.input_values[attribute].editingFinished.connect(self._check_value)
 
         return layout
-    
+
+    def _check_value(self, line_edit=None):
+        # Check if the value is less than the minimum allowed value
+        if line_edit is None:
+            line_edit = self.sender()
+        line_edit_key = next((key for key, value in self.input_values.items() if value == line_edit), None)
+       
+        min_value = self.limits[line_edit_key]['min']
+        max_value = self.limits[line_edit_key]['max']
+        value = float(line_edit.text()) if line_edit.text() else None
+
+        if line_edit_key == 'd':
+            if min_value is not None and (value is None or value < min_value):
+                line_edit.setText(str(min_value))
+            elif max_value is not None and value is not None and value > max_value:
+                line_edit.setText(str(max_value))
+            line_edit.setPlaceholderText(str(min_value))
+        elif line_edit_key == 'l':
+            if min_value is not None and value is not None and value < min_value:
+                line_edit.setText(str(min_value))
+            elif max_value is not None and (value is None or value > max_value):
+                line_edit.setText(str(max_value))
+
     def set_attributes(self, attributes):
         for attribute, value in attributes.items():
             if value is not None:
                 self.input_values[attribute].setText(str(value))
+    
+    def set_limits(self, attribute, limits):
+        self.limits[attribute]['min'] = limits['min']
+        self.limits[attribute]['max'] =  limits['max']
+        self._check_value(self.input_values[attribute])
+
+    def get_attributes(self):
+        return {self.section_name: {self.subsection_number: {key: literal_eval(input.text()) for key, input in self.input_values.items()}}}
 
     def set_read_only(self, attribute):
         self.input_values[attribute].setReadOnly(True)
@@ -124,7 +157,7 @@ class ShaftSubsection(QWidget):
         self.confirm_button.setEnabled(all(input.text() != '' for input in self.input_values.values()))
 
     def emit_data_signal(self):
-        self.subsection_data_signal.emit({self.section_name: {self.subsection_number: {key: literal_eval(input.text()) for key, input in self.input_values.items()}}})
+        self.subsection_data_signal.emit(self.get_attributes())
     
     def emit_remove_signal(self):
         self.remove_subsection_signal.emit(self.subsection_number)
