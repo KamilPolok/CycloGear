@@ -4,7 +4,6 @@ from PyQt6.QtCore import pyqtSignal
 
 from .ShaftSubsection import ShaftSubsection
 
-
 class ShaftSection(QWidget):
     subsection_data_signal = pyqtSignal(dict)
     remove_subsection_plot_signal = pyqtSignal(str, int)
@@ -49,7 +48,8 @@ class ShaftSection(QWidget):
         subsection.remove_subsection_signal.connect(self.remove_subsection)
         self.subsections.append(subsection)
         self.subsections_layout.addWidget(subsection)
-        self.update_remove_buttons_visibility()
+        self.set_remove_subsection_buttons_visibile()
+        self.set_add_subsection_button_enabled(False)
         self.subsection_count += 1
     
     def remove_subsection(self, subsection_number):
@@ -69,15 +69,21 @@ class ShaftSection(QWidget):
             self.subsection_count = len(self.subsections)
             
             # Update the visibility of the remove buttons
-            self.update_remove_buttons_visibility()
+            self.set_remove_subsection_buttons_visibile()
         
         self.remove_subsection_plot_signal.emit(self.name, subsection_number)
     
-    def update_remove_buttons_visibility(self):
+    def set_remove_subsection_buttons_visibile(self):
         # Show the remove button only if there are more than one subsections
         single_subsection = len(self.subsections) == 1
         for subsection in self.subsections:
             subsection.remove_button.setVisible(not single_subsection)
+    
+    def set_add_subsection_button_visibile(self, visible):
+        self.add_subsection_button.setVisible(visible)
+
+    def set_add_subsection_button_enabled(self, enabled):
+        self.add_subsection_button.setEnabled(enabled)
     
     def toggle(self, event):
         # Toggle the visibility of the subsections
@@ -86,9 +92,6 @@ class ShaftSection(QWidget):
             widget = self.subsections_layout.itemAt(i).widget()
             if widget is not None:
                 widget.setVisible(self.expanded)
-    
-    def set_add_subsection_button_visibility(self, visible):
-        self.add_subsection_button.setVisible(visible)
     
     def handle_subsection_data(self, data):
         self.subsection_data_signal.emit(data)

@@ -21,7 +21,7 @@ class ShaftDesignerController:
     
     def _connect_signals_and_slots(self):
         for section in self._sidebar_sections.values():
-            section.subsection_data_signal.connect(self._draw_shaft)
+            section.subsection_data_signal.connect(self._handle_subsection_data)
             section.remove_subsection_plot_signal.connect(self._remove_shaft_subsection)
 
     def _init_ui(self):
@@ -40,9 +40,9 @@ class ShaftDesignerController:
                 section.setEnabled(False)
 
         # Disable option to add new subsections for sections below
-        self._sidebar_sections['Mimośród 1'].set_add_subsection_button_visibility(False)
-        self._sidebar_sections['Mimośród 2'].set_add_subsection_button_visibility(False)
-        self._sidebar_sections['Pomiędzy mimośrodami'].set_add_subsection_button_visibility(False)
+        self._sidebar_sections['Mimośród 1'].set_add_subsection_button_visibile(False)
+        self._sidebar_sections['Mimośród 2'].set_add_subsection_button_visibile(False)
+        self._sidebar_sections['Pomiędzy mimośrodami'].set_add_subsection_button_visibile(False)
 
         # Disable changing the default values of data entries in certain subsections below
         self._sidebar_sections['Pomiędzy mimośrodami'].subsections[0].set_read_only('l')
@@ -71,18 +71,40 @@ class ShaftDesignerController:
         if self.shaft_calculator.shaft_sections:
             self._draw_shaft()
     
-    def _draw_shaft(self, shaft_subsection_attributes = None):
-        shaft_plot_attributes = self.shaft_calculator.calculate_shaft_sections(shaft_subsection_attributes)
-        self._chart.draw_shaft(shaft_plot_attributes)
+    def _handle_subsection_data(self, shaft_subsection_attributes):
+        # Uptade the shaft drawing
+        self._draw_shaft(shaft_subsection_attributes)
 
-        if self.shaft_calculator.shaft_coordinates_changed is True:
-            self._chart._draw_shaft_coordinates()
-
-        # If 'Mimośrody' section is calculated, enable other sections in sidebar
+        # Enable other sections in the sidebar if both eccentrics sections where plotted, 
         if 'Mimośród 1' and 'Mimośród 2' in self.shaft_calculator.shaft_sections:
             for section in self._sidebar_sections.values():
                 section.setEnabled(True)
+        
+        # Check if add subsection button can be enabled
+        section_name = next(iter(shaft_subsection_attributes))
+        self.check_if_can_enable_subsection_button(section_name)
+    
+    def _draw_shaft(self, shaft_subsection_attributes = None):
+        # Calculate shaft subsections plot attributes and draw them on the chart
+        shaft_plot_attributes = self.shaft_calculator.calculate_shaft_sections(shaft_subsection_attributes)
+        self._chart.draw_shaft(shaft_plot_attributes)
+
+        # Redraw the shaft coordinates if they were changed
+        if self.shaft_calculator.shaft_coordinates_changed is True:
+            self._chart._draw_shaft_coordinates()
 
     def _remove_shaft_subsection(self, section_name, subsection_number):
+        # Remove the subsection plot from the chart and its attributes in calculators shaft sections
         shaft_plot_attributes = self.shaft_calculator.remove_shaft_subsection(section_name, subsection_number)
-        self._chart.draw_shaft(shaft_plot_attributes)
+        if shaft_plot_attributes != None:
+            self._chart.draw_shaft(shaft_plot_attributes)
+        
+        # Check if add subsection button can be enabled
+        self.check_if_can_enable_subsection_button(section_name)
+
+    def check_if_can_enable_subsection_button(self, section_name):
+        # Enable add button if the last subsection in the sidebar was plotted - do not allow to add multiple subsections at once
+        last_subsection_number = self._sidebar_sections[section_name].subsection_count - 1
+
+        if last_subsection_number in self.shaft_calculator.shaft_sections[section_name]:
+            self._sidebar_sections[section_name].set_add_subsection_button_enabled(True)
