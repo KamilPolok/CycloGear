@@ -69,6 +69,10 @@ class ShaftDesignerController:
         if 'Mimośród 1' and 'Mimośród 2' in self.shaft_calculator.shaft_sections:
             for section in self._sidebar_sections.values():
                 section.setEnabled(True)
+
+        if self.shaft_calculator.updated_eccentrics_diameter:
+            self._sidebar_sections['Mimośród 1'].subsections[0].set_attributes({'d': self.shaft_calculator.updated_eccentrics_diameter})
+            self._sidebar_sections['Mimośród 2'].subsections[0].set_attributes({'d': self.shaft_calculator.updated_eccentrics_diameter})
         
         # Check if add subsection button can be enabled
         section_name = next(iter(shaft_subsection_attributes))

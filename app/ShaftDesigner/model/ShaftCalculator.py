@@ -19,13 +19,17 @@ class ShaftCalculator:
         self.shaft_coordinates_changed = False
 
         # Set the same diameter of eccentrics
+        self.updated_eccentrics_diameter = None
+
         if shaft_subsection_attributes:
             if 'Mimośród 1' in shaft_subsection_attributes:
                 if 'Mimośród 2' in self.shaft_sections:
-                    self.shaft_sections['Mimośród 2'][0]['d'] = self.shaft_sections['Mimośród 1'][0]['d']
+                    self.updated_eccentrics_diameter = self.shaft_sections['Mimośród 1'][0]['d']
+                    self.shaft_sections['Mimośród 2'][0]['d'] = self.updated_eccentrics_diameter
             elif 'Mimośród 2' in shaft_subsection_attributes:
                 if 'Mimośród 1' in self.shaft_sections:
-                    self.shaft_sections['Mimośród 1'][0]['d'] = self.shaft_sections['Mimośród 2'][0]['d']
+                    self.updated_eccentrics_diameter = self.shaft_sections['Mimośród 2'][0]['d']
+                    self.shaft_sections['Mimośród 1'][0]['d'] = self.updated_eccentrics_diameter
     
     def calculate_shaft_sections_limits(self, current_subsections):
         self.limits = {
