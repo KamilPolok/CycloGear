@@ -1,6 +1,6 @@
 from ast import literal_eval
 
-from PyQt6.QtCore import QRegularExpression, pyqtSignal
+from PyQt6.QtCore import Qt, QRegularExpression, pyqtSignal
 from PyQt6.QtGui import QRegularExpressionValidator
 from PyQt6.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QPushButton, QSizePolicy, QVBoxLayout, QWidget
 
@@ -76,6 +76,7 @@ class ShaftSubsection(QWidget):
 
         # Line edit for input
         line_edit = QLineEdit()
+        line_edit.setAlignment(Qt.AlignmentFlag.AlignRight)
         line_edit.setFixedWidth(50)
         line_edit.setText('')
         
@@ -99,12 +100,21 @@ class ShaftSubsection(QWidget):
 
         # Connect signals and slots
         self.input_values[attribute].textChanged.connect(self.check_if_all_inputs_provided)
-        self.input_values[attribute].editingFinished.connect(self._check_value)
+        self.input_values[attribute].editingFinished.connect(self._check_boundaries)
 
         return layout
 
-    def _check_value(self, line_edit=None):
-        # Check if the value is less than the minimum allowed value
+    def format_input(self, number):
+        # Check if the text is a valid number and set its format
+        if number is None:
+            formatted_text = ""
+        else:
+            formatted_text = "{:.2f}".format(number)
+        
+        return formatted_text
+
+    def _check_boundaries(self, line_edit=None):
+        # Check if the input value is within bounadaries
         if line_edit is None:
             line_edit = self.sender()
         line_edit_key = next((key for key, value in self.input_values.items() if value == line_edit), None)
@@ -115,25 +125,29 @@ class ShaftSubsection(QWidget):
 
         if line_edit_key == 'd':
             if min_value is not None and (value is None or value < min_value):
-                line_edit.setText(str(min_value))
+                line_edit.setText(self.format_input(min_value))
             elif max_value is not None and value is not None and value > max_value:
-                line_edit.setText(str(max_value))
-            line_edit.setPlaceholderText(str(min_value))
+                line_edit.setText(self.format_input(max_value))
+            else:
+                line_edit.setText(self.format_input(value))
+            line_edit.setPlaceholderText(self.format_input(min_value))
         elif line_edit_key == 'l':
             if min_value is not None and value is not None and value < min_value:
-                line_edit.setText(str(min_value))
+                line_edit.setText(self.format_input(min_value))
             elif max_value is not None and (value is None or value > max_value):
-                line_edit.setText(str(max_value))
+                line_edit.setText(self.format_input(max_value))
+            else:
+                line_edit.setText(self.format_input(value))
 
     def set_attributes(self, attributes):
         for attribute, value in attributes.items():
             if value is not None:
-                self.input_values[attribute].setText(str(value))
+                self.input_values[attribute].setText(self.format_input(value))
     
     def set_limits(self, attribute, limits):
         self.limits[attribute]['min'] = limits['min']
         self.limits[attribute]['max'] =  limits['max']
-        self._check_value(self.input_values[attribute])
+        self._check_boundaries(self.input_values[attribute])
 
     def get_attributes(self):
         return {self.section_name: {self.subsection_number: {key: literal_eval(input.text()) for key, input in self.input_values.items()}}}
