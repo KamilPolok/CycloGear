@@ -1,7 +1,7 @@
 from ShaftDesigner.model.ShaftCalculator import ShaftCalculator
 
 from ShaftDesigner.view.Chart import Chart
-from ShaftDesigner.view.ShaftSection import ShaftSection
+from ShaftDesigner.view.ShaftSection import ShaftSection, ShaftSection2
         
 class ShaftDesignerController:
     def __init__(self, view):
@@ -20,10 +20,11 @@ class ShaftDesignerController:
         self.shaft_calculator = ShaftCalculator(self.section_names)
     
     def _connect_signals_and_slots(self):
-        for section in self._sidebar_sections.values():
+        for section_name, section in self._sidebar_sections.items():
             section.subsection_data_signal.connect(self._handle_subsection_data)
-            section.add_subsection_signal.connect(self._set_limits)
-            section.remove_subsection_plot_signal.connect(self._remove_shaft_subsection)
+            if section_name == 'Przed mimośrodami' or section_name == 'Za mimośrodami':
+                section.add_subsection_signal.connect(self._set_limits)
+                section.remove_subsection_plot_signal.connect(self._remove_shaft_subsection)
 
     def _init_ui(self):
         # Set an instance of chart
@@ -31,19 +32,18 @@ class ShaftDesignerController:
         self._shaft_designer.init_chart(self._chart)
 
         # Set instances of sidebar sections
-        for name in self.section_names:
+        for name in self.section_names[:2]:
             section = ShaftSection(name)
+            self._sidebar_sections[name] = section
+
+        for name in self.section_names[2:]:
+            section = ShaftSection2(name)
             self._sidebar_sections[name] = section
         
         # Initially disable all sections except the 'Mimośrody' one:
         for section_name, section in self._sidebar_sections.items():
             if section_name != 'Mimośród 1' and section_name != 'Mimośród 2':
                 section.setEnabled(False)
-
-        # Disable option to add new subsections for sections below
-        self._sidebar_sections['Mimośród 1'].set_add_subsection_button_visibile(False)
-        self._sidebar_sections['Mimośród 2'].set_add_subsection_button_visibile(False)
-        self._sidebar_sections['Pomiędzy mimośrodami'].set_add_subsection_button_visibile(False)
 
         # Disable changing the default values of data entries in certain subsections below
         self._sidebar_sections['Pomiędzy mimośrodami'].subsections[0].set_read_only('l')
@@ -126,8 +126,9 @@ class ShaftDesignerController:
         self.check_if_can_enable_add_subsection_button(section_name)
 
     def check_if_can_enable_add_subsection_button(self, section_name):
-        # Enable add button if the last subsection in the sidebar was plotted - do not allow to add multiple subsections at once
-        last_subsection_number = self._sidebar_sections[section_name].subsection_count - 1
+        if section_name == 'Przed mimośrodami' or section_name == 'Za mimośrodami':
+            # Enable add button if the last subsection in the sidebar was plotted - do not allow to add multiple subsections at once
+            last_subsection_number = self._sidebar_sections[section_name].subsection_count - 1
 
-        if last_subsection_number in self.shaft_calculator.shaft_sections[section_name]:
-            self._sidebar_sections[section_name].set_add_subsection_button_enabled(True)   
+            if last_subsection_number in self.shaft_calculator.shaft_sections[section_name]:
+                self._sidebar_sections[section_name].set_add_subsection_button_enabled(True)   

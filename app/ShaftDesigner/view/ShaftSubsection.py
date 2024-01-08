@@ -23,13 +23,25 @@ class ShaftSubsection(QWidget):
         self.main_layout = QVBoxLayout(self)
         self.main_layout.setContentsMargins(0, 0, 0, 0)
 
+        # Header layout
+        self.header_layout = QHBoxLayout()
+
         # Set header
         self.header = QLabel()
         self._set_header()
         self.header.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.header.setFixedHeight(30)
         self.header.mousePressEvent = self.toggle
-        self.main_layout.addWidget(self.header)
+        self.header_layout.addWidget(self.header)
+
+        # Set removal button
+        self.remove_button = QPushButton("-", self)
+        self.remove_button.setFixedWidth(30)
+        self.remove_button.clicked.connect(self.emit_remove_signal)
+        self.header_layout.addWidget(self.remove_button)
+
+        # Add header layout to main layout
+        self.main_layout.addLayout(self.header_layout)
 
         # Set content widget and layout
         self.content_widget = QWidget()
@@ -45,14 +57,9 @@ class ShaftSubsection(QWidget):
         self.confirm_button.clicked.connect(self.emit_data_signal)
         self.confirm_button.setEnabled(False)
 
-        # Set removal button
-        self.remove_button = QPushButton("Usuń", self)
-        self.remove_button.clicked.connect(self.emit_remove_signal)
-
         self.content_layout.addLayout(diameter)
         self.content_layout.addLayout(length)
         self.content_layout.addWidget(self.confirm_button)
-        self.content_layout.addWidget(self.remove_button)
         self.content_widget.setVisible(False)
 
         self.main_layout.addWidget(self.content_widget)

@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QLabel, QPushButton, QVBoxLayout, QWidget, QSizePolicy
+from PyQt6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget, QSizePolicy
 
 from PyQt6.QtCore import pyqtSignal
 
@@ -6,11 +6,9 @@ from .ShaftSubsection import ShaftSubsection
 
 class ShaftSection(QWidget):
     subsection_data_signal = pyqtSignal(dict)
-    add_subsection_signal = pyqtSignal()
-    remove_subsection_plot_signal = pyqtSignal(str, int)
 
-    def __init__(self, name):
-        super().__init__()
+    def __init__(self, name, parent=None):
+        super().__init__(parent)
         self.name = name
         self.subsections = []
         self.subsection_count = 0
@@ -18,31 +16,95 @@ class ShaftSection(QWidget):
         self._init_ui()
 
     def _init_ui(self):
-        # Set layout
+        # Main layout
         self.layout = QVBoxLayout(self)
+
+        self._init_header()
+        self._init_subsections()
+
+        # Initially collapse ShaftSection widget
+        self.expanded = True
+        self.toggle(None)
+    
+    def _init_header(self):
+        # Header layout
+        self.header_layout = QHBoxLayout()
 
         # Set header
         self.header = QLabel(self.name)
         self.header.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.header.setFixedHeight(30)
         self.header.mousePressEvent = self.toggle
-        self.layout.addWidget(self.header)
+        self.header_layout.addWidget(self.header)
 
+        # Add header layout to main layout
+        self.layout.addLayout(self.header_layout)
+    
+    def _init_subsections(self):
         # Set subsections layout
         self.subsections_layout = QVBoxLayout()
         self.layout.addLayout(self.subsections_layout)
 
+        # Add one subsection
+        self.add_subsection()
+
+    def add_subsection(self):
+        subsection = ShaftSubsection(self.name, self.subsection_count, self)
+        subsection.subsection_data_signal.connect(self.handle_subsection_data)
+        self.subsections.append(subsection)
+        self.subsections_layout.addWidget(subsection)
+        self.set_remove_subsection_buttons_visibile()
+        self.subsection_count += 1
+    
+    def toggle(self, event):
+        # Toggle the visibility of the subsections
+        self.expanded = not self.expanded
+        for i in range(self.subsections_layout.count()): 
+            widget = self.subsections_layout.itemAt(i).widget()
+            if widget is not None:
+                widget.setVisible(self.expanded)
+    
+    def set_limits(self, limits):
+        for subsection_number, attributes in limits.items():
+            for attribute, attribute_limits in attributes.items():
+                self.subsections[subsection_number].set_limits(attribute, attribute_limits)
+    
+    def set_remove_subsection_buttons_visibile(self):
+        # Show the remove button only if there are more than one subsections
+        single_subsection = len(self.subsections) == 1
+        for subsection in self.subsections:
+            subsection.remove_button.setVisible(not single_subsection)
+
+    def handle_subsection_data(self, data):
+        self.subsection_data_signal.emit(data)
+
+class ShaftSection2(ShaftSection):
+    subsection_data_signal = pyqtSignal(dict)
+    add_subsection_signal = pyqtSignal()
+    remove_subsection_plot_signal = pyqtSignal(str, int)
+
+    def __init__(self, name, parent=None):
+        super().__init__(name, parent)
+
+    def _init_header(self):
+        # Header layout
+        self.header_layout = QHBoxLayout()
+
+        # Set header
+        self.header = QLabel(self.name)
+        self.header.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self.header.setFixedHeight(30)
+        self.header.mousePressEvent = self.toggle
+        self.header_layout.addWidget(self.header)
+
         # Set add subsection button
         self.add_subsection_button = QPushButton("+", self)
         self.add_subsection_button.clicked.connect(self.add_subsection)
-        self.layout.addWidget(self.add_subsection_button)
+        self.add_subsection_button.setFixedWidth(30)
+        self.header_layout.addWidget(self.add_subsection_button)
 
-        # Initially add one subsection
-        self.add_subsection()
-
-        # Initially collapse ShaftSection widget
-        self.expanded = True
-        self.toggle(None)
+        # Add header layout to main layout
+        self.layout.addLayout(self.header_layout)
 
     def add_subsection(self):
         subsection = ShaftSubsection(self.name, self.subsection_count, self)
@@ -77,12 +139,6 @@ class ShaftSection(QWidget):
         
         self.remove_subsection_plot_signal.emit(self.name, subsection_number)
     
-    def set_remove_subsection_buttons_visibile(self):
-        # Show the remove button only if there are more than one subsections
-        single_subsection = len(self.subsections) == 1
-        for subsection in self.subsections:
-            subsection.remove_button.setVisible(not single_subsection)
-    
     def set_add_subsection_button_visibile(self, visible):
         self.add_subsection_button.setVisible(visible)
 
@@ -96,11 +152,5 @@ class ShaftSection(QWidget):
             widget = self.subsections_layout.itemAt(i).widget()
             if widget is not None:
                 widget.setVisible(self.expanded)
-    
-    def set_limits(self, limits):
-        for subsection_number, attributes in limits.items():
-            for attribute, attribute_limits in attributes.items():
-                self.subsections[subsection_number].set_limits(attribute, attribute_limits)
-
-    def handle_subsection_data(self, data):
-        self.subsection_data_signal.emit(data)
+        
+        self.add_subsection_button.setVisible(self.expanded)
