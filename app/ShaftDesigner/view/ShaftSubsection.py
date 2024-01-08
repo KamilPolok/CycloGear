@@ -80,7 +80,7 @@ class ShaftSubsection(QWidget):
         line_edit.setText('')
         
         # Input validation
-        regex = QRegularExpression(r'^[1-9]\d{0,3}(\.\d{1,2})?$')
+        regex = QRegularExpression(r'^[0-9]\d{0,3}(\.\d{1,2})?$')
         line_edit.setValidator(QRegularExpressionValidator(regex, line_edit))
 
         # Units label
@@ -154,7 +154,7 @@ class ShaftSubsection(QWidget):
         self.updateGeometry()
 
     def check_if_all_inputs_provided(self):
-        self.confirm_button.setEnabled(all(input.text() != '' for input in self.input_values.values()))
+        self.confirm_button.setEnabled(all(input.text() != '' for input in self.input_values.values()) and all(literal_eval(input.text()) != 0 for input in self.input_values.values()))
 
     def emit_data_signal(self):
         self.subsection_data_signal.emit(self.get_attributes())
