@@ -140,23 +140,47 @@ class Chart(QWidget):
         self.markers_and_labels.clear()
 
         # Define markers and corresponding labels
-        markers = [roller_support, eccentric1_position, eccentric2_position, pin_support, shaft_length]
-        labels = ['A', 'L1', 'L2', 'B', 'L']
+        points = [ 0, roller_support, eccentric1_position, eccentric2_position, pin_support, shaft_length]
+        labels = ['0', 'A', 'L1', 'L2', 'B', 'L']
 
         # Draw markers
-        scatter = self.ax.scatter(markers, [0] * len(markers), color='black', s=8, zorder=5)
-        self.markers_and_labels.append(scatter)
+        markers = self.ax.scatter(points, [0] * len(points), color='black', s=8, zorder=5)
+        self.markers_and_labels.append(markers)
 
         # Add labels for the markers
-        for marker, label in zip(markers, labels):
-            annotation = self.ax.annotate(label, (marker, 0), textcoords="offset points", xytext=(10, -15), ha='center')
-            self.markers_and_labels.append(annotation)
+        for marker, label in zip(points, labels):
+            annotation_labels = self.ax.annotate(label, (marker, 0), textcoords="offset points", xytext=(10, -15), ha='center', zorder=5)
+            self.markers_and_labels.append(annotation_labels)
+
+        # Draw dimension lines between points
+        dimensions_color = 'SkyBlue'
+        for i in range(len(points) - 1):
+            start, end = points[i], points[i + 1]
+            mid_point = (start + end) / 2
+            distance = end - start
+
+            # Draw dimension line with arrows
+            dimension_lines = self.ax.annotate(
+                '', xy=(start, 0), xycoords='data',
+                xytext=(end, 0), textcoords='data',
+                arrowprops=dict(arrowstyle="<->", color=dimensions_color),
+                zorder=3
+            )
+            self.markers_and_labels.append(dimension_lines)
+
+            # Add dimension labels
+            dimension_labels = self.ax.text(mid_point, 0, f' {distance} ', ha='center', va='center', color=dimensions_color,
+                     fontsize=8,
+                     bbox=dict(facecolor='white', edgecolor='none', boxstyle='round,pad=0.2', zorder=3))
+
+            self.markers_and_labels.append(dimension_labels)
 
         # Remove any active plots so they can be properly redrawn
         for plot_name in list(self.active_plots.keys()):
             for line in self.active_plots[plot_name]:
                 line.remove()
             del self.active_plots[plot_name]
+
         self._update_plot()
     
     def _update_plot(self):
