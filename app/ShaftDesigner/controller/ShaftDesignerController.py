@@ -106,7 +106,7 @@ class ShaftDesignerController:
 
         # Redraw the shaft coordinates if they were changed
         if self.shaft_calculator.shaft_coordinates_changed is True:
-            self._chart._draw_shaft_coordinates()
+            self._chart.draw_shaft_markers()
         
         # Set limits
         self._set_limits()

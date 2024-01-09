@@ -20,7 +20,13 @@ class Chart(QWidget):
         self.active_plots = {}          # Dictionary to keep track of active plots
         self.active_sections = {}       # Dictionary to keep track of shaft sections
 
-        self.markers_and_labels = []  # List to keep track of markers and labels
+        self.shaft_markers = []         # List to keep track of shaft markers
+        self.shaft_coordinates = []     # List to keep track of shaft coordinates
+        self.shaft_dimensions = []      # List to keep track of shaft dimensions
+
+        self.shaft_attributes = {}      # List to keep track of current shaft attributes
+
+        self.dimension_offset = 0
 
         # Initialize the user interface for the chart widget
         self._init_ui()
@@ -44,6 +50,7 @@ class Chart(QWidget):
         # Create a custom toolbar with plot selector
         self._toolbar = CustomToolbar(self.canvas, self)
         self._toolbar.updated_selected_plots.connect(self._update_plot)
+        self._toolbar.show_dimensions_checkbox.stateChanged.connect(self._draw_shaft_dimensions)
 
         # Create and store the cursor object for interactive data display
         self.cursor = mplcursors.cursor(self.ax, hover=False)
@@ -120,7 +127,7 @@ class Chart(QWidget):
         self.ax.grid(True, which='minor', linestyle=':', linewidth='0.2', color='gray')
         self.ax.minorticks_on()
 
-    def _draw_shaft_coordinates(self):
+    def draw_shaft_markers(self):
         """
         Draw the shaft characteristic points on the plot.
 
@@ -133,47 +140,27 @@ class Chart(QWidget):
         eccentric2_position = self._data['L2']
         shaft_length = self._data['L']
 
-
-        # Remove old markers and labels
-        for item in self.markers_and_labels:
-            item.remove()
-        self.markers_and_labels.clear()
-
-        # Define markers and corresponding labels
+        # Define marker points and corresponding labels
         points = [ 0, roller_support, eccentric1_position, eccentric2_position, pin_support, shaft_length]
         labels = ['0', 'A', 'L1', 'L2', 'B', 'L']
 
+        # Remove old markers
+        for item in self.shaft_markers:
+            item.remove()
+        self.shaft_markers.clear()
+
         # Draw markers
         markers = self.ax.scatter(points, [0] * len(points), color='black', s=8, zorder=5)
-        self.markers_and_labels.append(markers)
+        self.shaft_markers.append(markers)
 
         # Add labels for the markers
         for marker, label in zip(points, labels):
             annotation_labels = self.ax.annotate(label, (marker, 0), textcoords="offset points", xytext=(10, -15), ha='center', zorder=5)
-            self.markers_and_labels.append(annotation_labels)
+            self.shaft_markers.append(annotation_labels)
 
-        # Draw dimension lines between points
-        dimensions_color = 'SkyBlue'
-        for i in range(len(points) - 1):
-            start, end = points[i], points[i + 1]
-            mid_point = (start + end) / 2
-            distance = end - start
+        self._draw_shaft_coordinates()
 
-            # Draw dimension line with arrows
-            dimension_lines = self.ax.annotate(
-                '', xy=(start, 0), xycoords='data',
-                xytext=(end, 0), textcoords='data',
-                arrowprops=dict(arrowstyle="<->", color=dimensions_color),
-                zorder=3
-            )
-            self.markers_and_labels.append(dimension_lines)
-
-            # Add dimension labels
-            dimension_labels = self.ax.text(mid_point, 0, f' {distance} ', ha='center', va='center', color=dimensions_color,
-                     fontsize=8,
-                     bbox=dict(facecolor='white', edgecolor='none', boxstyle='round,pad=0.2', zorder=3))
-
-            self.markers_and_labels.append(dimension_labels)
+        self.canvas.draw()
 
         # Remove any active plots so they can be properly redrawn
         for plot_name in list(self.active_plots.keys()):
@@ -182,6 +169,32 @@ class Chart(QWidget):
             del self.active_plots[plot_name]
 
         self._update_plot()
+
+    def _draw_shaft_coordinates(self):
+        # Remove old coordinates
+        for item in self.shaft_coordinates:
+            item.remove()
+        self.shaft_coordinates.clear()
+
+        if self._toolbar.show_dimensions_checkbox.isChecked():
+            # Define characteristic shaft coordinates
+            points = [0, self._data['LA'], self._data['L1'], self._data['L2'], self._data['LB'], self._data['L']]
+
+            # Draw dimension lines between points
+            dimensions_color = 'SkyBlue'
+            for i in range(len(points) - 1):
+                start, end = points[i], points[i + 1]
+                mid_point = (start + end) / 2
+                distance = "{:.1f}".format(end - start)
+                y_position = -self.dimension_offset
+
+                dimension = self._draw_dimension(distance, start, end, mid_point, y_position, y_position, y_position)
+
+                self.shaft_coordinates.extend(dimension)
+
+                print(self.shaft_coordinates)
+        
+        self.canvas.draw()
     
     def _update_plot(self):
         """
@@ -241,19 +254,118 @@ class Chart(QWidget):
             ))
 
     def draw_shaft(self, shaft_subsections_drawing_attributes):
-        # Remove existing sections
+        self.shaft_attributes = shaft_subsections_drawing_attributes
+        print(self.shaft_attributes)
+
+        # Remove old sections
         for section in list(self.active_sections.keys()):
             self.active_sections[section].remove()
             del self.active_sections[section]
 
         # Draw new sections
-        for section_name, section in shaft_subsections_drawing_attributes.items():
+        for section_name, section in self.shaft_attributes.items():
             for subsection_number, subsection in section.items():
-                subsection_plot = Rectangle(subsection[0], subsection[1], subsection[2], color='grey', linewidth=2, fill=False)
-                self.active_sections[f"{section_name}_{subsection_number}"] = subsection_plot
+                start = subsection[0]
+                length = subsection[1]
+                diameter = subsection[2]
+
+                subsection_id = f"{section_name}_{subsection_number}"
+
+                subsection_plot = Rectangle(start, length, diameter, color='grey', linewidth=2, fill=False)
+                self.active_sections[subsection_id] = subsection_plot
                 self.ax.add_patch(subsection_plot)
+        
+        # Draw shaft dimensions
+        self._draw_shaft_dimensions()
 
         self.canvas.draw()
+    
+    def _draw_shaft_dimensions(self):
+        # Remove old dimenions
+        for item in self.shaft_dimensions:
+            item.remove()
+        self.shaft_dimensions.clear()
+        
+        highest_diameter = 0
+
+        if self.shaft_attributes and self._toolbar.show_dimensions_checkbox.isChecked():
+            # Get the highest diameter of shaft
+            for section_name, section in self.shaft_attributes.items():
+                for subsection_number, subsection in section.items():
+                        if subsection[-1] > highest_diameter:
+                            highest_diameter = subsection[-1]
+
+            self.dimension_offset = ((0.5 * highest_diameter ) * 1.2 + self._data['e'])
+
+            # Draw new dimensions
+            for section_name, section in self.shaft_attributes.items():
+                for subsection_number, subsection in section.items():
+
+                    # Draw length dimension
+                    start = subsection[0]
+                    length = subsection[1]
+                    diameter = subsection[2]
+
+                    start_z = start[0]
+                    end_z = start[0] + length
+                    y_position = self.dimension_offset
+                    label_position = start_z + length * 0.5
+                    text = "{:.1f}".format(length)
+
+                    length_dimension = self._draw_dimension(text, start_z, end_z, label_position, y_position, y_position, y_position)
+                    self.shaft_dimensions.extend(length_dimension)
+
+                    # Draw diameter dimension
+                    start_y = start[1]
+                    end_y = start[1] + diameter
+                    z_position = start_z + length * 0.75
+                    y_position = start_y + diameter * 0.5
+                    text = "Ø {:.1f}".format(diameter)
+
+                    diameter_dimension = self._draw_dimension(text, z_position, z_position, z_position, start_y, end_y, y_position)
+                    self.shaft_dimensions.extend(diameter_dimension)
+        
+        self._draw_shaft_coordinates()
+
+        self.canvas.draw()
+
+    def _draw_dimension(self, text, start_z, end_z, label_z_position, start_y=0, end_y=0, label_y_position=0):
+        lines = []
+        # Set dimensions color
+        dimensions_color = '#c62828'
+
+        # Draw dimension line
+        dimension_line = self.ax.annotate(
+            '', xy=(start_z, start_y), xycoords='data',
+            xytext=(end_z, end_y), textcoords='data',
+            arrowprops=dict(arrowstyle="<->", color=dimensions_color),
+            zorder=3
+        )
+        lines.append(dimension_line)
+
+        # Perfrom actions depending of dimension line orientation
+        offset = 0.3
+        if start_z == end_z:                # Vertical line
+            ha, va = 'right', 'center'
+            rotation = 90
+            label_z_position -= offset            
+        else:                               # Horizontal line
+            ha, va = 'center', 'bottom'
+            rotation = 0
+            label_y_position += offset
+
+            # draw reference lines for horizontal dimension lines
+            for position in [start_z, end_z]:
+                reference_line = self.ax.plot([position, position], [0, end_y], linestyle='-', color=dimensions_color, linewidth=0.5, zorder=0)
+                lines.append(reference_line[0])
+
+        # Add dimension labels
+        dimension_label = self.ax.text(label_z_position, label_y_position, text, rotation=rotation, ha=ha, va=va, color=dimensions_color,
+                                        fontsize=8,
+                                        bbox=dict(alpha=0, zorder=3))
+        lines.append(dimension_label)
+        
+        return lines
 
     def init_plots(self, data):
         """
@@ -266,7 +378,7 @@ class Chart(QWidget):
 
         self._set_plots_data()
         self._set_axes_limits()
-        self._draw_shaft_coordinates()
+        self.draw_shaft_markers()
 
 class CustomToolbar(NavigationToolbar):
     updated_selected_plots = pyqtSignal()
@@ -288,6 +400,10 @@ class CustomToolbar(NavigationToolbar):
 
         # Prepare checkboxes dict for plot selection
         self.checkboxes = None
+
+        # prepare checkbox for display dimensions
+        self.show_dimensions_checkbox = QCheckBox('Wyświetl wymiary')
+        self.addWidget(self.show_dimensions_checkbox)
 
     def update_plot_selector(self, plots):
         """
