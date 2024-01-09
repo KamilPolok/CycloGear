@@ -19,7 +19,8 @@ class Chart(QWidget):
 
         self.active_plots = {}          # Dictionary to keep track of active plots
         self.active_sections = {}       # Dictionary to keep track of shaft sections
-
+        
+        self.axes = []                  # List to keep track of figure axes
         self.shaft_markers = []         # List to keep track of shaft markers
         self.shaft_coordinates = []     # List to keep track of shaft coordinates
         self.shaft_dimensions = []      # List to keep track of shaft dimensions
@@ -41,6 +42,18 @@ class Chart(QWidget):
 
         # Create a matplotlib figure and canvas for plotting
         self._figure, self.ax = plt.subplots(constrained_layout=True)
+
+        # Set the display setting of the figure and axes
+        background_color = 'white'
+        self._figure.set_facecolor(background_color)
+        self.ax.set_facecolor(background_color)
+
+        # Remove axes ticks and spines and grid lines
+        self.ax.set_xticks([])
+        self.ax.set_yticks([])
+        self.ax.spines[['right', 'top', 'bottom', 'left']].set_visible(False)
+        self.ax.grid(False)
+
         self.canvas = FigureCanvasQTAgg(self._figure)
 
         # Set the focus policy to accept focus and then set focus to the canvas
@@ -105,27 +118,38 @@ class Chart(QWidget):
         This method calculates the overall maximum and minimum values across all plots
         and sets the x and y axis limits accordingly.
         """
-        # Initialize variables to store the overall max and min values
-        self.overall_max = float('-inf')
-        self.overall_min = float('inf')
+        # Set x and y axis limits
+        shaft_length = self._data['L']
+        
+        offset = 0.1 * shaft_length
+        xmin = -offset
+        xmax = shaft_length + offset
+        ymin = -0.25 * shaft_length
+        ymax = 0.25 * shaft_length
 
-        for plot in self._plots.values():
-            current_max = max(plot['y'])
-            current_min = min(plot['y'])
+        self.ax.set_xlim(xmin, xmax)
+        self.ax.set_ylim(ymin, ymax)
 
-            if current_max > self.overall_max:
-                self.overall_max = current_max
-            if current_min < self.overall_min:
-                self.overall_min = current_min
+        # Display axes arrows
+        for item in self.axes:
+            item.remove()
+        self.axes.clear()
 
-        # Set z and y axis limits
-        offset = 0.1 * self._data['L']
-        self.ax.set_xlim([0 - offset, self._data['L'] + offset])
-        self.ax.set_ylim(self.overall_min + 0.2 * self.overall_min, self.overall_max + 0.2 * self.overall_max)
-        self.ax.set_xlabel(self._z['zlabel'])
-        self.ax.grid(True, which='major', linestyle='-', linewidth='0.2', color='gray')
-        self.ax.grid(True, which='minor', linestyle=':', linewidth='0.2', color='gray')
-        self.ax.minorticks_on()
+        arrow_x_max = shaft_length + 0.5 * offset
+       
+        z_axis = self.ax.annotate(
+            '', xy=(0, 0), xycoords='data',
+            xytext=(arrow_x_max, 0), textcoords='data',
+            arrowprops=dict(arrowstyle="<-", color='#1b5e20'),
+            zorder=3
+        )   
+        self.axes.append(z_axis)
+
+        z_axis_label = self.ax.text(arrow_x_max, 0, 'z [mm]', ha='left', va='center', color='#1b5e20', 
+                                    fontsize=8, fontweight='bold',
+                                    bbox=dict(alpha=0, zorder=3))
+        
+        self.axes.append(z_axis_label)
 
     def draw_shaft_markers(self):
         """
