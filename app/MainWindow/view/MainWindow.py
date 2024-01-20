@@ -1,9 +1,9 @@
-from PyQt6.QtWidgets import QMainWindow, QTabWidget, QWidget, QVBoxLayout, QPushButton
+from PyQt6.QtWidgets import QTabWidget, QWidget, QVBoxLayout, QPushButton
 
 from ShaftDesigner.controller.ShaftDesignerController import ShaftDesignerController
 from ShaftDesigner.view.ShaftDesigner import ShaftDesigner
 
-class MainWindow(QMainWindow):
+class MainWindow(QWidget):
     """
     Main window class for the application.
     """
@@ -27,15 +27,9 @@ class MainWindow(QMainWindow):
         """
         Initialize the user interface.
         """
-        # Set window attributes
-        self.setWindowTitle('CycloDesign')
-
-        # Set central widget
-        central_widget = QWidget(self)
-        self.setCentralWidget(central_widget)
-
         # Set layouts 
-        self.main_layout = QVBoxLayout(central_widget)
+        self.main_layout = QVBoxLayout()
+        self.setLayout(self.main_layout)
 
         self.tabs_section_layout = QVBoxLayout()
         self.buttons_section_layout = QVBoxLayout()
@@ -56,7 +50,7 @@ class MainWindow(QMainWindow):
         self.buttons_section_layout.addWidget(self._next_tab_button)
         self.buttons_section_layout.addWidget(self.preview_button)
 
-        # Init shaft designer
+        # # Init shaft designer
         self._init_shaft_designer()
     
     def init_tabs(self):

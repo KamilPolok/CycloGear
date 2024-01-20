@@ -6,8 +6,8 @@ sys.path.append(root_directory)
 
 from PyQt6.QtWidgets import QApplication
 
-from MainWindow.view.MainWindow import MainWindow
-from MainWindow.controller.MainWindowController import MainWindowController
+from AppWindow import AppWindow
+from app.AppController import AppController
 
 def main():
     cyclo_app = QApplication([])
@@ -68,10 +68,10 @@ def main():
         'Nc': [None, 'W'],              # Starty mocy ł. centralnych
         }
 
-    main_window = MainWindow()
+    app_window = AppWindow()
 
-    main_window_controller = MainWindowController(data, main_window)
-    main_window.show()
+    app_controller = AppController(data, app_window)
+    app_window.show()
 
     sys.exit(cyclo_app.exec())
 
