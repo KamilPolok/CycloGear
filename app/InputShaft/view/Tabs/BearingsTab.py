@@ -6,27 +6,27 @@ from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QLabel
 from .TabIf import Tab
 from .TabCommon import create_data_display_row, create_data_input_row, format_value
 
-from MainWindow.view.MainWindow import MainWindow
+from InputShaft.view.InputShaft import InputShaft
 
 class BearingsTab(Tab):
     updated_data_signal = pyqtSignal(dict)
     updated_support_bearings_data_signal = pyqtSignal(dict)
     updated_central_bearings_data_signal = pyqtSignal(dict)
 
-    def __init__(self, window: MainWindow, on_click_callback):
+    def __init__(self, parent: InputShaft, on_click_callback):
         """
         Initialize the BearingsTab with state tracking in the sublayouts.
         """
-        super().__init__(window, on_click_callback)
+        super().__init__(parent, on_click_callback)
         self.setup_sublayouts_state_tracking()
 
     def _set_tab_data(self):
         """
-        Set the initial data for the tab from the main window's data.
+        Set the initial data for the tab from the main parent's data.
         """
         attributes_to_acquire = ['Lhp', 'fdp', 'ftp', 'Łożyska_podporowe', 'ds',
                                  'Lhc', 'fdc', 'ftc', 'Łożyska_centralne', 'de',]
-        self.tab_data = {attr: self._window.data[attr] for attr in attributes_to_acquire}
+        self.tab_data = {attr: self._parent.data[attr] for attr in attributes_to_acquire}
         self._items_to_select_states['Łożyska_podporowe'] = ''
         self._items_to_select_states['Łożyska_centralne'] = ''
 
@@ -53,7 +53,7 @@ class BearingsTab(Tab):
         section_label = QLabel('Łożyska podporowe:')
 
         # Create data display and input rows
-        ds = create_data_display_row(self, 'dsc', self._window.data['dsc'], 'd<sub>s</sub>', 'Obliczona średnica wału wejściowego')
+        ds = create_data_display_row(self, 'dsc', self._parent.data['dsc'], 'd<sub>s</sub>', 'Obliczona średnica wału wejściowego')
         lh = create_data_input_row(self, 'Lhp', 'Trwałość godzinowa łożyska', 'L<sub>h</sub>')
         fd = create_data_input_row(self, 'ftp', 'Współczynnik zależny od zmiennych obciążeń dynamicznych', 'f<sub>d</sub>')
         ft = create_data_input_row(self, 'fdp', 'Współczynnik zależny od temperatury pracy łożyska', 'f<sub>t</sub>')
@@ -85,7 +85,7 @@ class BearingsTab(Tab):
         section_label = QLabel('Łożyska centralne:')
 
         # Create data display and input rows
-        de = create_data_display_row(self, 'dec', self._window.data['dec'], 'd<sub>e</sub>', 'Obliczona średnica wykorbienia')
+        de = create_data_display_row(self, 'dec', self._parent.data['dec'], 'd<sub>e</sub>', 'Obliczona średnica wykorbienia')
         lh = create_data_input_row(self, 'Lhc', 'Trwałość godzinowa łożyska', 'L<sub>h</sub>')
         fd = create_data_input_row(self, 'ftc', 'Współczynnik zależny od zmiennych obciążeń dynamicznych', 'f<sub>d</sub>')
         ft = create_data_input_row(self, 'fdc', 'Współczynnik zależny od temperatury pracy', 'f<sub>t</sub>')
@@ -261,9 +261,9 @@ class BearingsTab(Tab):
     
     def update_tab(self):
         """
-        Update the tab with data from the main window.
+        Update the tab with data from the parent.
         """
         for key, value in self.output_values.items():
-            if value != self._window.data[key][0]:
-                value = self._window.data[key][0]
+            if value != self._parent.data[key][0]:
+                value = self._parent.data[key][0]
                 self.output_values[key].setText(format_value(value))

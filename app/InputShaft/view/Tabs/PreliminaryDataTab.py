@@ -11,10 +11,10 @@ class PreliminaryDataTab(Tab):
 
     def _set_tab_data(self):
         """
-        Initialize tab data from the main window's data.
+        Initialize tab data from the parent's data.
         """
         attributes_to_acquire = ['L', 'LA', 'LB', 'L1', 'Materiał', 'xz', 'qdop']
-        self.tab_data = {attr: self._window.data[attr] for attr in attributes_to_acquire}
+        self.tab_data = {attr: self._parent.data[attr] for attr in attributes_to_acquire}
         self._items_to_select_states['Materiał'] = ''
 
     def init_ui(self):

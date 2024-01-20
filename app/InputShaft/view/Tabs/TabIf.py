@@ -2,22 +2,22 @@ from abc import ABCMeta, abstractmethod
 
 from PyQt6.QtWidgets import QWidget, QLineEdit
 
-from MainWindow.view.MainWindow import MainWindow
+from InputShaft.view.InputShaft import InputShaft
 
 class ABCQWidgetMeta(ABCMeta, type(QWidget)):
     pass
 
 class Tab(QWidget, metaclass=ABCQWidgetMeta):
-    def __init__(self, window: MainWindow, on_click_callback):
+    def __init__(self, parent: InputShaft, on_click_callback):
         """
         Initialize a base tab for the application.
 
         Args:
-            window (MainWindow): The main window instance.
+            parent (QWidget): The InputShaft component instance.
             on_click_callback (function): Callback function to be called on state change.
         """
         super().__init__()
-        self._window = window
+        self._parent = parent
         self._on_click_callback = on_click_callback
         # Set the inputs list and dict - to track their state and verify if all inputs were provided in current tab 
         self._line_edits_states = {}

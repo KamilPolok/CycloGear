@@ -2,37 +2,37 @@ import math
 import numpy as np
 from sympy import symbols, Piecewise
 
-from MainWindow.view import MainWindow
+from InputShaft.view.InputShaft import InputShaft
 
 from DbHandler.controller.DBController import ViewSelectItemController
 from DbHandler.model.DatabaseHandler import DatabaseHandler
 from DbHandler.view.Window import Window
 
-class MainWindowController:
+class InputShaftController:
     """
-    Controller for the MainWindow in the application.
+    Controller for the InputShaft in the application.
 
-    This class handles the interactions between the model (data) and the view (MainWindow),
+    This class handles the interactions between the model (data) and the view (InputShaft),
     including initializing the view with data, connecting signals and slots, and handling
     user interactions.
     """
 
-    def __init__(self, model, view: MainWindow):
+    def __init__(self, model, view: InputShaft):
         """
-        Initialize the MainWindowController.
+        Initialize the InputShaftController.
 
         :param model: The data model for the application.
-        :param view: The MainWindow instance of the application.
+        :param view: The InputShaft (QWidget) instance of the input shaft coomponent's GUI.
         """
-        self._window = view
+        self._input_shaft = view
         self._data = model
         self._startup()
         self._connect_signals_and_slots()
 
     def _startup(self):
         """Initialize the view with necessary data and set up tabs."""
-        self._window.set_data(self._data)
-        self._window.init_tabs()
+        self._input_shaft.set_data(self._data)
+        self._input_shaft.init_tabs()
 
     def _connect_signals_and_slots(self):
         """
@@ -41,14 +41,14 @@ class MainWindowController:
         This method sets up connections between UI elements and their corresponding
         actions or handlers.
         """
-        self._window.tabs[0].select_material_button.clicked.connect(self._open_materials_db_window)
-        self._window.tabs[0].updated_data_signal.connect(self._calculate_input_shaft_attributes)
-        self._window.tabs[1].updated_support_bearings_data_signal.connect(self._open_support_bearings_db_window)
-        self._window.tabs[1].updated_central_bearings_data_signal.connect(self._open_central_bearings_db_window)
-        self._window.tabs[1].updated_data_signal.connect(self._calculate_bearings_attributes)
-        self._window.tabs[2].updated_support_bearings_rolling_element_data_signal.connect(self._open_support_bearings_rolling_elements_db_window)
-        self._window.tabs[2].updated_central_bearings_rolling_element_data_signal.connect(self._open_central_bearings_rolling_elements_db_window)
-        self._window.tabs[2].updated_data_signal.connect(self._calculate_power_loss)
+        self._input_shaft.tabs[0].select_material_button.clicked.connect(self._open_materials_db_window)
+        self._input_shaft.tabs[0].updated_data_signal.connect(self._calculate_input_shaft_attributes)
+        self._input_shaft.tabs[1].updated_support_bearings_data_signal.connect(self._open_support_bearings_db_window)
+        self._input_shaft.tabs[1].updated_central_bearings_data_signal.connect(self._open_central_bearings_db_window)
+        self._input_shaft.tabs[1].updated_data_signal.connect(self._calculate_bearings_attributes)
+        self._input_shaft.tabs[2].updated_support_bearings_rolling_element_data_signal.connect(self._open_support_bearings_rolling_elements_db_window)
+        self._input_shaft.tabs[2].updated_central_bearings_rolling_element_data_signal.connect(self._open_central_bearings_rolling_elements_db_window)
+        self._input_shaft.tabs[2].updated_data_signal.connect(self._calculate_power_loss)
 
     def _open_materials_db_window(self):
         """
@@ -63,7 +63,7 @@ class MainWindowController:
         available_tables = db_handler.getAvailableTables(tables_group_name)
         limits = db_handler.getTableItemsFilters(tables_group_name)
         view_select_items_ctrl = ViewSelectItemController(db_handler, subwindow, available_tables, limits)
-        subwindow.itemDataSignal.connect(self._window.tabs[0].update_viewed_material)
+        subwindow.itemDataSignal.connect(self._input_shaft.tabs[0].update_viewed_material)
         subwindow.exec()
     
     def _open_support_bearings_db_window(self, data):
@@ -91,7 +91,7 @@ class MainWindowController:
         limits['C']['min'] = self._data['Cr'][0]
         # Setup the controller for the subwindow
         view_select_items_ctrl = ViewSelectItemController(db_handler, subwindow, available_tables, limits)
-        subwindow.itemDataSignal.connect(self._window.tabs[1].update_viewed_support_bearings_code)
+        subwindow.itemDataSignal.connect(self._input_shaft.tabs[1].update_viewed_support_bearings_code)
         subwindow.exec()
     
     def _open_central_bearings_db_window(self, data):
@@ -119,7 +119,7 @@ class MainWindowController:
         limits['C']['min'] = self._data['Cc'][0]
         # Setup the controller for the subwindow
         view_select_items_ctrl = ViewSelectItemController(db_handler, subwindow, available_tables, limits)
-        subwindow.itemDataSignal.connect(self._window.tabs[1].update_viewed_central_bearings_code)
+        subwindow.itemDataSignal.connect(self._input_shaft.tabs[1].update_viewed_central_bearings_code)
         subwindow.exec()
 
     def _open_support_bearings_rolling_elements_db_window(self, data):
@@ -145,7 +145,7 @@ class MainWindowController:
         limits['D']['max'] = math.ceil(self._data['dwpc'][0]) + 1
         # Setup the controller for the subwindow
         view_select_items_ctrl = ViewSelectItemController(db_handler, subwindow, available_tables, limits)
-        subwindow.itemDataSignal.connect(self._window.tabs[2].update_viewed_support_bearings_rolling_element_code)
+        subwindow.itemDataSignal.connect(self._input_shaft.tabs[2].update_viewed_support_bearings_rolling_element_code)
         subwindow.exec()
 
     def _open_central_bearings_rolling_elements_db_window(self, data):
@@ -171,7 +171,7 @@ class MainWindowController:
         limits['D']['max'] = math.ceil(self._data['dwcc'][0]) + 1
         # Setup the controller for the subwindow
         view_select_items_ctrl = ViewSelectItemController(db_handler, subwindow, available_tables, limits)
-        subwindow.itemDataSignal.connect(self._window.tabs[2].update_viewed_central_bearings_rolling_element_code)
+        subwindow.itemDataSignal.connect(self._input_shaft.tabs[2].update_viewed_central_bearings_rolling_element_code)
         subwindow.exec()
 
     def _calculate_support_bearings_load_capacity(self, data):
@@ -326,7 +326,7 @@ class MainWindowController:
             'x': self._data['x'][0]
         }
 
-        self._window.set_shaft_designer_data(self.shaft_designer_data)
+        self._input_shaft.set_shaft_designer_data(self.shaft_designer_data)
 
     def _calculate_bearings_attributes(self, data):
         """

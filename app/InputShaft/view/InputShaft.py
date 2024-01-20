@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import QTabWidget, QWidget, QVBoxLayout, QPushButton
 from ShaftDesigner.controller.ShaftDesignerController import ShaftDesignerController
 from ShaftDesigner.view.ShaftDesigner import ShaftDesigner
 
-class MainWindow(QWidget):
+class InputShaft(QWidget):
     """
     Main window class for the application.
     """

@@ -6,26 +6,26 @@ from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QLabel
 from .TabIf import Tab
 from .TabCommon import create_data_display_row, create_data_input_row, format_value
 
-from MainWindow.view.MainWindow import MainWindow
+from InputShaft.view.InputShaft import InputShaft
 
 class PowerLossTab(Tab):
     updated_data_signal = pyqtSignal(dict)
     updated_support_bearings_rolling_element_data_signal = pyqtSignal(dict)
     updated_central_bearings_rolling_element_data_signal = pyqtSignal(dict)
 
-    def __init__(self, window: MainWindow, on_click_callback):
+    def __init__(self, parent: InputShaft, on_click_callback):
         """
         Initialize the PowerLossTab with state tracking in the sublayouts.
         """
-        super().__init__(window, on_click_callback)
+        super().__init__(parent, on_click_callback)
         self.setup_sublayouts_state_tracking()
 
     def _set_tab_data(self):
         """
-        Set the initial data for the tab from the main window's data.
+        Set the initial data for the tab from the parent's data.
         """
         attributes_to_acquire = ['f', 'Toczne_podporowych', 'Toczne_centralnych']
-        self.tab_data = {attr: self._window.data[attr] for attr in attributes_to_acquire}
+        self.tab_data = {attr: self._parent.data[attr] for attr in attributes_to_acquire}
         self._items_to_select_states['Toczne_podporowych'] = ''
         self._items_to_select_states['Toczne_centralnych'] = ''
 
@@ -66,8 +66,8 @@ class PowerLossTab(Tab):
         section_label = QLabel('Łożyska podporowe:')
 
         # Create data display and input rows
-        #rolling_element = create_data_display_row(self, ('Łożyska_podporowe','elementy toczne'), self._window.data['Łożyska_podporowe'], '', 'Elementy toczne')
-        dw = create_data_display_row(self, 'dwpc', self._window.data['dwpc'], 'd<sub>w</sub>', 'Obliczona średnica elementów tocznych')
+        #rolling_element = create_data_display_row(self, ('Łożyska_podporowe','elementy toczne'), self._parent.data['Łożyska_podporowe'], '', 'Elementy toczne')
+        dw = create_data_display_row(self, 'dwpc', self._parent.data['dwpc'], 'd<sub>w</sub>', 'Obliczona średnica elementów tocznych')
         
         # Create button for rolling element selection
         button_layout = QHBoxLayout()
@@ -94,8 +94,8 @@ class PowerLossTab(Tab):
         section_label = QLabel('Łożyska centralne:')
 
         # Create data display and input rows
-        #rolling_element = create_data_display_row(self, ('Łożyska_centralne','elementy toczne'), self._window.data['Łożyska_centralne'], '', 'Elementy toczne')
-        dw = create_data_display_row(self, 'dwcc', self._window.data['dwcc'], 'd<sub>w</sub>', 'Obliczona średnica elementów tocznych')
+        #rolling_element = create_data_display_row(self, ('Łożyska_centralne','elementy toczne'), self._parent.data['Łożyska_centralne'], '', 'Elementy toczne')
+        dw = create_data_display_row(self, 'dwcc', self._parent.data['dwcc'], 'd<sub>w</sub>', 'Obliczona średnica elementów tocznych')
 
         # Create button for rolling element selection
         button_layout = QHBoxLayout()
@@ -208,7 +208,7 @@ class PowerLossTab(Tab):
         Args:
             itemData (dict): Data of the selected item.
         """
-        self._select_support_bearings_rolling_element_button.setText(f"{self._window.data['Łożyska_podporowe']['elementy toczne'][0]} {str(itemData['Kod'][0])}")
+        self._select_support_bearings_rolling_element_button.setText(f"{self._parent.data['Łożyska_podporowe']['elementy toczne'][0]} {str(itemData['Kod'][0])}")
         self.tab_data['Toczne_podporowych'] = itemData
 
         self._items_to_select_states['Toczne_podporowych'] = str(itemData['Kod'][0])
@@ -221,7 +221,7 @@ class PowerLossTab(Tab):
         Args:
             itemData (dict): Data of the selected item.
         """
-        self._select_central_bearings_rolling_element_button.setText(f"{self._window.data['Łożyska_centralne']['elementy toczne'][0]} {str(itemData['Kod'][0])}")
+        self._select_central_bearings_rolling_element_button.setText(f"{self._parent.data['Łożyska_centralne']['elementy toczne'][0]} {str(itemData['Kod'][0])}")
         self.tab_data['Toczne_centralnych'] = itemData
 
         self._items_to_select_states['Toczne_centralnych'] = str(itemData['Kod'][0])
@@ -263,30 +263,30 @@ class PowerLossTab(Tab):
     
     def update_tab(self):
         """
-        Update the tab with data from the main window.
+        Update the tab with data from the parent.
         """
         addData = True
         for key_tuple, value_label in self.output_values.items():
             # Check if the key is a tuple (indicating a parent-child relationship)
             if isinstance(key_tuple, tuple):
                 parent_key, attribute = key_tuple
-                if parent_key in self._window.data and attribute in self._window.data[parent_key]:
+                if parent_key in self._parent.data and attribute in self._parent.data[parent_key]:
                     addData = False
-                    new_value = self._window.data[parent_key][attribute][0]
+                    new_value = self._parent.data[parent_key][attribute][0]
                     value_label.setText(format_value(new_value))
             else:
                 # Handle keys without a parent
                 attribute = key_tuple
-                if attribute in self._window.data:
-                    new_value = self._window.data[attribute][0]
+                if attribute in self._parent.data:
+                    new_value = self._parent.data[attribute][0]
                     value_label.setText(format_value(new_value))
 
         if addData:
-            Dwp = create_data_display_row(self, ('Łożyska_centralne','Dw'), self._window.data['Łożyska_centralne']['Dw'], 'D<sub>w</sub>', 'Średnica wewnętrzna łożyska')
-            Dzp = create_data_display_row(self, ('Łożyska_centralne','Dz'), self._window.data['Łożyska_centralne']['Dz'], 'D<sub>z</sub>', 'Średnica zewnętrzna łożyska')
+            Dwp = create_data_display_row(self, ('Łożyska_centralne','Dw'), self._parent.data['Łożyska_centralne']['Dw'], 'D<sub>w</sub>', 'Średnica wewnętrzna łożyska')
+            Dzp = create_data_display_row(self, ('Łożyska_centralne','Dz'), self._parent.data['Łożyska_centralne']['Dz'], 'D<sub>z</sub>', 'Średnica zewnętrzna łożyska')
             self.central_bearings_section_layout.insertLayout(0, Dzp)
             self.central_bearings_section_layout.insertLayout(0, Dwp)
-            Dwc = create_data_display_row(self, ('Łożyska_podporowe','Dw'), self._window.data['Łożyska_podporowe']['Dw'], 'D<sub>w</sub>', 'Średnica wewnętrzna łożyska')
-            Dzc = create_data_display_row(self, ('Łożyska_podporowe','Dz'), self._window.data['Łożyska_podporowe']['Dz'], 'D<sub>z</sub>', 'Średnica zewnętrzna łożyska')
+            Dwc = create_data_display_row(self, ('Łożyska_podporowe','Dw'), self._parent.data['Łożyska_podporowe']['Dw'], 'D<sub>w</sub>', 'Średnica wewnętrzna łożyska')
+            Dzc = create_data_display_row(self, ('Łożyska_podporowe','Dz'), self._parent.data['Łożyska_podporowe']['Dz'], 'D<sub>z</sub>', 'Średnica zewnętrzna łożyska')
             self.support_bearings_section_layout.insertLayout(0, Dwc)
             self.support_bearings_section_layout.insertLayout(0, Dzc)
