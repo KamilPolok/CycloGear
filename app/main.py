@@ -16,7 +16,7 @@ def main():
         # Napęd
         'nwe':[750, 'obr/min'],         # Prędkość obrotowa wejściowa
         'w0':[78,54, 'rad/s'],          # Prędkość kątowa wejściowa
-        'Mwe': [26.67, 'Nm'],           # Moment wejściowy
+        'Mwe': [26.67, 'Nm'],           # Moment wejściowy - moment skręcający
         # Zadane wymiary wału
         'L': [100, 'mm'],               # Całkowita długość wału wejściowego
         'LA': [15, 'mm'],               # Wsp. podpory przesuwnej - A
