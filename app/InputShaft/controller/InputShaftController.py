@@ -254,8 +254,9 @@ class InputShaftController:
         :param data: Data used for calculating input shaft attributes.
         """
         self._update_data(data)
-        data = self.functions_calculator.calculate_initial_functions(self._data)
-        self._shaft_designer_controller.set_initial_data(data)
+
+        functions, shaftdata = self.functions_calculator.calculate_initial_functions(self._data)
+        self._shaft_designer_controller.set_initial_data(functions, shaftdata)
 
     def _calculate_bearings_attributes(self, data):
         """

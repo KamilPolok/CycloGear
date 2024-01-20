@@ -50,9 +50,9 @@ class ShaftDesignerController:
 
         self._shaft_designer.init_sidebar(self._sidebar_sections)
 
-    def set_initial_data(self, data):
-        self.shaft_calculator.set_data(data)
-        self._chart.init_plots(data)
+    def set_initial_data(self, functions, shaft_data):
+        self.shaft_calculator.set_data(shaft_data)
+        self._chart.init_plots(functions, shaft_data)
 
         # Set limits
         self._set_limits()
