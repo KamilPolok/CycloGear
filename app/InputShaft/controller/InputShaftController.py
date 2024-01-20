@@ -4,6 +4,9 @@ from sympy import symbols, Piecewise
 
 from InputShaft.view.InputShaft import InputShaft
 
+from ShaftDesigner.controller.ShaftDesignerController import ShaftDesignerController
+from ShaftDesigner.view.ShaftDesigner import ShaftDesigner
+
 from DbHandler.controller.DBController import ViewSelectItemController
 from DbHandler.model.DatabaseHandler import DatabaseHandler
 from DbHandler.view.Window import Window
@@ -30,9 +33,19 @@ class InputShaftController:
         self._connect_signals_and_slots()
 
     def _startup(self):
-        """Initialize the view with necessary data and set up tabs."""
+        """Initialize the input shaft widget with necessary data, set up tabs and initialize the shaft designer"""
         self._input_shaft.set_data(self._data)
         self._input_shaft.init_tabs()
+
+        self._init_shaft_designer()
+    
+    def _init_shaft_designer(self):
+        # Set an instance of shaft designer
+        window_title = f'CycloGear2023 - Projektant Wału Wejściowego'
+        self._shaft_designer = ShaftDesigner(window_title)
+
+        # Set an instance of shaft designer controller
+        self._shaft_designer_controller = ShaftDesignerController(self._shaft_designer)
 
     def _connect_signals_and_slots(self):
         """
@@ -41,6 +54,7 @@ class InputShaftController:
         This method sets up connections between UI elements and their corresponding
         actions or handlers.
         """
+        self._input_shaft.show_preview_signal.connect(self._open_shaft_designer_window)
         self._input_shaft.tabs[0].select_material_button.clicked.connect(self._open_materials_db_window)
         self._input_shaft.tabs[0].updated_data_signal.connect(self._calculate_input_shaft_attributes)
         self._input_shaft.tabs[1].updated_support_bearings_data_signal.connect(self._open_support_bearings_db_window)
@@ -50,6 +64,10 @@ class InputShaftController:
         self._input_shaft.tabs[2].updated_central_bearings_rolling_element_data_signal.connect(self._open_central_bearings_rolling_elements_db_window)
         self._input_shaft.tabs[2].updated_data_signal.connect(self._calculate_power_loss)
 
+    def _open_shaft_designer_window(self):
+        if self._shaft_designer.isHidden():
+            self._shaft_designer.show()
+            
     def _open_materials_db_window(self):
         """
         Open the materials database window.
@@ -304,7 +322,7 @@ class InputShaftController:
         self._data['Rb'][0] = Rb
 
         # Set shaft designer data for visualization
-        self.shaft_designer_data = {
+        self._shaft_designer_data = {
             'z': zVals, 
             'F': FVals,
             'Mg': Mg, 
@@ -326,7 +344,7 @@ class InputShaftController:
             'x': self._data['x'][0]
         }
 
-        self._input_shaft.set_shaft_designer_data(self.shaft_designer_data)
+        self._shaft_designer_controller.set_initial_data(self._shaft_designer_data)
 
     def _calculate_bearings_attributes(self, data):
         """

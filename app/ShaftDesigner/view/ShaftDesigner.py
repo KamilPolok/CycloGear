@@ -8,13 +8,13 @@ class ShaftDesigner(QMainWindow):
     other components of the application and also for implementing
     the GUI for interactive shaft design
     """
-    def __init__(self):
+    def __init__(self, window_title):
         super().__init__()
-        self._init_ui()
+        self._init_ui(window_title)
     
-    def _init_ui(self):
+    def _init_ui(self, window_title):
         # Set window parameters
-        self.setWindowTitle("Wał Wejściowy")
+        self.setWindowTitle(window_title)
         self.resize(800,500)
 
         # Set layout
