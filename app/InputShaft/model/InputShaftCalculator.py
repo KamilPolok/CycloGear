@@ -127,4 +127,12 @@ class InputShaftCalculator():
             'x': self._data['x'][0]
         }
 
-        return (functions, shaft_data)
+        shaft_coordinates = [
+            ('A', self._data['LA'][0]),
+            ('L1', self._data['L1'][0]),
+            ('L2', self._data['L2'][0]),
+            ('B', self._data['LB'][0]),
+            ('L', self._data['L'][0])
+        ]
+
+        return (functions, shaft_data, shaft_coordinates)

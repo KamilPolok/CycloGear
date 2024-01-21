@@ -36,9 +36,9 @@ class ShaftDesignerController:
 
         self._shaft_designer.init_sidebar(self._sidebar_sections)
 
-    def set_initial_data(self, functions, shaft_data):
+    def set_initial_data(self, functions, shaft_data, shaft_coordinates):
         self.shaft_calculator.set_data(shaft_data)
-        self._chart.init_plots(functions, shaft_data)
+        self._chart.init_plots(functions, shaft_coordinates)
 
         # Redraw shaft section if anything is already drawn on the chart
         if self.shaft_calculator.shaft_sections:

@@ -255,8 +255,8 @@ class InputShaftController:
         """
         self._update_data(data)
 
-        functions, shaftdata = self.functions_calculator.calculate_initial_functions(self._data)
-        self._shaft_designer_controller.set_initial_data(functions, shaftdata)
+        functions, shaftdata, shaft_coordinates = self.functions_calculator.calculate_initial_functions(self._data)
+        self._shaft_designer_controller.set_initial_data(functions, shaftdata, shaft_coordinates)
 
     def _calculate_bearings_attributes(self, data):
         """

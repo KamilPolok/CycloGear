@@ -119,7 +119,7 @@ class Chart(QWidget):
         and sets the x and y axis limits accordingly.
         """
         # Set x and y axis limits
-        shaft_length = self._shaft_data['L']
+        shaft_length = self._z['z'][-1]
         
         offset = 0.1 * shaft_length
         xmin = -offset
@@ -157,28 +157,18 @@ class Chart(QWidget):
 
         This method adds markers and labels for significant points along the shaft,
         such as supports and eccentric positions.
-        """
-        roller_support = self._shaft_data['LA']
-        pin_support = self._shaft_data['LB']
-        eccentric1_position = self._shaft_data['L1']
-        eccentric2_position = self._shaft_data['L2']
-        shaft_length = self._shaft_data['L']
-
-        # Define marker points and corresponding labels
-        points = [ 0, roller_support, eccentric1_position, eccentric2_position, pin_support, shaft_length]
-        labels = ['0', 'A', 'L1', 'L2', 'B', 'L']
-
+        """        
         # Remove old markers
         for item in self.shaft_markers:
             item.remove()
         self.shaft_markers.clear()
 
         # Draw markers
-        markers = self.ax.scatter(points, [0] * len(points), color='black', s=8, zorder=5)
+        markers = self.ax.scatter(self.points, [0] * len(self.points), color='black', s=8, zorder=5)
         self.shaft_markers.append(markers)
 
         # Add labels for the markers
-        for marker, label in zip(points, labels):
+        for marker, label in zip(self.points, self.labels):
             annotation_labels = self.ax.annotate(label, (marker, 0), textcoords="offset points", xytext=(10, -15), ha='center', zorder=5)
             self.shaft_markers.append(annotation_labels)
 
@@ -202,12 +192,11 @@ class Chart(QWidget):
 
         if self._toolbar.show_dimensions_checkbox.isChecked():
             # Define characteristic shaft coordinates
-            points = [0, self._shaft_data['LA'], self._shaft_data['L1'], self._shaft_data['L2'], self._shaft_data['LB'], self._shaft_data['L']]
 
             # Draw dimension lines between points
             dimensions_color = 'SkyBlue'
-            for i in range(len(points) - 1):
-                start, end = points[i], points[i + 1]
+            for i in range(len(self.points) - 1):
+                start, end = self.points[i], self.points[i + 1]
                 mid_point = (start + end) / 2
                 distance = "{:.1f}".format(end - start)
                 y_position = -self.dimension_offset
@@ -316,7 +305,7 @@ class Chart(QWidget):
                         if subsection[-1] > highest_diameter:
                             highest_diameter = subsection[-1]
 
-            self.dimension_offset = ((0.5 * highest_diameter ) * 1.2 + self._shaft_data['e'])
+            self.dimension_offset = ((0.5 * highest_diameter ) * 1.2 + 5)
 
             # Draw new dimensions
             for section_name, section in self.shaft_attributes.items():
@@ -388,14 +377,17 @@ class Chart(QWidget):
         
         return lines
 
-    def init_plots(self, functions, shaft_data):
+    def init_plots(self, functions, coordinates):
         """
         Create and store plot data from the provided data dictionary.
 
         :param data: A dictionary containing the data for the plots.
         """
         self._functions = functions
-        self._shaft_data = shaft_data
+        
+        shaft_points = [(0,0)] + coordinates
+        self.labels = [coord[0] for coord in shaft_points]
+        self.points = [coord[1] for coord in shaft_points]
 
         self._set_plots_data()
         self._set_axes_limits()
