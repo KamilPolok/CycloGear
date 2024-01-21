@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget, QSizePolicy
+from PyQt6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget, QSizePolicy
 
 from PyQt6.QtCore import pyqtSignal
 
@@ -51,7 +51,9 @@ class ShaftSection(QWidget):
     def _init_subsections(self):
         # Set subsections layout
         self.subsections_layout = QVBoxLayout()
-        self.layout.addLayout(self.subsections_layout)
+        self.subsections_container = QFrame()
+        self.subsections_container.setLayout(self.subsections_layout)
+        self.layout.addWidget(self.subsections_container)
 
         # Add one subsection
         self.add_subsection()
@@ -83,13 +85,9 @@ class ShaftSection(QWidget):
         self.remove_subsection_plot_signal.emit(self.name, subsection_number)
     
     def toggle(self, event):
-        # Toggle the visibility of the subsections
+        # Expand or collapse the widget
         self.expanded = not self.expanded
-        for i in range(self.subsections_layout.count()): 
-            widget = self.subsections_layout.itemAt(i).widget()
-            if widget is not None:
-                widget.setVisible(self.expanded)
-        
+        self.subsections_container.setVisible(self.expanded)
         self.add_subsection_button.setVisible(self.expanded)
 
     def handle_subsection_data(self, data):
