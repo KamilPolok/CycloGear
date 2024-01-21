@@ -4,10 +4,8 @@ from PyQt6.QtCore import pyqtSignal
 
 from .ShaftSubsection import ShaftSubsection
 
-class ShaftSection(QWidget):
+class Section(QWidget):
     subsection_data_signal = pyqtSignal(dict)
-    add_subsection_signal = pyqtSignal()
-    remove_subsection_plot_signal = pyqtSignal(str, int)
 
     def __init__(self, name, parent=None):
         super().__init__(parent)
@@ -24,7 +22,7 @@ class ShaftSection(QWidget):
         self._init_header()
         self._init_subsections()
 
-        # Initially collapse ShaftSection widget
+        # Initially collapse Section widget
         self.expanded = True
         self.toggle(None)
     
@@ -39,12 +37,6 @@ class ShaftSection(QWidget):
         self.header.mousePressEvent = self.toggle
         self.header_layout.addWidget(self.header)
 
-        # Set add subsection button
-        self.add_subsection_button = QPushButton("+", self)
-        self.add_subsection_button.clicked.connect(self.add_subsection)
-        self.add_subsection_button.setFixedWidth(30)
-        self.header_layout.addWidget(self.add_subsection_button)
-
         # Add header layout to main layout
         self.layout.addLayout(self.header_layout)
     
@@ -55,8 +47,25 @@ class ShaftSection(QWidget):
         self.subsections_container.setLayout(self.subsections_layout)
         self.layout.addWidget(self.subsections_container)
 
-        # Add one subsection
-        self.add_subsection()
+    def toggle(self, event):
+        # Expand or collapse the widget
+        self.expanded = not self.expanded
+        self.subsections_container.setVisible(self.expanded)
+
+    def handle_subsection_data(self, data):
+        self.subsection_data_signal.emit(data)
+
+class ShaftSection(Section):
+    add_subsection_signal = pyqtSignal()
+    remove_subsection_plot_signal = pyqtSignal(str, int)
+    
+    def _init_header(self):
+        super()._init_header()
+        # Set add subsection button
+        self.add_subsection_button = QPushButton("+", self)
+        self.add_subsection_button.clicked.connect(self.add_subsection)
+        self.add_subsection_button.setFixedWidth(30)
+        self.header_layout.addWidget(self.add_subsection_button)
 
     def add_subsection(self):
         subsection = ShaftSubsection(self.name, self.subsection_count, self)
@@ -83,10 +92,15 @@ class ShaftSection(QWidget):
         self.remove_subsection_plot_signal.emit(self.name, subsection_number)
     
     def toggle(self, event):
-        # Expand or collapse the widget
-        self.expanded = not self.expanded
-        self.subsections_container.setVisible(self.expanded)
+        super().toggle(event)
         self.add_subsection_button.setVisible(self.expanded)
 
-    def handle_subsection_data(self, data):
-        self.subsection_data_signal.emit(data)
+class EccentricsSection(Section):
+    def set_subsections_number(self, sections_number):
+        for _ in range(sections_number):
+            subsection = ShaftSubsection(self.name, self.subsection_count, self)
+            subsection.remove_button.hide()
+            subsection.subsection_data_signal.connect(self.handle_subsection_data)
+            self.subsections.append(subsection)
+            self.subsections_layout.addWidget(subsection)
+            self.subsection_count += 1

@@ -1,7 +1,7 @@
 from ShaftDesigner.model.ShaftCalculator import ShaftCalculator
 
 from ShaftDesigner.view.Chart import Chart
-from ShaftDesigner.view.ShaftSection import ShaftSection
+from ShaftDesigner.view.ShaftSection import ShaftSection, EccentricsSection
         
 class ShaftDesignerController:
     def __init__(self, view):
@@ -22,7 +22,8 @@ class ShaftDesignerController:
     def _connect_signals_and_slots(self):
         for section_name, section in self._sidebar_sections.items():
             section.subsection_data_signal.connect(self._handle_subsection_data)
-            section.remove_subsection_plot_signal.connect(self._remove_shaft_subsection)
+            if section_name != 'Wykorbienia':
+                section.remove_subsection_plot_signal.connect(self._remove_shaft_subsection)
 
     def _init_ui(self):
         # Set an instance of chart
@@ -31,7 +32,10 @@ class ShaftDesignerController:
 
         # Set instances of sidebar sections
         for name in self.section_names:
-            section = ShaftSection(name)
+            if name == 'Wykorbienia':
+                section = EccentricsSection(name)
+            else:
+                section = ShaftSection(name)
             self._sidebar_sections[name] = section
 
         self._shaft_designer.init_sidebar(self._sidebar_sections)
@@ -39,6 +43,8 @@ class ShaftDesignerController:
     def set_initial_data(self, functions, shaft_data, shaft_coordinates):
         self.shaft_calculator.set_data(shaft_data)
         self._chart.init_plots(functions, shaft_coordinates)
+        # Set number of eccentrics
+        self._sidebar_sections['Wykorbienia'].set_subsections_number(shaft_data['n'])
 
         # Redraw shaft section if anything is already drawn on the chart
         if self.shaft_calculator.shaft_sections:
