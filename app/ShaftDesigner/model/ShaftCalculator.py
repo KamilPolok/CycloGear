@@ -13,87 +13,10 @@ class ShaftCalculator:
                     self.shaft_sections[section_name].update(section)
                 else:
                     self.shaft_sections[section_name] = section
-    
-    def _prepare_for_calculations(self, shaft_subsection_attributes):
-        # Init the flags
-        self.shaft_coordinates_changed = False
-
-        # Set the same diameter of eccentrics
-        self.updated_eccentrics_diameter = None
-
-        if shaft_subsection_attributes:
-            if 'Mimośród 1' in shaft_subsection_attributes:
-                if 'Mimośród 2' in self.shaft_sections:
-                    self.updated_eccentrics_diameter = self.shaft_sections['Mimośród 1'][0]['d']
-                    self.shaft_sections['Mimośród 2'][0]['d'] = self.updated_eccentrics_diameter
-            elif 'Mimośród 2' in shaft_subsection_attributes:
-                if 'Mimośród 1' in self.shaft_sections:
-                    self.updated_eccentrics_diameter = self.shaft_sections['Mimośród 2'][0]['d']
-                    self.shaft_sections['Mimośród 1'][0]['d'] = self.updated_eccentrics_diameter
-    
-    def calculate_shaft_sections_limits(self, current_subsections):
-        self.limits = {
-            'Mimośród 1': {0: {'l': {'min': 0, 'max': 2 * (self._shaft_attributes['L1'] - self._shaft_attributes['LA'])}, 
-                           'd': {'min': self._shaft_attributes['de'], 'max': 1000}}},
-            'Mimośród 2': {0: {'l': {'min': 0, 'max': (self._shaft_attributes['LB'] - self._shaft_attributes['L1']) - 0.5 * self._shaft_attributes['B1'] - self._shaft_attributes['x']}, 
-                           'd': {'min': self._shaft_attributes['de'], 'max': 1000}}},
-            'Przed mimośrodami': {0: {'l': {'min': 0, 'max': None}, 
-                                  'd': {'min': self._shaft_attributes['ds'], 'max': 1000}}},
-            'Pomiędzy mimośrodami': {0: {'l': {'min': 0, 'max': self._shaft_attributes['x']}, 
-                                     'd': {'min': self._shaft_attributes['ds'], 'max': 1000}}},
-            'Za mimośrodami': {0: {'l': {'min': 0, 'max': None}, 
-                               'd': {'min': self._shaft_attributes['ds'], 'max': 1000}}},
-        }
-
-        for section_name, section in current_subsections.items():
-            if 'Mimośród 1' in self.shaft_sections and 'Mimośród 2' in self.shaft_sections:
-                self.limits['Przed mimośrodami'][0]['l']['max'] = max(self._shaft_attributes['L1'] - 0.5 * self.shaft_sections['Mimośród 1'][0]['l'], 0)
-                self.limits['Za mimośrodami'][0]['l']['max'] = max(self._shaft_attributes['L'] - self._shaft_attributes['L2'] - 0.5 * self.shaft_sections['Mimośród 2'][0]['l'], 0)
-                if len(section) > 1:
-                    for subsection_number in range(1, len(section)):
-                        previous_subsection_number = subsection_number - 1
-                        l_min = self.limits[section_name][previous_subsection_number]['l']['min']
-                        l_max = max(self.limits[section_name][previous_subsection_number]['l']['max'] - self.shaft_sections[section_name][previous_subsection_number]['l'], 0)
-                        d_min = self.limits[section_name][previous_subsection_number]['d']['min']
-                        d_max = self.limits[section_name][previous_subsection_number]['d']['max']
-
-                        self.limits[section_name][subsection_number] = {'l': {'min': l_min, 'max': l_max}, 'd': {'min': d_min, 'max': d_max}}
-        
-        self._check_if_plots_are_within_boundaries()
-
-        return self.limits
-
-    def _check_if_plots_are_within_boundaries(self):
-        self.subsections_to_remove = []
-        self.is_outside_boundaries = False
-        for section_name, section in self.shaft_sections.items():
-            remove_remaining = False
-            for subsection_number, subsection in section.items():
-                if not remove_remaining:
-                    for attribute, value in subsection.items():
-                        if value < self.limits[section_name][subsection_number][attribute]['min']:
-                            subsection[attribute] = self.limits[section_name][subsection_number][attribute]['min']
-                            if subsection[attribute] == 0:
-                                self.subsections_to_remove.append((section_name, subsection_number))
-                            self.is_outside_boundaries = True
-                            remove_remaining = True
-                        elif value > self.limits[section_name][subsection_number][attribute]['max']:
-                            subsection[attribute] = self.limits[section_name][subsection_number][attribute]['max']
-                            self.is_outside_boundaries = True
-                            remove_remaining = True
-                else:
-                    self.subsections_to_remove.append((section_name, subsection_number))
-
-        for subsection in self.subsections_to_remove:
-                self.remove_shaft_subsection(subsection[0], subsection[1])
-                del self.limits[subsection[0]][subsection[1]]
 
     def calculate_shaft_sections(self, shaft_subsection_attributes = None):
         # Save subsection attrbutes
         self._save_shaft_sections_attributes(shaft_subsection_attributes)
-
-        # Prepare data before performing calculations
-        self._prepare_for_calculations(shaft_subsection_attributes)
 
         # Prepare dict storing shaft subsections plots attributes
         self.shaft_sections_plots_attributes = {section_name: {} for section_name in self._section_names}
@@ -121,13 +44,6 @@ class ShaftCalculator:
         position = self._shaft_attributes['L1']
         offset = self._shaft_attributes['e']
 
-        # If second eccentric section does not exists yet, take care of adjusting the shaft coordinates
-        if 'Mimośród 2' not in self.shaft_sections:
-            length_between = self._shaft_attributes['x']
-            eccentric2_position = position + 0.5 * length + 0.5 * self._shaft_attributes['B1'] + length_between
-            self._shaft_attributes['L2'] = eccentric2_position
-            self.shaft_coordinates_changed = True
-
         start_z = position - length / 2
         start_y = offset - diameter / 2
 
@@ -136,21 +52,12 @@ class ShaftCalculator:
     def _calculate_eccentric2_section(self):
         section = 'Mimośród 2'
         length = self.shaft_sections[section][0]['l']
+        self._shaft_attributes['B2'] = length
         diameter = self.shaft_sections[section][0]['d']
 
         position = self._shaft_attributes['L2']
         offset = self._shaft_attributes['e']
         length_between = self._shaft_attributes['x']
-
-        if 'Mimośród 1' in self.shaft_sections:
-            eccentric2_position = self._shaft_attributes['L1'] + 0.5 * length + 0.5 * self.shaft_sections['Mimośród 1'][0]['l'] + length_between
-
-            # If length of the second eccentric changed, calculate and redraw the new shaft coordinates
-            if position != eccentric2_position:
-                self.shaft_coordinates_changed = True
-
-                position = eccentric2_position
-                self._shaft_attributes['L2'] = eccentric2_position
 
         start_z = position - length / 2
         start_y = -offset - diameter / 2

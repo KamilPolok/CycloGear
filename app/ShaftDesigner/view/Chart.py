@@ -215,8 +215,6 @@ class Chart(QWidget):
                 dimension = self._draw_dimension(distance, start, end, mid_point, y_position, y_position, y_position)
 
                 self.shaft_coordinates.extend(dimension)
-
-                print(self.shaft_coordinates)
         
         self.canvas.draw()
     
@@ -279,7 +277,6 @@ class Chart(QWidget):
 
     def draw_shaft(self, shaft_subsections_drawing_attributes):
         self.shaft_attributes = shaft_subsections_drawing_attributes
-        print(self.shaft_attributes)
 
         # Remove old sections
         for section in list(self.active_sections.keys()):
