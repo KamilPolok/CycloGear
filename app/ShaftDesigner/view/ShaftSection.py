@@ -68,19 +68,17 @@ class ShaftSection(QWidget):
 
     def remove_subsection(self, subsection_number):
         # Find and remove the specific subsection
-        if len(self.subsections) > 0:
-            subsection_to_remove = next((s for s in self.subsections if s.subsection_number == subsection_number), None)
-            if subsection_to_remove:
-                self.subsections_layout.removeWidget(subsection_to_remove)
-                subsection_to_remove.deleteLater()
-                self.subsections = [s for s in self.subsections if s != subsection_to_remove]
-        
-            # Update the numbers and names of the remaining subsections
-                for i, subsection in enumerate(self.subsections):
-                    subsection.update_subsection_name(i)
+        subsection_to_remove = self.sender()
+        self.subsections_layout.removeWidget(subsection_to_remove)
+        subsection_to_remove.deleteLater()
+        self.subsections = [s for s in self.subsections if s != subsection_to_remove]
+    
+        # Update the numbers and names of the remaining subsections
+        for i, subsection in enumerate(self.subsections):
+            subsection.update_subsection_name(i)
 
-            # Update the subsection count
-            self.subsection_count = len(self.subsections)
+        # Update the subsection count
+        self.subsection_count -= 1
         
         self.remove_subsection_plot_signal.emit(self.name, subsection_number)
     
