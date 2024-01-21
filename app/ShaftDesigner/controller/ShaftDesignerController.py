@@ -8,7 +8,7 @@ class ShaftDesignerController:
         self._shaft_designer = view
 
         # Set shaft sections names
-        self.section_names = ['Mimośród 1', 'Mimośród 2',  'Przed mimośrodami', 'Pomiędzy mimośrodami', 'Za mimośrodami']
+        self.section_names = ['Wykorbienia', 'Przed Wykorbieniami', 'Pomiędzy Wykorbieniami', 'Za Wykorbieniami']
 
         # Prepare dict storing sidebar sections
         self._sidebar_sections = {}

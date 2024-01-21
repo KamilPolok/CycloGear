@@ -22,63 +22,45 @@ class ShaftCalculator:
         self.shaft_sections_plots_attributes = {section_name: {} for section_name in self._section_names}
 
         # Calculate shaft sections plots attributes
-        if 'Mimośród 1' in self.shaft_sections:
-            self._calculate_eccentric1_section()
-        if 'Mimośród 2' in self.shaft_sections:
-            self._calculate_eccentric2_section()
-        if 'Przed mimośrodami' in self.shaft_sections:
+        if 'Wykorbienia' in self.shaft_sections:
+            self._calculate_eccentricities_section()
+        if 'Przed Wykorbieniami' in self.shaft_sections:
             self._calculate_section_before_eccentricities()
-        if 'Pomiędzy mimośrodami' in self.shaft_sections:
+        if 'Pomiędzy Wykorbieniami' in self.shaft_sections:
             self._calculate_section_between_eccentricities()
-        if 'Za mimośrodami' in self.shaft_sections:
+        if 'Za Wykorbieniami' in self.shaft_sections:
             self._calculate_section_after_eccentricities()
         
         return self.shaft_sections_plots_attributes
     
-    def _calculate_eccentric1_section(self):
-        section = 'Mimośród 1'
-        length = self.shaft_sections[section][0]['l']
-        self._shaft_attributes['B1'] = length
-        diameter = self.shaft_sections[section][0]['d']
+    def _calculate_eccentricities_section(self):
+        section = 'Wykorbienia'
+        for subsection_number, subsection_data in self.shaft_sections[section].items():
+            length = subsection_data['l']
+            diameter = subsection_data['d']
+            position = self._shaft_attributes[f'L{subsection_number+1}']
+            offset = self._shaft_attributes['e'] * (-1)**subsection_number
 
-        position = self._shaft_attributes['L1']
-        offset = self._shaft_attributes['e']
+            start_z = position - length / 2
+            start_y = - diameter / 2 + offset 
 
-        start_z = position - length / 2
-        start_y = offset - diameter / 2
-
-        self.shaft_sections_plots_attributes[section][0] = [(start_z, start_y), length, diameter]
-
-    def _calculate_eccentric2_section(self):
-        section = 'Mimośród 2'
-        length = self.shaft_sections[section][0]['l']
-        self._shaft_attributes['B2'] = length
-        diameter = self.shaft_sections[section][0]['d']
-
-        position = self._shaft_attributes['L2']
-        offset = self._shaft_attributes['e']
-        length_between = self._shaft_attributes['x']
-
-        start_z = position - length / 2
-        start_y = -offset - diameter / 2
-
-        self.shaft_sections_plots_attributes[section][0] = [(start_z, start_y), length, diameter]
+            self.shaft_sections_plots_attributes[section][subsection_number] = [(start_z, start_y), length, diameter]
 
     def _calculate_section_between_eccentricities(self):
         # Draw the shaft section between the eccentrics
-        section ='Pomiędzy mimośrodami'
+        section = 'Pomiędzy Wykorbieniami'
         length = self.shaft_sections[section][0]['l']
         diameter = self.shaft_sections[section][0]['d']
-        start_z = self._shaft_attributes['L1'] + self.shaft_sections['Mimośród 1'][0]['l'] / 2
+        start_z = self._shaft_attributes['L1'] + self.shaft_sections['Wykorbienia'][0]['l'] / 2
         start_y = -diameter / 2
 
         self.shaft_sections_plots_attributes[section][0] = [(start_z, start_y), length, diameter]
 
     def _calculate_section_before_eccentricities(self):
         # Draw the shaft section before the first eccentric
-        section ='Przed mimośrodami'
+        section = 'Przed Wykorbieniami'
 
-        start_z = self._shaft_attributes['L1'] - self.shaft_sections['Mimośród 1'][0]['l'] / 2
+        start_z = self._shaft_attributes['L1'] - self.shaft_sections['Wykorbienia'][0]['l'] / 2
 
         for subsection_number, subsection_data in self.shaft_sections[section].items():
             length = subsection_data['l']
@@ -90,8 +72,8 @@ class ShaftCalculator:
         
     def _calculate_section_after_eccentricities(self):
         # Draw the shaft section after the second eccentric
-        section ='Za mimośrodami'
-        start_z = self._shaft_attributes['L2'] + self.shaft_sections['Mimośród 2'][0]['l'] / 2
+        section = 'Za Wykorbieniami'
+        start_z = self._shaft_attributes['L2'] + self.shaft_sections['Wykorbienia'][1]['l'] / 2
 
         for subsection_number, subsection_data in self.shaft_sections[section].items():
             length = subsection_data['l']
