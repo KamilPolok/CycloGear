@@ -6,13 +6,13 @@ class ShaftCalculator:
     def set_data(self, shaft_attributes):
         self._shaft_attributes = shaft_attributes
 
-    def _save_shaft_sections_attributes(self, shaft_subsection_attributes):
-        if shaft_subsection_attributes:
-            for section_name, section in shaft_subsection_attributes.items():
-                if section_name in self.shaft_sections:
-                    self.shaft_sections[section_name].update(section)
-                else:
-                    self.shaft_sections[section_name] = section
+    def _save_shaft_sections_attributes(self, attributes):
+        if attributes:
+            section_name = attributes[0]
+            if section_name not in self.shaft_sections:
+                self.shaft_sections[section_name] = [{}, None]
+            self.shaft_sections[section_name][0][attributes[1][0]] = attributes[1][1]
+            self.shaft_sections[section_name][1] = attributes[2]
 
     def calculate_shaft_sections(self, shaft_subsection_attributes = None):
         # Save subsection attrbutes
@@ -35,9 +35,9 @@ class ShaftCalculator:
     
     def _calculate_eccentricities_section(self):
         section = 'Wykorbienia'
-        for subsection_number, subsection_data in self.shaft_sections[section].items():
+        for subsection_number, subsection_data in self.shaft_sections[section][0].items():
             length = subsection_data['l']
-            diameter = subsection_data['d']
+            diameter = self.shaft_sections[section][1]['d']
             position = self._shaft_attributes[f'L{subsection_number+1}']
             offset = self._shaft_attributes['e'] * (-1)**subsection_number
 
@@ -49,9 +49,9 @@ class ShaftCalculator:
     def _calculate_section_between_eccentricities(self):
         # Draw the shaft section between the eccentrics
         section = 'Pomiędzy Wykorbieniami'
-        length = self.shaft_sections[section][0]['l']
-        diameter = self.shaft_sections[section][0]['d']
-        start_z = self._shaft_attributes['L1'] + self.shaft_sections['Wykorbienia'][0]['l'] / 2
+        length = self.shaft_sections[section][0][0]['l']
+        diameter = self.shaft_sections[section][0][0]['d']
+        start_z = self._shaft_attributes['L1'] + self.shaft_sections['Wykorbienia'][0][0]['l'] / 2
         start_y = -diameter / 2
 
         self.shaft_sections_plots_attributes[section][0] = [(start_z, start_y), length, diameter]
@@ -60,9 +60,9 @@ class ShaftCalculator:
         # Draw the shaft section before the first eccentric
         section = 'Przed Wykorbieniami'
 
-        start_z = self._shaft_attributes['L1'] - self.shaft_sections['Wykorbienia'][0]['l'] / 2
+        start_z = self._shaft_attributes['L1'] - self.shaft_sections['Wykorbienia'][0][0]['l'] / 2
 
-        for subsection_number, subsection_data in self.shaft_sections[section].items():
+        for subsection_number, subsection_data in self.shaft_sections[section][0].items():
             length = subsection_data['l']
             diameter = subsection_data['d']
             start_z -= length
@@ -73,9 +73,9 @@ class ShaftCalculator:
     def _calculate_section_after_eccentricities(self):
         # Draw the shaft section after the second eccentric
         section = 'Za Wykorbieniami'
-        start_z = self._shaft_attributes['L2'] + self.shaft_sections['Wykorbienia'][1]['l'] / 2
+        start_z = self._shaft_attributes['L2'] + self.shaft_sections['Wykorbienia'][0][1]['l'] / 2
 
-        for subsection_number, subsection_data in self.shaft_sections[section].items():
+        for subsection_number, subsection_data in self.shaft_sections[section][0].items():
             length = subsection_data['l']
             diameter = subsection_data['d']
             start_y = -diameter / 2
@@ -86,11 +86,15 @@ class ShaftCalculator:
     
     def remove_shaft_subsection(self, section_name, subsection_number):
         # Remove the subsection from shaft sections attributes
-        if section_name in self.shaft_sections and subsection_number in self.shaft_sections[section_name]:
-            del self.shaft_sections[section_name][subsection_number]
+        if section_name in self.shaft_sections and subsection_number in self.shaft_sections[section_name][0]:
+            del self.shaft_sections[section_name][0][subsection_number]
 
             # Adjust the numbering of the remaining subsections
             new_subsections = {}
-            for num, data in enumerate(self.shaft_sections[section_name].values()):
-                new_subsections[num] = data
-            self.shaft_sections[section_name] = new_subsections
+            if len(new_subsections):
+                for num, data in enumerate(self.shaft_sections[section_name][0].values()):
+                    new_subsections[num] = data
+                self.shaft_sections[section_name][0] = new_subsections
+            else:
+                del self.shaft_sections[section_name]
+                

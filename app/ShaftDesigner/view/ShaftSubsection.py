@@ -1,10 +1,12 @@
 from ast import literal_eval
 
-from PyQt6.QtCore import Qt, QRegularExpression, pyqtSignal
-from PyQt6.QtGui import QRegularExpressionValidator
-from PyQt6.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QPushButton, QSizePolicy, QVBoxLayout, QWidget
+from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QSizePolicy, QVBoxLayout, QWidget
+
+from .CommonFunctions import create_data_input_row
 
 class ShaftSubsection(QWidget):
+    check_if_inputs_provided_signal = pyqtSignal()
     subsection_data_signal = pyqtSignal(dict)
     remove_subsection_signal = pyqtSignal(int)
 
@@ -13,19 +15,24 @@ class ShaftSubsection(QWidget):
         self.section_name = section_name
         self.subsection_number = subsection_number
         self.expanded = False
-        self.input_values = {}
+        self.inputs = {}
 
         self._init_ui()
 
     def _init_ui(self):
-        # Set layout
+        # Main layout
         self.main_layout = QVBoxLayout(self)
         self.main_layout.setContentsMargins(0, 0, 0, 0)
 
+        self._init_header()
+        self._init_content()
+
+    def _init_header(self):
         # Header layout
         self.header_layout = QHBoxLayout()
+        self.main_layout.addLayout(self.header_layout)
 
-        # Set header
+        # Set header label
         self.header = QLabel()
         self._set_header()
         self.header.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
@@ -39,29 +46,23 @@ class ShaftSubsection(QWidget):
         self.remove_button.clicked.connect(self.emit_remove_signal)
         self.header_layout.addWidget(self.remove_button)
 
-        # Add header layout to main layout
-        self.main_layout.addLayout(self.header_layout)
-
-        # Set content widget and layout
-        self.content_widget = QWidget()
-        self.content_layout = QVBoxLayout(self.content_widget)
-        self.content_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+    def _init_content(self):
+        # Content layout
+        self.content_layout = QVBoxLayout()
+        self.content_container = QFrame()
+        self.content_container.setLayout(self.content_layout)
+        self.content_container.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.main_layout.addWidget(self.content_container)
         
-        # Set data entries
-        diameter = self._create_data_input_row('d', 'Ø')
-        length = self._create_data_input_row('l', 'L')
+        # Inputs layout
+        self.inputs_layout = QVBoxLayout()
+        self.content_layout.addLayout(self.inputs_layout)
 
         # Set OK button
         self.confirm_button = QPushButton("OK", self)
         self.confirm_button.clicked.connect(self.emit_data_signal)
         self.confirm_button.setEnabled(False)
-
-        self.content_layout.addLayout(diameter)
-        self.content_layout.addLayout(length)
         self.content_layout.addWidget(self.confirm_button)
-        self.content_widget.setVisible(False)
-
-        self.main_layout.addWidget(self.content_widget)
 
         # Initially collapse ShaftSubsection widget
         self.expanded = True
@@ -69,50 +70,24 @@ class ShaftSubsection(QWidget):
     
     def _set_header(self):
         self.header.setText(f'{self.subsection_number + 1}.')
-          
-    def _create_data_input_row(self, attribute, symbol):
-        layout = QHBoxLayout()
-        
-        # Symbol label
-        symbol_label = QLabel(f'{symbol}')
-        symbol_label.setFixedWidth(10)
-
-        equals_sign = QLabel('=')
-        equals_sign.setFixedWidth(10)
-
-        # Line edit for input
-        line_edit = QLineEdit()
-        line_edit.setAlignment(Qt.AlignmentFlag.AlignRight)
-        line_edit.setFixedWidth(50)
-        line_edit.setText('')
-        
-        # Input validation
-        regex = QRegularExpression(r'^[0-9]\d{0,3}(\.\d{1,2})?$')
-        line_edit.setValidator(QRegularExpressionValidator(regex, line_edit))
-
-        # Units label
-        units_label = QLabel('mm')
-        units_label.setFixedWidth(25)
-
-        # Assemble the layout
-        layout.addWidget(symbol_label)
-        layout.addWidget(equals_sign)
-        layout.addWidget(line_edit)
-        layout.addWidget(units_label)
-
-        # Save the line_edit for later reference
-        self.input_values[attribute] = line_edit
-
-        # Connect signals and slots
-        self.input_values[attribute].textChanged.connect(self._check_if_all_inputs_provided)
-
-        return layout
     
     def _check_if_all_inputs_provided(self):
-        self.confirm_button.setEnabled(all(input.text() != '' for input in self.input_values.values()) and all(literal_eval(input.text()) != 0 for input in self.input_values.values()))
+            self.check_if_inputs_provided_signal.emit()
+
+    def set_attributes(self, attributes):
+        # Set data entries
+        for attribute in attributes:
+            symbol = attribute[0]
+            label = attribute[1]
+
+            attribute_row, input = create_data_input_row(symbol, label)
+            self.inputs_layout.addLayout(attribute_row)
+            
+            input.textChanged.connect(self._check_if_all_inputs_provided)
+            self.inputs[symbol] = input
 
     def get_attributes(self):
-        return {self.section_name: {self.subsection_number: {key: literal_eval(input.text()) for key, input in self.input_values.items()}}}
+        return {key: literal_eval(input.text()) for key, input in self.inputs.items()}
     
     def update_subsection_name(self, new_number):
         self.subsection_number = new_number
@@ -121,7 +96,7 @@ class ShaftSubsection(QWidget):
     def toggle(self, event):
         # Collapse or expand contents of section
         self.expanded = not self.expanded
-        self.content_widget.setVisible(self.expanded)
+        self.content_container.setVisible(self.expanded)
 
         self.adjustSize()
         self.updateGeometry()
