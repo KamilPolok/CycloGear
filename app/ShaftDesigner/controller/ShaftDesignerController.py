@@ -36,7 +36,10 @@ class ShaftDesignerController:
                 section = EccentricsSection(name)
             else:
                 section = ShaftSection(name)
+                section.setDisabled(True)
             self._sidebar_sections[name] = section
+
+        self.all_sections_enabled = False
 
         self._shaft_designer.init_sidebar(self._sidebar_sections)
 
@@ -44,7 +47,8 @@ class ShaftDesignerController:
         self.shaft_calculator.set_data(shaft_data)
         self._chart.init_plots(functions, shaft_coordinates)
         # Set number of eccentrics
-        self._sidebar_sections['Wykorbienia'].set_subsections_number(shaft_data['n'])
+        self.eccentrics_number = shaft_data['n']
+        self._sidebar_sections['Wykorbienia'].set_subsections_number(self.eccentrics_number)
 
         # Redraw shaft section if anything is already drawn on the chart
         if self.shaft_calculator.shaft_sections:
@@ -53,7 +57,11 @@ class ShaftDesignerController:
     def _handle_subsection_data(self, shaft_subsection_attributes):
         # Update the shaft drawing
         self._draw_shaft(shaft_subsection_attributes)
-    
+
+        # Enable other sections if eccentrics sections where plotted
+        if self.all_sections_enabled == False:
+            self._enable_sections()
+                
     def _draw_shaft(self, shaft_subsection_attributes = None):
         # Calculate shaft subsections plot attributes and draw them on the chart
         shaft_plot_attributes = self.shaft_calculator.calculate_shaft_sections(shaft_subsection_attributes)
@@ -66,3 +74,10 @@ class ShaftDesignerController:
         # Recalculate and redraw shaft sections
         shaft_plot_attributes = self.shaft_calculator.calculate_shaft_sections()
         self._chart.draw_shaft(shaft_plot_attributes)
+    
+    def _enable_sections(self):
+        if len(self.shaft_calculator.shaft_sections_plots_attributes['Wykorbienia']) == self.eccentrics_number:
+            for section in self._sidebar_sections.values():
+                if not section.isEnabled():
+                    section.setEnabled(True)
+            self.all_sections_enabled == True
