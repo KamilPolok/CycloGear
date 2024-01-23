@@ -1,3 +1,4 @@
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (QHBoxLayout, QMainWindow, QPushButton, QSizePolicy, QSpacerItem, QStyle,
                              QVBoxLayout, QWidget, QScrollArea)
 class ShaftDesigner(QMainWindow):
@@ -25,22 +26,21 @@ class ShaftDesigner(QMainWindow):
     def init_chart(self, chart):
         # Add Chart
         self._chart = chart
-        self.centralWidget().layout().addWidget(self._chart)
+        self.main_layout.addWidget(self._chart)
     
     def init_sidebar(self, sections):
         # Set layout for sidebar and toggle button
-        self.sidebar_section_layout  = QHBoxLayout()
+        self.sidebar_section_layout = QHBoxLayout()
 
         # Set sidebar
         self.sidebar = QWidget()
         self.sidebar_layout = QVBoxLayout(self.sidebar)
-        self.sidebar.setFixedWidth(200)  # Set the fixed width for the sidebar
 
         # Set contents of the sidebar
         for section in sections.values():
             self.sidebar_layout.addWidget(section)
 
-        # Add a spacer item at the end of the sidebar layout - keeps the contents alignet to the top
+        # Add a spacer item at the end of the sidebar layout - keeps the contents aligned to the top
         spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
         self.sidebar_layout .addSpacerItem(spacer)
 
@@ -48,6 +48,7 @@ class ShaftDesigner(QMainWindow):
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setWidget(self.sidebar)
+        self.scroll_area.setAlignment(Qt.AlignmentFlag.AlignLeft)
         self.scroll_area.setFixedWidth(220)  # Slightly larger to accommodate scrollbar
 
         # Set sidebar toggle button
@@ -66,8 +67,10 @@ class ShaftDesigner(QMainWindow):
         self.toggle_button_layout.addWidget(self.toggle_button)
         self.toggle_button_layout.addStretch(1)
 
-        self.main_layout.addWidget(self.scroll_area)
-        self.main_layout.addLayout(self.toggle_button_layout)
+        self.sidebar_section_layout.addWidget(self.scroll_area)
+        self.sidebar_section_layout.addLayout(self.toggle_button_layout)
+
+        self.main_layout.addLayout(self.sidebar_section_layout)
 
     def toggle_sidebar(self):
         self.scroll_area.setVisible(not self.scroll_area.isVisible())

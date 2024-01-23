@@ -5,7 +5,7 @@ from ast import literal_eval
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget, QSizePolicy
 
-from .CommonFunctions import create_data_input_row
+from .CommonFunctions import create_data_input_row, format_input
 from .ShaftSubsection import ShaftSubsection
 
 class ABCQWidgetMeta(ABCMeta, type(QWidget)):
@@ -87,6 +87,17 @@ class ShaftSection(Section):
         self.subsections.append(subsection)
         self.subsections_layout.addWidget(subsection)
         self.subsection_count += 1
+        self.add_subsection_signal.emit()
+
+    def remove_subsections(self, subsections_number):
+        # Find and remove the specific subsection
+        for subsection_number in range(self.subsection_count, subsections_number, -1):
+            subsection_to_remove = next((s for s in self.subsections if s.subsection_number == subsection_number), None)
+            if subsection_to_remove:
+                self.subsections_layout.removeWidget(subsection_to_remove)
+                subsection_to_remove.deleteLater()
+                self.subsections.pop()
+                self.subsection_count -= 1
 
     def remove_subsection(self, subsection_number):
         # Find and remove the specific subsection
@@ -103,6 +114,10 @@ class ShaftSection(Section):
         self.subsection_count -= 1
         
         self.remove_subsection_plot_signal.emit(self.name, subsection_number)
+
+    def set_limits(self, limits):
+        for subsection_number, attributes in limits.items():
+            self.subsections[subsection_number].set_limits(attributes)
     
     def toggle(self, event):
         super().toggle(event)
@@ -116,7 +131,6 @@ class ShaftSection(Section):
     def handle_subsection_data(self, data):
         subsection = self.sender()
         data = (self.name,(subsection.subsection_number, data), None)
-        print(data)
         self.subsection_data_signal.emit(data)
 
 class EccentricsSection(Section):
@@ -129,33 +143,61 @@ class EccentricsSection(Section):
 
         # Set data entries
         self.inputs = {}
+        self.limits = {}
         
-        symbol, label = ('d', 'Ø')
-        attribute_row, input = create_data_input_row(symbol, label)
+        attribute, symbol = ('d', 'Ø')
+        attribute_row, input = create_data_input_row(symbol)
         self.subsections_layout.addLayout(attribute_row)
         
         input.textChanged.connect(self.check_if_inputs_provided)
-        self.inputs[symbol] = input
+        input.editingFinished.connect(self._check_if_meets_limits)
+        self.inputs[attribute] = input
 
     def set_subsections_number(self, sections_number):
-        for _ in range(sections_number):
-            subsection = ShaftSubsection(self.name, self.subsection_count, self)
-            subsection.set_attributes([('l', 'L')])
-            subsection.remove_button.hide()
-            subsection.subsection_data_signal.connect(self.handle_subsection_data)
-            subsection.check_if_inputs_provided_signal.connect(self.check_if_inputs_provided)
-            self.subsections.append(subsection)
-            self.subsections_layout.addWidget(subsection)
-            self.subsection_count += 1
+        if self.subsection_count != sections_number:
+            for _ in range(self.subsection_count, sections_number):
+                subsection = ShaftSubsection(self.name, self.subsection_count, self)
+                subsection.set_attributes([('l', 'L')])
+                subsection.remove_button.hide()
+                subsection.subsection_data_signal.connect(self.handle_subsection_data)
+                subsection.check_if_inputs_provided_signal.connect(self.check_if_inputs_provided)
+                self.subsections.append(subsection)
+                self.subsections_layout.addWidget(subsection)
+                self.subsection_count += 1
     
+    def set_limits(self, limits):
+        for subsection_number, attributes in limits.items():
+            for attribute, limits in attributes.items():
+                if attribute in self.inputs.keys():
+                    self.limits[attribute] = {}
+                    for limit, value in limits.items():
+                        self.limits[attribute][limit] = value
+                    self._check_if_meets_limits(self.inputs[attribute])
+                else:
+                    self.subsections[subsection_number].set_limits({attribute: limits})
+                    
     def check_if_inputs_provided(self): 
         section_input_provided = all(input.text() and literal_eval(input.text()) != 0 for input in self.inputs.values())
         for subsection in self.subsections:
             is_provided = all(input.text() and literal_eval(input.text()) != 0 for input in subsection.inputs.values())
             subsection.confirm_button.setEnabled(section_input_provided and is_provided)
-                    
+    
+    def _check_if_meets_limits(self, input = None):
+        input = self.sender() if input == None else input
+        attribute = next((key for key, value in self.inputs.items() if value == input), None)
+
+        if attribute:
+            min = self.limits[attribute]['min']
+            max = self.limits[attribute]['max']
+            value = float(input.text()) if input.text() else None
+
+            input.setPlaceholderText(f'{format_input(min)}-{format_input(max)}')
+            if value is not None and min <= value <= max:
+                input.setText(f'{format_input(value)}')
+            else:
+                input.clear()
+
     def handle_subsection_data(self, data):
         subsection = self.sender()
         data = (self.name,(subsection.subsection_number, data), {key: literal_eval(input.text()) for key, input in self.inputs.items()})
-        print(data)
         self.subsection_data_signal.emit(data)

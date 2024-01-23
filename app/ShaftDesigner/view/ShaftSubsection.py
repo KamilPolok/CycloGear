@@ -3,7 +3,7 @@ from ast import literal_eval
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QSizePolicy, QVBoxLayout, QWidget
 
-from .CommonFunctions import create_data_input_row
+from .CommonFunctions import create_data_input_row, format_input
 
 class ShaftSubsection(QWidget):
     check_if_inputs_provided_signal = pyqtSignal()
@@ -16,6 +16,7 @@ class ShaftSubsection(QWidget):
         self.subsection_number = subsection_number
         self.expanded = False
         self.inputs = {}
+        self.limits = {}
 
         self._init_ui()
 
@@ -73,18 +74,34 @@ class ShaftSubsection(QWidget):
     
     def _check_if_all_inputs_provided(self):
             self.check_if_inputs_provided_signal.emit()
+    
+    def _check_if_meets_limits(self, input=None):
+        input = self.sender() if input == None else input
+        attribute = next((key for key, value in self.inputs.items() if value == input), None)
+
+        if attribute:
+            min = self.limits[attribute]['min']
+            max = self.limits[attribute]['max']
+            value = float(input.text()) if input.text() else None
+
+            input.setPlaceholderText(f'{format_input(min)}-{format_input(max)}')
+            if value is not None and min <= value <= max:
+                input.setText(f'{format_input(value)}')
+            else:
+                input.clear()
 
     def set_attributes(self, attributes):
         # Set data entries
         for attribute in attributes:
-            symbol = attribute[0]
-            label = attribute[1]
+            attr = attribute[0]
+            symbol = attribute[1]
 
-            attribute_row, input = create_data_input_row(symbol, label)
+            attribute_row, input = create_data_input_row(symbol)
             self.inputs_layout.addLayout(attribute_row)
             
             input.textChanged.connect(self._check_if_all_inputs_provided)
-            self.inputs[symbol] = input
+            input.editingFinished.connect(self._check_if_meets_limits)
+            self.inputs[attr] = input
 
     def get_attributes(self):
         return {key: literal_eval(input.text()) for key, input in self.inputs.items()}
@@ -93,6 +110,14 @@ class ShaftSubsection(QWidget):
         self.subsection_number = new_number
         self._set_header()
     
+    def set_limits(self, limits):
+        for attribute, attribute_limits in limits.items():
+            if attribute in self.inputs.keys():
+                self.limits[attribute] = {}
+                for limit, value in attribute_limits.items():
+                    self.limits[attribute][limit] = value
+                self._check_if_meets_limits(self.inputs[attribute])
+
     def toggle(self, event):
         # Collapse or expand contents of section
         self.expanded = not self.expanded
