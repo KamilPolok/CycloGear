@@ -219,22 +219,21 @@ class Chart(QWidget):
         # Remove plots that are not selected
         for plot_name in list(self.active_plots.keys()):
             if plot_name not in selected_plots:
-                for line in self.active_plots[plot_name]:
-                    line.remove()
+                for element in self.active_plots[plot_name]:
+                    element.remove()
                 del self.active_plots[plot_name]
 
         # Add new selected plots
         for plot_name in selected_plots:
             if plot_name not in self.active_plots:
                 plot_info = self._plots[plot_name]
-                if plot_name.lower().startswith('d'):
-                    plot_lines = self.ax.plot(self._z['z'], plot_info['y'], linewidth = 1, color=plot_info['color'])
-                else:
-                    markerline, stemline, baseline = self.ax.stem(self._z['z'], plot_info['y'], linefmt=plot_info['color'], markerfmt='o', basefmt=" ")
-                    plt.setp(stemline, linewidth = 0.5)
-                    plt.setp(markerline, markersize = 1)
-                    plot_lines = [markerline, stemline, baseline]
-                self.active_plots[plot_name] = plot_lines
+                plot_elements = []
+                plot_line, = self.ax.plot(self._z['z'], plot_info['y'], linewidth = 1, color=plot_info['color'])
+                plot_elements.append(plot_line)
+                if not plot_name.lower().startswith('d'):
+                    filling = self.ax.fill_between(self._z['z'], plot_info['y'], alpha=0.3, color=plot_info['color'])
+                    plot_elements.append(filling)
+                self.active_plots[plot_name] = plot_elements
         
         # Manage the cursor
         self._manage_cursor()
