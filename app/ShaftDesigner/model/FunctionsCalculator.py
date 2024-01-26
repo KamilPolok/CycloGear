@@ -1,21 +1,21 @@
 import numpy as np
 from collections import OrderedDict
 
-class InputShaftCalculator():
+class FunctionsCalculator():
     def _calculate_support_reactions(self):
-        LA = self._data['LA'][0]    # [mm]
-        LB =  self._data['LB'][0]   # [mm]   
+        LA = self._data['LA'][0]
+        LB =  self._data['LB'][0]
 
         sum_moments_A = 0
         sum_forces = 0
 
-        # Adding active forces and moments caused by active forces relative to support A
+        # Add active forces and moments caused by active forces relative to support A
         for force in self.active_forces.values():
             distance_from_A = force['z'] - LA
             sum_moments_A += force['val'] * distance_from_A
             sum_forces += force['val']
 
-        # Calculating support reactions
+        # Calculate support reactions
         # Equation of moments relative to A: RA * 0 + sum_moments_A + RB * (LB - LA) = 0
         # Equation of vertical forces: RA + RB + sum_forces = 0
         RB = (-sum_moments_A) / (LB - LA)
@@ -42,10 +42,10 @@ class InputShaftCalculator():
         self.equivalent_moment = np.sqrt(np.power(self.bending_moment, 2) + np.power(reductionFactor / 2 * self.torque, 2))
 
     def _calculate_minimal_shaft_diameters(self):   
-        Zgo, Zsj = self._data['Materiał']['Zgo'][0] * 10**6, self._data['Materiał']['Zsj'][0] * 10**6   # [Pa]
-        G = self._data['Materiał']['G'][0] * 10**6                                                      # [Pa]
-        xz = self._data['xz'][0]                                                                        # [-]
-        qdop = self._data['qdop'][0]                                                                    # [deg]
+        Zgo, Zsj = self._data['Materiał']['Zgo'][0] * 10**6, self._data['Materiał']['Zsj'][0] * 10**6
+        G = self._data['Materiał']['G'][0] * 10**6
+        xz = self._data['xz'][0]
+        qdop = self._data['qdop'][0]
 
         # Calculate minimal shaft diameter based on equivalent stress condition         
         kgo = Zgo / xz                                                                                          
@@ -58,12 +58,12 @@ class InputShaftCalculator():
         # Calculate minimal shaft diameter d - based permissible angle of twist condition
         self.d_min_by_permissible_angle_of_twist = np.sqrt(32 * self.torque / (np.pi * G * qdop)) * 1000
 
-    def calculate_initial_functions(self, data):
+    def calculate_initial_functions_and_attributes(self, data):
         self._data = data
         # Extract necessary data
-        L, L1 = self._data['L'][0], self._data['L1'][0]                                                 # [mm]
-        x, e, B = self._data['x'][0], self._data['e'][0], self._data['B'][0]                            # [mm]
-        F = self._data['F'][0]                                                                          # [N]
+        L, L1 = self._data['L'][0], self._data['L1'][0]
+        x, e, B = self._data['x'][0], self._data['e'][0], self._data['B'][0]
+        F = self._data['F'][0]
 
         # Calculate coordinate of second cyclo disc
         L2 = L1 + B + x
@@ -101,18 +101,20 @@ class InputShaftCalculator():
         self._data['Ra'][0] = self.support_reactions['Fa']['val']
         self._data['Rb'][0] = self.support_reactions['Fb']['val']
         
-        # Set shaft designer data for visualization
-
+    def get_shaft_initial_functions(self):
         functions = {
-            'z': self.z_values, 
-            'F': self.all_forces,
-            'Mg': self.bending_moment, 
-            'Ms': self.torque,
-            'Mz': self.equivalent_moment,
-            'dMz': self.d_min_by_equivalent_stress,
-            'dMs': self.d_min_by_torsional_strength,
-            'dqdop': self.d_min_by_permissible_angle_of_twist}
-        
+        'z': self.z_values, 
+        'F': self.all_forces,
+        'Mg': self.bending_moment, 
+        'Ms': self.torque,
+        'Mz': self.equivalent_moment,
+        'dMz': self.d_min_by_equivalent_stress,
+        'dMs': self.d_min_by_torsional_strength,
+        'dqdop': self.d_min_by_permissible_angle_of_twist}
+
+        return functions
+    
+    def get_shaft_initial_attributes(self):
         shaft_data = {
             'L': self._data['L'][0],
             'L1': self._data['L1'][0],
@@ -126,15 +128,16 @@ class InputShaftCalculator():
             'B1': self._data['B'][0],
             'B2': self._data['B'][0],
             'e': self._data['e'][0],
-            'x': self._data['x'][0]
-        }
+            'x': self._data['x'][0]}
+        
+        return shaft_data
 
+    def get_shaft_coordinates(self):
         shaft_coordinates = [
             ('A', self._data['LA'][0]),
             ('L1', self._data['L1'][0]),
             ('L2', self._data['L2'][0]),
             ('B', self._data['LB'][0]),
-            ('L', self._data['L'][0])
-        ]
-
-        return (functions, shaft_data, shaft_coordinates)
+            ('L', self._data['L'][0])]
+        
+        return shaft_coordinates

@@ -1,4 +1,6 @@
 from ShaftDesigner.model.ShaftCalculator import ShaftCalculator
+from ShaftDesigner.model.FunctionsCalculator import FunctionsCalculator
+
 
 from ShaftDesigner.view.Chart import Chart
 from ShaftDesigner.view.ShaftSection import ShaftSection, EccentricsSection
@@ -12,12 +14,14 @@ class ShaftDesignerController:
 
         # Prepare dict storing sidebar sections
         self._sections = {}
-
         self._init_ui()
         self._connect_signals_and_slots()
 
         # Set an instance of shaft calculator
         self.shaft_calculator = ShaftCalculator(self.section_names)
+
+        # Set an instance of functions calculator
+        self.functions_calculator = FunctionsCalculator()
     
     def _connect_signals_and_slots(self):
         for section_name, section in self._sections.items():
@@ -44,14 +48,23 @@ class ShaftDesignerController:
         self._chart = Chart()
         self._shaft_designer.init_chart(self._chart)
 
-    def set_initial_data(self, functions, shaft_data, shaft_coordinates):
-        self.shaft_calculator.set_data(shaft_data)
-        self._chart.init_plots(functions, shaft_coordinates)
-        # Set number of eccentrics
-        self.eccentrics_number = shaft_data['n']
+    def update_shaft_data(self, data):
+        # Update shaft initial data, recalculate functions and attributes
+        self._data = data
+        self.functions_calculator.calculate_initial_functions_and_attributes(data)
+
+        # (Re)set shaft initial attributes
+        shaft_initial_attributes = self.functions_calculator.get_shaft_initial_attributes()
+        self.shaft_calculator.set_data(shaft_initial_attributes)
+        # (Re)set shaft initial functions and coordinates
+        initial_functions = self.functions_calculator.get_shaft_initial_functions()
+        shaft_coordinates = self.functions_calculator.get_shaft_coordinates()
+        self._chart.init_plots(initial_functions, shaft_coordinates)
+        # (Re)set number of eccentrics
+        self.eccentrics_number = shaft_initial_attributes['n']
         self._sections['Wykorbienia'].set_subsections_number(self.eccentrics_number)
 
-        # Set limits
+        # Update limits
         self._set_limits()
 
         # Redraw shaft section if anything is already drawn on the chart

@@ -3,7 +3,6 @@ import numpy as np
 
 from InputShaft.view.InputShaft import InputShaft
 
-from app.InputShaft.model.InputShaftCalculator import InputShaftCalculator
 from ShaftDesigner.controller.ShaftDesignerController import ShaftDesignerController
 from ShaftDesigner.view.ShaftDesigner import ShaftDesigner
 
@@ -37,11 +36,7 @@ class InputShaftController:
         self._input_shaft.set_data(self._data)
         self._input_shaft.init_tabs()
 
-        self._init_input_shaft_calculator()
         self._init_shaft_designer()
-    
-    def _init_input_shaft_calculator(self):
-        self.functions_calculator = InputShaftCalculator()
 
     def _init_shaft_designer(self):
         # Set an instance of shaft designer
@@ -60,7 +55,7 @@ class InputShaftController:
         """
         self._input_shaft.show_preview_signal.connect(self._open_shaft_designer_window)
         self._input_shaft.tabs[0].select_material_button.clicked.connect(self._open_materials_db_window)
-        self._input_shaft.tabs[0].updated_data_signal.connect(self._calculate_input_shaft_attributes)
+        self._input_shaft.tabs[0].updated_data_signal.connect(self._update_input_shaft_attributes)
         self._input_shaft.tabs[1].updated_support_bearings_data_signal.connect(self._open_support_bearings_db_window)
         self._input_shaft.tabs[1].updated_central_bearings_data_signal.connect(self._open_central_bearings_db_window)
         self._input_shaft.tabs[1].updated_data_signal.connect(self._calculate_bearings_attributes)
@@ -244,7 +239,7 @@ class InputShaftController:
         self._data['Ltc'][0] = l
         self._data['Cc'][0] = c
          
-    def _calculate_input_shaft_attributes(self, data):
+    def _update_input_shaft_attributes(self, data):
         """
         Calculate attributes for the input shaft.
 
@@ -255,8 +250,7 @@ class InputShaftController:
         """
         self._update_data(data)
 
-        functions, shaftdata, shaft_coordinates = self.functions_calculator.calculate_initial_functions(self._data)
-        self._shaft_designer_controller.set_initial_data(functions, shaftdata, shaft_coordinates)
+        self._shaft_designer_controller.update_shaft_data(self._data)
 
     def _calculate_bearings_attributes(self, data):
         """
