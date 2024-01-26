@@ -1,8 +1,10 @@
 from ShaftDesigner.model.ShaftCalculator import ShaftCalculator
 from ShaftDesigner.model.FunctionsCalculator import FunctionsCalculator
 
+from app.ShaftDesigner.view.Chart.Chart import Chart
+from app.ShaftDesigner.view.Chart.Chart_Plotter import Chart_Plotter
+from app.ShaftDesigner.view.Chart.Chart_ShaftViewer import Chart_ShaftViewer
 
-from ShaftDesigner.view.Chart import Chart
 from ShaftDesigner.view.ShaftSection import ShaftSection, EccentricsSection
         
 class ShaftDesignerController:
@@ -31,6 +33,10 @@ class ShaftDesignerController:
                 section.add_subsection_signal.connect(self._set_limits)
 
     def _init_ui(self):
+        self._init_shaft_sections()
+        self._init_chart()
+    
+    def _init_shaft_sections(self):
         # Set instances of sidebar sections
         for name in self.section_names:
             if name == 'Wykorbienia':
@@ -43,33 +49,14 @@ class ShaftDesignerController:
         self.all_sections_enabled = False
 
         self._shaft_designer.init_sidebar(self._sections)
-    
+
+    def _init_chart(self):
         # Set an instance of chart
         self._chart = Chart()
         self._shaft_designer.init_chart(self._chart)
-
-    def update_shaft_data(self, data):
-        # Update shaft initial data, recalculate functions and attributes
-        self._data = data
-        self.functions_calculator.calculate_initial_functions_and_attributes(data)
-
-        # (Re)set shaft initial attributes
-        shaft_initial_attributes = self.functions_calculator.get_shaft_initial_attributes()
-        self.shaft_calculator.set_data(shaft_initial_attributes)
-        # (Re)set shaft initial functions and coordinates
-        initial_functions = self.functions_calculator.get_shaft_initial_functions()
-        shaft_coordinates = self.functions_calculator.get_shaft_coordinates()
-        self._chart.init_plots(initial_functions, shaft_coordinates)
-        # (Re)set number of eccentrics
-        self.eccentrics_number = shaft_initial_attributes['n']
-        self._sections['Wykorbienia'].set_subsections_number(self.eccentrics_number)
-
-        # Update limits
-        self._set_limits()
-
-        # Redraw shaft section if anything is already drawn on the chart
-        if self.shaft_calculator.shaft_sections:
-            self._draw_shaft()
+        
+        self._plotter = Chart_Plotter(*self._chart.get_chart_controls())
+        self._shaft_viewer = Chart_ShaftViewer(*self._chart.get_chart_controls())
     
     def _handle_subsection_data(self, shaft_subsection_attributes):
         # Update the shaft drawing
@@ -93,7 +80,7 @@ class ShaftDesignerController:
     def _draw_shaft(self, shaft_subsection_attributes = None):
         # Calculate shaft subsections plot attributes and draw them on the chart
         shaft_plot_attributes = self.shaft_calculator.calculate_shaft_sections(shaft_subsection_attributes)
-        self._chart.draw_shaft(shaft_plot_attributes)
+        self._shaft_viewer.draw_shaft(shaft_plot_attributes)
 
     def _set_limits(self):
         current_subsections = {}
@@ -111,10 +98,10 @@ class ShaftDesignerController:
 
         # Recalculate and redraw shaft sections
         shaft_plot_attributes = self.shaft_calculator.calculate_shaft_sections()
-        self._chart.draw_shaft(shaft_plot_attributes)
-
+        self._shaft_viewer.draw_shaft(shaft_plot_attributes)
+        
         self._enable_add_subsection_button(section_name)
-
+    
     def _enable_sections(self):
         if len(self.shaft_calculator.shaft_sections_plots_attributes['Wykorbienia']) == self.eccentrics_number:
             for section in self._sections.values():
@@ -129,3 +116,28 @@ class ShaftDesignerController:
             if self._sections[section_name].subsection_count == 0 or (section_name in self.shaft_calculator.shaft_sections_plots_attributes and
             last_subsection_number in self.shaft_calculator.shaft_sections_plots_attributes[section_name]):
                 self._sections[section_name].set_add_subsection_button_enabled(True)
+
+    def update_shaft_data(self, data):
+        # Update shaft initial data, recalculate functions and attributes
+        self._data = data
+        self.functions_calculator.calculate_initial_functions_and_attributes(data)
+
+        # (Re)set shaft initial attributes
+        shaft_initial_attributes = self.functions_calculator.get_shaft_initial_attributes()
+        self.shaft_calculator.set_data(shaft_initial_attributes)
+        # (Re)set shaft initial functions
+        initial_functions = self.functions_calculator.get_shaft_initial_functions()
+        self._plotter.init_plots(initial_functions)
+        # (Re)set shaft initial coordinates
+        shaft_coordinates = self.functions_calculator.get_shaft_coordinates()
+        self._shaft_viewer.init_shaft(shaft_coordinates)
+        # (Re)set number of eccentrics
+        self.eccentrics_number = shaft_initial_attributes['n']
+        self._sections['Wykorbienia'].set_subsections_number(self.eccentrics_number)
+
+        # Update limits
+        self._set_limits()
+
+        # Redraw shaft section if anything is already drawn on the chart
+        if self.shaft_calculator.shaft_sections:
+            self._draw_shaft()
