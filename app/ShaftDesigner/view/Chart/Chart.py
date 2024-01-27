@@ -6,6 +6,8 @@ from matplotlib.backends.backend_qtagg import (
 from PyQt6.QtWidgets import QCheckBox, QVBoxLayout, QWidget
 from PyQt6.QtCore import Qt, pyqtSignal
 
+from .Utils.CheckboxDropdown import CheckboxDropdown
+
 class Chart(QWidget):
     """
     A class representing a chart widget in a PyQt application.
@@ -57,7 +59,6 @@ class Chart(QWidget):
         return (self._ax, self._canvas, self._toolbar)
 
 class CustomToolbar(NavigationToolbar):
-    updated_selected_plots = pyqtSignal()
     """
     A custom toolbar class for the chart widget, extending the NavigationToolbar.
 
@@ -75,26 +76,20 @@ class CustomToolbar(NavigationToolbar):
         super(CustomToolbar, self).__init__(canvas, parent, coordinates)
 
         # Prepare checkboxes dict for plot selection
-        self.checkboxes = None
+        self.plots_selector = CheckboxDropdown()
+        self.plots_selector.setTitle('f(z)')
+        self.addWidget(self.plots_selector)
 
         # prepare checkbox for display dimensions
         self.show_dimensions_checkbox = QCheckBox('Wyświetl wymiary')
         self.addWidget(self.show_dimensions_checkbox)
 
-    def update_plot_selector(self, plots):
+    def add_plot(self, plot_name, plot_symbol):
         """
         Update the plot selector with a list of plot names.
 
-        :param plots: A list of plot names to be added to the plot selector.
+        :param plot_name: Key of the plot
+        :param plot_symbol: Symbol to view by the plots_selector
+
         """
-        if self.checkboxes is None:
-            self.checkboxes = {}
-            for plot_name in plots:
-                checkbox = QCheckBox(plot_name)
-                checkbox.stateChanged.connect(self.plot_selection_changed)
-                self.addWidget(checkbox)
-                self.checkboxes[plot_name] = checkbox
-    
-    def plot_selection_changed(self):
-        # Emit the signal
-        self.updated_selected_plots.emit()
+        self.plots_selector.addItem(plot_symbol, plot_name)

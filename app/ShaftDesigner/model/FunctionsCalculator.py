@@ -97,22 +97,19 @@ class FunctionsCalculator():
                                    self.d_min_by_torsional_strength.max(),
                                    self.d_min_by_permissible_angle_of_twist.max())
         self._data['dec'][0] = self._data['dsc'][0] + 2 * e
-
         self._data['Ra'][0] = self.support_reactions['Fa']['val']
         self._data['Rb'][0] = self.support_reactions['Fb']['val']
         
     def get_shaft_initial_functions(self):
         functions = {
-        'z': self.z_values, 
-        'F': self.all_forces,
-        'Mg': self.bending_moment, 
-        'Ms': self.torque,
-        'Mz': self.equivalent_moment,
-        'dMz': self.d_min_by_equivalent_stress,
-        'dMs': self.d_min_by_torsional_strength,
-        'dqdop': self.d_min_by_permissible_angle_of_twist}
+        'Mg': ('Mg(z)', 'Moment gnący Mg [Nm]', 'red', self.bending_moment),
+        'Ms': ('Ms(z)', 'Moment skręcający Ms [Nm]', 'green', self.torque),
+        'Mz': ('Mz(z)', 'Moment zastępczy Mz [Nm]', 'blue', self.equivalent_moment), 
+        'dMz': ('d(Mz)', 'Średnica minimalna ze względu na moment zastępczy dMz [mm]', 'red', self.d_min_by_equivalent_stress),
+        'dMs': ('d(Ms)', 'Średnica minimalna ze względu na moment skręcający dMs [mm]', 'green', self.d_min_by_torsional_strength),
+        'dqdop': ('d(φ\')', 'Średnica minimalna ze względu na dopuszczalny kąt skręcenia dq\' [mm]', 'blue', self.d_min_by_permissible_angle_of_twist)}
 
-        return functions
+        return (self.z_values, functions)
     
     def get_shaft_initial_attributes(self):
         shaft_data = {

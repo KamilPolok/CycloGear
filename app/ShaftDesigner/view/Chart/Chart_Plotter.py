@@ -1,56 +1,28 @@
 import mplcursors
-
 class Chart_Plotter():
     def __init__(self, ax, canvas, toolbar):
         self._ax = ax
         self._canvas = canvas
         self._toolbar = toolbar
-        self._toolbar.updated_selected_plots.connect(self._refresh_selected_plots)
+        self._toolbar.plots_selector.stateChanged.connect(self._refresh_selected_plots)
 
         # Create and store the cursor object for interactive data display
         self._cursor = mplcursors.cursor(self._ax, hover=False)
 
-        self._active_plots = {}          # Dictionary to keep track of active plots
+        self._plots = {}            # Dictionary to keep track of plots
+        self._active_plots = {}     # Dictionary to keep track of active plots
 
-    def _set_plots_data(self):
+    def _add_plot_functions(self, functions):
         """
         Prepare and set the data for each plot based on the input data.
 
-        This method organizes the data for each plot type, including the y-values,
-        plot titles, y-axis labels, and colors.
+        This method appends plots to the toolbar selector 
         """
-        # Define plot details in a structured way
-        plot_details = {
-            'Mg': ('Mg(z)', 'Moment gnący Mg [Nm]', 'blue'),
-            'Ms': ('Ms(z)', 'Moment skręcający Ms [Nm]', 'green'),
-            'Mz': ('Mz(z)', 'Moment zastępczy Mz [Nm]', 'orange'),
-            'dMz': ('d(Mz)', 'Średnica minimalna ze względu na moment zastępczy dMz [mm]', 'purple'),
-            'dMs': ('d(Ms)', 'Średnica minimalna ze względu na moment skręcający dMs [mm]', 'red'),
-            'dqdop': ('d(q\')', 'Średnica minimalna ze względu na dopuszczalny kąt skręcenia dq\' [mm]', 'black')
-        }
-
-        self._F = self._functions['F']
-
-        # Prepare shaft coordinates - z
-        self._z = {
-            'z': self._functions['z'],
-            'zlabel': 'Współrzędna z [mm]',
-        }
-
-        # Prepare plot data for each plot
-        self._plots = {
-            title: {
-                'y': self._functions[key],
-                'title': title,
-                'ylabel': ylabel,
-                'color': color
-            }
-            for key, (title, ylabel, color) in plot_details.items()
-        }
-
-        # Update the plot selector in the toolbar
-        self._toolbar.update_plot_selector([plot['title'] for plot in self._plots.values()])
-
+        for key, function in functions.items():
+            if key not in self._plots:
+                self._toolbar.add_plot(key, function[0])
+            self._plots[key] = function
+            
     def _reset_plots(self):
         # Remove any active plots so they can be properly redrawn
         for plot_name in list(self._active_plots.keys()):
@@ -62,12 +34,10 @@ class Chart_Plotter():
 
     def _refresh_selected_plots(self):
         """
-        Switch the current plot based on the selected plot in the toolbar.
-
-        :param selected_plot: The name of the plot to be displayed.
+        Switch the current plots based on the selected plots.
         """
         # Determine which plots are selected
-        selected_plots = [key for key, checkbox in self._toolbar.checkboxes.items() if checkbox.isChecked()]
+        selected_plots = [plot[0] for plot in self._toolbar.plots_selector.currentOptions()]
 
         # Remove plots that are not selected
         for plot_name in list(self._active_plots.keys()):
@@ -79,12 +49,13 @@ class Chart_Plotter():
         # Add new selected plots
         for plot_name in selected_plots:
             if plot_name not in self._active_plots:
-                plot_info = self._plots[plot_name]
+                y = self._plots[plot_name][len(self._plots[plot_name]) - 1]
+                color = self._plots[plot_name][2]
                 plot_elements = []
-                plot_line, = self._ax.plot(self._z['z'], plot_info['y'], linewidth = 1, color=plot_info['color'])
+                plot_line, = self._ax.plot(self._z, y, linewidth = 1, color=color)
                 plot_elements.append(plot_line)
                 if not plot_name.lower().startswith('d'):
-                    filling = self._ax.fill_between(self._z['z'], plot_info['y'], alpha=0.3, color=plot_info['color'])
+                    filling = self._ax.fill_between(self._z, y, alpha=0.3, color=color)
                     plot_elements.append(filling)
                 self._active_plots[plot_name] = plot_elements
         
@@ -116,13 +87,14 @@ class Chart_Plotter():
                 alpha=0.7
             ))
 
-    def init_plots(self, functions):
+    def init_plots(self, z, functions):
         """
         Create and store plot data from the provided data dictionary.
 
-        :param data: A dictionary containing the data for the plots.
+        :param z: Numpy array containing the z arguments
+        :param functions: Dictionary containing the functions arrays for the plots.
         """
-        self._functions = functions
+        self._z = z
 
-        self._set_plots_data()
+        self._add_plot_functions(functions)
         self._reset_plots()

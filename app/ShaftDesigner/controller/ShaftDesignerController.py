@@ -122,17 +122,14 @@ class ShaftDesignerController:
         self._data = data
         self.functions_calculator.calculate_initial_functions_and_attributes(data)
 
-        # (Re)set shaft initial attributes
-        shaft_initial_attributes = self.functions_calculator.get_shaft_initial_attributes()
-        self.shaft_calculator.set_data(shaft_initial_attributes)
+        # (Re)set shaft initial attributes 
+        self.shaft_calculator.set_data(self.functions_calculator.get_shaft_initial_attributes())
         # (Re)set shaft initial functions
-        initial_functions = self.functions_calculator.get_shaft_initial_functions()
-        self._plotter.init_plots(initial_functions)
+        self._plotter.init_plots(*self.functions_calculator.get_shaft_initial_functions())
         # (Re)set shaft initial coordinates
-        shaft_coordinates = self.functions_calculator.get_shaft_coordinates()
-        self._shaft_viewer.init_shaft(shaft_coordinates)
+        self._shaft_viewer.init_shaft(self.functions_calculator.get_shaft_coordinates())
         # (Re)set number of eccentrics
-        self.eccentrics_number = shaft_initial_attributes['n']
+        self.eccentrics_number = data['n'][0]
         self._sections['Wykorbienia'].set_subsections_number(self.eccentrics_number)
 
         # Update limits
