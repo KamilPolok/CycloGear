@@ -4,9 +4,6 @@ class ShaftCalculator:
         self.shaft_sections = {}
         self.limits = {}
 
-    def set_data(self, shaft_attributes):
-        self._shaft_attributes = shaft_attributes
-
     def _save_shaft_sections_attributes(self, attributes):
         if attributes:
             section_name = attributes[0]
@@ -90,6 +87,25 @@ class ShaftCalculator:
             
             start_z += length  # Update start_z for the next subsection
     
+    def _check_if_plots_meet_limits(self):
+        meets_limits = True
+
+        for section_name, section in self.shaft_sections.items():
+            for subsection_number, subsection in section[0].items():
+                for attribute, value in subsection.items():
+                    min = self.limits[section_name][subsection_number][attribute]['min']
+                    max = self.limits[section_name][subsection_number][attribute]['max']
+                    if min <= value <= max:
+                        continue
+                    else:
+                        meets_limits = False
+                        if value < min:
+                                subsection[attribute] = min
+                        elif value > max:
+                                subsection[attribute] = max
+
+        return meets_limits
+
     def remove_shaft_subsection(self, section_name, subsection_number):
         # Remove the subsection from shaft sections attributes
         if section_name in self.shaft_sections and subsection_number in self.shaft_sections[section_name][0]:
@@ -145,22 +161,20 @@ class ShaftCalculator:
                 self.limits[section_name][subsection_number] = {'d': {'min': dmin, 'max': dmax}, 'l': {'min': lmin, 'max': lmax}}
 
         return self.limits
+    
+    def get_shaft_attributes(self):
+        shaft_steps = []
+        for section in self.shaft_sections_plots_attributes.values():
+            for subsection_attributes in section.values():
+                z = subsection_attributes[0][0]
+                l = subsection_attributes[1]
+                d = subsection_attributes[2]
 
-    def _check_if_plots_meet_limits(self):
-        meets_limits = True
+                shaft_steps.append({'z': z, 'l': l, 'd': d})
+        
+        shaft_steps.sort(key=lambda x: x['z'])
+        
+        return shaft_steps
 
-        for section_name, section in self.shaft_sections.items():
-            for subsection_number, subsection in section[0].items():
-                for attribute, value in subsection.items():
-                    min = self.limits[section_name][subsection_number][attribute]['min']
-                    max = self.limits[section_name][subsection_number][attribute]['max']
-                    if min <= value <= max:
-                        continue
-                    else:
-                        meets_limits = False
-                        if value < min:
-                                subsection[attribute] = min
-                        elif value > max:
-                                subsection[attribute] = max
-
-        return meets_limits
+    def set_data(self, shaft_attributes):
+        self._shaft_attributes = shaft_attributes

@@ -12,7 +12,7 @@ class Chart_Plotter():
         self._plots = {}            # Dictionary to keep track of plots
         self._active_plots = {}     # Dictionary to keep track of active plots
 
-    def _add_plot_functions(self, functions):
+    def add_plot_functions(self, functions):
         """
         Prepare and set the data for each plot based on the input data.
 
@@ -21,7 +21,11 @@ class Chart_Plotter():
         for key, function in functions.items():
             if key not in self._plots:
                 self._toolbar.add_plot(key, function[0])
-            self._plots[key] = function
+            if function[3] is not None:
+                self._plots[key] = function
+                self._toolbar.plots_selector.enableItem(key, True)
+            else:
+                self._toolbar.plots_selector.enableItem(key, False)
             
     def _reset_plots(self):
         # Remove any active plots so they can be properly redrawn
@@ -96,5 +100,5 @@ class Chart_Plotter():
         """
         self._z = z
 
-        self._add_plot_functions(functions)
+        self.add_plot_functions(functions)
         self._reset_plots()

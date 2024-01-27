@@ -40,6 +40,8 @@ def main():
         'Materiał' : [None],            # Materiał wału
         'xz': [1, ''],                  # Współczynnik bezpieczeństwa
         'qdop': [0.00436, 'rad/m'],     # Dopuszczalny jednostkowy kąt skręcenia wału
+        'tetadop': [0.001, 'rad'],      # Dopuszczalny kąt ugięcia wału
+        'fdop': [0.030, 'mm'],          # Dopuszczalna strzałka ugięcia wału
         # Łożyska podporow
         'Łożyska_podporowe': [None],    # Łożyska podporowe
         'Lhp': [20000, 'h'],            # Trwałość godzinowa ł. podporowych

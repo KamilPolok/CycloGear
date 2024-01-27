@@ -44,6 +44,12 @@ class CheckboxDropdown(QWidget):
             checkWidgetAction.setDefaultWidget(checkBox)
             self.menu.addAction(checkWidgetAction)
             self.checkboxes[id] = checkBox
+    
+    def enableItem(self, id, enabled=True):
+        if id in self.checkboxes:
+            self.checkboxes[id].setEnabled(enabled)
+        if enabled is False:
+             self.checkboxes[id].setChecked(enabled)
 
     def currentOptions(self):
         res = []

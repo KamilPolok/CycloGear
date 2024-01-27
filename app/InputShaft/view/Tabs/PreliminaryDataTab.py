@@ -13,7 +13,7 @@ class PreliminaryDataTab(Tab):
         """
         Initialize tab data from the parent's data.
         """
-        attributes_to_acquire = ['L', 'LA', 'LB', 'L1', 'Materiał', 'xz', 'qdop']
+        attributes_to_acquire = ['L', 'LA', 'LB', 'L1', 'Materiał', 'xz', 'qdop', 'tetadop', 'fdop']
         self.tab_data = {attr: self._parent.data[attr] for attr in attributes_to_acquire}
         self._items_to_select_states['Materiał'] = ''
 
@@ -57,11 +57,16 @@ class PreliminaryDataTab(Tab):
         component_label = QLabel('Pozostałe:')
 
         factor_of_safety = create_data_input_row(self, 'xz', 'Współczynnik bezpieczeństwa', 'x<sub>z</sub>')
-        allowable_angle_of_twist = create_data_input_row(self, 'qdop', 'Dopuszczalny jednostkowy kąt skręcenia wału', 'q\'')
+        permissible_angle_of_twist = create_data_input_row(self, 'qdop', 'Dopuszczalny jednostkowy kąt skręcenia wału', 'φ\'<sub>dop</sub>')
+        permissible_deflecton_angle = create_data_input_row(self, 'tetadop', 'Dopuszczalna kąt ugięcia', 'θ<sub>dop</sub>')
+        permissible_deflection_arrow = create_data_input_row(self, 'fdop', 'Dopuszczalna strzałka ugięcia', 'f<sub>dop</sub>')
 
         component_layout.addWidget(component_label)
         component_layout.addLayout(factor_of_safety)
-        component_layout.addLayout(allowable_angle_of_twist)
+        component_layout.addLayout(permissible_angle_of_twist)
+        component_layout.addLayout(permissible_deflecton_angle)
+        component_layout.addLayout(permissible_deflection_arrow)
+
 
         self.layout().addLayout(component_layout)
 
