@@ -6,6 +6,8 @@ class FunctionsCalculator():
         self.d_min_by_permissible_deflection_angle = None
         self.d_min_by_permissible_deflection_arrow = None
 
+        self._min_diameters = {}
+        
     def _calculate_support_reactions(self):
         LA = self._data['LA'][0]
         LB =  self._data['LB'][0]
@@ -26,6 +28,9 @@ class FunctionsCalculator():
         RA = -sum_forces - RB
 
         self.support_reactions = {'Fa': {'z': LA, 'val': RA}, 'Fb': {'z': LB, 'val': RB}}
+
+        self._data['Ra'][0] = self.support_reactions['Fa']['val']
+        self._data['Rb'][0] = self.support_reactions['Fb']['val']
 
     def _bending_moment_at_z(self, forces, z):
         moment = 0
@@ -87,23 +92,39 @@ class FunctionsCalculator():
     def _calculate_equivalent_moment(self):
         reductionFactor = 2 * np.sqrt(3)
         self.equivalent_moment = np.sqrt(np.power(self.bending_moment, 2) + np.power(reductionFactor / 2 * self.torque, 2))
-
-    def _calculate_minimal_shaft_diameters(self):   
-        Zgo, Zsj = self._data['Materiał']['Zgo'][0] * 10**6, self._data['Materiał']['Zsj'][0] * 10**6
-        G = self._data['Materiał']['G'][0] * 10**6
-        xz = self._data['xz'][0]
-        qdop = self._data['qdop'][0]
-
-        # Calculate minimal shaft diameter based on equivalent stress condition         
+        
+    def _calculate_dmin_by_equivalent_stress(self):
+        # Calculate minimal shaft diameter based on equivalent stress condition
+        Zgo = self._data['Materiał']['Zgo'][0] * 10**6
+        xz = self._data['xz'][0]  
         kgo = Zgo / xz                                                                                          
         self.d_min_by_equivalent_stress = np.power(32 * self.equivalent_moment / (np.pi * kgo), 1/3) * 1000
-
+        self._min_diameters['dMz'] = self.d_min_by_equivalent_stress
+    
+    def _calculate_dmin_by_torsional_strength(self):
         # Calculate minimal shaft diameter based on torsional strength condition
+        Zsj = self._data['Materiał']['Zsj'][0] * 10**6
+        xz = self._data['xz'][0]
         ksj = Zsj / xz
         self.d_min_by_torsional_strength = np.sqrt(16 * self.torque / (np.pi * ksj)) * 1000
+        self._min_diameters['dMs'] = self.d_min_by_torsional_strength
 
+
+    def _calculate_dmin_by_permissible_angle_of_twist(self):   
         # Calculate minimal shaft diameter d - based permissible angle of twist condition
+        G = self._data['Materiał']['G'][0] * 10**6
+        qdop = self._data['qdop'][0]
         self.d_min_by_permissible_angle_of_twist = np.sqrt(32 * self.torque / (np.pi * G * qdop)) * 1000
+        self._min_diameters['dqdop'] = self.d_min_by_permissible_angle_of_twist
+
+        
+    def _calculate_minimal_shaft_diameter(self):
+        e = self._data['e'][0]
+        self._data['dsc'][0] = max(self.d_min_by_equivalent_stress.max(),
+                                   self.d_min_by_torsional_strength.max(),
+                                   self.d_min_by_permissible_angle_of_twist.max())
+
+        self._data['dec'][0] = self._data['dsc'][0] + 2 * e
 
     def _check_if_whole_shaft_designed(self):
         total_length = 0
@@ -116,7 +137,7 @@ class FunctionsCalculator():
         self._data = data
         # Extract necessary data
         L, L1 = self._data['L'][0], self._data['L1'][0]
-        x, e, B = self._data['x'][0], self._data['e'][0], self._data['B'][0]
+        x, B = self._data['x'][0], self._data['B'][0]
         F = self._data['F'][0]
 
         # Calculate coordinate of second cyclo disc
@@ -142,17 +163,14 @@ class FunctionsCalculator():
         self._calculate_bending_moment()
         self._calculate_torque()
         self._calculate_equivalent_moment()
-        
-        self._calculate_minimal_shaft_diameters()
 
-        # Save the calculated parameters
-        self._data['L2'][0] = L2
-        self._data['dsc'][0] = max(self.d_min_by_equivalent_stress.max(),
-                                   self.d_min_by_torsional_strength.max(),
-                                   self.d_min_by_permissible_angle_of_twist.max())
-        self._data['dec'][0] = self._data['dsc'][0] + 2 * e
-        self._data['Ra'][0] = self.support_reactions['Fa']['val']
-        self._data['Rb'][0] = self.support_reactions['Fb']['val']
+        # calculate d min by different conditions
+        self._calculate_bending_moment()
+        self._calculate_dmin_by_torsional_strength()
+        self._calculate_dmin_by_equivalent_stress()
+        self._calculate_dmin_by_permissible_angle_of_twist()
+
+        self._calculate_minimal_shaft_diameter()
         
     def calculate_remaining_functions(self, shaft_steps):
         self._shaft_steps = shaft_steps
@@ -218,11 +236,17 @@ class FunctionsCalculator():
                     self.d_min_by_permissible_deflection_arrow.append((64 / (np.pi * E * f_dop * 0.001) * np.sqrt(di_at_z**2))**(1 / 4) * 1000)
                 else:
                     self.d_min_by_permissible_deflection_arrow.append(0)
+
+            self._calculate_minimal_shaft_diameter()
         else:
             self.d_min_by_permissible_deflection_angle = None
             self.d_min_by_permissible_deflection_arrow = None
         
+        self._min_diameters['dkdop'] = self.d_min_by_permissible_deflection_angle
+        self._min_diameters['dfdop'] = self.d_min_by_permissible_deflection_arrow
+        
     def get_shaft_functions(self):
+        self.d_min = np.max(np.stack(list(function for function in self._min_diameters.values() if function is not None)), axis=0)
         functions = {
             'Mg': ('Mg(z)', 'Moment gnący Mg [Nm]', 'red', self.bending_moment),
             'Ms': ('Ms(z)', 'Moment skręcający Ms [Nm]', 'green', self.torque),
@@ -231,7 +255,8 @@ class FunctionsCalculator():
             'dMs': ('d(Ms)', 'Średnica minimalna ze względu na moment skręcający dMs [mm]', 'green', self.d_min_by_torsional_strength),
             'dqdop': ('d(φ\')', 'Średnica minimalna ze względu na dopuszczalny kąt skręcenia dq\' [mm]', 'blue', self.d_min_by_permissible_angle_of_twist),
             'dkdop': ('d(θdop)', 'Średnica minimalna ze względu na dopuszczalny kąt ugięcia [mm]', 'purple', self.d_min_by_permissible_deflection_angle), 
-            'dfdop': ('d(fdop)', 'Średnica minimalna ze względu na dopuszczalną stzrałkę ugięcia [mm]', 'orange', self.d_min_by_permissible_deflection_arrow)}
+            'dfdop': ('d(fdop)', 'Średnica minimalna ze względu na dopuszczalną stzrałkę ugięcia [mm]', 'orange', self.d_min_by_permissible_deflection_arrow),
+            'dmin': ('dmin', 'Średnica minimalna [mm]', 'black', self.d_min)}
         
         return functions
 

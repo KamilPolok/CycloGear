@@ -26,6 +26,8 @@ class Chart_Plotter():
                 self._toolbar.plots_selector.enableItem(key, True)
             else:
                 self._toolbar.plots_selector.enableItem(key, False)
+        
+            self._reset_plots()
             
     def _reset_plots(self):
         # Remove any active plots so they can be properly redrawn
@@ -101,4 +103,3 @@ class Chart_Plotter():
         self._z = z
 
         self.add_plot_functions(functions)
-        self._reset_plots()
