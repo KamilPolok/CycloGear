@@ -51,21 +51,25 @@ class Chart_Plotter():
                 for element in self._active_plots[plot_name]:
                     element.remove()
                 del self._active_plots[plot_name]
-
+    
         # Add new selected plots
         for plot_name in selected_plots:
             if plot_name not in self._active_plots:
                 y = self._plots[plot_name][len(self._plots[plot_name]) - 1]
                 color = self._plots[plot_name][2]
-                plot_elements = []
-                plot_line, = self._ax.plot(self._z, y, linewidth = 1, color=color)
-                plot_elements.append(plot_line)
-                if not plot_name.lower().startswith('d'):
+                if  plot_name.lower().startswith('d'):
+                    d_half_above_axis = y / 2
+                    d_half_below_axis = [-d for d in d_half_above_axis]
+
+                    above, = self._ax.plot(self._z, d_half_above_axis, linewidth = 1, color=color)
+                    below, = self._ax.plot(self._z, d_half_below_axis, linewidth = 1, color=color)
+                    plot_elements = [above, below]
+                else:
+                    plot, = self._ax.plot(self._z, y, linewidth = 1, color=color)
                     filling = self._ax.fill_between(self._z, y, alpha=0.3, color=color)
-                    plot_elements.append(filling)
+                    plot_elements = [plot, filling]
                 self._active_plots[plot_name] = plot_elements
         
-        # Manage the cursor
         self._refresh_cursor()
 
         self._canvas.draw()
@@ -75,7 +79,7 @@ class Chart_Plotter():
         Refresh the mplcursors cursor for interactive data display.
         """
         # Remove the previous cursor if it exists
-        if hasattr(self, 'cursor') and self._cursor:
+        if hasattr(self, '_cursor') and self._cursor:
             self._cursor.remove()
 
         # Collect all current plot lines
@@ -84,14 +88,50 @@ class Chart_Plotter():
         # Create a new cursor if there are plots
         if current_lines:
             self._cursor = mplcursors.cursor(current_lines, hover=False)
-            self._cursor.connect("add", lambda sel: sel.annotation.set(
-                text=f'({sel.target[0]:.2f}; {sel.target[1]:.2f})',
-                fontsize=8,
-                fontweight='bold',
-                color='black',
-                backgroundcolor='grey',
-                alpha=0.7
-            ))
+            self._cursor.connect("add", lambda sel: self._annotate_cursor(sel))
+        else:
+            self._cursor = None  # Reset cursor if there are no plots
+
+    def _annotate_cursor(self, sel):
+        """
+        Annotate the cursor based on the selected plot.
+        """
+        # Check if the current artist (plot) is a diameter plot
+        plot_color = 'black'
+        plot_key = None
+        is_diameter_plot = False
+
+        # Determine the type and key of the plot that is currently selected by the cursor
+        # and key the plot label 
+        for key, lines in self._active_plots.items():
+            if sel.artist in lines:
+                plot_label = self._plots[key][0]
+                plot_color = self._plots[key][2]
+                if key.startswith('d'):
+                    is_diameter_plot = True
+                break
+
+        # Set the annotation text based on the plot type
+        if is_diameter_plot:
+            # For diameter plots, use absolute value for y-coordinate
+            text = f'z: {sel.target[0]:.2f}, {plot_label}/2: {abs(sel.target[1]):.2f}'
+        else:
+            # For other types of plots, use the original y-coordinate
+            text = f'z: {sel.target[0]:.2f}, {plot_label}: {sel.target[1]:.2f}'
+
+        # Set annotation properties
+        sel.annotation.set(
+            text=text,
+            fontsize=8,
+            fontweight='bold',
+            color='black',
+            backgroundcolor=plot_color,
+            alpha=0.7
+        )
+
+        # Customize the border and arrow colors
+        sel.annotation.get_bbox_patch().set_edgecolor(plot_color)
+        sel.annotation.arrow_patch.set_color(plot_color)
 
     def init_plots(self, z, functions):
         """
