@@ -87,6 +87,7 @@ class ShaftSection(Section):
         self.subsections.append(subsection)
         self.subsections_layout.addWidget(subsection)
         self.subsection_count += 1
+        self.set_add_subsection_button_enabled(False)
         self.add_subsection_signal.emit()
 
     def remove_subsections(self, subsections_number):
@@ -118,6 +119,9 @@ class ShaftSection(Section):
     def set_limits(self, limits):
         for subsection_number, attributes in limits.items():
             self.subsections[subsection_number].set_limits(attributes)
+    
+    def set_add_subsection_button_enabled(self, enabled):
+        self.add_subsection_button.setEnabled(enabled)
     
     def toggle(self, event):
         super().toggle(event)
