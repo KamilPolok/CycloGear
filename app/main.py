@@ -20,7 +20,7 @@ def main():
         # Zadane wymiary wału
         'L': [100, 'mm'],               # Całkowita długość wału wejściowego
         'LA': [15, 'mm'],               # Wsp. podpory przesuwnej - A
-        'LB': [52, 'mm'],               # Wsp. podpory nieprzesuwnej - B
+        'LB': [80, 'mm'],               # Wsp. podpory nieprzesuwnej - B
         'n': [2, ''],                    # Liczba kół obiegowych
         'L1': [24, 'mm'],               # Wsp. koła obiegowego 1
         'L2': [None, 'mm'],             # Wsp. koła obiegowego 2
