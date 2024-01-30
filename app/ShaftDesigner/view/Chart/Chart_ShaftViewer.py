@@ -1,15 +1,16 @@
 from matplotlib.patches import Rectangle
 
+from PyQt6.QtWidgets import QCheckBox
+
 class Chart_ShaftViewer():
     def __init__(self, ax, canvas, toolbar):
         self._ax = ax
         self._canvas = canvas
         self._toolbar = toolbar
-        self._toolbar.show_dimensions_checkbox.stateChanged.connect(self._draw_shaft_dimensions)
         
         self._active_sections = {}       # Dictionary to keep track of shaft sections
         
-        self._axes_arrows = []                  # List to keep track of figure axes
+        self._axes_arrows = []           # List to keep track of figure axes
         self._shaft_markers = []         # List to keep track of shaft markers
         self._shaft_coordinates = []     # List to keep track of shaft coordinates
         self._shaft_dimensions = []      # List to keep track of shaft dimensions
@@ -17,6 +18,16 @@ class Chart_ShaftViewer():
         self._shaft_attributes = {}      # List to keep track of current shaft attributes
 
         self._dimension_offset = 0
+
+        self._init_ui()
+    
+    def _init_ui(self):
+        self._set_dimension_checkbox()
+
+    def _set_dimension_checkbox(self):
+        self.dimensions_checkbox = QCheckBox('Wymiary')
+        self.dimensions_checkbox.stateChanged.connect(self._draw_shaft_dimensions)
+        self._toolbar.addWidget(self.dimensions_checkbox)
 
     def _set_axes_limits(self):
         """
@@ -89,7 +100,7 @@ class Chart_ShaftViewer():
             item.remove()
         self._shaft_coordinates.clear()
 
-        if self._toolbar.show_dimensions_checkbox.isChecked():
+        if self.dimensions_checkbox.isChecked():
             # Define characteristic shaft coordinates
 
             # Draw dimension lines between points
@@ -114,7 +125,7 @@ class Chart_ShaftViewer():
         
         highest_diameter = 0
 
-        if self._shaft_attributes and self._toolbar.show_dimensions_checkbox.isChecked():
+        if self._shaft_attributes and self.dimensions_checkbox.isChecked():
             # Get the highest diameter of shaft
             for section_name, section in self._shaft_attributes.items():
                 for subsection_number, subsection in section.items():

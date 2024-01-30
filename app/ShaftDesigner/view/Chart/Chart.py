@@ -74,7 +74,3 @@ class CustomToolbar(NavigationToolbar):
         :param coordinates: Flag to show coordinates on the toolbar.
         """
         super(CustomToolbar, self).__init__(canvas, parent, coordinates)
-
-        # prepare checkbox for display dimensions
-        self.show_dimensions_checkbox = QCheckBox('Wyświetl wymiary')
-        self.addWidget(self.show_dimensions_checkbox)
