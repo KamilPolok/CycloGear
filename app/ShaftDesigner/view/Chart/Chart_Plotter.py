@@ -12,23 +12,6 @@ class Chart_Plotter():
         self._plots = {}            # Dictionary to keep track of plots
         self._active_plots = {}     # Dictionary to keep track of active plots
 
-    def add_plot_functions(self, functions):
-        """
-        Prepare and set the data for each plot based on the input data.
-
-        This method appends plots to the toolbar selector 
-        """
-        for key, function in functions.items():
-            if key not in self._plots:
-                self._toolbar.add_plot(key, function[0])
-            if function[3] is not None:
-                self._plots[key] = function
-                self._toolbar.plots_selector.enableItem(key, True)
-            else:
-                self._toolbar.plots_selector.enableItem(key, False)
-        
-            self._reset_plots()
-            
     def _reset_plots(self):
         # Remove any active plots so they can be properly redrawn
         for plot_name in list(self._active_plots.keys()):
@@ -133,13 +116,23 @@ class Chart_Plotter():
         sel.annotation.get_bbox_patch().set_edgecolor(plot_color)
         sel.annotation.arrow_patch.set_color(plot_color)
 
-    def init_plots(self, z, functions):
+    def set_plots_functions(self, functions, z=None):
         """
-        Create and store plot data from the provided data dictionary.
+        Add or update plot functions. Add functions to plot selector
 
         :param z: Numpy array containing the z arguments
         :param functions: Dictionary containing the functions arrays for the plots.
         """
-        self._z = z
+        for key, function in functions.items():
+            if key not in self._plots:
+                self._toolbar.add_plot(key, function[0])
+            if function[3] is not None:
+                self._plots[key] = function
+                self._toolbar.plots_selector.enableItem(key, True)
+            else:
+                self._toolbar.plots_selector.enableItem(key, False)
 
-        self.add_plot_functions(functions)
+        if z is not None:
+            self._z = z
+        
+        self._reset_plots()

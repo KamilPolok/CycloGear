@@ -116,7 +116,7 @@ class ShaftDesignerController:
         shaft_steps = self.shaft_calculator.get_shaft_attributes()
 
         self.functions_calculator.calculate_remaining_functions(shaft_steps)
-        self._plotter.add_plot_functions(self.functions_calculator.get_shaft_functions())
+        self._plotter.set_plots_functions(self.functions_calculator.get_shaft_functions())
 
     def _enable_add_subsection_button(self, section_name):
         # Enable add button if the last subsection in the sidebar was plotted - do not allow to add multiple subsections at once
@@ -152,4 +152,4 @@ class ShaftDesignerController:
             self.functions_calculator.calculate_remaining_functions(shaft_steps)
 
         # (Re)draw shaft plots
-        self._plotter.init_plots(self.functions_calculator.get_shaft_z(), self.functions_calculator.get_shaft_functions())
+        self._plotter.set_plots_functions(self.functions_calculator.get_shaft_functions(), self.functions_calculator.get_shaft_z())
