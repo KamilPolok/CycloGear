@@ -1,6 +1,6 @@
 from matplotlib.patches import Rectangle
 
-from PyQt6.QtWidgets import QCheckBox
+from .Utils.CheckboxDropdown import CheckboxDropdown
 
 class Chart_ShaftViewer():
     def __init__(self, ax, canvas, toolbar):
@@ -25,9 +25,11 @@ class Chart_ShaftViewer():
         self._set_dimension_checkbox()
 
     def _set_dimension_checkbox(self):
-        self.dimensions_checkbox = QCheckBox('Wymiary')
-        self.dimensions_checkbox.stateChanged.connect(self._draw_shaft_dimensions)
-        self._toolbar.addWidget(self.dimensions_checkbox)
+        self.dimensions_selector = CheckboxDropdown()
+        self.dimensions_selector.setTitle('Wymiary')
+        self.dimensions_selector.addItem('dimensions', 'Wymiary stopni', self._draw_shaft_dimensions)
+        self.dimensions_selector.addItem('coordinates', 'Współrzędne wału', self._draw_shaft_coordinates)
+        self._toolbar.addWidget(self.dimensions_selector)
 
     def _set_axes_limits(self):
         """
@@ -68,6 +70,23 @@ class Chart_ShaftViewer():
                                     bbox=dict(alpha=0, zorder=3))
         
         self._axes_arrows.append(z_axis_label)
+    
+    def _get_dimension_offset(self):
+        """
+        Get the offset from the shaft that applies to shaft coordinates 
+        and dimensions, so they get displayed neatly and do not
+        overlay with shaft drawing.
+        """        
+        highest_diameter = 0
+
+        for section in self._shaft_attributes.values():
+            for subsection in section.values():
+                subsection_diameter = subsection[-1]
+                if subsection_diameter > highest_diameter:
+                    highest_diameter = subsection_diameter
+
+        if highest_diameter != 0:
+            self._dimension_offset = ((0.5 * highest_diameter ) * 1.2 + 5)
 
     def _draw_shaft_markers(self):
         """
@@ -90,9 +109,9 @@ class Chart_ShaftViewer():
             annotation_labels = self._ax.annotate(label, (marker, 0), textcoords="offset points", xytext=(10, -15), ha='center', zorder=5)
             self._shaft_markers.append(annotation_labels)
 
-        self._draw_shaft_coordinates()
-
         self._canvas.draw()
+
+        self._draw_shaft_coordinates()
 
     def _draw_shaft_coordinates(self):
         # Remove old coordinates
@@ -100,8 +119,8 @@ class Chart_ShaftViewer():
             item.remove()
         self._shaft_coordinates.clear()
 
-        if self.dimensions_checkbox.isChecked():
-            # Define characteristic shaft coordinates
+        if self.dimensions_selector.isChecked('coordinates'):
+            self._get_dimension_offset()
 
             # Draw dimension lines between points
             dimensions_color = 'SkyBlue'
@@ -122,19 +141,11 @@ class Chart_ShaftViewer():
         for item in self._shaft_dimensions:
             item.remove()
         self._shaft_dimensions.clear()
-        
-        highest_diameter = 0
 
-        if self._shaft_attributes and self.dimensions_checkbox.isChecked():
-            # Get the highest diameter of shaft
-            for section_name, section in self._shaft_attributes.items():
-                for subsection_number, subsection in section.items():
-                        if subsection[-1] > highest_diameter:
-                            highest_diameter = subsection[-1]
+        # Draw new dimensions
+        if self.dimensions_selector.isChecked('dimensions'):
+            self._get_dimension_offset()
 
-            self._dimension_offset = ((0.5 * highest_diameter ) * 1.2 + 5)
-
-            # Draw new dimensions
             for section_name, section in self._shaft_attributes.items():
                 for subsection_number, subsection in section.items():
 
@@ -161,8 +172,6 @@ class Chart_ShaftViewer():
 
                     diameter_dimension = self._draw_dimension(text, z_position, z_position, z_position, start_y, end_y, y_position)
                     self._shaft_dimensions.extend(diameter_dimension)
-        
-        self._draw_shaft_coordinates()
 
         self._canvas.draw()
 
@@ -224,11 +233,12 @@ class Chart_ShaftViewer():
                 subsection_plot = Rectangle(start, length, diameter, color='grey', linewidth=2, fill=False)
                 self._active_sections[subsection_id] = subsection_plot
                 self._ax.add_patch(subsection_plot)
-        
-        # Draw shaft dimensions
-        self._draw_shaft_dimensions()
-
+    
         self._canvas.draw()
+
+        # Draw shaft dimensions and coordinates
+        self._draw_shaft_dimensions()
+        self._draw_shaft_coordinates()
 
     def init_shaft(self, coordinates):
         shaft_points = [(0,0)] + coordinates

@@ -36,20 +36,31 @@ class CheckboxDropdown(QWidget):
     def setTitle(self, title):
         self.dropdownButton.setText(title + " \u25BC")
 
-    def addItem(self, id, label):
+    def addItem(self, id, label, callback=None):
         if id not in self.checkboxes:
             checkBox = QCheckBox(label, self)
-            checkBox.stateChanged.connect(self._emitStateChangedSignal)
             checkWidgetAction = QWidgetAction(self)
             checkWidgetAction.setDefaultWidget(checkBox)
             self.menu.addAction(checkWidgetAction)
             self.checkboxes[id] = checkBox
+            if callback == None:
+                checkBox.stateChanged.connect(self._emitStateChangedSignal)
+            else:
+                checkBox.stateChanged.connect(callback)
     
     def enableItem(self, id, enabled=True):
         if id in self.checkboxes:
             self.checkboxes[id].setEnabled(enabled)
         if enabled is False:
              self.checkboxes[id].setChecked(enabled)
+
+    def isChecked(self, id):
+        if id in self.checkboxes:
+            checkbox = self.checkboxes[id]
+            if checkbox.isChecked():
+                return True
+        return False
+
 
     def currentOptions(self):
         res = []
