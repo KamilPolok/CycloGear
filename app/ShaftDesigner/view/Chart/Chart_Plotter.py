@@ -1,16 +1,33 @@
 import mplcursors
+
+from .Utils.CheckboxDropdown import CheckboxDropdown
+
 class Chart_Plotter():
     def __init__(self, ax, canvas, toolbar):
         self._ax = ax
         self._canvas = canvas
         self._toolbar = toolbar
-        self._toolbar.plots_selector.stateChanged.connect(self._refresh_selected_plots)
 
         # Create and store the cursor object for interactive data display
         self._cursor = mplcursors.cursor(self._ax, hover=False)
 
         self._plots = {}            # Dictionary to keep track of plots
         self._active_plots = {}     # Dictionary to keep track of active plots
+    
+        self._init_ui()
+
+    def _init_ui(self):
+        self._set_plots_selector()
+
+    def _set_plots_selector(self):
+        """
+        Create a plots selector an add it to the toolbar. Plot selector
+        enables to select plots that will be shown on the chart.
+        """
+        self._plots_selector = CheckboxDropdown()
+        self._plots_selector.stateChanged.connect(self._refresh_selected_plots)
+        self._plots_selector.setTitle('f(z)')
+        self._toolbar.addWidget(self._plots_selector)
 
     def _reset_plots(self):
         # Remove any active plots so they can be properly redrawn
@@ -26,7 +43,7 @@ class Chart_Plotter():
         Switch the current plots based on the selected plots.
         """
         # Determine which plots are selected
-        selected_plots = [plot[0] for plot in self._toolbar.plots_selector.currentOptions()]
+        selected_plots = [plot[0] for plot in self._plots_selector.currentOptions()]
 
         # Remove plots that are not selected
         for plot_name in list(self._active_plots.keys()):
@@ -123,16 +140,17 @@ class Chart_Plotter():
         :param z: Numpy array containing the z arguments
         :param functions: Dictionary containing the functions arrays for the plots.
         """
-        for key, function in functions.items():
-            if key not in self._plots:
-                self._toolbar.add_plot(key, function[0])
+        for name, function in functions.items():
+            if name not in self._plots:
+                label = function[0]
+                self._plots_selector.addItem(name, label)
             if function[3] is not None:
-                self._plots[key] = function
-                self._toolbar.plots_selector.enableItem(key, True)
+                self._plots[name] = function
+                self._plots_selector.enableItem(name, True)
             else:
-                self._toolbar.plots_selector.enableItem(key, False)
+                self._plots_selector.enableItem(name, False)
 
         if z is not None:
             self._z = z
-        
+
         self._reset_plots()

@@ -36,7 +36,7 @@ class CheckboxDropdown(QWidget):
     def setTitle(self, title):
         self.dropdownButton.setText(title + " \u25BC")
 
-    def addItem(self, label, id):
+    def addItem(self, id, label):
         if id not in self.checkboxes:
             checkBox = QCheckBox(label, self)
             checkBox.stateChanged.connect(self._emitStateChangedSignal)

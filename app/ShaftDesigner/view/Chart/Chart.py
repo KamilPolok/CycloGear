@@ -75,21 +75,6 @@ class CustomToolbar(NavigationToolbar):
         """
         super(CustomToolbar, self).__init__(canvas, parent, coordinates)
 
-        # Prepare checkboxes dict for plot selection
-        self.plots_selector = CheckboxDropdown()
-        self.plots_selector.setTitle('f(z)')
-        self.addWidget(self.plots_selector)
-
         # prepare checkbox for display dimensions
         self.show_dimensions_checkbox = QCheckBox('Wyświetl wymiary')
         self.addWidget(self.show_dimensions_checkbox)
-
-    def add_plot(self, plot_name, plot_symbol):
-        """
-        Update the plot selector with a list of plot names.
-
-        :param plot_name: Key of the plot
-        :param plot_symbol: Symbol to view by the plots_selector
-
-        """
-        self.plots_selector.addItem(plot_symbol, plot_name)
