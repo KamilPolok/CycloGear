@@ -162,6 +162,17 @@ class ShaftCalculator:
 
         return self.limits
     
+
+    def is_whole_shaft_designed(self):
+        total_length = 0
+    
+        for section in self.shaft_sections_plots_attributes.values():
+            for subsection_attributes in section.values(): 
+                length = subsection_attributes[1]
+                total_length += length
+        
+        return total_length == self._shaft_attributes['L']
+
     def get_shaft_attributes(self):
         shaft_steps = []
         for section in self.shaft_sections_plots_attributes.values():

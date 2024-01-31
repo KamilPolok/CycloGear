@@ -13,6 +13,7 @@ class ShaftDesignerController:
 
         # Set shaft sections names
         self.section_names = ['Wykorbienia', 'Przed Wykorbieniami', 'Pomiędzy Wykorbieniami', 'Za Wykorbieniami']
+        self.is_whole_shaft_designed = False
 
         # Prepare dict storing sidebar sections
         self._sections = {}
@@ -65,10 +66,10 @@ class ShaftDesignerController:
         # Enable other sections if eccentrics sections where plotted
         self._enable_sections()
 
-        # Enable and toggle functions visibility
-        self._toggle_plots_state()
-
         self._enable_add_subsection_button(shaft_subsection_attributes[0])
+
+        # Enable the confirmation of current shaft design
+        self._enable_shaft_design_confirmation()
                 
     def _draw_shaft(self, shaft_subsection_attributes = None):
         # Calculate shaft subsections plot attributes and draw them on the chart
@@ -111,13 +112,24 @@ class ShaftDesignerController:
                     if not section.isEnabled():
                         section.setEnabled(True)
                 self.all_sections_enabled == True
-    
-    def _toggle_plots_state(self):
-        shaft_steps = self.shaft_calculator.get_shaft_attributes()
 
+    def _enable_shaft_design_confirmation(self):
+        if self.is_whole_shaft_designed or self._is_whole_shaft_designed_state_changed():
+            self._toogle_remaining_plots_visibility()
+            
+    def _is_whole_shaft_designed_state_changed(self):
+        is_whole_shaft_designed_new = self.shaft_calculator.is_whole_shaft_designed()
+        if is_whole_shaft_designed_new != self.is_whole_shaft_designed:
+            self.is_whole_shaft_designed = is_whole_shaft_designed_new
+            return True
+        else:
+            return False
+    
+    def _toogle_remaining_plots_visibility(self):
+        shaft_steps = self.shaft_calculator.get_shaft_attributes()
         self.functions_calculator.calculate_remaining_functions(shaft_steps)
         self._plotter.set_plots_functions(self.functions_calculator.get_shaft_functions())
-
+    
     def _enable_add_subsection_button(self, section_name):
         # Enable add button if the last subsection in the sidebar was plotted - do not allow to add multiple subsections at once
         if section_name != 'Wykorbienia':
@@ -148,8 +160,7 @@ class ShaftDesignerController:
         # Redraw shaft and recalculate remaining functions
         if self.shaft_calculator.shaft_sections:
             self._draw_shaft()
-            shaft_steps = self.shaft_calculator.get_shaft_attributes()
-            self.functions_calculator.calculate_remaining_functions(shaft_steps)
+            self._enable_shaft_design_confirmation()
 
         # (Re)draw shaft plots
         self._plotter.set_plots_functions(self.functions_calculator.get_shaft_functions(), self.functions_calculator.get_shaft_z())
