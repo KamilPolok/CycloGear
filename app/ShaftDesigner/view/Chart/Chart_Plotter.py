@@ -135,20 +135,22 @@ class Chart_Plotter():
 
     def set_plots_functions(self, functions, z=None):
         """
-        Add or update plot functions. Add functions to plot selector
+        Add or update plot functions. Add functions to plot selector and
+        update the disabled/enabled state of checkbox if the set plot
+        function is None.
 
         :param z: Numpy array containing the z arguments
         :param functions: Dictionary containing the functions arrays for the plots.
         """
-        for name, function in functions.items():
-            if name not in self._plots:
+        for id, function in functions.items():
+            if id not in self._plots:
                 label = function[0]
-                self._plots_selector.addItem(name, label)
+                self._plots_selector.addItem(id, label)
             if function[3] is not None:
-                self._plots[name] = function
-                self._plots_selector.enableItem(name, True)
+                self._plots[id] = function
+                self._plots_selector.enableItem(id, True)
             else:
-                self._plots_selector.enableItem(name, False)
+                self._plots_selector.enableItem(id, False)
 
         if z is not None:
             self._z = z
