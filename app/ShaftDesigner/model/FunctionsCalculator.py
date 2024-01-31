@@ -83,17 +83,17 @@ class FunctionsCalculator():
 
         return {'C': C, 'D': D}
     
-    def _calculate_bending_moment(self):
+    def _calculate_bending_moment_function(self):
         self.bending_moment = np.array([self._bending_moment_at_z(self._all_forces, z) for z in self._z_values])
 
-    def _calculate_torque(self):
+    def _calculate_torque_function(self):
         self.torque = np.array([self._data['Mwe'][0] if z > self._data['L1'][0] else 0 for z in self._z_values])
 
-    def _calculate_equivalent_moment(self):
+    def _calculate_equivalent_moment_function(self):
         reductionFactor = 2 * np.sqrt(3)
         self.equivalent_moment = np.sqrt(np.power(self.bending_moment, 2) + np.power(reductionFactor / 2 * self.torque, 2))
         
-    def _calculate_dmin_by_equivalent_stress(self):
+    def _calculate_dmin_function_by_equivalent_stress(self):
         # Calculate minimal shaft diameter based on equivalent stress condition
         Zgo = self._data['Materiał']['Zgo'][0] * 10**6
         xz = self._data['xz'][0]  
@@ -101,7 +101,7 @@ class FunctionsCalculator():
         self.d_min_by_equivalent_stress = np.power(32 * self.equivalent_moment / (np.pi * kgo), 1/3) * 1000
         self._min_diameters['dMz'] = self.d_min_by_equivalent_stress
     
-    def _calculate_dmin_by_torsional_strength(self):
+    def _calculate_dmin_function_by_torsional_strength(self):
         # Calculate minimal shaft diameter based on torsional strength condition
         Zsj = self._data['Materiał']['Zsj'][0] * 10**6
         xz = self._data['xz'][0]
@@ -109,15 +109,16 @@ class FunctionsCalculator():
         self.d_min_by_torsional_strength = np.sqrt(16 * self.torque / (np.pi * ksj)) * 1000
         self._min_diameters['dMs'] = self.d_min_by_torsional_strength
 
-
-    def _calculate_dmin_by_permissible_angle_of_twist(self):   
+    def _calculate_dmin_function_by_permissible_angle_of_twist(self):   
         # Calculate minimal shaft diameter d - based permissible angle of twist condition
         G = self._data['Materiał']['G'][0] * 10**6
         qdop = self._data['qdop'][0]
         self.d_min_by_permissible_angle_of_twist = np.sqrt(32 * self.torque / (np.pi * G * qdop)) * 1000
         self._min_diameters['dqdop'] = self.d_min_by_permissible_angle_of_twist
 
-        
+    def _calculate_dmin_function_by_all_conditions(self):
+        self.d_min = np.max(np.stack(list(function for function in self._min_diameters.values() if function is not None)), axis=0)
+
     def _calculate_minimal_shaft_diameter(self):
         e = self._data['e'][0]
         self._data['dsc'][0] = max(self.d_min_by_equivalent_stress.max(),
@@ -160,15 +161,15 @@ class FunctionsCalculator():
         self._z_values = np.arange(0,L + interval, interval)
 
         # Calculate functions
-        self._calculate_bending_moment()
-        self._calculate_torque()
-        self._calculate_equivalent_moment()
+        self._calculate_bending_moment_function()
+        self._calculate_torque_function()
+        self._calculate_equivalent_moment_function()
 
         # calculate d min by different conditions
-        self._calculate_bending_moment()
-        self._calculate_dmin_by_torsional_strength()
-        self._calculate_dmin_by_equivalent_stress()
-        self._calculate_dmin_by_permissible_angle_of_twist()
+        self._calculate_dmin_function_by_torsional_strength()
+        self._calculate_dmin_function_by_equivalent_stress()
+        self._calculate_dmin_function_by_permissible_angle_of_twist()
+        self._calculate_dmin_function_by_all_conditions()
 
         self._calculate_minimal_shaft_diameter()
         
@@ -245,9 +246,10 @@ class FunctionsCalculator():
         
         self._min_diameters['dkdop'] = self.d_min_by_permissible_deflection_angle
         self._min_diameters['dfdop'] = self.d_min_by_permissible_deflection_arrow
+
+        self._calculate_dmin_function_by_all_conditions()
         
     def get_shaft_functions(self):
-        self.d_min = np.max(np.stack(list(function for function in self._min_diameters.values() if function is not None)), axis=0)
         functions = {
             'Mg': ('Mg(z)', 'Moment gnący Mg [Nm]', '#1ABC9C', self.bending_moment),
             'Ms': ('Ms(z)', 'Moment skręcający Ms [Nm]', '#196F3D', self.torque),
