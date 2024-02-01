@@ -1,13 +1,11 @@
 import sys
-import os
 
-root_directory = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
-sys.path.append(root_directory)
+import Utility.path_config
 
 from PyQt6.QtWidgets import QApplication
 
 from AppWindow import AppWindow
-from app.AppController import AppController
+from AppController import AppController
 
 def main():
     cyclo_app = QApplication([])
@@ -80,4 +78,5 @@ def main():
     sys.exit(cyclo_app.exec())
 
 if __name__ == "__main__":
+
     main()

@@ -1,9 +1,9 @@
 from ShaftDesigner.model.ShaftCalculator import ShaftCalculator
 from ShaftDesigner.model.FunctionsCalculator import FunctionsCalculator
 
-from app.ShaftDesigner.view.Chart.Chart import Chart
-from app.ShaftDesigner.view.Chart.Chart_Plotter import Chart_Plotter
-from app.ShaftDesigner.view.Chart.Chart_ShaftViewer import Chart_ShaftViewer
+from ShaftDesigner.view.Chart.Chart import Chart
+from ShaftDesigner.view.Chart.Chart_Plotter import Chart_Plotter
+from ShaftDesigner.view.Chart.Chart_ShaftViewer import Chart_ShaftViewer
 
 from ShaftDesigner.view.ShaftSection import ShaftSection, EccentricsSection
         

@@ -4,12 +4,33 @@ import os
 import sys
 
 
-root_directory = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
-                                               '..', '..', '..',))
-sys.path.append(root_directory)
+# Function to determine if we're running as a PyInstaller bundle
+def is_frozen():
+    return getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS')
+
+# Function to get the correct base directory
+def get_base_dir():
+    if is_frozen():
+        # If the application is run as a bundle, the PyInstaller bootloader
+        # extends the sys module by a flag frozen=True and sets the app 
+        # path into variable _MEIPASS.
+        return sys._MEIPASS
+    else:
+        # If it's run in a normal Python environment, return the directory
+        # containing this file.
+        return os.path.dirname(os.path.abspath(__file__))
+
+base_dir = get_base_dir()
+
+config_path = os.path.join(base_dir, '..', '..', 'config.py')
+config_dir = os.path.dirname(config_path)
+
+# Add the config directory to sys.path if not already added
+if config_dir not in sys.path:
+    sys.path.append(config_dir)
 
 
-from config import DATA_DIR, DATABASE_NAME
+from config import DATA_PATH, DATABASE_NAME
 
 database_tables = [
     {   
@@ -69,23 +90,20 @@ class DatabaseCreator:
         self._populateTables()
 
     def _createDatabase(self):
-        # Get the destination directory absoulte path where csv and database files shuld be stored
-        self._destinationDirAbsPath = self._findDestinationDirectory()
-        # Get the absoulte path of the created database
-        self._databaseAbsPath = os.path.normpath(os.path.join(self._destinationDirAbsPath, DATABASE_NAME))
-
-        conn = sqlite3.connect(self._databaseAbsPath)
-        conn.close
-
-    def _findDestinationDirectory(self):
-        if not os.path.exists(DATA_DIR):
-            sys.stderr.write(f"Error: {DATA_DIR} does not exist.\n")
+        # Get the destination directory absoulte path where csv and database files should be stored
+        self._dataPath = DATA_PATH
+        if not os.path.exists(DATA_PATH):
+            sys.stderr.write(f"Error: {DATA_PATH} does not exist.\n")
             sys.exit(1)
-        else:
-            return DATA_DIR
+
+        # Get the absoulte path of the created database
+        self._databasePath = os.path.normpath(os.path.join(self._dataPath, DATABASE_NAME))
+
+        conn = sqlite3.connect(self._databasePath)
+        conn.close
     
     def _createTables(self):
-        conn = sqlite3.connect(self._databaseAbsPath)
+        conn = sqlite3.connect(self._databasePath)
         # Create table for every table parameters listed above
         self._tables = database_tables
         
@@ -99,11 +117,11 @@ class DatabaseCreator:
         conn.close
     
     def _populateTables(self):
-        conn = sqlite3.connect(self._databaseAbsPath)
+        conn = sqlite3.connect(self._databasePath)
        
         for table in self._tables:
             # Get the associated csv file absolute path 
-            csvPath = os.path.normpath(os.path.join(self._destinationDirAbsPath,table["csvName"]))
+            csvPath = os.path.normpath(os.path.join(self._dataPath,table["csvName"]))
             # Check if the csv file exists
             if not os.path.exists(csvPath):
                 sys.stderr.write(f"Error: {csvPath} does not exist.\n")

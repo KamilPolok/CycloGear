@@ -4,7 +4,7 @@ import os
 import sys
 import re
 
-from config import DATA_DIR, DATABASE_NAME
+from config import DATA_PATH, DATABASE_NAME
 
 class DatabaseHandler:
     def __init__(self):
@@ -12,11 +12,11 @@ class DatabaseHandler:
     
     def _startup(self):
         # Check if destination folder where database file should be, exists
-        if not os.path.exists(DATA_DIR):
-            sys.stderr.write(f"Error: Directory {DATA_DIR} does not exist.\n")
+        if not os.path.exists(DATA_PATH):
+            sys.stderr.write(f"Error: Directory {DATA_PATH} does not exist.\n")
             sys.exit(1)
         # Check if database file exists
-        self._databaseAbsPath = os.path.normpath(os.path.join(DATA_DIR, DATABASE_NAME))
+        self._databaseAbsPath = os.path.normpath(os.path.join(DATA_PATH, DATABASE_NAME))
         if not os.path.exists(self._databaseAbsPath):
             sys.stderr.write(f"Error: Database file {self._databaseAbsPath} does not exist.\n")
             sys.exit(1)
