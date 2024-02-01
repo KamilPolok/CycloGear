@@ -1,6 +1,7 @@
 import math
 import numpy as np
 
+from InputShaft.Mediator import Mediator
 from InputShaft.view.InputShaft import InputShaft
 
 from ShaftDesigner.controller.ShaftDesignerController import ShaftDesignerController
@@ -36,6 +37,7 @@ class InputShaftController:
         self._input_shaft.set_data(self._data)
         self._input_shaft.init_tabs()
 
+        self._mediator = Mediator()
         self._init_shaft_designer()
 
     def _init_shaft_designer(self):
@@ -44,7 +46,7 @@ class InputShaftController:
         self._shaft_designer = ShaftDesigner(window_title)
 
         # Set an instance of shaft designer controller
-        self._shaft_designer_controller = ShaftDesignerController(self._shaft_designer)
+        self._shaft_designer_controller = ShaftDesignerController(self._shaft_designer, self._mediator)
 
     def _connect_signals_and_slots(self):
         """
@@ -62,6 +64,7 @@ class InputShaftController:
         self._input_shaft.tabs[2].updated_support_bearings_rolling_element_data_signal.connect(self._open_support_bearings_rolling_elements_db_window)
         self._input_shaft.tabs[2].updated_central_bearings_rolling_element_data_signal.connect(self._open_central_bearings_rolling_elements_db_window)
         self._input_shaft.tabs[2].updated_data_signal.connect(self._calculate_power_loss)
+        self._mediator.shaftDesigningFinished.connect(self._on_finishing_shaft_designing)
 
     def _open_shaft_designer_window(self):
         if self._shaft_designer.isHidden():
@@ -323,3 +326,6 @@ class InputShaftController:
         for key, value in data.items():
             if key in self._data:
                 self._data[key] = value 
+
+    def _on_finishing_shaft_designing(self):
+        self._input_shaft.reset_to_first_tab()

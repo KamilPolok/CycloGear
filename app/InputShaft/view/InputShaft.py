@@ -9,6 +9,8 @@ class InputShaft(QWidget):
     def __init__(self):
         super().__init__()
         self._init_ui()
+
+        self.is_shaft_designed = False
     
     def set_data(self, data):
         """
@@ -116,19 +118,26 @@ class InputShaft(QWidget):
         # Update tab GUI
         self.tabs[index].update_tab()
         
-    def update_access_to_next_tabs(self, enable_next_tab_button=False, disable_next_tabs=False):
+    def update_access_to_next_tabs(self, enable_next_tab_button, disable_next_tabs):
         """
         Check and update the state of the next tab button.
         """
-        if enable_next_tab_button:
+        self.enable_preview_button(enable_next_tab_button)
+
+        if enable_next_tab_button and self.is_shaft_designed:
             self._next_tab_button.setEnabled(True)
-            self.preview_button.setEnabled(True)
         else:
             self._next_tab_button.setEnabled(False)
-            self.preview_button.setEnabled(False)
 
         if disable_next_tabs:
             self.disable_next_tabs()
+    
+    def enable_preview_button(self, enable_preview_button):
+        if self._tab_widget.currentIndex() == 0:
+            if enable_preview_button:
+                self.preview_button.setEnabled(True)
+            else:
+                self.preview_button.setEnabled(False)
 
     def disable_next_tabs(self):
         """
@@ -136,3 +145,8 @@ class InputShaft(QWidget):
         """
         for i in range(self._tab_widget.currentIndex() + 1, self._tab_widget.count()):
             self._tab_widget.setTabEnabled(i, False)
+    
+    def reset_to_first_tab(self):
+        self.is_shaft_designed = True
+        self._tab_widget.setCurrentIndex(0)
+        self.update_access_to_next_tabs(True, True)

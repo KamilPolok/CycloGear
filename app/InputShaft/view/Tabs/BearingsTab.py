@@ -24,8 +24,8 @@ class BearingsTab(Tab):
         """
         Set the initial data for the tab from the main parent's data.
         """
-        attributes_to_acquire = ['Lhp', 'fdp', 'ftp', 'Łożyska_podporowe', 'ds',
-                                 'Lhc', 'fdc', 'ftc', 'Łożyska_centralne', 'de',]
+        attributes_to_acquire = ['Lhp', 'fdp', 'ftp', 'Łożyska_podporowe',
+                                 'Lhc', 'fdc', 'ftc', 'Łożyska_centralne',]
         self.tab_data = {attr: self._parent.data[attr] for attr in attributes_to_acquire}
         self._items_to_select_states['Łożyska_podporowe'] = ''
         self._items_to_select_states['Łożyska_centralne'] = ''
@@ -53,7 +53,7 @@ class BearingsTab(Tab):
         section_label = QLabel('Łożyska podporowe:')
 
         # Create data display and input rows
-        ds = create_data_display_row(self, 'dsc', self._parent.data['dsc'], 'd<sub>s</sub>', 'Obliczona średnica wału wejściowego')
+        dA = create_data_display_row(self, 'dA', self._parent.data['dA'], 'd<sub>s</sub>', 'Średnica pod podporę A')
         lh = create_data_input_row(self, 'Lhp', 'Trwałość godzinowa łożyska', 'L<sub>h</sub>')
         fd = create_data_input_row(self, 'ftp', 'Współczynnik zależny od zmiennych obciążeń dynamicznych', 'f<sub>d</sub>')
         ft = create_data_input_row(self, 'fdp', 'Współczynnik zależny od temperatury pracy łożyska', 'f<sub>t</sub>')
@@ -69,7 +69,7 @@ class BearingsTab(Tab):
         button_layout.addWidget(self._select_support_bearings_button)
 
         self.support_bearings_section_layout.addWidget(section_label)
-        self.support_bearings_section_layout.addLayout(ds)
+        self.support_bearings_section_layout.addLayout(dA)
         self.support_bearings_section_layout.addLayout(lh)
         self.support_bearings_section_layout.addLayout(fd)
         self.support_bearings_section_layout.addLayout(ft)
@@ -85,7 +85,7 @@ class BearingsTab(Tab):
         section_label = QLabel('Łożyska centralne:')
 
         # Create data display and input rows
-        de = create_data_display_row(self, 'dec', self._parent.data['dec'], 'd<sub>e</sub>', 'Obliczona średnica wykorbienia')
+        de = create_data_display_row(self, 'de', self._parent.data['de'], 'd<sub>e</sub>', 'Średnica pod koła obiegowe')
         lh = create_data_input_row(self, 'Lhc', 'Trwałość godzinowa łożyska', 'L<sub>h</sub>')
         fd = create_data_input_row(self, 'ftc', 'Współczynnik zależny od zmiennych obciążeń dynamicznych', 'f<sub>d</sub>')
         ft = create_data_input_row(self, 'fdc', 'Współczynnik zależny od temperatury pracy', 'f<sub>t</sub>')
@@ -208,7 +208,6 @@ class BearingsTab(Tab):
         self.tab_data['Łożyska_podporowe'] = itemData
 
         self._items_to_select_states['Łożyska_podporowe'] = str(itemData['Kod'][0])
-        self.tab_data['ds'][0] = itemData['Dw'][0]
         self.check_state()
 
     def update_viewed_central_bearings_code(self, itemData):
@@ -222,7 +221,6 @@ class BearingsTab(Tab):
         self.tab_data['Łożyska_centralne'] = itemData
 
         self._items_to_select_states['Łożyska_centralne'] = str(itemData['Kod'][0])
-        self.tab_data['de'][0] = itemData['Dw'][0]
         self.check_state()
     
     def getData(self):

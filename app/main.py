@@ -33,9 +33,10 @@ def main():
         'F': [5254.56, 'N'],            # Siła pochodząca od koła obiegowego
         # Obliczone i dobrane średnice
         'dsc': [None, 'mm'],            # Średnica wału wejściowego - obliczona
-        'ds': [None, 'mm'],             # Średnica wału wejściowego - dostosowana do łożyska
         'dec': [None, 'mm'],            # Średnica mimośrodu - obliczona
-        'de': [None, 'mm'],             # Średnica mimośrodu - dostosowana do łożyska
+        'dA': [None, 'mm'],             # Średnica pod podporę A
+        'dB': [None, 'mm'],             # Średnica pod podporę B
+        'de': [None, 'mm'],             # Średnica pod tarcze
         # Dobrany materiał i parametry
         'Materiał' : [None],            # Materiał wału
         'xz': [1, ''],                  # Współczynnik bezpieczeństwa

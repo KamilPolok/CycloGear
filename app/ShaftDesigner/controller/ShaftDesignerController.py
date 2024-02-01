@@ -8,8 +8,9 @@ from app.ShaftDesigner.view.Chart.Chart_ShaftViewer import Chart_ShaftViewer
 from ShaftDesigner.view.ShaftSection import ShaftSection, EccentricsSection
         
 class ShaftDesignerController:
-    def __init__(self, view):
+    def __init__(self, view, mediator):
         self._shaft_designer = view
+        self._mediator = mediator
 
         # Set shaft sections names
         self.section_names = ['Wykorbienia', 'Przed Wykorbieniami', 'Pomiędzy Wykorbieniami', 'Za Wykorbieniami']
@@ -27,6 +28,7 @@ class ShaftDesignerController:
         self.functions_calculator = FunctionsCalculator()
     
     def _connect_signals_and_slots(self):
+        self._shaft_designer.confirmation_button.clicked.connect(self._emit_shaft_designing_finished)
         for section_name, section in self._sections.items():
             section.subsection_data_signal.connect(self._handle_subsection_data)
             if section_name != 'Wykorbienia':
@@ -116,6 +118,7 @@ class ShaftDesignerController:
     def _enable_shaft_design_confirmation(self):
         if self.is_whole_shaft_designed or self._is_whole_shaft_designed_state_changed():
             self._toogle_remaining_plots_visibility()
+            self._shaft_designer.confirmation_button.setEnabled(self.is_whole_shaft_designed)
             
     def _is_whole_shaft_designed_state_changed(self):
         is_whole_shaft_designed_new = self.shaft_calculator.is_whole_shaft_designed()
@@ -137,6 +140,10 @@ class ShaftDesignerController:
             if self._sections[section_name].subsection_count == 0 or (section_name in self.shaft_calculator.shaft_sections_plots_attributes and
             last_subsection_number in self.shaft_calculator.shaft_sections_plots_attributes[section_name]):
                 self._sections[section_name].set_add_subsection_button_enabled(True)
+
+    def _emit_shaft_designing_finished(self):
+        self.shaft_calculator.save_data(self._data)
+        self._mediator.emit_shaft_designing_finished()
 
     def update_shaft_data(self, data):
         # Update shaft initial data

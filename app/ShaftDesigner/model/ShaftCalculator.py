@@ -189,3 +189,21 @@ class ShaftCalculator:
 
     def set_data(self, shaft_attributes):
         self._shaft_attributes = shaft_attributes
+
+    def save_data(self, data):
+        LA = self._shaft_attributes['LA']
+        LB = self._shaft_attributes['LB']
+        L1 = self._shaft_attributes['L1']
+       
+        support_places = [ [LA, None], [LB, None], [L1, None],]
+
+        shaft_steps = self.get_shaft_attributes()
+        for support in support_places:
+            for step in shaft_steps:
+                if step['z'] + step['l'] > support[0]:
+                    support[1] = step['d']
+                    break
+        
+        data['dA'][0] = support_places[0][1]
+        data['dB'][0] = support_places[1][1]
+        data['de'][0] = support_places[2][1]

@@ -66,15 +66,8 @@ class ResultsTab(Tab):
         self.results_subtab_layout = QVBoxLayout(content_widget)
         subtab.setWidget(content_widget)
 
-        dimensionsLabel = QLabel('Wymiary')
-        ds = create_data_display_row(self, 'ds',  self._parent.data['ds'], 'd<sub>s</sub>', 'Średnica wału')
-        de = create_data_display_row(self, 'de',  self._parent.data['de'], 'd<sub>e</sub>', 'Średnica wykorbienia')
-
         Łożyska1 = QLabel('Łożyska')
-
-        self.results_subtab_layout.addWidget(dimensionsLabel)
-        self.results_subtab_layout.addLayout(ds)
-        self.results_subtab_layout.addLayout(de)
+        
         self.results_subtab_layout.addWidget(Łożyska1)
 
     def update_tab(self):
