@@ -1,24 +1,26 @@
 from ast import literal_eval
 
 from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QLabel
+from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QComboBox, QStackedWidget
 
-from .TabIf import ITrackedTab
+from .TabIf import ITrackedTab, ITrackedWidget
 from .TabCommon import create_data_display_row, create_data_input_row, format_value
 
 from InputShaft.view.InputShaft import InputShaft
+
+class Section(ITrackedWidget):
+    def _init_ui(self):
+        self.main_layout = QVBoxLayout()
+        self.setLayout(self.main_layout)
+
+    def addLayout(self, layout):
+        self.main_layout.addLayout(layout)
+        self._setup_state_tracking()
 
 class BearingsTab(ITrackedTab):
     updated_data_signal = pyqtSignal(dict)
     updated_support_bearings_data_signal = pyqtSignal(dict)
     updated_central_bearings_data_signal = pyqtSignal(dict)
-
-    def __init__(self, parent: InputShaft, on_click_callback):
-        """
-        Initialize the BearingsTab with state tracking in the sublayouts.
-        """
-        super().__init__(parent, on_click_callback)
-        self.setup_sublayouts_state_tracking()
 
     def _set_tab_data(self):
         """
@@ -36,27 +38,39 @@ class BearingsTab(ITrackedTab):
         """
         self._set_tab_data()
 
-        self.setLayout(QVBoxLayout())
+        self.main_layout = QVBoxLayout()
+        self.setLayout(self.main_layout)
 
-        self.component_layout = QHBoxLayout()
-        self.layout().addLayout(self.component_layout)
+        self._init_selector()
+        self._init_sections()
 
-        # Create UI sections for bearings
-        self.view_support_bearings_section()
-        self.view_central_bearings_section()
+    def _init_selector(self):
+        self.layout_selector = QComboBox()
+        self.layout_selector.addItems(["Podpora przesuwna A", "Wykorbienia"])
+        self.layout_selector.currentIndexChanged.connect(self._change_section)
+        self.main_layout.addWidget(self.layout_selector)
 
-    def view_support_bearings_section(self):
+    def _init_sections(self):
+        self.init_support_bearings_section()
+        self.init_central_bearings_section()
+
+        self.stacked_sections = QStackedWidget()
+        self.stacked_sections.addWidget(self.support_bearing_section)
+        self.stacked_sections.addWidget(self.central_bearing_section)
+
+        self.main_layout.addWidget(self.stacked_sections)
+    
+    def init_support_bearings_section(self):
         """
         Create and layout the UI components for the support bearings section.
         """
-        self.support_bearings_section_layout = QVBoxLayout()
-        section_label = QLabel('Łożyska podporowe:')
+        self.support_bearing_section = Section(self, self._enable_select_support_bearings_button)
 
         # Create data display and input rows
-        dA = create_data_display_row(self, 'dA', self._parent.data['dA'], 'd<sub>s</sub>', 'Średnica pod podporę A')
-        lh = create_data_input_row(self, 'Lhp', 'Trwałość godzinowa łożyska', 'L<sub>h</sub>')
-        fd = create_data_input_row(self, 'ftp', 'Współczynnik zależny od zmiennych obciążeń dynamicznych', 'f<sub>d</sub>')
-        ft = create_data_input_row(self, 'fdp', 'Współczynnik zależny od temperatury pracy łożyska', 'f<sub>t</sub>')
+        self.support_bearing_section.addLayout(create_data_display_row(self, 'dA', self._parent.data['dA'], 'd<sub>s</sub>', 'Średnica wewnętrzna'))
+        self.support_bearing_section.addLayout(create_data_input_row(self, 'Lhp', 'Trwałość godzinowa łożyska', 'L<sub>h</sub>'))
+        self.support_bearing_section.addLayout(create_data_input_row(self, 'ftp', 'Współczynnik zależny od zmiennych obciążeń dynamicznych', 'f<sub>d</sub>'))
+        self.support_bearing_section.addLayout(create_data_input_row(self, 'fdp', 'Współczynnik zależny od temperatury pracy', 'f<sub>t</sub>'))
 
         # Create button for bearing selection
         button_layout = QHBoxLayout()
@@ -67,28 +81,19 @@ class BearingsTab(ITrackedTab):
 
         button_layout.addWidget(button_label)
         button_layout.addWidget(self._select_support_bearings_button)
+        self.support_bearing_section.addLayout(button_layout)
 
-        self.support_bearings_section_layout.addWidget(section_label)
-        self.support_bearings_section_layout.addLayout(dA)
-        self.support_bearings_section_layout.addLayout(lh)
-        self.support_bearings_section_layout.addLayout(fd)
-        self.support_bearings_section_layout.addLayout(ft)
-        self.support_bearings_section_layout.addLayout(button_layout)
-
-        self.component_layout.addLayout(self.support_bearings_section_layout)
-
-    def view_central_bearings_section(self):
+    def init_central_bearings_section(self):
         """
         Create and layout the UI components for the central bearings section.
         """
-        self.central_bearings_section_layout = QVBoxLayout()
-        section_label = QLabel('Łożyska centralne:')
+        self.central_bearing_section = Section(self, self._enable_select_central_bearings_button)
 
         # Create data display and input rows
-        de = create_data_display_row(self, 'de', self._parent.data['de'], 'd<sub>e</sub>', 'Średnica pod koła obiegowe')
-        lh = create_data_input_row(self, 'Lhc', 'Trwałość godzinowa łożyska', 'L<sub>h</sub>')
-        fd = create_data_input_row(self, 'ftc', 'Współczynnik zależny od zmiennych obciążeń dynamicznych', 'f<sub>d</sub>')
-        ft = create_data_input_row(self, 'fdc', 'Współczynnik zależny od temperatury pracy', 'f<sub>t</sub>')
+        self.central_bearing_section.addLayout(create_data_display_row(self, 'de', self._parent.data['de'], 'd<sub>e</sub>', 'Średnica wewnętrzna'))
+        self.central_bearing_section.addLayout(create_data_input_row(self, 'Lhc', 'Trwałość godzinowa łożyska', 'L<sub>h</sub>'))
+        self.central_bearing_section.addLayout(create_data_input_row(self, 'ftc', 'Współczynnik zależny od zmiennych obciążeń dynamicznych', 'f<sub>d</sub>'))
+        self.central_bearing_section.addLayout(create_data_input_row(self, 'fdc', 'Współczynnik zależny od temperatury pracy', 'f<sub>t</sub>'))
 
         # Create button for bearing selection
         button_layout = QHBoxLayout()
@@ -100,97 +105,33 @@ class BearingsTab(ITrackedTab):
 
         button_layout.addWidget(button_label)
         button_layout.addWidget(self._select_central_bearings_button)
-
-        self.central_bearings_section_layout.addWidget(section_label)
-        self.central_bearings_section_layout.addLayout(de)
-        self.central_bearings_section_layout.addLayout(lh)
-        self.central_bearings_section_layout.addLayout(fd)
-        self.central_bearings_section_layout.addLayout(ft)
-        self.central_bearings_section_layout.addLayout(button_layout)
-
-        self.component_layout.addLayout(self.central_bearings_section_layout)
-
-    def get_layout_state(self, line_edits):
-        """
-        Get the current state of a layout based on the text in its line edits.
-
-        Args:
-            line_edits (list): List of QLineEdit objects.
-
-        Returns:
-            list/None: List of text from each QLineEdit if none are empty, else None.
-        """
-        layout_input_states = [line_edit.text() for line_edit in line_edits]
-        return None if '' in layout_input_states else layout_input_states
-
-    def setup_sublayouts_state_tracking(self):
-        """
-        Setup state tracking for the sublayouts in the tab.
-        This involves identifying line edits in each section and setting up their initial state.
-        """
-        self._support_bearings_line_edits = [le for le in self._inputs_to_provide if self.is_widget_in_layout(le, self.support_bearings_section_layout)]
-        self._central_bearings_line_edits = [le for le in self._inputs_to_provide if self.is_widget_in_layout(le, self.central_bearings_section_layout)]
-
-        self.support_bearings_section_layout_original_state = self.get_layout_state(self._support_bearings_line_edits)
-        self._central_bearings_section_layout_original_state = self.get_layout_state(self._central_bearings_line_edits)
-
-        for line_edit in self._support_bearings_line_edits:
-            line_edit.textChanged.connect(self.check_support_bearings_section_layout_state)
-
-        for line_edit in self._central_bearings_line_edits:
-            line_edit.textChanged.connect(self.check_central_bearings_section_layout_state)
-
-    def is_widget_in_layout(self, widget, layout):
-        """
-        Check if a given widget is in a specified layout.
-
-        Args:
-            widget (QWidget): The widget to check.
-            layout (QLayout): The layout to search within.
-
-        Returns:
-            bool: True if the widget is in the layout, False otherwise.
-        """
-        for i in range(layout.count()):
-            item = layout.itemAt(i)
-            if item.widget() == widget:
-                return True
-            elif item.layout() and self.is_widget_in_layout(widget, item.layout()):
-                return True
-        return False
+        self.central_bearing_section.addLayout(button_layout)
     
-    def check_support_bearings_section_layout_state(self):
+    def _change_section(self, index):
+        self.stacked_sections.setCurrentIndex(index)
+    
+    def _enable_select_support_bearings_button(self, enable_button, delete_choice):
         """
-        Check the state of the support bearings section layout and update the UI accordingly.
-        Enables or disables the selection button based on whether all inputs are filled.
+        Enable or disable the selection button based on whether all inputs are filled.
         """
-        current_state = self.get_layout_state(self._support_bearings_line_edits)
-        all_filled = current_state is not None
-        state_changed = current_state != self.support_bearings_section_layout_original_state
 
-        if all_filled:
-            self.support_bearings_section_layout_original_state = current_state
+        if enable_button:
             self._select_support_bearings_button.setEnabled(True)
-            if state_changed:
+            if delete_choice:
                 self._select_support_bearings_button.setText('Wybierz Łożysko')
                 self._items_to_select['Łożyska_podporowe'] = ''
                 self._check_state()
         else:
             self._select_support_bearings_button.setEnabled(False)
     
-    def check_central_bearings_section_layout_state(self):
+    def _enable_select_central_bearings_button(self, enable_button, delete_choice):
         """
-        Check the state of the central bearings section layout and update the UI accordingly.
-        Enables or disables the selection button based on whether all inputs are filled.
+        Enable or disable the selection button based on whether all inputs are filled.
         """
-        current_state = self.get_layout_state(self._central_bearings_line_edits)
-        all_filled = current_state is not None
-        state_changed = current_state != self._central_bearings_section_layout_original_state
 
-        if all_filled:
-            self._central_bearings_section_layout_original_state = current_state
+        if enable_button:
             self._select_central_bearings_button.setEnabled(True)
-            if state_changed:
+            if delete_choice:
                 self._select_central_bearings_button.setText('Wybierz Łożysko')
                 self._items_to_select['Łożyska_centralne'] = ''
                 self._check_state()
