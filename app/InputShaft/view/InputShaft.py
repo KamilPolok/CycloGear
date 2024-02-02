@@ -83,7 +83,7 @@ class InputShaft(QWidget):
         self.tabs_section_layout.addWidget(self._tab_widget)
 
         # Check if the first tab is initially filled
-        self.tabs[self._tab_widget.currentIndex()].check_state()
+        self.tabs[self._tab_widget.currentIndex()]._check_state()
 
     def _show_preview(self):
         self.update_data()
@@ -114,7 +114,7 @@ class InputShaft(QWidget):
         Handle tab change event.
         """
         # Check if all the inputs are provided
-        self.tabs[index].check_state()
+        self.tabs[index]._check_state()
         # Update tab GUI
         self.tabs[index].update_tab()
         

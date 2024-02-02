@@ -3,12 +3,12 @@ from ast import literal_eval
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QLabel
 
-from .TabIf import Tab
+from .TabIf import ITrackedTab
 from .TabCommon import create_data_display_row, create_data_input_row, format_value
 
 from InputShaft.view.InputShaft import InputShaft
 
-class BearingsTab(Tab):
+class BearingsTab(ITrackedTab):
     updated_data_signal = pyqtSignal(dict)
     updated_support_bearings_data_signal = pyqtSignal(dict)
     updated_central_bearings_data_signal = pyqtSignal(dict)
@@ -27,10 +27,10 @@ class BearingsTab(Tab):
         attributes_to_acquire = ['Lhp', 'fdp', 'ftp', 'Łożyska_podporowe',
                                  'Lhc', 'fdc', 'ftc', 'Łożyska_centralne',]
         self.tab_data = {attr: self._parent.data[attr] for attr in attributes_to_acquire}
-        self._items_to_select_states['Łożyska_podporowe'] = ''
-        self._items_to_select_states['Łożyska_centralne'] = ''
+        self._items_to_select['Łożyska_podporowe'] = ''
+        self._items_to_select['Łożyska_centralne'] = ''
 
-    def init_ui(self):
+    def _init_ui(self):
         """
         Initialize the user interface for this tab.
         """
@@ -128,8 +128,8 @@ class BearingsTab(Tab):
         Setup state tracking for the sublayouts in the tab.
         This involves identifying line edits in each section and setting up their initial state.
         """
-        self._support_bearings_line_edits = [le for le in self._line_edits_states if self.is_widget_in_layout(le, self.support_bearings_section_layout)]
-        self._central_bearings_line_edits = [le for le in self._line_edits_states if self.is_widget_in_layout(le, self.central_bearings_section_layout)]
+        self._support_bearings_line_edits = [le for le in self._inputs_to_provide if self.is_widget_in_layout(le, self.support_bearings_section_layout)]
+        self._central_bearings_line_edits = [le for le in self._inputs_to_provide if self.is_widget_in_layout(le, self.central_bearings_section_layout)]
 
         self.support_bearings_section_layout_original_state = self.get_layout_state(self._support_bearings_line_edits)
         self._central_bearings_section_layout_original_state = self.get_layout_state(self._central_bearings_line_edits)
@@ -173,8 +173,8 @@ class BearingsTab(Tab):
             self._select_support_bearings_button.setEnabled(True)
             if state_changed:
                 self._select_support_bearings_button.setText('Wybierz Łożysko')
-                self._items_to_select_states['Łożyska_podporowe'] = ''
-                self.check_state()
+                self._items_to_select['Łożyska_podporowe'] = ''
+                self._check_state()
         else:
             self._select_support_bearings_button.setEnabled(False)
     
@@ -192,8 +192,8 @@ class BearingsTab(Tab):
             self._select_central_bearings_button.setEnabled(True)
             if state_changed:
                 self._select_central_bearings_button.setText('Wybierz Łożysko')
-                self._items_to_select_states['Łożyska_centralne'] = ''
-                self.check_state()
+                self._items_to_select['Łożyska_centralne'] = ''
+                self._check_state()
         else:
             self._select_central_bearings_button.setEnabled(False)
     
@@ -207,8 +207,8 @@ class BearingsTab(Tab):
         self._select_support_bearings_button.setText(str(itemData['Kod'][0]))
         self.tab_data['Łożyska_podporowe'] = itemData
 
-        self._items_to_select_states['Łożyska_podporowe'] = str(itemData['Kod'][0])
-        self.check_state()
+        self._items_to_select['Łożyska_podporowe'] = str(itemData['Kod'][0])
+        self._check_state()
 
     def update_viewed_central_bearings_code(self, itemData):
         """
@@ -220,8 +220,8 @@ class BearingsTab(Tab):
         self._select_central_bearings_button.setText(str(itemData['Kod'][0]))
         self.tab_data['Łożyska_centralne'] = itemData
 
-        self._items_to_select_states['Łożyska_centralne'] = str(itemData['Kod'][0])
-        self.check_state()
+        self._items_to_select['Łożyska_centralne'] = str(itemData['Kod'][0])
+        self._check_state()
     
     def getData(self):
         """

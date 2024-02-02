@@ -3,12 +3,12 @@ from ast import literal_eval
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QLabel
 
-from .TabIf import Tab
+from .TabIf import ITrackedTab
 from .TabCommon import create_data_display_row, create_data_input_row, format_value
 
 from InputShaft.view.InputShaft import InputShaft
 
-class PowerLossTab(Tab):
+class PowerLossTab(ITrackedTab):
     updated_data_signal = pyqtSignal(dict)
     updated_support_bearings_rolling_element_data_signal = pyqtSignal(dict)
     updated_central_bearings_rolling_element_data_signal = pyqtSignal(dict)
@@ -26,10 +26,10 @@ class PowerLossTab(Tab):
         """
         attributes_to_acquire = ['f', 'Toczne_podporowych', 'Toczne_centralnych']
         self.tab_data = {attr: self._parent.data[attr] for attr in attributes_to_acquire}
-        self._items_to_select_states['Toczne_podporowych'] = ''
-        self._items_to_select_states['Toczne_centralnych'] = ''
+        self._items_to_select['Toczne_podporowych'] = ''
+        self._items_to_select['Toczne_centralnych'] = ''
 
-    def init_ui(self):
+    def _init_ui(self):
         """
         Initialize the user interface for this tab.
         """
@@ -132,8 +132,8 @@ class PowerLossTab(Tab):
         Setup state tracking for the sublayouts in the tab.
         This involves identifying line edits in each section and setting up their initial state.
         """
-        self._support_bearings_line_edits = [le for le in self._line_edits_states if self.is_widget_in_layout(le, self.support_bearings_section_layout)]
-        self._central_bearings_line_edits = [le for le in self._line_edits_states if self.is_widget_in_layout(le, self.central_bearings_section_layout)]
+        self._support_bearings_line_edits = [le for le in self._inputs_to_provide if self.is_widget_in_layout(le, self.support_bearings_section_layout)]
+        self._central_bearings_line_edits = [le for le in self._inputs_to_provide if self.is_widget_in_layout(le, self.central_bearings_section_layout)]
 
         self._support_bearings_section_layout_original_state = self.get_layout_state(self._support_bearings_line_edits)
         self._central_bearings_section_layout_original_state = self.get_layout_state(self._central_bearings_line_edits)
@@ -177,8 +177,8 @@ class PowerLossTab(Tab):
             self._select_support_bearings_rolling_element_button.setEnabled(True)
             if state_changed:
                 self._select_support_bearings_rolling_element_button.setText('Wybierz elementy toczne')
-                self._items_to_select_states['Toczne_podporowych'] = ''
-                self.check_state()
+                self._items_to_select['Toczne_podporowych'] = ''
+                self._check_state()
         else:
             self._select_support_bearings_rolling_element_button.setEnabled(False)
     
@@ -196,8 +196,8 @@ class PowerLossTab(Tab):
             self._select_central_bearings_rolling_element_button.setEnabled(True)
             if state_changed:
                 self._select_central_bearings_rolling_element_button.setText('Wybierz elementy toczne')
-                self._items_to_select_states['Toczne_centralnych'] = ''
-                self.check_state()
+                self._items_to_select['Toczne_centralnych'] = ''
+                self._check_state()
         else:
             self._select_central_bearings_rolling_element_button.setEnabled(False)
     
@@ -211,8 +211,8 @@ class PowerLossTab(Tab):
         self._select_support_bearings_rolling_element_button.setText(f"{self._parent.data['Łożyska_podporowe']['elementy toczne'][0]} {str(itemData['Kod'][0])}")
         self.tab_data['Toczne_podporowych'] = itemData
 
-        self._items_to_select_states['Toczne_podporowych'] = str(itemData['Kod'][0])
-        self.check_state()
+        self._items_to_select['Toczne_podporowych'] = str(itemData['Kod'][0])
+        self._check_state()
 
     def update_viewed_central_bearings_rolling_element_code(self, itemData):
         """
@@ -224,8 +224,8 @@ class PowerLossTab(Tab):
         self._select_central_bearings_rolling_element_button.setText(f"{self._parent.data['Łożyska_centralne']['elementy toczne'][0]} {str(itemData['Kod'][0])}")
         self.tab_data['Toczne_centralnych'] = itemData
 
-        self._items_to_select_states['Toczne_centralnych'] = str(itemData['Kod'][0])
-        self.check_state()
+        self._items_to_select['Toczne_centralnych'] = str(itemData['Kod'][0])
+        self._check_state()
     
     def getData(self):
         """

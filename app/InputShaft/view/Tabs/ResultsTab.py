@@ -1,10 +1,10 @@
 from PyQt6.QtWidgets import QTabWidget, QWidget, QVBoxLayout, QLabel, QScrollArea
 
-from .TabIf import Tab
+from .TabIf import ITrackedTab
 from .TabCommon import create_data_display_row, format_value
 
-class ResultsTab(Tab):
-    def init_ui(self):
+class ResultsTab(ITrackedTab):
+    def _init_ui(self):
         """
         Initialize the user interface for ResultsTab.
         """

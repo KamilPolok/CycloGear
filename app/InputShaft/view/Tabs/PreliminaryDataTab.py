@@ -3,10 +3,10 @@ from ast import literal_eval
 from PyQt6.QtCore import QEvent, pyqtSignal
 from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QLabel
 
-from .TabIf import Tab
+from .TabIf import ITrackedTab
 from .TabCommon import create_data_input_row, create_data_display_row
 
-class PreliminaryDataTab(Tab):
+class PreliminaryDataTab(ITrackedTab):
     updated_data_signal = pyqtSignal(dict)
 
     def _set_tab_data(self):
@@ -15,9 +15,9 @@ class PreliminaryDataTab(Tab):
         """
         attributes_to_acquire = ['L', 'LA', 'LB', 'L1', 'Materiał', 'xz', 'qdop', 'tetadop', 'fdop']
         self.tab_data = {attr: self._parent.data[attr] for attr in attributes_to_acquire}
-        self._items_to_select_states['Materiał'] = ''
+        self._items_to_select['Materiał'] = ''
 
-    def init_ui(self):
+    def _init_ui(self):
         """
         Initialize the user interface for this tab.
         """
@@ -120,7 +120,7 @@ class PreliminaryDataTab(Tab):
     
     def _setup_inputs_validation(self):
         """
-        This function gets triggered when the user switches onto current Tab.
+        This function gets triggered when the user switches onto current ITrackedTab.
         It (re)initializes and applies the input limits of the validated_inputs.
         """
         self.validated_inputs_limits = {}
@@ -248,8 +248,8 @@ class PreliminaryDataTab(Tab):
         self.select_material_button.setText(str(item_data['Oznaczenie'][0]))
         self.tab_data['Materiał'] = item_data
 
-        self._items_to_select_states['Materiał'] = str(item_data['Oznaczenie'][0])
-        self.check_state()
+        self._items_to_select['Materiał'] = str(item_data['Oznaczenie'][0])
+        self._check_state()
 
     def get_data(self):
         """

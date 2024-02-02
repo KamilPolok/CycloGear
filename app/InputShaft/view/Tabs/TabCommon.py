@@ -1,14 +1,14 @@
 """
-    This file collects all functions that are common for each Tab class.
+    This file collects all functions that are common for each ITrackedTab class.
 """
 
 from PyQt6.QtGui import QFocusEvent, QKeyEvent, QRegularExpressionValidator
 from PyQt6.QtCore import Qt, QRegularExpression, QTimer, pyqtSignal
 from PyQt6.QtWidgets import  QHBoxLayout, QLabel, QLineEdit
 
-from .TabIf import Tab
+from .TabIf import ITrackedTab
 
-def create_data_input_row(tab: Tab, attribute: str, description: str, symbol: str) -> QHBoxLayout:
+def create_data_input_row(tab: ITrackedTab, attribute: str, description: str, symbol: str) -> QHBoxLayout:
     """
     Create a row for data input with description, symbol, and input field.
 
@@ -54,7 +54,7 @@ def create_data_input_row(tab: Tab, attribute: str, description: str, symbol: st
 
     return layout
 
-def create_data_display_row(tab: Tab, attribute: tuple, data: list, symbol: str, description: str = '') -> QHBoxLayout:
+def create_data_display_row(tab: ITrackedTab, attribute: tuple, data: list, symbol: str, description: str = '') -> QHBoxLayout:
     """
     Create a row for displaying data with description, symbol, and a read-only field.
 
