@@ -40,7 +40,6 @@ class InputShaft(QWidget):
         # Add button for opening the shaft designer
         self.preview_button = QPushButton('Podgląd', self)
         self.preview_button.clicked.connect(self._show_preview)
-        self.preview_button.setEnabled(False)
 
         self.buttons_section_layout.addWidget(self._next_tab_button)
         self.buttons_section_layout.addWidget(self.preview_button)

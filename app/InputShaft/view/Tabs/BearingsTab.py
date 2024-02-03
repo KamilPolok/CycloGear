@@ -76,7 +76,6 @@ class BearingsTab(ITrackedTab):
         button_layout = QHBoxLayout()
         button_label = QLabel('Łożysko:')
         self._select_support_A_bearings_button = QPushButton('Wybierz łożysko')
-        self._select_support_A_bearings_button.setEnabled(False)
         self._select_support_A_bearings_button.clicked.connect(self.update_selected_support_A_bearing_data)
 
         button_layout.addWidget(button_label)
@@ -100,7 +99,6 @@ class BearingsTab(ITrackedTab):
         button_label = QLabel('Łożysko:')
 
         self._select_central_bearings_button = QPushButton('Wybierz łożysko')
-        self._select_central_bearings_button.setEnabled(False)
         self._select_central_bearings_button.clicked.connect(self.update_selected_central_bearing_data)
 
         button_layout.addWidget(button_label)

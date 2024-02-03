@@ -82,7 +82,6 @@ class PowerLossTab(ITrackedTab):
         button_layout = QHBoxLayout()
         button_label = QLabel('Elementy toczne:')
         self._select_support_A_bearings_rolling_element_button = QPushButton('Wybierz elementy toczne')
-        self._select_support_A_bearings_rolling_element_button.setEnabled(False)
         self._select_support_A_bearings_rolling_element_button.clicked.connect(self.update_selected_support_A_bearings_rolling_element_data)
 
         button_layout.addWidget(button_label)
@@ -103,7 +102,6 @@ class PowerLossTab(ITrackedTab):
         button_layout = QHBoxLayout()
         button_label = QLabel('Elementy toczne:')
         self._select_central_bearings_rolling_element_button = QPushButton('Wybierz elementy toczne')
-        self._select_central_bearings_rolling_element_button.setEnabled(False)
         self._select_central_bearings_rolling_element_button.clicked.connect(self.update_selected_central_bearings_rolling_element_data)
 
         button_layout.addWidget(button_label)
