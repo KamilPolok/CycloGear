@@ -59,9 +59,11 @@ class InputShaftController:
         self._input_shaft.tabs[0].select_material_button.clicked.connect(self._open_materials_db_window)
         self._input_shaft.tabs[0].updated_data_signal.connect(self._update_input_shaft_attributes)
         self._input_shaft.tabs[1].updated_support_A_bearing_data_signal.connect(self._open_support_A_bearings_db_window)
+        self._input_shaft.tabs[1].updated_support_B_bearing_data_signal.connect(self._open_support_B_bearings_db_window)
         self._input_shaft.tabs[1].updated_central_bearing_data_signal.connect(self._open_central_bearings_db_window)
         self._input_shaft.tabs[1].updated_data_signal.connect(self._calculate_bearings_attributes)
         self._input_shaft.tabs[2].updated_support_A_bearing_rolling_element_data_signal.connect(self._open_support_A_bearings_rolling_elements_db_window)
+        self._input_shaft.tabs[2].updated_support_B_bearing_rolling_element_data_signal.connect(self._open_support_B_bearings_rolling_elements_db_window)
         self._input_shaft.tabs[2].updated_central_bearing_rolling_element_data_signal.connect(self._open_central_bearings_rolling_elements_db_window)
         self._input_shaft.tabs[2].updated_data_signal.connect(self._calculate_power_loss)
         self._mediator.shaftDesigningFinished.connect(self._on_finishing_shaft_designing)
@@ -90,7 +92,7 @@ class InputShaftController:
         """
         Open the support bearings database _window.
 
-        This method is triggered when the user wants to select a support bearing from the database.
+        This method is triggered when the user wants to select a support A bearing from the database.
         It first calculates bearing attributes based on provided data.
 
         :param data: Data used for calculating bearing attributes.
@@ -112,6 +114,34 @@ class InputShaftController:
         # Setup the controller for the subwindow
         view_select_items_ctrl = ViewSelectItemController(db_handler, subwindow, available_tables, limits)
         subwindow.itemDataSignal.connect(self._input_shaft.tabs[1].update_viewed_support_A_bearing_code)
+        subwindow.exec()
+
+    def _open_support_B_bearings_db_window(self, data):
+        """
+        Open the support B bearings database _window.
+
+        This method is triggered when the user wants to select a support B bearing from the database.
+        It first calculates bearing attributes based on provided data.
+
+        :param data: Data used for calculating bearing attributes.
+        """
+        self._calculate_support_B_bearings_load_capacity(data)
+
+        # Get acces to the database
+        db_handler = DatabaseHandler()
+        # Create a subwindow that views GUI for the DatabaseHandler
+        subwindow = Window()
+        subwindow.setWindowTitle("Dobór łożyska")
+        # Specify the group name of the tables you want to take for consideration
+        tables_group_name = 'wał wejściowy-łożyska-podporowe'
+        available_tables = db_handler.getAvailableTables(tables_group_name)
+        # Specify the limits for the group of tables
+        limits = db_handler.getTableItemsFilters(tables_group_name)
+        limits['Dw']['min'] = self._data['dB'][0]
+        limits['C']['min'] = self._data['CB'][0]
+        # Setup the controller for the subwindow
+        view_select_items_ctrl = ViewSelectItemController(db_handler, subwindow, available_tables, limits)
+        subwindow.itemDataSignal.connect(self._input_shaft.tabs[1].update_viewed_support_B_bearing_code)
         subwindow.exec()
     
     def _open_central_bearings_db_window(self, data):
@@ -146,7 +176,7 @@ class InputShaftController:
         """
         Open the support bearings rolling_elements database window.
 
-        This method is triggered when the user wants to select rolling elements for a support bearing from the database.
+        This method is triggered when the user wants to select rolling elements for a support A bearing from the database.
         It first calculates rolling elements attributes based on provided data.
 
         :param data: Data used for calculating bearing diameter.
@@ -166,6 +196,32 @@ class InputShaftController:
         # Setup the controller for the subwindow
         view_select_items_ctrl = ViewSelectItemController(db_handler, subwindow, available_tables, limits)
         subwindow.itemDataSignal.connect(self._input_shaft.tabs[2].update_viewed_support_A_bearings_rolling_element_code)
+        subwindow.exec()
+
+    def _open_support_B_bearings_rolling_elements_db_window(self, data):
+        """
+        Open the support bearings rolling_elements database window.
+
+        This method is triggered when the user wants to select rolling elements for a support B bearing from the database.
+        It first calculates rolling elements attributes based on provided data.
+
+        :param data: Data used for calculating bearing diameter.
+        """
+        # Get acces to the database
+        db_handler = DatabaseHandler()
+        # Create a subwindow that views GUI for the DatabaseHandler
+        subwindow = Window()
+        subwindow.setWindowTitle("Dobór elementu tocznego")
+        # Specify the group name of the tables you want to take for consideration
+        tables_group_name = f"wał wejściowy-elementy toczne-{self._data['Łożyska_podpora_B']['elementy toczne'][0]}"
+        available_tables = db_handler.getAvailableTables(tables_group_name)
+        # Specify the limits for the group of tables
+        limits = db_handler.getTableItemsFilters(tables_group_name)
+        limits['D']['min'] = math.floor(self._data['dwBc'][0]) - 1
+        limits['D']['max'] = math.ceil(self._data['dwBc'][0]) + 1
+        # Setup the controller for the subwindow
+        view_select_items_ctrl = ViewSelectItemController(db_handler, subwindow, available_tables, limits)
+        subwindow.itemDataSignal.connect(self._input_shaft.tabs[2].update_viewed_support_B_bearings_rolling_element_code)
         subwindow.exec()
 
     def _open_central_bearings_rolling_elements_db_window(self, data):
@@ -217,6 +273,30 @@ class InputShaftController:
 
         self._data['LrA'][0] = l
         self._data['CA'][0] = c
+
+    def _calculate_support_B_bearings_load_capacity(self, data):
+        """
+        Calculate load capacity of the support bearings.
+
+        This method calculates the life and capacity of the first set of bearings based on the provided data.
+
+        :param data: Data used for calculating bearing attributes.
+        """
+        self._update_data(data)
+
+        nwe = self._data['nwe'][0]
+        lh = self._data['LhB'][0]
+        fd = self._data['fdB'][0]
+        ft = self._data['ftB'][0]
+        p = 3.0
+
+        ra = self._data['Ra'][0]
+
+        l = 60 * lh * nwe / np.power(10, 6)
+        c = ra * np.power(l, 1 / p) * ft / fd / 1000 # [kN]
+
+        self._data['LrB'][0] = l
+        self._data['CB'][0] = c
     
     def _calculate_central_bearings_load_capacity(self, data):
         """
@@ -263,13 +343,21 @@ class InputShaftController:
         """
         self._update_data(data)
 
-        # Calculate support bearings attributes
+        # Calculate support A bearing attributes
         Dw = self._data['Łożyska_podpora_A']['Dw'][0]
         Dz = self._data['Łożyska_podpora_A']['Dz'][0]
 
         dw = 0.25 * (Dz - Dw)
 
         self._data['dwAc'][0] = dw
+
+        # Calculate support B bearing attributes
+        Dw = self._data['Łożyska_podpora_B']['Dw'][0]
+        Dz = self._data['Łożyska_podpora_B']['Dz'][0]
+
+        dw = 0.25 * (Dz - Dw)
+
+        self._data['dwBc'][0] = dw
 
         # Calculate central bearings attributes
         Dw = self._data['Łożyska_centralne']['Dw'][0]
@@ -295,7 +383,7 @@ class InputShaftController:
         Ra = self._data['Ra'][0]
         F = self._data['F'][0]
 
-        # Calculate power loss in support bearings
+        # Calculate power loss for support A bearing
         dw = self._data['Toczne_podpora_A']['D'][0]
         Dw = self._data['Łożyska_podpora_A']['Dw'][0]
 
@@ -305,7 +393,17 @@ class InputShaftController:
         self._data['SA'][0] = S
         self._data['NA'][0] = NA
 
-        # Calculate power loss in central bearings
+        # Calculate power loss for support B bearing
+        dw = self._data['Toczne_podpora_B']['D'][0]
+        Dw = self._data['Łożyska_podpora_B']['Dw'][0]
+
+        S = dw / 2
+        NB = fA * 0.001 * w0 * (1 + (Dw + 2 * S) / dw) * (1 + e / rw1) * 4 * Ra / np.pi
+
+        self._data['SB'][0] = S
+        self._data['NB'][0] = NB
+
+        # Calculate power loss for central bearings
         dw = self._data['Toczne_centralnych']['D'][0]
         Dw = self._data['Łożyska_centralne']['Dw'][0]
         Dz = self._data['Łożyska_centralne']['Dz'][0]

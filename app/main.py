@@ -55,6 +55,20 @@ def main():
         'Toczne_podpora_A': [None],     # Element toczny
         'SA': [None, 'mm'],             # Grubość pierścienia
         'NA': [None, 'W'],              # Starty mocy
+        ## Łożyska podpora B
+        # Dobór łożysk
+        'Łożyska_podpora_B': [None],    # Łożyska
+        'LhB': [20000, 'h'],            # Trwałość godzinowa
+        'LrB': [None, 'obr'],           # Trwałość
+        'CB': [None, 'kN'],             # Nośność
+        'fdB': [1.60, ''],              # Współczynnik zależny od zmiennych obciążeń dynamicznych
+        'ftB': [1.00, ''],              # Współczynnik zależny od temperatury pracy łożyska
+        # Straty mocy
+        'fB': [0.01, 'mm'],             # Współczynnik tarcia tocznego
+        'dwBc': [None, 'mm'],           # Średnica elementu tocznego ł. podporowych - obliczona
+        'Toczne_podpora_B': [None],     # Element toczny
+        'SB': [None, 'mm'],             # Grubość pierścienia
+        'NB': [None, 'W'],              # Starty mocy
         ## Łożyska centralne
         # Dobór łożysk
         'Łożyska_centralne': [None],    # Łożyska
