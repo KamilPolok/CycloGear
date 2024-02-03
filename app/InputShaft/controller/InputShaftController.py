@@ -58,11 +58,11 @@ class InputShaftController:
         self._input_shaft.show_preview_signal.connect(self._open_shaft_designer_window)
         self._input_shaft.tabs[0].select_material_button.clicked.connect(self._open_materials_db_window)
         self._input_shaft.tabs[0].updated_data_signal.connect(self._update_input_shaft_attributes)
-        self._input_shaft.tabs[1].updated_support_bearings_data_signal.connect(self._open_support_bearings_db_window)
-        self._input_shaft.tabs[1].updated_central_bearings_data_signal.connect(self._open_central_bearings_db_window)
+        self._input_shaft.tabs[1].updated_support_A_bearing_data_signal.connect(self._open_support_A_bearings_db_window)
+        self._input_shaft.tabs[1].updated_central_bearing_data_signal.connect(self._open_central_bearings_db_window)
         self._input_shaft.tabs[1].updated_data_signal.connect(self._calculate_bearings_attributes)
-        self._input_shaft.tabs[2].updated_support_bearings_rolling_element_data_signal.connect(self._open_support_bearings_rolling_elements_db_window)
-        self._input_shaft.tabs[2].updated_central_bearings_rolling_element_data_signal.connect(self._open_central_bearings_rolling_elements_db_window)
+        self._input_shaft.tabs[2].updated_support_A_bearing_rolling_element_data_signal.connect(self._open_support_A_bearings_rolling_elements_db_window)
+        self._input_shaft.tabs[2].updated_central_bearing_rolling_element_data_signal.connect(self._open_central_bearings_rolling_elements_db_window)
         self._input_shaft.tabs[2].updated_data_signal.connect(self._calculate_power_loss)
         self._mediator.shaftDesigningFinished.connect(self._on_finishing_shaft_designing)
 
@@ -86,7 +86,7 @@ class InputShaftController:
         subwindow.itemDataSignal.connect(self._input_shaft.tabs[0].update_viewed_material)
         subwindow.exec()
     
-    def _open_support_bearings_db_window(self, data):
+    def _open_support_A_bearings_db_window(self, data):
         """
         Open the support bearings database _window.
 
@@ -95,23 +95,23 @@ class InputShaftController:
 
         :param data: Data used for calculating bearing attributes.
         """
-        self._calculate_support_bearings_load_capacity(data)
+        self._calculate_support_A_bearings_load_capacity(data)
 
         # Get acces to the database
         db_handler = DatabaseHandler()
         # Create a subwindow that views GUI for the DatabaseHandler
         subwindow = Window()
-        subwindow.setWindowTitle("Dobór łożyska podporowego")
+        subwindow.setWindowTitle("Dobór łożyska")
         # Specify the group name of the tables you want to take for consideration
         tables_group_name = 'wał wejściowy-łożyska-podporowe'
         available_tables = db_handler.getAvailableTables(tables_group_name)
         # Specify the limits for the group of tables
         limits = db_handler.getTableItemsFilters(tables_group_name)
         limits['Dw']['min'] = self._data['dsc'][0]
-        limits['C']['min'] = self._data['Cr'][0]
+        limits['C']['min'] = self._data['CA'][0]
         # Setup the controller for the subwindow
         view_select_items_ctrl = ViewSelectItemController(db_handler, subwindow, available_tables, limits)
-        subwindow.itemDataSignal.connect(self._input_shaft.tabs[1].update_viewed_support_bearings_code)
+        subwindow.itemDataSignal.connect(self._input_shaft.tabs[1].update_viewed_support_A_bearing_code)
         subwindow.exec()
     
     def _open_central_bearings_db_window(self, data):
@@ -129,7 +129,7 @@ class InputShaftController:
         db_handler = DatabaseHandler()
         # Create a subwindow that views GUI for the DatabaseHandler
         subwindow = Window()
-        subwindow.setWindowTitle("Dobór łożyska centralnego")
+        subwindow.setWindowTitle("Dobór łożyska")
         # Specify the group name of the tables you want to take for consideration
         tables_group_name = 'wał wejściowy-łożyska-centralne'
         available_tables = db_handler.getAvailableTables(tables_group_name)
@@ -142,7 +142,7 @@ class InputShaftController:
         subwindow.itemDataSignal.connect(self._input_shaft.tabs[1].update_viewed_central_bearings_code)
         subwindow.exec()
 
-    def _open_support_bearings_rolling_elements_db_window(self, data):
+    def _open_support_A_bearings_rolling_elements_db_window(self, data):
         """
         Open the support bearings rolling_elements database window.
 
@@ -157,15 +157,15 @@ class InputShaftController:
         subwindow = Window()
         subwindow.setWindowTitle("Dobór elementu tocznego")
         # Specify the group name of the tables you want to take for consideration
-        tables_group_name = f"wał wejściowy-elementy toczne-{self._data['Łożyska_podporowe']['elementy toczne'][0]}"
+        tables_group_name = f"wał wejściowy-elementy toczne-{self._data['Łożyska_podpora_A']['elementy toczne'][0]}"
         available_tables = db_handler.getAvailableTables(tables_group_name)
         # Specify the limits for the group of tables
         limits = db_handler.getTableItemsFilters(tables_group_name)
-        limits['D']['min'] = math.floor(self._data['dwpc'][0]) - 1
-        limits['D']['max'] = math.ceil(self._data['dwpc'][0]) + 1
+        limits['D']['min'] = math.floor(self._data['dwAc'][0]) - 1
+        limits['D']['max'] = math.ceil(self._data['dwAc'][0]) + 1
         # Setup the controller for the subwindow
         view_select_items_ctrl = ViewSelectItemController(db_handler, subwindow, available_tables, limits)
-        subwindow.itemDataSignal.connect(self._input_shaft.tabs[2].update_viewed_support_bearings_rolling_element_code)
+        subwindow.itemDataSignal.connect(self._input_shaft.tabs[2].update_viewed_support_A_bearings_rolling_element_code)
         subwindow.exec()
 
     def _open_central_bearings_rolling_elements_db_window(self, data):
@@ -194,7 +194,7 @@ class InputShaftController:
         subwindow.itemDataSignal.connect(self._input_shaft.tabs[2].update_viewed_central_bearings_rolling_element_code)
         subwindow.exec()
 
-    def _calculate_support_bearings_load_capacity(self, data):
+    def _calculate_support_A_bearings_load_capacity(self, data):
         """
         Calculate load capacity of the support bearings.
 
@@ -205,9 +205,9 @@ class InputShaftController:
         self._update_data(data)
 
         nwe = self._data['nwe'][0]
-        lh = self._data['Lhp'][0]
-        fd = self._data['fdp'][0]
-        ft = self._data['ftp'][0]
+        lh = self._data['LhA'][0]
+        fd = self._data['fdA'][0]
+        ft = self._data['ftA'][0]
         p = 3.0
 
         ra = self._data['Ra'][0]
@@ -215,8 +215,8 @@ class InputShaftController:
         l = 60 * lh * nwe / np.power(10, 6)
         c = ra * np.power(l, 1 / p) * ft / fd / 1000 # [kN]
 
-        self._data['Lrp'][0] = l
-        self._data['Cr'][0] = c
+        self._data['LrA'][0] = l
+        self._data['CA'][0] = c
     
     def _calculate_central_bearings_load_capacity(self, data):
         """
@@ -264,12 +264,12 @@ class InputShaftController:
         self._update_data(data)
 
         # Calculate support bearings attributes
-        Dw = self._data['Łożyska_podporowe']['Dw'][0]
-        Dz = self._data['Łożyska_podporowe']['Dz'][0]
+        Dw = self._data['Łożyska_podpora_A']['Dw'][0]
+        Dz = self._data['Łożyska_podpora_A']['Dz'][0]
 
         dw = 0.25 * (Dz - Dw)
 
-        self._data['dwpc'][0] = dw
+        self._data['dwAc'][0] = dw
 
         # Calculate central bearings attributes
         Dw = self._data['Łożyska_centralne']['Dw'][0]
@@ -289,21 +289,21 @@ class InputShaftController:
 
         w0 = self._data['w0'][0]
         e = self._data['e'][0]
-        fp = self._data['fp'][0]
+        fA = self._data['fA'][0]
         fc = self._data['fc'][0]
         rw1 = self._data['rw1'][0]
         Ra = self._data['Ra'][0]
         F = self._data['F'][0]
 
         # Calculate power loss in support bearings
-        dw = self._data['Toczne_podporowych']['D'][0]
-        Dw = self._data['Łożyska_podporowe']['Dw'][0]
+        dw = self._data['Toczne_podpora_A']['D'][0]
+        Dw = self._data['Łożyska_podpora_A']['Dw'][0]
 
         S = dw / 2
-        Np = fp * 0.001 * w0 * (1 + (Dw + 2 * S) / dw) * (1 + e / rw1) * 4 * Ra / np.pi
+        NA = fA * 0.001 * w0 * (1 + (Dw + 2 * S) / dw) * (1 + e / rw1) * 4 * Ra / np.pi
 
-        self._data['Sp'][0] = S
-        self._data['Np'][0] = Np
+        self._data['SA'][0] = S
+        self._data['NA'][0] = NA
 
         # Calculate power loss in central bearings
         dw = self._data['Toczne_centralnych']['D'][0]

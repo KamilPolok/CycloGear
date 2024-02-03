@@ -22,16 +22,16 @@ class Section(ITrackedWidget):
 
 class PowerLossTab(ITrackedTab):
     updated_data_signal = pyqtSignal(dict)
-    updated_support_bearings_rolling_element_data_signal = pyqtSignal(dict)
-    updated_central_bearings_rolling_element_data_signal = pyqtSignal(dict)
+    updated_support_A_bearing_rolling_element_data_signal = pyqtSignal(dict)
+    updated_central_bearing_rolling_element_data_signal = pyqtSignal(dict)
 
     def _set_tab_data(self):
         """
         Set the initial data for the tab from the parent's data.
         """
-        attributes_to_acquire = ['fc', 'fp', 'Toczne_podporowych', 'Toczne_centralnych']
+        attributes_to_acquire = ['fc', 'fA', 'Toczne_podpora_A', 'Toczne_centralnych']
         self.tab_data = {attr: self._parent.data[attr] for attr in attributes_to_acquire}
-        self._items_to_select['Toczne_podporowych'] = ''
+        self._items_to_select['Toczne_podpora_A'] = ''
         self._items_to_select['Toczne_centralnych'] = ''
 
     def _init_ui(self):
@@ -59,39 +59,39 @@ class PowerLossTab(ITrackedTab):
         self.main_layout.addWidget(self.layout_selector)
 
     def _init_sections(self):
-        self._init_support_bearings_section()
+        self._init_support_A_bearing_section()
         self._init_central_bearings_section()
 
         self.stacked_sections = QStackedWidget()
-        self.stacked_sections.addWidget(self.support_bearing_section)
+        self.stacked_sections.addWidget(self.support_A_bearing_section)
         self.stacked_sections.addWidget(self.central_bearing_section)
 
         self.main_layout.addWidget(self.stacked_sections)
 
-    def _init_support_bearings_section(self):
+    def _init_support_A_bearing_section(self):
         """
-        Create and layout the UI components for the support bearings section.
+        Create and layout the UI components for the support A bearing section.
         """
-        self.support_bearing_section = Section(self, self._enable_select_support_bearings_rolling_element_button)
+        self.support_A_bearing_section = Section(self, self._enable_select_support_A_bearings_rolling_element_button)
 
         # Create data display and input rows
-        self.support_bearing_section.addLayout(create_data_input_row(self, 'fp', 'Współczynnik tarcia tocznego', 'f'))
-        self.support_bearing_section.addLayout(create_data_display_row(self, 'dwpc', self._parent.data['dwpc'], 'd<sub>w</sub>', 'Obliczona średnica elementów tocznych'))
+        self.support_A_bearing_section.addLayout(create_data_input_row(self, 'fA', 'Współczynnik tarcia tocznego', 'f'))
+        self.support_A_bearing_section.addLayout(create_data_display_row(self, 'dwAc', self._parent.data['dwAc'], 'd<sub>w</sub>', 'Obliczona średnica elementów tocznych'))
         
         # Create button for rolling element selection
         button_layout = QHBoxLayout()
         button_label = QLabel('Elementy toczne:')
-        self._select_support_bearings_rolling_element_button = QPushButton('Wybierz elementy toczne')
-        self._select_support_bearings_rolling_element_button.setEnabled(False)
-        self._select_support_bearings_rolling_element_button.clicked.connect(self.update_selected_support_bearings_rolling_element_data)
+        self._select_support_A_bearings_rolling_element_button = QPushButton('Wybierz elementy toczne')
+        self._select_support_A_bearings_rolling_element_button.setEnabled(False)
+        self._select_support_A_bearings_rolling_element_button.clicked.connect(self.update_selected_support_A_bearings_rolling_element_data)
 
         button_layout.addWidget(button_label)
-        button_layout.addWidget(self._select_support_bearings_rolling_element_button)
-        self.support_bearing_section.addLayout(button_layout)
+        button_layout.addWidget(self._select_support_A_bearings_rolling_element_button)
+        self.support_A_bearing_section.addLayout(button_layout)
 
     def _init_central_bearings_section(self):
         """
-        Create and layout the UI components for the central bearings section.
+        Create and layout the UI components for the central bearing section.
         """
         self.central_bearing_section = Section(self, self._enable_select_central_bearings_rolling_element_button)
 
@@ -113,18 +113,18 @@ class PowerLossTab(ITrackedTab):
     def _change_section(self, index):
         self.stacked_sections.setCurrentIndex(index)
     
-    def _enable_select_support_bearings_rolling_element_button(self, enable_button, delete_choice):
+    def _enable_select_support_A_bearings_rolling_element_button(self, enable_button, delete_choice):
         """
         Enable or disable the selection button based on whether all inputs are filled.
         """
         if enable_button:
-            self._select_support_bearings_rolling_element_button.setEnabled(True)
+            self._select_support_A_bearings_rolling_element_button.setEnabled(True)
             if delete_choice:
-                self._select_support_bearings_rolling_element_button.setText('Wybierz elementy toczne')
-                self._items_to_select['Toczne_podporowych'] = ''
+                self._select_support_A_bearings_rolling_element_button.setText('Wybierz elementy toczne')
+                self._items_to_select['Toczne_podpora_A'] = ''
                 self._check_state()
         else:
-            self._select_support_bearings_rolling_element_button.setEnabled(False)
+            self._select_support_A_bearings_rolling_element_button.setEnabled(False)
     
     def _enable_select_central_bearings_rolling_element_button(self, enable_button, delete_choice):
         """
@@ -139,22 +139,22 @@ class PowerLossTab(ITrackedTab):
         else:
             self._select_central_bearings_rolling_element_button.setEnabled(False)
     
-    def update_viewed_support_bearings_rolling_element_code(self, itemData):
+    def update_viewed_support_A_bearings_rolling_element_code(self, itemData):
         """
-        Update the displayed code for the selected support bearing rolling element.
+        Update the displayed code for the selected rolling element.
 
         Args:
             itemData (dict): Data of the selected item.
         """
-        self._select_support_bearings_rolling_element_button.setText(f"{self._parent.data['Łożyska_podporowe']['elementy toczne'][0]} {str(itemData['Kod'][0])}")
-        self.tab_data['Toczne_podporowych'] = itemData
+        self._select_support_A_bearings_rolling_element_button.setText(f"{self._parent.data['Łożyska_podpora_A']['elementy toczne'][0]} {str(itemData['Kod'][0])}")
+        self.tab_data['Toczne_podpora_A'] = itemData
 
-        self._items_to_select['Toczne_podporowych'] = str(itemData['Kod'][0])
+        self._items_to_select['Toczne_podpora_A'] = str(itemData['Kod'][0])
         self._check_state()
 
     def update_viewed_central_bearings_rolling_element_code(self, itemData):
         """
-        Update the displayed code for the selected central bearing rolling element.
+        Update the displayed code for the selected rolling element.
 
         Args:
             itemData (dict): Data of the selected item.
@@ -178,19 +178,19 @@ class PowerLossTab(ITrackedTab):
             self.tab_data[attribute][0] = value
         return self.tab_data
     
-    def update_selected_support_bearings_rolling_element_data(self):
+    def update_selected_support_A_bearings_rolling_element_data(self):
         """
-        Emit a signal with the updated data for the selected support bearing rolling element.
+        Emit a signal with the updated data for the selected rolling element.
         """
         tab_data = self.getData()
-        self.updated_support_bearings_rolling_element_data_signal.emit(tab_data)
+        self.updated_support_A_bearing_rolling_element_data_signal.emit(tab_data)
 
     def update_selected_central_bearings_rolling_element_data(self):
         """
-        Emit a signal with the updated data for the selected central bearing rolling element.
+        Emit a signal with the updated data for the selected rolling element.
         """
         tab_data = self.getData()
-        self.updated_central_bearings_rolling_element_data_signal.emit(tab_data)
+        self.updated_central_bearing_rolling_element_data_signal.emit(tab_data)
 
     def update_data(self):
         """
@@ -220,7 +220,7 @@ class PowerLossTab(ITrackedTab):
                     value_label.setText(format_value(new_value))
 
         if addData:
-            self.support_bearing_section.insertLayout(0, create_data_display_row(self, ('Łożyska_podporowe','Dw'), self._parent.data['Łożyska_podporowe']['Dw'], 'D<sub>w</sub>', 'Średnica wewnętrzna łożyska'))
-            self.support_bearing_section.insertLayout(0, create_data_display_row(self, ('Łożyska_podporowe','Dz'), self._parent.data['Łożyska_podporowe']['Dz'], 'D<sub>z</sub>', 'Średnica zewnętrzna łożyska'))
+            self.support_A_bearing_section.insertLayout(0, create_data_display_row(self, ('Łożyska_podpora_A','Dw'), self._parent.data['Łożyska_podpora_A']['Dw'], 'D<sub>w</sub>', 'Średnica wewnętrzna łożyska'))
+            self.support_A_bearing_section.insertLayout(0, create_data_display_row(self, ('Łożyska_podpora_A','Dz'), self._parent.data['Łożyska_podpora_A']['Dz'], 'D<sub>z</sub>', 'Średnica zewnętrzna łożyska'))
             self.central_bearing_section.insertLayout(0, create_data_display_row(self, ('Łożyska_centralne','Dw'), self._parent.data['Łożyska_centralne']['Dw'], 'D<sub>w</sub>', 'Średnica wewnętrzna łożyska'))
             self.central_bearing_section.insertLayout(0, create_data_display_row(self, ('Łożyska_centralne','Dz'), self._parent.data['Łożyska_centralne']['Dz'], 'D<sub>z</sub>', 'Średnica zewnętrzna łożyska'))

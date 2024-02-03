@@ -91,8 +91,8 @@ class ResultsTab(ITrackedTab):
             for key, value in self._parent.data['Materiał'].items():
                 attribute = create_data_display_row(self, ('Materiał', key), value, key)
                 self.data_subtab_layout.addLayout(attribute)
-            for key, value in self._parent.data['Łożyska_podporowe'].items():
-                attribute = create_data_display_row(self, ('Łożyska_podporowe', key), value, key)
+            for key, value in self._parent.data['Łożyska_podpora_A'].items():
+                attribute = create_data_display_row(self, ('Łożyska_podpora_A', key), value, key)
                 self.results_subtab_layout.addLayout(attribute)
             for key, value in self._parent.data['Łożyska_centralne'].items():
                 attribute = create_data_display_row(self, ('Łożyska_centralne', key), value, key)

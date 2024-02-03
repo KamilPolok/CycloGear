@@ -41,34 +41,35 @@ def main():
         'qdop': [0.00436, 'rad/m'],     # Dopuszczalny jednostkowy kąt skręcenia wału
         'tetadop': [0.001, 'rad'],      # Dopuszczalny kąt ugięcia wału
         'fdop': [0.030, 'mm'],          # Dopuszczalna strzałka ugięcia wału
-        # Łożyska podporow
-        'Łożyska_podporowe': [None],    # Łożyska podporowe
-        'Lhp': [20000, 'h'],            # Trwałość godzinowa ł. podporowych
-        'Lrp': [None, 'obr'],           # Trwałość ł. podporowych
-        'Cr': [None, 'kN'],             # Nośność ł. podporowych - obliczona
-        # Dodaj                         # Nośność ł. podporowych - dostosowana do łożyska
-        'fdp': [1.80, ''],              # Współczynnik zależny od zmiennych obciążeń dynamicznych
-        'ftp': [1.00, ''],              # Współczynnik zależny od temperatury pracy łożyska
-        # Łożyska centralne
-        'Łożyska_centralne': [None],    # Łożyska centralne
-        'Lhc': [20000, 'h'],            # Trwałość godzinowa ł. centralnych
-        'Ltc': [None, 'obr'],           # Trwałość ł. centralnych
-        'Cc': [None, 'kN'],             # Nośność ł. centralnych - obliczona
-        # Dodaj                         # Nośność ł. centralnych - dostosowana do łożyska
+        ## Łożyska podpora A
+        # Dobór łożysk
+        'Łożyska_podpora_A': [None],    # Łożyska
+        'LhA': [20000, 'h'],            # Trwałość godzinowa
+        'LrA': [None, 'obr'],           # Trwałość
+        'CA': [None, 'kN'],             # Nośność
+        'fdA': [1.80, ''],              # Współczynnik zależny od zmiennych obciążeń dynamicznych
+        'ftA': [1.00, ''],              # Współczynnik zależny od temperatury pracy łożyska
+        # Straty mocy
+        'fA': [0.01, 'mm'],             # Współczynnik tarcia tocznego
+        'dwAc': [None, 'mm'],           # Średnica elementu tocznego ł. podporowych - obliczona
+        'Toczne_podpora_A': [None],     # Element toczny
+        'SA': [None, 'mm'],             # Grubość pierścienia
+        'NA': [None, 'W'],              # Starty mocy
+        ## Łożyska centralne
+        # Dobór łożysk
+        'Łożyska_centralne': [None],    # Łożyska
+        'Lhc': [20000, 'h'],            # Trwałość godzinowa
+        'Ltc': [None, 'obr'],           # Trwałość
+        'Cc': [None, 'kN'],             # Nośność
         'fdc': [1.00, ''],              # Współczynnik zależny od zmiennych obciążeń dynamicznych
         'ftc': [1.00, ''],              # Współczynnik zależny od temperatury pracy łożyska
         # Straty mocy
-        'fp': [0.01, 'mm'],             # Współczynnik tarcia tocznego łożyska podporowego
-        'fc': [0.01, 'mm'],             # Współczynnik tarcia tocznego łożyska centralnego
+        'fc': [0.01, 'mm'],             # Współczynnik tarcia tocznego
         'rw1': [99, 'mm'],              # Promień koła toczengo (koło obiegowe)
-        'dwpc': [None, 'mm'],           # Średnica elementu tocznego ł. podporowych - obliczona
-        'Toczne_podporowych': [None],   # Element toczny ł. podporowych
-        'Sp': [None, 'mm'],             # Grubość pierścienia ł. podporowych
-        'Np': [None, 'W'],              # Starty mocy ł. podporowych
-        'dwcc': [None, 'mm'],           # Średnica elementu tocznego ł. centralnych - obliczona
-        'Toczne_centralnych': [None],   # Element toczny ł. centralnych
-        'Sc': [None, 'mm'],             # Grubość pierścienia ł. centralnych
-        'Nc': [None, 'W'],              # Starty mocy ł. centralnych
+        'dwcc': [None, 'mm'],           # Średnica elementu tocznego
+        'Toczne_centralnych': [None],   # Element toczny
+        'Sc': [None, 'mm'],             # Grubość pierścienia
+        'Nc': [None, 'W'],              # Starty mocy
         }
 
     app_window = AppWindow()

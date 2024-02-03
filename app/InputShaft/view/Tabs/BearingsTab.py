@@ -19,17 +19,17 @@ class Section(ITrackedWidget):
 
 class BearingsTab(ITrackedTab):
     updated_data_signal = pyqtSignal(dict)
-    updated_support_bearings_data_signal = pyqtSignal(dict)
-    updated_central_bearings_data_signal = pyqtSignal(dict)
+    updated_support_A_bearing_data_signal = pyqtSignal(dict)
+    updated_central_bearing_data_signal = pyqtSignal(dict)
 
     def _set_tab_data(self):
         """
         Set the initial data for the tab from the main parent's data.
         """
-        attributes_to_acquire = ['Lhp', 'fdp', 'ftp', 'Łożyska_podporowe',
+        attributes_to_acquire = ['LhA', 'fdA', 'ftA', 'Łożyska_podpora_A',
                                  'Lhc', 'fdc', 'ftc', 'Łożyska_centralne',]
         self.tab_data = {attr: self._parent.data[attr] for attr in attributes_to_acquire}
-        self._items_to_select['Łożyska_podporowe'] = ''
+        self._items_to_select['Łożyska_podpora_A'] = ''
         self._items_to_select['Łożyska_centralne'] = ''
 
     def _init_ui(self):
@@ -51,37 +51,37 @@ class BearingsTab(ITrackedTab):
         self.main_layout.addWidget(self.layout_selector)
 
     def _init_sections(self):
-        self.init_support_bearings_section()
+        self.init_support_A_bearings_section()
         self.init_central_bearings_section()
 
         self.stacked_sections = QStackedWidget()
-        self.stacked_sections.addWidget(self.support_bearing_section)
+        self.stacked_sections.addWidget(self.support_A_bearing_section)
         self.stacked_sections.addWidget(self.central_bearing_section)
 
         self.main_layout.addWidget(self.stacked_sections)
     
-    def init_support_bearings_section(self):
+    def init_support_A_bearings_section(self):
         """
-        Create and layout the UI components for the support bearings section.
+        Create and layout the UI components for the support A bearing section.
         """
-        self.support_bearing_section = Section(self, self._enable_select_support_bearings_button)
+        self.support_A_bearing_section = Section(self, self._enable_select_support_A_bearings_button)
 
         # Create data display and input rows
-        self.support_bearing_section.addLayout(create_data_display_row(self, 'dA', self._parent.data['dA'], 'd<sub>s</sub>', 'Średnica wewnętrzna'))
-        self.support_bearing_section.addLayout(create_data_input_row(self, 'Lhp', 'Trwałość godzinowa łożyska', 'L<sub>h</sub>'))
-        self.support_bearing_section.addLayout(create_data_input_row(self, 'ftp', 'Współczynnik zależny od zmiennych obciążeń dynamicznych', 'f<sub>d</sub>'))
-        self.support_bearing_section.addLayout(create_data_input_row(self, 'fdp', 'Współczynnik zależny od temperatury pracy', 'f<sub>t</sub>'))
+        self.support_A_bearing_section.addLayout(create_data_display_row(self, 'dA', self._parent.data['dA'], 'd<sub>s</sub>', 'Średnica wewnętrzna'))
+        self.support_A_bearing_section.addLayout(create_data_input_row(self, 'LhA', 'Trwałość godzinowa łożyska', 'L<sub>h</sub>'))
+        self.support_A_bearing_section.addLayout(create_data_input_row(self, 'ftA', 'Współczynnik zależny od zmiennych obciążeń dynamicznych', 'f<sub>d</sub>'))
+        self.support_A_bearing_section.addLayout(create_data_input_row(self, 'fdA', 'Współczynnik zależny od temperatury pracy', 'f<sub>t</sub>'))
 
         # Create button for bearing selection
         button_layout = QHBoxLayout()
         button_label = QLabel('Łożysko:')
-        self._select_support_bearings_button = QPushButton('Wybierz łożysko')
-        self._select_support_bearings_button.setEnabled(False)
-        self._select_support_bearings_button.clicked.connect(self.update_selected_support_bearing_data)
+        self._select_support_A_bearings_button = QPushButton('Wybierz łożysko')
+        self._select_support_A_bearings_button.setEnabled(False)
+        self._select_support_A_bearings_button.clicked.connect(self.update_selected_support_A_bearing_data)
 
         button_layout.addWidget(button_label)
-        button_layout.addWidget(self._select_support_bearings_button)
-        self.support_bearing_section.addLayout(button_layout)
+        button_layout.addWidget(self._select_support_A_bearings_button)
+        self.support_A_bearing_section.addLayout(button_layout)
 
     def init_central_bearings_section(self):
         """
@@ -110,19 +110,19 @@ class BearingsTab(ITrackedTab):
     def _change_section(self, index):
         self.stacked_sections.setCurrentIndex(index)
     
-    def _enable_select_support_bearings_button(self, enable_button, delete_choice):
+    def _enable_select_support_A_bearings_button(self, enable_button, delete_choice):
         """
         Enable or disable the selection button based on whether all inputs are filled.
         """
 
         if enable_button:
-            self._select_support_bearings_button.setEnabled(True)
+            self._select_support_A_bearings_button.setEnabled(True)
             if delete_choice:
-                self._select_support_bearings_button.setText('Wybierz Łożysko')
-                self._items_to_select['Łożyska_podporowe'] = ''
+                self._select_support_A_bearings_button.setText('Wybierz Łożysko')
+                self._items_to_select['Łożyska_podpora_A'] = ''
                 self._check_state()
         else:
-            self._select_support_bearings_button.setEnabled(False)
+            self._select_support_A_bearings_button.setEnabled(False)
     
     def _enable_select_central_bearings_button(self, enable_button, delete_choice):
         """
@@ -138,22 +138,22 @@ class BearingsTab(ITrackedTab):
         else:
             self._select_central_bearings_button.setEnabled(False)
     
-    def update_viewed_support_bearings_code(self, itemData):
+    def update_viewed_support_A_bearing_code(self, itemData):
         """
-        Update the displayed code for the selected support bearing.
+        Update the displayed code for the selected bearing.
 
         Args:
             itemData (dict): Data of the selected item.
         """
-        self._select_support_bearings_button.setText(str(itemData['Kod'][0]))
-        self.tab_data['Łożyska_podporowe'] = itemData
+        self._select_support_A_bearings_button.setText(str(itemData['Kod'][0]))
+        self.tab_data['Łożyska_podpora_A'] = itemData
 
-        self._items_to_select['Łożyska_podporowe'] = str(itemData['Kod'][0])
+        self._items_to_select['Łożyska_podpora_A'] = str(itemData['Kod'][0])
         self._check_state()
 
     def update_viewed_central_bearings_code(self, itemData):
         """
-        Update the displayed code for the selected central bearing.
+        Update the displayed code for the selected bearing.
 
         Args:
             itemData (dict): Data of the selected item.
@@ -177,19 +177,19 @@ class BearingsTab(ITrackedTab):
             self.tab_data[attribute][0] = value
         return self.tab_data
     
-    def update_selected_support_bearing_data(self):
+    def update_selected_support_A_bearing_data(self):
         """
-        Emit a signal with the updated data for the selected support bearing.
+        Emit a signal with the updated data for the selected bearing.
         """
         tab_data = self.getData()
-        self.updated_support_bearings_data_signal.emit(tab_data)
+        self.updated_support_A_bearing_data_signal.emit(tab_data)
 
     def update_selected_central_bearing_data(self):
         """
-        Emit a signal with the updated data for the selected central bearing.
+        Emit a signal with the updated data for the selected bearing.
         """
         tab_data = self.getData()
-        self.updated_central_bearings_data_signal.emit(tab_data)
+        self.updated_central_bearing_data_signal.emit(tab_data)
 
     def update_data(self):
         """
