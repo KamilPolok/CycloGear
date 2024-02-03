@@ -54,6 +54,7 @@ class InputShaft(QWidget):
         from .Tabs.PowerLossTab import PowerLossTab
         
         self._tab_widget = QTabWidget(self)
+
         self.tabs = []
 
         # Add tabs
@@ -77,12 +78,7 @@ class InputShaft(QWidget):
         for i in range(1, self._tab_widget.count()):
             self._tab_widget.setTabEnabled(i, False)
 
-        self._tab_widget.currentChanged.connect(self.on_tab_change)
-
         self.tabs_section_layout.addWidget(self._tab_widget)
-
-        # Check if the first tab is initially filled
-        self.tabs[self._tab_widget.currentIndex()]._check_state()
 
     def _show_preview(self):
         self.update_data()
@@ -107,15 +103,6 @@ class InputShaft(QWidget):
             # Update data with curret tab data
             self.update_data()
             self._tab_widget.setCurrentIndex(next_index)
-
-    def on_tab_change(self, index):
-        """
-        Handle tab change event.
-        """
-        # Check if all the inputs are provided
-        self.tabs[index]._check_state()
-        # Update tab GUI
-        self.tabs[index].update_tab()
         
     def update_access_to_next_tabs(self, enable_next_tab_button, disable_next_tabs):
         """

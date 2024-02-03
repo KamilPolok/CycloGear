@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
+from PyQt6.QtCore import QEvent
 from PyQt6.QtWidgets import QWidget, QLineEdit
 
 class ABCQWidgetMeta(ABCMeta, type(QWidget)):
@@ -88,3 +89,22 @@ class ITrackedTab(ITrackedWidget):
     def update_data(self):
         """Update the tab. This method can be overridden in subclasses to provide specific update logic."""
         pass
+    
+    def showEvent(self, event):
+        """
+        Override the showEvent method of the QWidget to implement custom logic
+        (call _on_tab_activated() method) to execute when the tab is shown.
+
+        param: event
+        """
+        if event.type() == QEvent.Type.Show:
+            self._on_tab_activated()
+        super().showEvent(event)
+    
+    def _on_tab_activated(self):
+        """
+        This method is triggered every time when the tab becomes active and calls appropriate methods.
+        """
+        self._check_state()
+
+        self.update_tab()

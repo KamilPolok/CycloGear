@@ -219,23 +219,12 @@ class PreliminaryDataTab(ITrackedTab):
         self.validated_inputs_limits[input_name] = (round(min_value, 2), round(max_value, 2))
         self.input_values[input_name].setPlaceholderText(f"{min_value:.2f}-{max_value:.2f}")
 
-    def showEvent(self, event):
-        """
-        Override the showEvent method of this tab
-        to implement custom logic (call _on_tab_activated() method) to execute 
-        when the tab becomes active
-
-        param: event
-        """
-        if event.type() == QEvent.Type.Show:
-            self._on_tab_activated()
-        super().showEvent(event)
-
     def _on_tab_activated(self):
         """
-        This method is triggered every time when the tab becomes active
-        and calls appropriate methods.
+        Override parents method to call additional methods when this tab becomes active.
         """
+        super()._on_tab_activated()
+        
         self._update_eccentrics_position()
         self._setup_inputs_validation()
 
