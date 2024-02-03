@@ -107,7 +107,7 @@ class InputShaftController:
         available_tables = db_handler.getAvailableTables(tables_group_name)
         # Specify the limits for the group of tables
         limits = db_handler.getTableItemsFilters(tables_group_name)
-        limits['Dw']['min'] = self._data['dsc'][0]
+        limits['Dw']['min'] = self._data['dA'][0]
         limits['C']['min'] = self._data['CA'][0]
         # Setup the controller for the subwindow
         view_select_items_ctrl = ViewSelectItemController(db_handler, subwindow, available_tables, limits)
@@ -135,7 +135,7 @@ class InputShaftController:
         available_tables = db_handler.getAvailableTables(tables_group_name)
         # Specify the limits for the group of tables
         limits = db_handler.getTableItemsFilters(tables_group_name)
-        limits['Dw']['min'] = self._data['dec'][0]
+        limits['Dw']['min'] = self._data['de'][0]
         limits['C']['min'] = self._data['Cc'][0]
         # Setup the controller for the subwindow
         view_select_items_ctrl = ViewSelectItemController(db_handler, subwindow, available_tables, limits)
