@@ -58,7 +58,8 @@ def main():
         'fdc': [1.00, ''],              # Współczynnik zależny od zmiennych obciążeń dynamicznych
         'ftc': [1.00, ''],              # Współczynnik zależny od temperatury pracy łożyska
         # Straty mocy
-        'f': [0.01, 'mm'],              # Luz w łożysku - nie jestem pewien
+        'fp': [0.01, 'mm'],             # Współczynnik tarcia tocznego łożyska podporowego
+        'fc': [0.01, 'mm'],             # Współczynnik tarcia tocznego łożyska centralnego
         'rw1': [99, 'mm'],              # Promień koła toczengo (koło obiegowe)
         'dwpc': [None, 'mm'],           # Średnica elementu tocznego ł. podporowych - obliczona
         'Toczne_podporowych': [None],   # Element toczny ł. podporowych

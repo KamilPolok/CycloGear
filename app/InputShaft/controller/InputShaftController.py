@@ -289,7 +289,8 @@ class InputShaftController:
 
         w0 = self._data['w0'][0]
         e = self._data['e'][0]
-        f = self._data['f'][0]
+        fp = self._data['fp'][0]
+        fc = self._data['fc'][0]
         rw1 = self._data['rw1'][0]
         Ra = self._data['Ra'][0]
         F = self._data['F'][0]
@@ -299,7 +300,7 @@ class InputShaftController:
         Dw = self._data['Łożyska_podporowe']['Dw'][0]
 
         S = dw / 2
-        Np = f * 0.001 * w0 * (1 + (Dw + 2 * S) / dw) * (1 + e / rw1) * 4 * Ra / np.pi
+        Np = fp * 0.001 * w0 * (1 + (Dw + 2 * S) / dw) * (1 + e / rw1) * 4 * Ra / np.pi
 
         self._data['Sp'][0] = S
         self._data['Np'][0] = Np
@@ -310,7 +311,7 @@ class InputShaftController:
         Dz = self._data['Łożyska_centralne']['Dz'][0]
 
         S = 0.15 * (Dz - Dw)
-        Nc = f * 0.001 * w0 * (1 + (Dw + 2 * S) / dw) * (1 + e / rw1) * 4 * F / np.pi
+        Nc = fc * 0.001 * w0 * (1 + (Dw + 2 * S) / dw) * (1 + e / rw1) * 4 * F / np.pi
 
         self._data['Sc'][0] = S
         self._data['Nc'][0] = Nc
