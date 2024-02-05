@@ -1,14 +1,14 @@
 """
     This file collects all functions that are common for each ITrackedTab class.
 """
+from PyQt6.QtWidgets import  QHBoxLayout, QLabel
 
-from PyQt6.QtGui import QFocusEvent, QKeyEvent, QRegularExpressionValidator
-from PyQt6.QtCore import Qt, QRegularExpression, QTimer, pyqtSignal
-from PyQt6.QtWidgets import  QHBoxLayout, QLabel, QLineEdit
+from .Input import Input
+from .Output import Output
 
-from .TabIf import ITrackedTab
+from .ITrackedTab import ITrackedTab
 
-def create_data_input_row(tab: ITrackedTab, attribute: str, description: str, symbol: str) -> QHBoxLayout:
+def create_data_input_row(tab: ITrackedTab, attribute: str, description: str, symbol: str, decimal_precision: int = 2) -> QHBoxLayout:
     """
     Create a row for data input with description, symbol, and input field.
 
@@ -30,14 +30,11 @@ def create_data_input_row(tab: ITrackedTab, attribute: str, description: str, sy
     symbol_label.setFixedWidth(50)
 
     # Line edit for input
-    line_edit = LineEdit()
+    line_edit = Input()
+    line_edit.setDecimalPrecision(decimal_precision)
     line_edit.setFixedWidth(80)
     if (value := tab.tab_data[attribute][0]) is not None:
         line_edit.setText(str(value))
-
-    # Input validation
-    regex = QRegularExpression('^(0|[1-9][0-9]{0,6})(\.[0-9]{1,4})?$')
-    line_edit.setValidator(QRegularExpressionValidator(regex, line_edit))
 
     # Units label
     units_label = QLabel(tab.tab_data[attribute][-1])
@@ -54,7 +51,7 @@ def create_data_input_row(tab: ITrackedTab, attribute: str, description: str, sy
 
     return layout
 
-def create_data_display_row(tab: ITrackedTab, attribute: tuple, data: list, symbol: str, description: str = '') -> QHBoxLayout:
+def create_data_display_row(tab, attribute: tuple, data: list, symbol: str, description: str = '', decimal_precision: int = 2) -> QHBoxLayout:
     """
     Create a row for displaying data with description, symbol, and a read-only field.
 
@@ -77,7 +74,10 @@ def create_data_display_row(tab: ITrackedTab, attribute: tuple, data: list, symb
     symbol_label.setFixedWidth(50)
 
     # Value label (read-only)
-    value_label = QLineEdit(format_value(data[0]) if data[0] is not None else '')
+    value_label = Output()
+    value = format_value(data[0]) if data[0] is not None else ''
+    value_label.setText(value)
+    value_label.setDecimalPrecision(decimal_precision)
     value_label.setReadOnly(True)
     value_label.setFixedWidth(80)
 
@@ -102,36 +102,3 @@ def format_value(var) -> str:
     :return: A string representation of the variable.
     """
     return f'{var:.2f}' if isinstance(var, float) else str(var)
-
-class LineEdit(QLineEdit):
-    inputConfirmedSignal = pyqtSignal(object)
-
-    def __init__(self, parent=None):
-        super(LineEdit, self).__init__(parent)
-        self.inactivityTimer = QTimer()
-        self.inactivityTimer.setInterval(1000)  # Timeout interval in ms
-        self.inactivityTimer.setSingleShot(True)
-        self.inactivityTimer.timeout.connect(self.on_inactivity)
-        self.textEdited.connect(self.reset_inactivity_timer)
-
-    def reset_inactivity_timer(self):
-        if self.inactivityTimer.isActive():
-            self.inactivityTimer.stop()
-        self.inactivityTimer.start()
-
-    def on_inactivity(self):
-        self.inputConfirmedSignal.emit(self)
-
-    def keyPressEvent(self, event: QKeyEvent):
-        super().keyPressEvent(event)
-        if event.key() in [Qt.Key.Key_Return, Qt.Key.Key_Enter]:
-            self.emit_inactivity_signal()
-
-    def focusOutEvent(self, event: QFocusEvent):
-        super().focusOutEvent(event)
-        self.emit_inactivity_signal()
-
-    def emit_inactivity_signal(self):
-        if self.inactivityTimer.isActive():
-            self.inactivityTimer.stop()
-        self.inputConfirmedSignal.emit(self)

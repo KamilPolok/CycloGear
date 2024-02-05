@@ -3,8 +3,9 @@ from ast import literal_eval
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QComboBox, QStackedWidget
 
-from .TabIf import ITrackedTab, ITrackedWidget
-from .TabCommon import create_data_display_row, create_data_input_row, format_value
+from .common.ITrackedWidget import ITrackedWidget
+from .common.ITrackedTab import ITrackedTab
+from .common.common_functions import create_data_display_row, create_data_input_row, format_value
 
 from InputShaft.view.InputShaft import InputShaft
 
@@ -79,8 +80,8 @@ class PowerLossTab(ITrackedTab):
         self.support_A_bearing_section = Section(self, self._enable_select_support_A_bearings_rolling_element_button)
 
         # Create data display and input rows
-        self.support_A_bearing_section.addLayout(create_data_input_row(self, 'fA', 'Współczynnik tarcia tocznego', 'f'))
-        self.support_A_bearing_section.addLayout(create_data_display_row(self, 'dwAc', self._parent.data['dwAc'], 'd<sub>w</sub>', 'Obliczona średnica elementów tocznych'))
+        self.support_A_bearing_section.addLayout(create_data_input_row(self, 'fA', 'Współczynnik tarcia tocznego', 'f', decimal_precision=2))
+        self.support_A_bearing_section.addLayout(create_data_display_row(self, 'dwAc', self._parent.data['dwAc'], 'd<sub>w</sub>', 'Obliczona średnica elementów tocznych', decimal_precision=2))
         
         # Create button for rolling element selection
         button_layout = QHBoxLayout()
@@ -99,8 +100,8 @@ class PowerLossTab(ITrackedTab):
         self.support_B_bearing_section = Section(self, self._enable_select_support_B_bearings_rolling_element_button)
 
         # Create data display and input rows
-        self.support_B_bearing_section.addLayout(create_data_input_row(self, 'fB', 'Współczynnik tarcia tocznego', 'f'))
-        self.support_B_bearing_section.addLayout(create_data_display_row(self, 'dwBc', self._parent.data['dwBc'], 'd<sub>w</sub>', 'Obliczona średnica elementów tocznych'))
+        self.support_B_bearing_section.addLayout(create_data_input_row(self, 'fB', 'Współczynnik tarcia tocznego', 'f', decimal_precision=2))
+        self.support_B_bearing_section.addLayout(create_data_display_row(self, 'dwBc', self._parent.data['dwBc'], 'd<sub>w</sub>', 'Obliczona średnica elementów tocznych', decimal_precision=2))
         
         # Create button for rolling element selection
         button_layout = QHBoxLayout()
@@ -119,8 +120,8 @@ class PowerLossTab(ITrackedTab):
         self.central_bearing_section = Section(self, self._enable_select_central_bearings_rolling_element_button)
 
         # Create data display and input rows
-        self.central_bearing_section.addLayout(create_data_input_row(self, 'fc', 'Współczynnik tarcia tocznego', 'f'))
-        self.central_bearing_section.addLayout(create_data_display_row(self, 'dwcc', self._parent.data['dwcc'], 'd<sub>w</sub>', 'Obliczona średnica elementów tocznych'))
+        self.central_bearing_section.addLayout(create_data_input_row(self, 'fc', 'Współczynnik tarcia tocznego', 'f', decimal_precision=2))
+        self.central_bearing_section.addLayout(create_data_display_row(self, 'dwcc', self._parent.data['dwcc'], 'd<sub>w</sub>', 'Obliczona średnica elementów tocznych', decimal_precision=2))
 
         # Create button for rolling element selection
         button_layout = QHBoxLayout()
@@ -275,9 +276,9 @@ class PowerLossTab(ITrackedTab):
                     value_label.setText(format_value(new_value))
 
         if addData:
-            self.support_A_bearing_section.insertLayout(0, create_data_display_row(self, ('Łożyska_podpora_A','Dw'), self._parent.data['Łożyska_podpora_A']['Dw'], 'D<sub>w</sub>', 'Średnica wewnętrzna łożyska'))
-            self.support_A_bearing_section.insertLayout(0, create_data_display_row(self, ('Łożyska_podpora_A','Dz'), self._parent.data['Łożyska_podpora_A']['Dz'], 'D<sub>z</sub>', 'Średnica zewnętrzna łożyska'))
-            self.support_B_bearing_section.insertLayout(0, create_data_display_row(self, ('Łożyska_podpora_B','Dw'), self._parent.data['Łożyska_podpora_B']['Dw'], 'D<sub>w</sub>', 'Średnica wewnętrzna łożyska'))
-            self.support_B_bearing_section.insertLayout(0, create_data_display_row(self, ('Łożyska_podpora_B','Dz'), self._parent.data['Łożyska_podpora_B']['Dz'], 'D<sub>z</sub>', 'Średnica zewnętrzna łożyska'))
-            self.central_bearing_section.insertLayout(0, create_data_display_row(self, ('Łożyska_centralne','Dw'), self._parent.data['Łożyska_centralne']['Dw'], 'D<sub>w</sub>', 'Średnica wewnętrzna łożyska'))
-            self.central_bearing_section.insertLayout(0, create_data_display_row(self, ('Łożyska_centralne','Dz'), self._parent.data['Łożyska_centralne']['Dz'], 'D<sub>z</sub>', 'Średnica zewnętrzna łożyska'))
+            self.support_A_bearing_section.insertLayout(0, create_data_display_row(self, ('Łożyska_podpora_A','Dw'), self._parent.data['Łożyska_podpora_A']['Dw'], 'D<sub>w</sub>', 'Średnica wewnętrzna łożyska', decimal_precision=2))
+            self.support_A_bearing_section.insertLayout(0, create_data_display_row(self, ('Łożyska_podpora_A','Dz'), self._parent.data['Łożyska_podpora_A']['Dz'], 'D<sub>z</sub>', 'Średnica zewnętrzna łożyska', decimal_precision=2))
+            self.support_B_bearing_section.insertLayout(0, create_data_display_row(self, ('Łożyska_podpora_B','Dw'), self._parent.data['Łożyska_podpora_B']['Dw'], 'D<sub>w</sub>', 'Średnica wewnętrzna łożyska', decimal_precision=2))
+            self.support_B_bearing_section.insertLayout(0, create_data_display_row(self, ('Łożyska_podpora_B','Dz'), self._parent.data['Łożyska_podpora_B']['Dz'], 'D<sub>z</sub>', 'Średnica zewnętrzna łożyska', decimal_precision=2))
+            self.central_bearing_section.insertLayout(0, create_data_display_row(self, ('Łożyska_centralne','Dw'), self._parent.data['Łożyska_centralne']['Dw'], 'D<sub>w</sub>', 'Średnica wewnętrzna łożyska', decimal_precision=2))
+            self.central_bearing_section.insertLayout(0, create_data_display_row(self, ('Łożyska_centralne','Dz'), self._parent.data['Łożyska_centralne']['Dz'], 'D<sub>z</sub>', 'Średnica zewnętrzna łożyska', decimal_precision=2))

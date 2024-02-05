@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QTabWidget, QWidget, QVBoxLayout, QLabel, QScrollArea
 
-from .TabIf import ITrackedTab
-from .TabCommon import create_data_display_row, format_value
+from .common.ITrackedTab import ITrackedTab
+from .common.common_functions import create_data_display_row, format_value
 
 class ResultsTab(ITrackedTab):
     def _init_ui(self):
@@ -29,16 +29,16 @@ class ResultsTab(ITrackedTab):
         subtab.setWidget(content_widget)
 
         generalDataLabel = QLabel('Ogólne:')
-        nwe = create_data_display_row(self, 'nwe', self._parent.data['nwe'], 'n<sub>we</sub>', 'Prędkość obrotowa wejściowa')
-        mwe = create_data_display_row(self, 'Mwe', self._parent.data['Mwe'], 'M<sub>we</sub>', 'Moment obrotowy wejściowy')
+        nwe = create_data_display_row(self, 'nwe', self._parent.data['nwe'], 'n<sub>we</sub>', 'Prędkość obrotowa wejściowa', decimal_precision=2)
+        mwe = create_data_display_row(self, 'Mwe', self._parent.data['Mwe'], 'M<sub>we</sub>', 'Moment obrotowy wejściowy', decimal_precision=2)
         dimensionsLabel = QLabel('Wymiary:')
-        length = create_data_display_row(self, 'L',  self._parent.data['L'], 'L', 'Długość wału wejściowego',)
-        rollerSupport = create_data_display_row(self, 'LA', self._parent.data['LA'], 'L<sub>A</sub>', 'Współrzędne podpory przesuwnej',)
-        pinSupport = create_data_display_row(self, 'LB', self._parent.data['LB'], 'L<sub>B</sub>', 'Współrzędne podpory nieprzesuwnej')
-        e = create_data_display_row(self, 'e',  self._parent.data['e'], 'e', 'Mimośród')
+        length = create_data_display_row(self, 'L',  self._parent.data['L'], 'L', 'Długość wału wejściowego', decimal_precision=2)
+        rollerSupport = create_data_display_row(self, 'LA', self._parent.data['LA'], 'L<sub>A</sub>', 'Współrzędne podpory przesuwnej', decimal_precision=2)
+        pinSupport = create_data_display_row(self, 'LB', self._parent.data['LB'], 'L<sub>B</sub>', 'Współrzędne podpory nieprzesuwnej', decimal_precision=2)
+        e = create_data_display_row(self, 'e',  self._parent.data['e'], 'e', 'Mimośród', decimal_precision=2)
         cycloDiscCoordinatesLabel = QLabel('Współrzędne kół obiegowych:')
-        cycloDisc1 = create_data_display_row(self, 'L1', self._parent.data['L1'], 'L<sub>1</sub>', 'Koło obiegowe 1')
-        cycloDisc2 = create_data_display_row(self, 'L2', self._parent.data['L2'], 'L<sub>2</sub>', 'Koło obiegowe 2')
+        cycloDisc1 = create_data_display_row(self, 'L1', self._parent.data['L1'], 'L<sub>1</sub>', 'Koło obiegowe 1', decimal_precision=2)
+        cycloDisc2 = create_data_display_row(self, 'L2', self._parent.data['L2'], 'L<sub>2</sub>', 'Koło obiegowe 2', decimal_precision=2)
         materialsLabel = QLabel('Materiał:')
         
         self.data_subtab_layout.addWidget(generalDataLabel)
@@ -89,11 +89,11 @@ class ResultsTab(ITrackedTab):
             
         if addData:
             for key, value in self._parent.data['Materiał'].items():
-                attribute = create_data_display_row(self, ('Materiał', key), value, key)
+                attribute = create_data_display_row(self, ('Materiał', key), value, key, decimal_precision=0)
                 self.data_subtab_layout.addLayout(attribute)
             for key, value in self._parent.data['Łożyska_podpora_A'].items():
-                attribute = create_data_display_row(self, ('Łożyska_podpora_A', key), value, key)
+                attribute = create_data_display_row(self, ('Łożyska_podpora_A', key), value, key, decimal_precision=2)
                 self.results_subtab_layout.addLayout(attribute)
             for key, value in self._parent.data['Łożyska_centralne'].items():
-                attribute = create_data_display_row(self, ('Łożyska_centralne', key), value, key)
+                attribute = create_data_display_row(self, ('Łożyska_centralne', key), value, key, decimal_precision=2)
                 self.results_subtab_layout.addLayout(attribute)

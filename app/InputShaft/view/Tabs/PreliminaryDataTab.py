@@ -3,8 +3,8 @@ from ast import literal_eval
 from PyQt6.QtCore import QEvent, pyqtSignal
 from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QLabel
 
-from .TabIf import ITrackedTab
-from .TabCommon import create_data_input_row, create_data_display_row
+from .common.ITrackedTab import ITrackedTab
+from .common.common_functions import create_data_input_row, create_data_display_row
 
 class PreliminaryDataTab(ITrackedTab):
     updated_data_signal = pyqtSignal(dict)
@@ -38,13 +38,13 @@ class PreliminaryDataTab(ITrackedTab):
         component_layout = QVBoxLayout()
         component_label = QLabel('Wymiary:')
 
-        shaft_length = create_data_input_row(self, 'L', 'Długość wału wejściowego', 'L')
-        roller_support = create_data_input_row(self, 'LA', 'Współrzędne podpory przesuwnej', 'L<sub>A</sub>')
-        pin_support = create_data_input_row(self, 'LB', 'Współrzędne podpory nieprzesuwnej', 'L<sub>B</sub>')
-        cyclo_disc1 = create_data_input_row(self, 'L1', 'Współrzędne koła obiegowego 1', 'L<sub>1</sub>')
-        cyclo_disc2 = create_data_display_row(self, 'L2', self._parent.data['L2'], 'L<sub>2</sub>', 'Współrzędne koła obiegowego 2')
-        disc_width = create_data_display_row(self, 'x', self._parent.data['x'], 'x', 'Odległość pomiędzy tarczami')
-        discs_distance = create_data_display_row(self, 'B', self._parent.data['B'], 'B', 'Grubość tarczy')
+        shaft_length = create_data_input_row(self, 'L', 'Długość wału wejściowego', 'L', decimal_precision=2)
+        roller_support = create_data_input_row(self, 'LA', 'Współrzędne podpory przesuwnej', 'L<sub>A</sub>', decimal_precision=2)
+        pin_support = create_data_input_row(self, 'LB', 'Współrzędne podpory nieprzesuwnej', 'L<sub>B</sub>', decimal_precision=2)
+        cyclo_disc1 = create_data_input_row(self, 'L1', 'Współrzędne koła obiegowego 1', 'L<sub>1</sub>', decimal_precision=2)
+        cyclo_disc2 = create_data_display_row(self, 'L2', self._parent.data['L2'], 'L<sub>2</sub>', 'Współrzędne koła obiegowego 2', decimal_precision=2)
+        disc_width = create_data_display_row(self, 'x', self._parent.data['x'], 'x', 'Odległość pomiędzy tarczami', decimal_precision=2)
+        discs_distance = create_data_display_row(self, 'B', self._parent.data['B'], 'B', 'Grubość tarczy', decimal_precision=2)
 
         component_layout.addWidget(component_label)
         component_layout.addLayout(shaft_length)
@@ -64,10 +64,10 @@ class PreliminaryDataTab(ITrackedTab):
         component_layout = QVBoxLayout()
         component_label = QLabel('Pozostałe:')
 
-        factor_of_safety = create_data_input_row(self, 'xz', 'Współczynnik bezpieczeństwa', 'x<sub>z</sub>')
-        permissible_angle_of_twist = create_data_input_row(self, 'qdop', 'Dopuszczalny jednostkowy kąt skręcenia wału', 'φ\'<sub>dop</sub>')
-        permissible_deflecton_angle = create_data_input_row(self, 'tetadop', 'Dopuszczalna kąt ugięcia', 'θ<sub>dop</sub>')
-        permissible_deflection_arrow = create_data_input_row(self, 'fdop', 'Dopuszczalna strzałka ugięcia', 'f<sub>dop</sub>')
+        factor_of_safety = create_data_input_row(self, 'xz', 'Współczynnik bezpieczeństwa', 'x<sub>z</sub>', decimal_precision=1)
+        permissible_angle_of_twist = create_data_input_row(self, 'qdop', 'Dopuszczalny jednostkowy kąt skręcenia wału', 'φ\'<sub>dop</sub>', decimal_precision=5)
+        permissible_deflecton_angle = create_data_input_row(self, 'tetadop', 'Dopuszczalna kąt ugięcia', 'θ<sub>dop</sub>', decimal_precision=5)
+        permissible_deflection_arrow = create_data_input_row(self, 'fdop', 'Dopuszczalna strzałka ugięcia', 'f<sub>dop</sub>', decimal_precision=5)
 
         component_layout.addWidget(component_label)
         component_layout.addLayout(factor_of_safety)
@@ -162,7 +162,6 @@ class PreliminaryDataTab(ITrackedTab):
         
         min_value, max_value = self.validated_inputs_limits[input_name]
         if min_value <= value <= max_value:
-            input.setText(f"{value:.2f}")
             self.validated_inputs_values[input_name] = value
             return True
         return False

@@ -3,8 +3,9 @@ from ast import literal_eval
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QComboBox, QStackedWidget
 
-from .TabIf import ITrackedTab, ITrackedWidget
-from .TabCommon import create_data_display_row, create_data_input_row, format_value
+from .common.ITrackedWidget import ITrackedWidget
+from .common.ITrackedTab import ITrackedTab
+from .common.common_functions import create_data_display_row, create_data_input_row, format_value
 
 from InputShaft.view.InputShaft import InputShaft
 
@@ -72,10 +73,10 @@ class BearingsTab(ITrackedTab):
         self.support_A_bearing_section = Section(self, self._enable_select_support_A_bearings_button)
 
         # Create data display and input rows
-        self.support_A_bearing_section.addLayout(create_data_display_row(self, 'dA', self._parent.data['dA'], 'd<sub>s</sub>', 'Średnica wewnętrzna'))
-        self.support_A_bearing_section.addLayout(create_data_input_row(self, 'LhA', 'Trwałość godzinowa łożyska', 'L<sub>h</sub>'))
-        self.support_A_bearing_section.addLayout(create_data_input_row(self, 'ftA', 'Współczynnik zależny od zmiennych obciążeń dynamicznych', 'f<sub>d</sub>'))
-        self.support_A_bearing_section.addLayout(create_data_input_row(self, 'fdA', 'Współczynnik zależny od temperatury pracy', 'f<sub>t</sub>'))
+        self.support_A_bearing_section.addLayout(create_data_display_row(self, 'dA', self._parent.data['dA'], 'd<sub>s</sub>', 'Średnica wewnętrzna', decimal_precision=2))
+        self.support_A_bearing_section.addLayout(create_data_input_row(self, 'LhA', 'Trwałość godzinowa łożyska', 'L<sub>h</sub>', decimal_precision=0))
+        self.support_A_bearing_section.addLayout(create_data_input_row(self, 'ftA', 'Współczynnik zależny od zmiennych obciążeń dynamicznych', 'f<sub>d</sub>', decimal_precision=2))
+        self.support_A_bearing_section.addLayout(create_data_input_row(self, 'fdA', 'Współczynnik zależny od temperatury pracy', 'f<sub>t</sub>', decimal_precision=2))
 
         # Create button for bearing selection
         button_layout = QHBoxLayout()
@@ -94,10 +95,10 @@ class BearingsTab(ITrackedTab):
         self.support_B_bearing_section = Section(self, self._enable_select_support_B_bearings_button)
 
         # Create data display and input rows
-        self.support_B_bearing_section.addLayout(create_data_display_row(self, 'dB', self._parent.data['dB'], 'd<sub>s</sub>', 'Średnica wewnętrzna'))
-        self.support_B_bearing_section.addLayout(create_data_input_row(self, 'LhB', 'Trwałość godzinowa łożyska', 'L<sub>h</sub>'))
-        self.support_B_bearing_section.addLayout(create_data_input_row(self, 'ftB', 'Współczynnik zależny od zmiennych obciążeń dynamicznych', 'f<sub>d</sub>'))
-        self.support_B_bearing_section.addLayout(create_data_input_row(self, 'fdB', 'Współczynnik zależny od temperatury pracy', 'f<sub>t</sub>'))
+        self.support_B_bearing_section.addLayout(create_data_display_row(self, 'dB', self._parent.data['dB'], 'd<sub>s</sub>', 'Średnica wewnętrzna', decimal_precision=2))
+        self.support_B_bearing_section.addLayout(create_data_input_row(self, 'LhB', 'Trwałość godzinowa łożyska', 'L<sub>h</sub>', decimal_precision=0))
+        self.support_B_bearing_section.addLayout(create_data_input_row(self, 'ftB', 'Współczynnik zależny od zmiennych obciążeń dynamicznych', 'f<sub>d</sub>', decimal_precision=2))
+        self.support_B_bearing_section.addLayout(create_data_input_row(self, 'fdB', 'Współczynnik zależny od temperatury pracy', 'f<sub>t</sub>', decimal_precision=2))
 
         # Create button for bearing selection
         button_layout = QHBoxLayout()
@@ -116,10 +117,10 @@ class BearingsTab(ITrackedTab):
         self.central_bearing_section = Section(self, self._enable_select_central_bearings_button)
 
         # Create data display and input rows
-        self.central_bearing_section.addLayout(create_data_display_row(self, 'de', self._parent.data['de'], 'd<sub>e</sub>', 'Średnica wewnętrzna'))
-        self.central_bearing_section.addLayout(create_data_input_row(self, 'Lhc', 'Trwałość godzinowa łożyska', 'L<sub>h</sub>'))
-        self.central_bearing_section.addLayout(create_data_input_row(self, 'ftc', 'Współczynnik zależny od zmiennych obciążeń dynamicznych', 'f<sub>d</sub>'))
-        self.central_bearing_section.addLayout(create_data_input_row(self, 'fdc', 'Współczynnik zależny od temperatury pracy', 'f<sub>t</sub>'))
+        self.central_bearing_section.addLayout(create_data_display_row(self, 'de', self._parent.data['de'], 'd<sub>e</sub>', 'Średnica wewnętrzna', decimal_precision=2))
+        self.central_bearing_section.addLayout(create_data_input_row(self, 'Lhc', 'Trwałość godzinowa łożyska', 'L<sub>h</sub>', decimal_precision=0))
+        self.central_bearing_section.addLayout(create_data_input_row(self, 'ftc', 'Współczynnik zależny od zmiennych obciążeń dynamicznych', 'f<sub>d</sub>', decimal_precision=2))
+        self.central_bearing_section.addLayout(create_data_input_row(self, 'fdc', 'Współczynnik zależny od temperatury pracy', 'f<sub>t</sub>', decimal_precision=2))
 
         # Create button for bearing selection
         button_layout = QHBoxLayout()
