@@ -57,11 +57,7 @@ class Section(QWidget, metaclass=ABCQWidgetMeta):
         # Expand or collapse the widget
         self.expanded = not self.expanded
         self.subsections_container.setVisible(self.expanded)
-    
-    @abstractmethod
-    def check_if_inputs_provided(self):
-        pass
-        
+
     @abstractmethod
     def handle_subsection_data(self, data):
         pass
@@ -83,7 +79,6 @@ class ShaftSection(Section):
         subsection.set_attributes([('d', 'Ø'), ('l', 'L')])
         subsection.subsection_data_signal.connect(self.handle_subsection_data)
         subsection.remove_subsection_signal.connect(self.remove_subsection)
-        subsection.check_if_inputs_provided_signal.connect(self.check_if_inputs_provided)
         self.subsections.append(subsection)
         self.subsections_layout.addWidget(subsection)
         self.subsection_count += 1
@@ -127,14 +122,10 @@ class ShaftSection(Section):
         super().toggle(event)
         self.add_subsection_button.setVisible(self.expanded)
 
-    def check_if_inputs_provided(self):
+    def handle_subsection_data(self, subsection_data):
         subsection = self.sender()
-        is_provided =  all(input.text() and literal_eval(input.text()) != 0 for input in subsection.inputs.values())
-        subsection.confirm_button.setEnabled(is_provided)
-
-    def handle_subsection_data(self, data):
-        subsection = self.sender()
-        data = (self.name,(subsection.subsection_number, data), None)
+        common_section_data = None
+        data = (self.name, subsection.subsection_number, subsection_data, common_section_data)
         self.subsection_data_signal.emit(data)
 
 class EccentricsSection(Section):
@@ -147,14 +138,11 @@ class EccentricsSection(Section):
 
         # Set data entries
         self.inputs = {}
-        self.limits = {}
         
         attribute, symbol = ('d', 'Ø')
         attribute_row, input = create_data_input_row(symbol)
         self.subsections_layout.addLayout(attribute_row)
         
-        input.textChanged.connect(self.check_if_inputs_provided)
-        input.editingFinished.connect(self._check_if_meets_limits)
         self.inputs[attribute] = input
 
     def set_subsections_number(self, sections_number):
@@ -162,46 +150,20 @@ class EccentricsSection(Section):
             for _ in range(self.subsection_count, sections_number):
                 subsection = ShaftSubsection(self.name, self.subsection_count, self)
                 subsection.set_attributes([('l', 'L')])
+                for attribute, input in self.inputs.items():
+                    subsection.add_input(attribute, input)
                 subsection.remove_button.hide()
                 subsection.subsection_data_signal.connect(self.handle_subsection_data)
-                subsection.check_if_inputs_provided_signal.connect(self.check_if_inputs_provided)
                 self.subsections.append(subsection)
                 self.subsections_layout.addWidget(subsection)
                 self.subsection_count += 1
     
     def set_limits(self, limits):
         for subsection_number, attributes in limits.items():
-            for attribute, limits in attributes.items():
-                if attribute in self.inputs.keys():
-                    self.limits[attribute] = {}
-                    for limit, value in limits.items():
-                        self.limits[attribute][limit] = value
-                    self._check_if_meets_limits(self.inputs[attribute])
-                else:
-                    self.subsections[subsection_number].set_limits({attribute: limits})
-                    
-    def check_if_inputs_provided(self): 
-        section_input_provided = all(input.text() and literal_eval(input.text()) != 0 for input in self.inputs.values())
-        for subsection in self.subsections:
-            is_provided = all(input.text() and literal_eval(input.text()) != 0 for input in subsection.inputs.values())
-            subsection.confirm_button.setEnabled(section_input_provided and is_provided)
-    
-    def _check_if_meets_limits(self, input = None):
-        input = self.sender() if input == None else input
-        attribute = next((key for key, value in self.inputs.items() if value == input), None)
+            self.subsections[subsection_number].set_limits(attributes)
 
-        if attribute:
-            min = self.limits[attribute]['min']
-            max = self.limits[attribute]['max']
-            value = float(input.text()) if input.text() else None
-
-            input.setPlaceholderText(f'{format_input(min)}-{format_input(max)}')
-            if value is not None and min <= value <= max:
-                input.setText(f'{format_input(value)}')
-            else:
-                input.clear()
-
-    def handle_subsection_data(self, data):
+    def handle_subsection_data(self, subsection_data):
         subsection = self.sender()
-        data = (self.name,(subsection.subsection_number, data), {key: literal_eval(input.text()) for key, input in self.inputs.items()})
+        common_section_data = {key: literal_eval(input.text()) for key, input in self.inputs.items()}
+        data = (self.name, subsection.subsection_number, subsection_data, common_section_data)
         self.subsection_data_signal.emit(data)

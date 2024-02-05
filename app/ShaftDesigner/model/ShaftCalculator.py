@@ -7,10 +7,18 @@ class ShaftCalculator:
     def _save_shaft_sections_attributes(self, attributes):
         if attributes:
             section_name = attributes[0]
+            section_number = attributes[1]
+            data = attributes[2]
+            common_section_data = attributes[3]
+            
             if section_name not in self.shaft_sections:
-                self.shaft_sections[section_name] = [{}, None]
-            self.shaft_sections[section_name][0][attributes[1][0]] = attributes[1][1]
-            self.shaft_sections[section_name][1] = attributes[2]
+                self.shaft_sections[section_name] = {}
+            
+            self.shaft_sections[section_name][section_number] = data
+
+            if isinstance(common_section_data, dict):
+                for subsection_attributes in self.shaft_sections[section_name].values():
+                    subsection_attributes.update(common_section_data)
 
     def calculate_shaft_sections(self, shaft_subsection_attributes = None):
         # Save subsection attrbutes
@@ -33,9 +41,9 @@ class ShaftCalculator:
     
     def _calculate_eccentricities_section(self):
         section = 'Wykorbienia'
-        for subsection_number, subsection_data in self.shaft_sections[section][0].items():
+        for subsection_number, subsection_data in self.shaft_sections[section].items():
             length = subsection_data['l']
-            diameter = self.shaft_sections[section][1]['d']
+            diameter = subsection_data['d']
             position = self._shaft_attributes[f'L{subsection_number+1}']
             self._shaft_attributes[F'B{subsection_number+1}'] = length
             offset = self._shaft_attributes['e'] * (-1)**subsection_number
@@ -48,9 +56,9 @@ class ShaftCalculator:
     def _calculate_section_between_eccentricities(self):
         # Draw the shaft section between the eccentrics
         section = 'Pomiędzy Wykorbieniami'
-        start_z = self._shaft_attributes['L1'] + self.shaft_sections['Wykorbienia'][0][0]['l'] / 2
+        start_z = self._shaft_attributes['L1'] + self.shaft_sections['Wykorbienia'][0]['l'] / 2
 
-        for subsection_number, subsection_data in self.shaft_sections[section][0].items():
+        for subsection_number, subsection_data in self.shaft_sections[section].items():
             length = subsection_data['l']
             diameter = subsection_data['d']
             start_y = -diameter / 2
@@ -63,9 +71,9 @@ class ShaftCalculator:
         # Draw the shaft section before the first eccentric
         section = 'Przed Wykorbieniami'
 
-        start_z = self._shaft_attributes['L1'] - self.shaft_sections['Wykorbienia'][0][0]['l'] / 2
+        start_z = self._shaft_attributes['L1'] - self.shaft_sections['Wykorbienia'][0]['l'] / 2
 
-        for subsection_number, subsection_data in self.shaft_sections[section][0].items():
+        for subsection_number, subsection_data in self.shaft_sections[section].items():
             length = subsection_data['l']
             diameter = subsection_data['d']
             start_z -= length
@@ -76,9 +84,9 @@ class ShaftCalculator:
     def _calculate_section_after_eccentricities(self):
         # Draw the shaft section after the second eccentric
         section = 'Za Wykorbieniami'
-        start_z = self._shaft_attributes['L2'] + self.shaft_sections['Wykorbienia'][0][1]['l'] / 2
+        start_z = self._shaft_attributes['L2'] + self.shaft_sections['Wykorbienia'][1]['l'] / 2
 
-        for subsection_number, subsection_data in self.shaft_sections[section][0].items():
+        for subsection_number, subsection_data in self.shaft_sections[section].items():
             length = subsection_data['l']
             diameter = subsection_data['d']
             start_y = -diameter / 2
@@ -91,7 +99,7 @@ class ShaftCalculator:
         meets_limits = True
 
         for section_name, section in self.shaft_sections.items():
-            for subsection_number, subsection in section[0].items():
+            for subsection_number, subsection in section.items():
                 for attribute, value in subsection.items():
                     min = self.limits[section_name][subsection_number][attribute]['min']
                     max = self.limits[section_name][subsection_number][attribute]['max']
@@ -108,15 +116,15 @@ class ShaftCalculator:
 
     def remove_shaft_subsection(self, section_name, subsection_number):
         # Remove the subsection from shaft sections attributes
-        if section_name in self.shaft_sections and subsection_number in self.shaft_sections[section_name][0]:
-            del self.shaft_sections[section_name][0][subsection_number]
+        if section_name in self.shaft_sections and subsection_number in self.shaft_sections[section_name]:
+            del self.shaft_sections[section_name][subsection_number]
 
             # Adjust the numbering of the remaining subsections
             new_subsections = {}
-            if len(self.shaft_sections[section_name][0]):
-                for num, data in enumerate(self.shaft_sections[section_name][0].values()):
+            if len(self.shaft_sections[section_name]):
+                for num, data in enumerate(self.shaft_sections[section_name].values()):
                     new_subsections[num] = data
-                self.shaft_sections[section_name][0] = new_subsections
+                self.shaft_sections[section_name] = new_subsections
             else:
                 del self.shaft_sections[section_name]
                 
@@ -157,12 +165,11 @@ class ShaftCalculator:
                         lmax = max(L - L2 - 0.5 * B2, 0)
                 else:
                     previous_subsection = self.limits[section_name][subsection_number - 1]
-                    lmax = max(previous_subsection['l']['max'] - self.shaft_sections[section_name][0][subsection_number - 1]['l'], 0)
+                    lmax = max(previous_subsection['l']['max'] - self.shaft_sections[section_name][subsection_number - 1]['l'], 0)
                 self.limits[section_name][subsection_number] = {'d': {'min': dmin, 'max': dmax}, 'l': {'min': lmin, 'max': lmax}}
 
         return self.limits
     
-
     def is_whole_shaft_designed(self):
         total_length = 0
     

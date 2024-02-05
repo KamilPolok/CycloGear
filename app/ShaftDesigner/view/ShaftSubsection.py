@@ -6,7 +6,6 @@ from PyQt6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QSizePolic
 from .CommonFunctions import create_data_input_row, format_input
 
 class ShaftSubsection(QWidget):
-    check_if_inputs_provided_signal = pyqtSignal()
     subsection_data_signal = pyqtSignal(dict)
     remove_subsection_signal = pyqtSignal(int)
 
@@ -73,7 +72,7 @@ class ShaftSubsection(QWidget):
         self.header.setText(f'{self.subsection_number + 1}.')
     
     def _check_if_all_inputs_provided(self):
-            self.check_if_inputs_provided_signal.emit()
+        self.confirm_button.setEnabled(all(input.text() != '' for input in self.inputs.values()) and all(literal_eval(input.text()) != 0 for input in self.inputs.values()))
     
     def _check_if_meets_limits(self, input=None):
         input = self.sender() if input == None else input
@@ -93,15 +92,18 @@ class ShaftSubsection(QWidget):
     def set_attributes(self, attributes):
         # Set data entries
         for attribute in attributes:
-            attr = attribute[0]
+            id = attribute[0]
             symbol = attribute[1]
 
             attribute_row, input = create_data_input_row(symbol)
             self.inputs_layout.addLayout(attribute_row)
-            
-            input.textChanged.connect(self._check_if_all_inputs_provided)
-            input.editingFinished.connect(self._check_if_meets_limits)
-            self.inputs[attr] = input
+
+            self.add_input(id, input)
+    
+    def add_input(self, id, input):
+        input.textChanged.connect(self._check_if_all_inputs_provided)
+        input.editingFinished.connect(self._check_if_meets_limits)
+        self.inputs[id] = input
 
     def get_attributes(self):
         return {key: literal_eval(input.text()) for key, input in self.inputs.items()}
