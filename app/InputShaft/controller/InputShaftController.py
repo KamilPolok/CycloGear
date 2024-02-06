@@ -381,6 +381,7 @@ class InputShaftController:
         fc = self._data['fc'][0]
         rw1 = self._data['rw1'][0]
         Ra = self._data['Ra'][0]
+        Rb = self._data['Rb'][0]
         F = self._data['F'][0]
 
         # Calculate power loss for support A bearing
@@ -388,7 +389,7 @@ class InputShaftController:
         Dw = self._data['Łożyska_podpora_A']['Dw'][0]
 
         S = dw / 2
-        NA = fA * 0.001 * w0 * (1 + (Dw + 2 * S) / dw) * (1 + e / rw1) * 4 * Ra / np.pi
+        NA = fA * 0.001 * w0 * (1 + (Dw + 2 * S) / dw) * (1 + e / rw1) * 4 * np.abs(Ra) / np.pi
 
         self._data['SA'][0] = S
         self._data['NA'][0] = NA
@@ -398,7 +399,7 @@ class InputShaftController:
         Dw = self._data['Łożyska_podpora_B']['Dw'][0]
 
         S = dw / 2
-        NB = fA * 0.001 * w0 * (1 + (Dw + 2 * S) / dw) * (1 + e / rw1) * 4 * Ra / np.pi
+        NB = fA * 0.001 * w0 * (1 + (Dw + 2 * S) / dw) * (1 + e / rw1) * 4 * np.abs(Rb) / np.pi
 
         self._data['SB'][0] = S
         self._data['NB'][0] = NB
