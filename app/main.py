@@ -29,6 +29,8 @@ def main():
         'Ra':[None, 'N'],               # Reakcja w podporze nieruchomej
         'Rb':[None, 'N'],               # Reakcja w podporze ruchomej
         'F': [5254.56, 'N'],            # Siła pochodząca od koła obiegowego
+        'F1': [None, 'N'],              # Siła na kole obiegowym 1
+        'F2': [None, 'N'],              # Siła na kole obiegowym 2
         # Obliczone i dobrane średnice
         'dsc': [None, 'mm'],            # Średnica wału wejściowego - obliczona
         'dec': [None, 'mm'],            # Średnica mimośrodu - obliczona

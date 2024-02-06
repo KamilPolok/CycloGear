@@ -147,6 +147,8 @@ class FunctionsCalculator():
 
         # Organize data
         self.active_forces = {'F1': {'z': L1, 'val': F}, 'F2': {'z': L2, 'val': -F}}
+        self._data['F1'][0] = self.active_forces['F1']['val']
+        self._data['F2'][0] = self.active_forces['F2']['val']
 
         # Calculate support reactions
         self._calculate_support_reactions()
