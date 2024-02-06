@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import QTabWidget, QWidget, QVBoxLayout, QPushButton
 class InputShaft(QWidget):
     show_preview_signal = pyqtSignal()
     """
-    Main window class for the application.
+    GUI class for the Input Shaft component.
     """
     def __init__(self):
         super().__init__()
@@ -39,7 +39,6 @@ class InputShaft(QWidget):
 
         # Add button for opening the shaft designer
         self.preview_button = QPushButton('Podgląd', self)
-        self.preview_button.clicked.connect(self._show_preview)
 
         self.buttons_section_layout.addWidget(self._next_tab_button)
         self.buttons_section_layout.addWidget(self.preview_button)
@@ -80,28 +79,14 @@ class InputShaft(QWidget):
 
         self.tabs_section_layout.addWidget(self._tab_widget)
 
-    def _show_preview(self):
-        self.update_data()
-        self.show_preview_signal.emit()
-
-    def update_data(self):
-        current_index = self._tab_widget.currentIndex()
-        self.tabs[current_index].update_data()
-
     def next_tab(self):
         """
         Move to the next tab.
         """
-        current_index = self._tab_widget.currentIndex()
-        next_index = current_index + 1
+        next_index = self._tab_widget.currentIndex() + 1
 
-        # Check if current tab is not the last one
         if next_index < self._tab_widget.count():
-            # Enable next tab if it wasn't anabled earlier
-            if not self._tab_widget.isTabEnabled(next_index):
-                self._tab_widget.setTabEnabled(next_index, True)
-            # Update data with curret tab data
-            self.update_data()
+            self._tab_widget.setTabEnabled(next_index, True)
             self._tab_widget.setCurrentIndex(next_index)
         
     def update_access_to_next_tabs(self, enable_next_tab_button, disable_next_tabs):
@@ -110,7 +95,7 @@ class InputShaft(QWidget):
         """
         self.enable_preview_button(enable_next_tab_button)
 
-        if enable_next_tab_button and self.is_shaft_designed:
+        if self.is_shaft_designed and enable_next_tab_button:
             self._next_tab_button.setEnabled(True)
         else:
             self._next_tab_button.setEnabled(False)
@@ -118,12 +103,15 @@ class InputShaft(QWidget):
         if disable_next_tabs:
             self.disable_next_tabs()
     
-    def enable_preview_button(self, enable_preview_button):
+    def enable_preview_button(self, enable):
+        """
+        Toggle the preview button visibility.
+
+        Args:
+            enable (bool): Specifies whether the preview button should be enabled (True) or disabled (False).
+        """
         if self._tab_widget.currentIndex() == 0:
-            if enable_preview_button:
-                self.preview_button.setEnabled(True)
-            else:
-                self.preview_button.setEnabled(False)
+            self.preview_button.setEnabled(enable)
 
     def disable_next_tabs(self):
         """
@@ -132,7 +120,11 @@ class InputShaft(QWidget):
         for i in range(self._tab_widget.currentIndex() + 1, self._tab_widget.count()):
             self._tab_widget.setTabEnabled(i, False)
     
-    def reset_to_first_tab(self):
+    def handle_shaft_designing_finished(self):
+        """
+        This method is called when the shaft design is confirmed. It sets the
+        first tab as current tab and updates the acces to next tabs.
+        """
         self.is_shaft_designed = True
         self._tab_widget.setCurrentIndex(0)
         self.update_access_to_next_tabs(True, True)

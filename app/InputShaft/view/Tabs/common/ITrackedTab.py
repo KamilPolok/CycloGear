@@ -15,11 +15,11 @@ class ITrackedTab(ITrackedWidget):
         super().__init__(parent, callback)
 
     def update_tab(self):
-        """Update the tab. This method can be overridden in subclasses to provide specific update logic."""
+        """Update the tab data. This method can be overridden in subclasses to provide specific update logic."""
         pass
 
     def update_data(self):
-        """Update the tab. This method can be overridden in subclasses to provide specific update logic."""
+        """Update the data. This method can be overridden in subclasses to provide specific update logic."""
         pass
     
     def showEvent(self, event):
@@ -40,3 +40,19 @@ class ITrackedTab(ITrackedWidget):
         self._check_state()
 
         self.update_tab()
+
+    def _check_state(self):
+        """
+        Overloads the parent class method - execute the the update_data method
+        when all the inputs are filled.
+        """
+        current_state = self._get_state()
+
+        all_filled = current_state is not None
+        state_changed = current_state != self._original_state
+
+        if all_filled:
+            self.update_data()
+            self._original_state = current_state
+        
+        self._callback(all_filled, state_changed)

@@ -55,7 +55,7 @@ class InputShaftController:
         This method sets up connections between UI elements and their corresponding
         actions or handlers.
         """
-        self._input_shaft.show_preview_signal.connect(self._open_shaft_designer_window)
+        self._input_shaft.preview_button.clicked.connect(self._open_shaft_designer_window)
         self._input_shaft.tabs[0].select_material_button.clicked.connect(self._open_materials_db_window)
         self._input_shaft.tabs[0].updated_data_signal.connect(self._update_input_shaft_attributes)
         self._input_shaft.tabs[1].updated_support_A_bearing_data_signal.connect(self._open_support_A_bearings_db_window)
@@ -66,7 +66,7 @@ class InputShaftController:
         self._input_shaft.tabs[2].updated_support_B_bearing_rolling_element_data_signal.connect(self._open_support_B_bearings_rolling_elements_db_window)
         self._input_shaft.tabs[2].updated_central_bearing_rolling_element_data_signal.connect(self._open_central_bearings_rolling_elements_db_window)
         self._input_shaft.tabs[2].updated_data_signal.connect(self._calculate_power_loss)
-        self._mediator.shaftDesigningFinished.connect(self._on_finishing_shaft_designing)
+        self._mediator.shaftDesigningFinished.connect(self._on_shaft_designing_finished)
 
     def _open_shaft_designer_window(self):
         if self._shaft_designer.isHidden():
@@ -427,5 +427,5 @@ class InputShaftController:
             if key in self._data:
                 self._data[key] = value 
 
-    def _on_finishing_shaft_designing(self):
-        self._input_shaft.reset_to_first_tab()
+    def _on_shaft_designing_finished(self):
+        self._input_shaft.handle_shaft_designing_finished()
