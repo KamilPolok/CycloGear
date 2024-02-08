@@ -7,7 +7,7 @@ from .common.ITrackedTab import ITrackedTab
 from .common.common_functions import create_data_input_row, create_data_display_row
 
 class PreliminaryDataTab(ITrackedTab):
-    updated_data_signal = pyqtSignal(dict)
+    update_data_signal = pyqtSignal(dict)
 
     def _set_tab_data(self):
         """
@@ -227,7 +227,7 @@ class PreliminaryDataTab(ITrackedTab):
         self._update_eccentrics_position()
         self._setup_inputs_validation()
 
-    def update_viewed_material(self, item_data):
+    def update_selected_material(self, item_data):
         """
         Update the displayed material information.
 
@@ -257,4 +257,4 @@ class PreliminaryDataTab(ITrackedTab):
         Emit a signal to update the tab's data.
         """
         tab_data = self.get_data()
-        self.updated_data_signal.emit(tab_data)
+        self.update_data_signal.emit(tab_data)
