@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
+from PyQt6.QtCore import QEvent
 from PyQt6.QtWidgets import QWidget
 
 from .Input import Input
@@ -53,7 +54,7 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
         """
         inputs_states = [input.text() for input in self._inputs_to_provide]
         inputs_states += [item for item in self._items_to_select.values()]
-        return None if '' in inputs_states else inputs_states 
+        return None if '' in inputs_states else inputs_states
 
     def _check_state(self):
         """
@@ -71,3 +72,20 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
             self._original_state = current_state
         
         self._callback(all_filled, state_changed)
+    
+    def showEvent(self, event):
+        """
+        Override the showEvent method of the QWidget to implement custom logic
+        (call _on_tab_activated() method) to execute when the widget is shown.
+
+        param: event
+        """
+        if event.type() == QEvent.Type.Show:
+            self._on_activated()
+        super().showEvent(event)
+    
+    def _on_activated(self):
+        """
+        This method is triggered every time when widget becomes visible and calls appropriate methods.
+        """
+        self._check_state()

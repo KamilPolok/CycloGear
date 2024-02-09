@@ -218,11 +218,11 @@ class PreliminaryDataTab(ITrackedTab):
         self.validated_inputs_limits[input_name] = (round(min_value, 2), round(max_value, 2))
         self.input_values[input_name].setPlaceholderText(f"{min_value:.2f}-{max_value:.2f}")
 
-    def _on_tab_activated(self):
+    def _on_activated(self):
         """
         Override parents method to call additional methods when this tab becomes active.
         """
-        super()._on_tab_activated()
+        super()._on_activated()
         
         self._update_eccentrics_position()
         self._setup_inputs_validation()
