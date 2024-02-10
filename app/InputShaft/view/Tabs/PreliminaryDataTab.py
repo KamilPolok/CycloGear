@@ -247,7 +247,7 @@ class PreliminaryDataTab(ITrackedTab):
         """
         for attribute, line_edit in self.input_values.items():
             text = line_edit.text()
-            value = literal_eval(text)
+            value = None if text == "" else literal_eval(text)
             self.tab_data[attribute][0] = value
 
         return self.tab_data
