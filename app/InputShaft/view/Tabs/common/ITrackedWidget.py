@@ -4,6 +4,7 @@ from PyQt6.QtCore import QEvent
 from PyQt6.QtWidgets import QWidget
 
 from .Input import Input
+from .DataButton import DataButton
 
 class ABCQWidgetMeta(ABCMeta, type(QWidget)):
     pass
@@ -20,8 +21,6 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
         super().__init__(parent)
         self._parent = parent
         self._callback = callback
-
-        self._items_to_select = {}
 
         self._init_ui()
         self._setup_state_tracking()
@@ -43,6 +42,11 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
         for input in self._inputs_to_provide:
             input.inputConfirmedSignal.connect(self._check_state)
 
+        self._items_to_select = self.findChildren(DataButton)
+
+        for item in self._items_to_select:
+            item.dataChangedSignal.connect(self._check_state)
+
         self._original_state = self._get_state()
 
     def _get_state(self):
@@ -53,8 +57,8 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
             list or None: A list of input states if all inputs are filled, otherwise None.
         """
         inputs_states = [input.text() for input in self._inputs_to_provide]
-        inputs_states += [item for item in self._items_to_select.values()]
-        return None if '' in inputs_states else inputs_states
+        inputs_states += [item.data() for item in self._items_to_select]
+        return None if '' in inputs_states or None in inputs_states else inputs_states
 
     def _check_state(self):
         """

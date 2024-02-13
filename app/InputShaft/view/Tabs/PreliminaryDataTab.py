@@ -3,6 +3,7 @@ from ast import literal_eval
 from PyQt6.QtCore import QEvent, pyqtSignal
 from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QLabel
 
+from .common.DataButton import DataButton
 from .common.ITrackedTab import ITrackedTab
 from .common.common_functions import create_data_input_row, create_data_display_row
 
@@ -15,7 +16,7 @@ class PreliminaryDataTab(ITrackedTab):
         """
         attributes_to_acquire = ['L', 'LA', 'LB', 'L1', 'Materiał', 'xz', 'qdop', 'tetadop', 'fdop']
         self.tab_data = {attr: self._parent.data[attr] for attr in attributes_to_acquire}
-        self._items_to_select['Materiał'] = ''
+        self._items = {}
 
     def _init_ui(self):
         """
@@ -85,7 +86,8 @@ class PreliminaryDataTab(ITrackedTab):
         component_layout = QHBoxLayout()
         component_label = QLabel('Materiał:')
 
-        self.select_material_button = QPushButton('Wybierz Materiał')
+        self.select_material_button = DataButton('Wybierz Materiał')
+        self._items['Materiał'] = self.select_material_button
 
         component_layout.addWidget(component_label)
         component_layout.addWidget(self.select_material_button)
@@ -233,11 +235,7 @@ class PreliminaryDataTab(ITrackedTab):
 
         :param item_data: Dictionary containing material data.
         """
-        self.select_material_button.setText(str(item_data['Oznaczenie'][0]))
-        self.tab_data['Materiał'] = item_data
-
-        self._items_to_select['Materiał'] = str(item_data['Oznaczenie'][0])
-        self._check_state()
+        self.select_material_button.setData(item_data)
 
     def get_data(self):
         """
@@ -245,10 +243,13 @@ class PreliminaryDataTab(ITrackedTab):
 
         :return: Dictionary of the tab's data.
         """
-        for attribute, line_edit in self.input_values.items():
-            text = line_edit.text()
+        for attribute, input in self.input_values.items():
+            text = input.text()
             value = None if text == "" else literal_eval(text)
             self.tab_data[attribute][0] = value
+
+        for attribute, item in self._items.items():
+            self.tab_data[attribute] = item.data()
 
         return self.tab_data
 

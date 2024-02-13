@@ -1,8 +1,9 @@
 from ast import literal_eval
 
 from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QComboBox, QStackedWidget
+from PyQt6.QtWidgets import QComboBox, QVBoxLayout, QHBoxLayout, QLabel, QStackedWidget, QWidget
 
+from .common.DataButton import DataButton
 from .common.ITrackedWidget import ITrackedWidget
 from .common.ITrackedTab import ITrackedTab
 from .common.common_functions import create_data_display_row, create_data_input_row, format_value
@@ -31,11 +32,9 @@ class PowerLossTab(ITrackedTab):
         """
         Set the initial data for the tab from the parent's data.
         """
-        attributes_to_acquire = ['fA','fB', 'fc','Toczne_podpora_A', 'Toczne_podpora_B', 'Toczne_centralnych']
+        attributes_to_acquire = ['fA','fB', 'fc']
         self.tab_data = {attr: self._parent.data[attr] for attr in attributes_to_acquire}
-        self._items_to_select['Toczne_podpora_A'] = ''
-        self._items_to_select['Toczne_podpora_B'] = ''
-        self._items_to_select['Toczne_centralnych'] = ''
+        self._items = {}
 
     def _init_ui(self):
         """
@@ -67,9 +66,9 @@ class PowerLossTab(ITrackedTab):
         self._init_central_bearing_section()
 
         self.stacked_sections = QStackedWidget()
-        self.stacked_sections.addWidget(self.support_A_bearing_section)
-        self.stacked_sections.addWidget(self.support_B_bearing_section)
-        self.stacked_sections.addWidget(self.central_bearing_section)
+        self.stacked_sections.addWidget(self.section_A)
+        self.stacked_sections.addWidget(self.section_B)
+        self.stacked_sections.addWidget(self.section_central)
 
         self.main_layout.addWidget(self.stacked_sections)
 
@@ -77,46 +76,70 @@ class PowerLossTab(ITrackedTab):
         """
         Create and layout the UI components for the support A bearing section.
         """
+        section_layout = QVBoxLayout()
+
+        self.section_A = QWidget()
+        self.section_A.setLayout(section_layout)
+
+        # Set content container
         self.support_A_bearing_section = Section(self, self._enable_select_support_A_bearing_rolling_element_button)
 
-        # Create data display and input rows
+        # Set data display and input rows
         self.support_A_bearing_section.addLayout(create_data_input_row(self, 'fA', 'Współczynnik tarcia tocznego', 'f', decimal_precision=2))
         self.support_A_bearing_section.addLayout(create_data_display_row(self, 'dwAc', self._parent.data['dwAc'], 'd<sub>w</sub>', 'Obliczona średnica elementów tocznych', decimal_precision=2))
         
-        # Create button for rolling element selection
+        # Set button for rolling element selection
         button_layout = QHBoxLayout()
         button_label = QLabel('Elementy toczne:')
-        self._select_support_A_bearing_rolling_element_button = QPushButton('Wybierz elementy toczne')
+
+        self._select_support_A_bearing_rolling_element_button = DataButton('Wybierz elementy toczne')
+        self._items['Toczne_podpora_A'] = self._select_support_A_bearing_rolling_element_button
         self._select_support_A_bearing_rolling_element_button.clicked.connect(self.select_support_A_bearing_rolling_element)
 
         button_layout.addWidget(button_label)
         button_layout.addWidget(self._select_support_A_bearing_rolling_element_button)
-        self.support_A_bearing_section.addLayout(button_layout)
+
+        section_layout.addWidget(self.support_A_bearing_section)
+        section_layout.addLayout(button_layout)
 
     def _init_support_B_bearing_section(self):
         """
         Create and layout the UI components for the support B bearing section.
         """
+        section_layout = QVBoxLayout()
+
+        self.section_B = QWidget()
+        self.section_B.setLayout(section_layout)
+
         self.support_B_bearing_section = Section(self, self._enable_select_support_B_bearing_rolling_element_button)
 
-        # Create data display and input rows
+        # Set data display and input rows
         self.support_B_bearing_section.addLayout(create_data_input_row(self, 'fB', 'Współczynnik tarcia tocznego', 'f', decimal_precision=2))
         self.support_B_bearing_section.addLayout(create_data_display_row(self, 'dwBc', self._parent.data['dwBc'], 'd<sub>w</sub>', 'Obliczona średnica elementów tocznych', decimal_precision=2))
         
-        # Create button for rolling element selection
+        # Set button for rolling element selection
         button_layout = QHBoxLayout()
         button_label = QLabel('Elementy toczne:')
-        self._select_support_B_bearing_rolling_element_button = QPushButton('Wybierz elementy toczne')
+
+        self._select_support_B_bearing_rolling_element_button = DataButton('Wybierz elementy toczne')
+        self._items['Toczne_podpora_B'] = self._select_support_B_bearing_rolling_element_button
         self._select_support_B_bearing_rolling_element_button.clicked.connect(self.select_support_B_bearing_rolling_element)
 
         button_layout.addWidget(button_label)
         button_layout.addWidget(self._select_support_B_bearing_rolling_element_button)
-        self.support_B_bearing_section.addLayout(button_layout)
+
+        section_layout.addWidget(self.support_B_bearing_section)
+        section_layout.addLayout(button_layout)
 
     def _init_central_bearing_section(self):
         """
         Create and layout the UI components for the central bearing section.
         """
+        section_layout = QVBoxLayout()
+
+        self.section_central = QWidget()
+        self.section_central.setLayout(section_layout)
+
         self.central_bearing_section = Section(self, self._enable_select_central_bearing_rolling_element_button)
 
         # Create data display and input rows
@@ -126,12 +149,16 @@ class PowerLossTab(ITrackedTab):
         # Create button for rolling element selection
         button_layout = QHBoxLayout()
         button_label = QLabel('Elementy toczne:')
-        self._select_central_bearing_rolling_element_button = QPushButton('Wybierz elementy toczne')
+
+        self._select_central_bearing_rolling_element_button = DataButton('Wybierz elementy toczne')
+        self._items['Toczne_centralnych'] = self._select_support_B_bearing_rolling_element_button
         self._select_central_bearing_rolling_element_button.clicked.connect(self.select_central_bearing_rolling_element)
 
         button_layout.addWidget(button_label)
         button_layout.addWidget(self._select_central_bearing_rolling_element_button)
-        self.central_bearing_section.addLayout(button_layout)
+
+        section_layout.addWidget(self.central_bearing_section)
+        section_layout.addLayout(button_layout)
     
     def _change_section(self, index):
         self.stacked_sections.setCurrentIndex(index)
@@ -143,9 +170,7 @@ class PowerLossTab(ITrackedTab):
         if enable_button:
             self._select_support_A_bearing_rolling_element_button.setEnabled(True)
             if delete_choice:
-                self._select_support_A_bearing_rolling_element_button.setText('Wybierz elementy toczne')
-                self._items_to_select['Toczne_podpora_A'] = ''
-                self._check_state()
+                self._select_support_A_bearing_rolling_element_button.clear()
         else:
             self._select_support_A_bearing_rolling_element_button.setEnabled(False)
 
@@ -156,9 +181,7 @@ class PowerLossTab(ITrackedTab):
         if enable_button:
             self._select_support_B_bearing_rolling_element_button.setEnabled(True)
             if delete_choice:
-                self._select_support_B_bearing_rolling_element_button.setText('Wybierz elementy toczne')
-                self._items_to_select['Toczne_podpora_B'] = ''
-                self._check_state()
+               self._select_support_B_bearing_rolling_element_button.clear()
         else:
             self._select_support_B_bearing_rolling_element_button.setEnabled(False)
     
@@ -169,9 +192,7 @@ class PowerLossTab(ITrackedTab):
         if enable_button:
             self._select_central_bearing_rolling_element_button.setEnabled(True)
             if delete_choice:
-                self._select_central_bearing_rolling_element_button.setText('Wybierz elementy toczne')
-                self._items_to_select['Toczne_centralnych'] = ''
-                self._check_state()
+                self._select_central_bearing_rolling_element_button.clear()
         else:
             self._select_central_bearing_rolling_element_button.setEnabled(False)
     
@@ -182,11 +203,7 @@ class PowerLossTab(ITrackedTab):
         Args:
             item_data (dict): Data of the selected item.
         """
-        self._select_support_A_bearing_rolling_element_button.setText(f"{self._parent.data['Łożyska_podpora_A']['elementy toczne'][0]} {str(item_data['Kod'][0])}")
-        self.tab_data['Toczne_podpora_A'] = item_data
-
-        self._items_to_select['Toczne_podpora_A'] = str(item_data['Kod'][0])
-        self._check_state()
+        self._select_support_A_bearing_rolling_element_button.setData(item_data)
 
     def update_selected_support_B_bearing_rolling_element(self, item_data):
         """
@@ -195,11 +212,7 @@ class PowerLossTab(ITrackedTab):
         Args:
             item_data (dict): Data of the selected item.
         """
-        self._select_support_B_bearing_rolling_element_button.setText(f"{self._parent.data['Łożyska_podpora_B']['elementy toczne'][0]} {str(item_data['Kod'][0])}")
-        self.tab_data['Toczne_podpora_B'] = item_data
-
-        self._items_to_select['Toczne_podpora_B'] = str(item_data['Kod'][0])
-        self._check_state()
+        self._select_support_B_bearing_rolling_element_button.setData(item_data)
 
     def update_selected_central_bearing_rolling_element(self, item_data):
         """
@@ -208,12 +221,8 @@ class PowerLossTab(ITrackedTab):
         Args:
             item_data (dict): Data of the selected item.
         """
-        self._select_central_bearing_rolling_element_button.setText(f"{self._parent.data['Łożyska_centralne']['elementy toczne'][0]} {str(item_data['Kod'][0])}")
-        self.tab_data['Toczne_centralnych'] = item_data
+        self._select_central_bearing_rolling_element_button.setData(item_data)
 
-        self._items_to_select['Toczne_centralnych'] = str(item_data['Kod'][0])
-        self._check_state()
-    
     def get_data(self):
         """
         Retrieve and format the data from the input fields.
@@ -221,10 +230,14 @@ class PowerLossTab(ITrackedTab):
         Returns:
             dict: The formatted data from the tab.
         """
-        for attribute, line_edit in self.input_values.items():
-            text = line_edit.text()
+        for attribute, input in self.input_values.items():
+            text = input.text()
             value = None if text == "" else literal_eval(text)
             self.tab_data[attribute][0] = value
+
+        for attribute, item in self._items.items():
+            self.tab_data[attribute] = item.data()
+
         return self.tab_data
     
     def select_support_A_bearing_rolling_element(self):
