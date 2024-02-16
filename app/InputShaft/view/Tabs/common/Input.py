@@ -1,6 +1,6 @@
 from PyQt6.QtGui import QFocusEvent, QKeyEvent, QRegularExpressionValidator
 from PyQt6.QtCore import Qt, QRegularExpression, QTimer, pyqtSignal, QObject
-from PyQt6.QtWidgets import QLineEdit
+from PyQt6.QtWidgets import QApplication, QLineEdit
 
 class Input(QLineEdit):
     """Custom QLineEdit that validates input and monitors for inactivity."""
@@ -101,6 +101,7 @@ class InactivityMonitor(QObject):
         self._timer.setInterval(self._timeout_interval)
         self._timer.setSingleShot(True)
         self._timer.timeout.connect(self.inactivitySignal.emit)
+        QApplication.instance().aboutToQuit.connect(self.handleAboutToQuit)
     
     def stop_timer(self):
         """Stops the inactivity timer if it is active."""
@@ -111,6 +112,9 @@ class InactivityMonitor(QObject):
         """Resets the inactivity timer, restarting it from the beginning."""
         self.stop_timer()
         self._timer.start()
+    
+    def handleAboutToQuit(self):
+        self.stop_timer()
 
 class ValidationHandler:
     """Handles input validation based on specified rules for decimal digits."""

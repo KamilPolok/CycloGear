@@ -17,9 +17,10 @@ class DataButton(QPushButton):
         self.setText(id)
 
     def setData(self, data):
-        self._data = data
-        self._setID()
-        self.dataChangedSignal.emit()
+        if data:
+            self._data = data
+            self._setID()
+            self.dataChangedSignal.emit()
     
     def clear(self):
         self._data = None

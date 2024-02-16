@@ -171,3 +171,17 @@ class ShaftDesignerController:
 
         # (Re)draw shaft plots
         self._plotter.set_plots_functions(self.functions_calculator.get_shaft_functions(), self.functions_calculator.get_shaft_z())
+    
+    def get_shaft_data(self):
+        return self.shaft_calculator.shaft_sections
+    
+    def set_shaft_data(self, data):
+        for section_name, section in data.items():
+            for subsection_number, subsection in section.items():
+                if section_name != 'Wykorbienia':
+                    self._sections[section_name].add_subsection()
+                data = (section_name, subsection_number, subsection, None)
+                self._draw_shaft(data)
+                self._enable_sections()
+
+        self._enable_shaft_design_confirmation()

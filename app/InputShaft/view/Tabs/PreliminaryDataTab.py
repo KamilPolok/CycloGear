@@ -1,3 +1,4 @@
+from copy import deepcopy
 from ast import literal_eval
 
 from PyQt6.QtCore import QEvent, pyqtSignal
@@ -14,8 +15,8 @@ class PreliminaryDataTab(ITrackedTab):
         """
         Initialize tab data from the parent's data.
         """
-        attributes_to_acquire = ['L', 'LA', 'LB', 'L1', 'Materiał', 'xz', 'qdop', 'tetadop', 'fdop']
-        self.tab_data = {attr: self._parent.data[attr] for attr in attributes_to_acquire}
+        attributes_to_acquire = ['L', 'LA', 'LB', 'L1', 'L2', 'Materiał', 'xz', 'qdop', 'tetadop', 'fdop']
+        self.tab_data = {attr: deepcopy(self._parent.data[attr]) for attr in attributes_to_acquire}
         self._items = {}
 
     def _init_ui(self):
@@ -252,6 +253,15 @@ class PreliminaryDataTab(ITrackedTab):
             self.tab_data[attribute] = item.data()
 
         return self.tab_data
+    
+    def set_tab(self, data):
+        for attribute, line_edit in self.input_values.items():
+            value = data[attribute][0] if data[attribute][0] is not None else ''
+            line_edit.setText(value)
+
+        self._update_eccentrics_position()
+
+        self.select_material_button.setData(data['Materiał'])
 
     def update_data(self):
         """

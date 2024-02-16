@@ -6,9 +6,97 @@ from DbHandler.model.DatabaseHandler import DatabaseHandler
 from DbHandler.view.Window import Window
 
 class InputShaftCalculator():
-    def __init__(self, data):
-        self.data = data
+    def __init__(self):
+        self.data = {
+            # Napęd
+            'nwe':[750, 'obr/min'],         # Prędkość obrotowa wejściowa
+            'w0':[78,54, 'rad/s'],          # Prędkość kątowa wejściowa
+            'Mwe': [26.67, 'Nm'],           # Moment wejściowy - moment skręcający
+            # Zadane wymiary wału
+            'L': [None, 'mm'],              # Całkowita długość wału wejściowego
+            'LA': [None, 'mm'],             # Wsp. podpory przesuwnej - A
+            'LB': [None, 'mm'],             # Wsp. podpory nieprzesuwnej - B
+            'n': [2, ''],                   # Liczba kół obiegowych
+            'L1': [None, 'mm'],             # Wsp. koła obiegowego 1
+            'L2': [None, 'mm'],             # Wsp. koła obiegowego 2
+            'e': [3, 'mm'],                 # Mimośród
+            'B': [17, 'mm'],                # Długość koła obiegowego
+            'x': [5, 'mm'],                 # Odległość pomiędzy dwoma kołami obiegowymi
+            # Siły pochodzące od kół obiegowych
+            'Fwzx': [4444.44, 'N'],         # Wypadkowa siła międzyzębna działająca w osi x
+            'Fwzy': [2799.16, 'N'],         # Wypadkowa siła międzyzębn działająca w osi y
+            'Fwm': [5602.25, 'N'],          # Wypadkowa siła w mechanizmie wyjściowym
+            # Reakcje podporowe i siły działające na wał
+            'Ra':[None, 'N'],               # Reakcja w podporze nieruchomej
+            'Rb':[None, 'N'],               # Reakcja w podporze ruchomej
+            'F': [None, 'N'],               # Siła pochodząca od koła obiegowego
+            'F1': [None, 'N'],              # Siła na kole obiegowym 1
+            'F2': [None, 'N'],              # Siła na kole obiegowym 2
+            # Obliczone i dobrane średnice
+            'dsc': [None, 'mm'],            # Średnica wału wejściowego - obliczona
+            'dec': [None, 'mm'],            # Średnica mimośrodu - obliczona
+            'dA': [None, 'mm'],             # Średnica pod podporę A
+            'dB': [None, 'mm'],             # Średnica pod podporę B
+            'de': [None, 'mm'],             # Średnica pod tarcze
+            # Dobrany materiał i parametry
+            'Materiał' : None,              # Materiał wału
+            'xz': [None, ''],               # Współczynnik bezpieczeństwa
+            'qdop': [None, 'rad/m'],        # Dopuszczalny jednostkowy kąt skręcenia wału
+            'tetadop': [None, 'rad'],       # Dopuszczalny kąt ugięcia wału
+            'fdop': [None, 'mm'],           # Dopuszczalna strzałka ugięcia wału
+            ## Łożyska podpora A
+            # Dobór łożysk
+            'Łożyska_podpora_A': None,      # Łożyska
+            'LhA': [None, 'h'],             # Trwałość godzinowa
+            'LrA': [None, 'obr'],           # Trwałość
+            'CA': [None, 'kN'],             # Nośność
+            'fdA': [None, ''],              # Współczynnik zależny od zmiennych obciążeń dynamicznych
+            'ftA': [None, ''],              # Współczynnik zależny od temperatury pracy łożyska
+            # Straty mocy
+            'fA': [None, 'mm'],             # Współczynnik tarcia tocznego
+            'dwAc': [None, 'mm'],           # Średnica elementu tocznego ł. podporowych - obliczona
+            'Toczne_podpora_A': None,       # Element toczny
+            'SA': [None, 'mm'],             # Grubość pierścienia
+            'NA': [None, 'W'],              # Starty mocy
+            ## Łożyska podpora B
+            # Dobór łożysk
+            'Łożyska_podpora_B': None,      # Łożyska
+            'LhB': [None, 'h'],             # Trwałość godzinowa
+            'LrB': [None, 'obr'],           # Trwałość
+            'CB': [None, 'kN'],             # Nośność
+            'fdB': [None, ''],              # Współczynnik zależny od zmiennych obciążeń dynamicznych
+            'ftB': [None, ''],              # Współczynnik zależny od temperatury pracy łożyska
+            # Straty mocy
+            'fB': [None, 'mm'],             # Współczynnik tarcia tocznego
+            'dwBc': [None, 'mm'],           # Średnica elementu tocznego ł. podporowych - obliczona
+            'Toczne_podpora_B': None,       # Element toczny
+            'SB': [None, 'mm'],             # Grubość pierścienia
+            'NB': [None, 'W'],              # Starty mocy
+            ## Łożyska centralne
+            # Dobór łożysk
+            'Łożyska_centralne': None,      # Łożyska
+            'Lhc': [None, 'h'],             # Trwałość godzinowa
+            'Ltc': [None, 'obr'],           # Trwałość
+            'Cc': [None, 'kN'],             # Nośność
+            'fdc': [None, ''],              # Współczynnik zależny od zmiennych obciążeń dynamicznych
+            'ftc': [None, ''],              # Współczynnik zależny od temperatury pracy łożyska
+            # Straty mocy
+            'fc': [None, 'mm'],             # Współczynnik tarcia tocznego
+            'rw1': [99, 'mm'],              # Promień koła toczengo (koło obiegowe)
+            'dwcc': [None, 'mm'],           # Średnica elementu tocznego
+            'Toczne_centralnych': None,     # Element toczny
+            'Sc': [None, 'mm'],             # Grubość pierścienia
+            'Nc': [None, 'W'],              # Starty mocy
+        }
 
+    def calculate_preliminary_attributes(self):
+        fwzx = self.data['Fwzx'][0]
+        fwzy = self.data['Fwzy'][0]
+        fwm = self.data['Fwm'][0]
+
+        self.data['F'][0] = (fwzx**2 + (fwm - fwzy)**2)**0.5
+        print(self.data['F'])
+        
     def calculate_bearings_attributes(self):
         """
         Calculate attributes of support and central bearings.
@@ -302,6 +390,12 @@ class InputShaftCalculator():
         Get component data.
         """
         return self.data
+    
+    def set_data(self, data):
+        """
+        Set component data.
+        """
+        self.data.update(data)
     
     def update_data(self, data):
         """

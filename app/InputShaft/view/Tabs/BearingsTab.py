@@ -1,3 +1,4 @@
+from copy import deepcopy
 from ast import literal_eval
 
 from PyQt6.QtCore import pyqtSignal
@@ -32,7 +33,7 @@ class BearingsTab(ITrackedTab):
         attributes_to_acquire = ['LhA', 'fdA', 'ftA',
                                  'LhB', 'fdB', 'ftB', 
                                  'Lhc', 'fdc', 'ftc']
-        self.tab_data = {attr: self._parent.data[attr] for attr in attributes_to_acquire}
+        self.tab_data = {attr: deepcopy(self._parent.data[attr]) for attr in attributes_to_acquire}
         self._items = {}
 
     def _init_ui(self):
@@ -276,4 +277,12 @@ class BearingsTab(ITrackedTab):
         for key, value in self.output_values.items():
             if value != self._parent.data[key][0]:
                 value = self._parent.data[key][0]
-                self.output_values[key].setText(format_value(value))
+                self.output_values[key].setText(format_value(self._parent.data[key][0]) if self._parent.data[key][0] is not None else '')
+
+    def set_tab(self, data):
+        for attribute, line_edit in self.input_values.items():
+            value = data[attribute][0] if data[attribute][0] is not None else ''
+            line_edit.setText(value)
+        self.update_selected_support_A_bearing(data['Łożyska_podpora_A'])
+        self.update_selected_support_B_bearing(data['Łożyska_podpora_B'])
+        self.update_selected_central_bearing(data['Łożyska_centralne'])

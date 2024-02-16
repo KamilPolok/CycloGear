@@ -1,3 +1,4 @@
+from copy import deepcopy
 from ast import literal_eval
 
 from PyQt6.QtCore import pyqtSignal
@@ -33,7 +34,7 @@ class PowerLossTab(ITrackedTab):
         Set the initial data for the tab from the parent's data.
         """
         attributes_to_acquire = ['fA','fB', 'fc']
-        self.tab_data = {attr: self._parent.data[attr] for attr in attributes_to_acquire}
+        self.tab_data = {attr: deepcopy(self._parent.data[attr]) for attr in attributes_to_acquire}
         self._items = {}
 
     def _init_ui(self):
@@ -267,7 +268,15 @@ class PowerLossTab(ITrackedTab):
         """
         tab_data = self.get_data()
         self.update_data_signal.emit(tab_data)
-    
+
+    def set_tab(self, data):
+        for attribute, line_edit in self.input_values.items():
+            value = data[attribute][0] if data[attribute][0] is not None else ''
+            line_edit.setText(value)
+        self.update_selected_support_A_bearing_rolling_element(data['Toczne_podpora_A'])
+        self.update_selected_support_B_bearing_rolling_element(data['Toczne_podpora_B'])
+        self.update_selected_central_bearing_rolling_element(data['Toczne_centralnych'])
+
     def update_tab(self):
         """
         Update the tab with data from the parent.

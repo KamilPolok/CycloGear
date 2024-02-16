@@ -114,7 +114,48 @@ class InputShaftController:
         :param data: Data used for calculating input shaft attributes.
         """
         self._calculator.update_data(data)
+        self._calculator.calculate_preliminary_attributes()
         self._shaft_designer_controller.update_shaft_data(self._calculator.get_data())
 
     def _on_shaft_designing_finished(self):
         self._input_shaft.handle_shaft_designing_finished()
+
+    def save_data(self):
+        '''
+        Get the component data
+        '''
+        data = []
+        # Get calculator data
+        data.append(self._calculator.get_data())
+
+        # Get shaft designer data
+        data.append(self._shaft_designer_controller.get_shaft_data())
+
+        # Get every tab data
+        for tab in self._input_shaft.tabs[:-1]:
+            data.append(tab.get_data())
+
+        # Get is_shaft_designed flag
+        data.append(self._input_shaft.is_shaft_designed)
+        return data
+
+    def load_data(self, data):
+        '''
+        Set the initial component data.
+        '''
+        # Set the calculators data
+        self._calculator.set_data(data[0])
+
+        # Set the shaft designer data
+        if data[1]:
+            self._shaft_designer_controller.update_shaft_data(self._calculator.get_data())
+            self._shaft_designer_controller.set_shaft_data(data[1])
+
+        # Set every tab data
+        for idx, tab in enumerate(self._input_shaft.tabs[:-1]):
+            tab.set_tab(data[idx+2])
+        
+        # Set is_shaft_designed_flag
+        self._input_shaft.is_shaft_designed = data[-1]
+        if self._input_shaft.is_shaft_designed:
+            self._on_shaft_designing_finished()
