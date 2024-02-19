@@ -41,7 +41,6 @@ class StartupWindow(QDialog):
 
     def create_new_project(self):
         self.create_new_project_signal.emit()
-        self.accept()
     
     def open_existing_project(self):
         self.open_existing_project_signal.emit()

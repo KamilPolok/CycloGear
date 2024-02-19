@@ -6,7 +6,6 @@ from PyQt6.QtWidgets import QApplication
 from PyQt6.QtCore import QCoreApplication
 
 from AppWindow import AppWindow
-from StartupWindow import StartupWindow
 
 from AppController import AppController
 
@@ -19,9 +18,8 @@ def main():
     cyclo_app.aboutToQuit.connect(on_about_to_quit)
 
     app_window = AppWindow()
-    launch_window = StartupWindow(app_window)
 
-    app_controller = AppController(app_window, launch_window)
+    app_controller = AppController(app_window)
 
     sys.exit(cyclo_app.exec())
 
