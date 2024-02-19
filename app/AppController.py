@@ -35,30 +35,22 @@ class AppController():
         self._set_app_window_title()
         self._app_window.show()
 
-        self._startup_finished = False
+        self._init_components()
+
         startup_window = StartupWindow(self._app_window)
-        startup_handler = StartupHandler(self._app_title, startup_window)
+        startup_handler = StartupHandler(self._app_title, startup_window, self._load_data)
+        result = startup_handler.startup()
 
-        while not self._startup_finished:
-            self._init_components()
-            result = startup_window.exec()
-            if result == StartupWindow.DialogCode.Accepted:
-                data = startup_handler.get_data()
-                if data:
-                    project_data, project_title = data
-                    result = self._load_data(project_data)
-                    if result:
-                        self._startup_finished = True
-                        self._set_project_title(project_title)
-                else:
-                    self._startup_finished = True
+        if result:
+            if startup_handler.new_project:
+                self._init_components()
             else:
-                break
-
-        if self._startup_finished:
+                self._set_project_title(startup_handler._project_title)
+            self._startup_finished = True
             self._add_components()
         else:
-            self._quit_app()
+            self._startup_finished = False
+            self._app_window.close()
 
     def _init_components(self):
         self._components = []
@@ -66,30 +58,23 @@ class AppController():
 
     def _add_components(self):
         for component in self._components:
-            self._app_window.add_component(component)
+            self._app_window.add_component(component[0])
+
+    def _load_data(self, data):
+        for component in self._components:
+            component[1].load_data(data)
 
     def _init_input_shaft_component(self):
         self._input_shaft = InputShaft()
         self._input_shaft_calculator = InputShaftCalculator()
         self._input_shaft_controller = InputShaftController(self._input_shaft_calculator, self._input_shaft)
-        self._components.append(self._input_shaft)
-
-    def _load_data(self, data):
-        if data == None:
-            return False
-        try:
-            self._input_shaft_controller.load_data(data)
-            return True
-        except Exception as e:
-            MessageHandler.critical(self._app_window, 'Błąd', f'Wczytane dane są niepoprawne.')
-            return False
+        self._components.append((self._input_shaft, self._input_shaft_controller))        
 
     def _save_data(self):
         data = self._input_shaft_controller.save_data()
         result = self._session_manager.save_data(self._project_title, data)
         if result:
             self._set_project_title(result)
-        print(result)
         return result
 
     def _save_data_as(self):

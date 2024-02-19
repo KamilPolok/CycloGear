@@ -95,7 +95,6 @@ class InputShaftCalculator():
         fwm = self.data['Fwm'][0]
 
         self.data['F'][0] = (fwzx**2 + (fwm - fwzy)**2)**0.5
-        print(self.data['F'])
         
     def calculate_bearings_attributes(self):
         """
