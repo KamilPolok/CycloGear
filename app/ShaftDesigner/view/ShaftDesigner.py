@@ -1,6 +1,8 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (QHBoxLayout, QMainWindow, QPushButton, QSizePolicy, QSpacerItem, QStyle,
                              QVBoxLayout, QWidget, QScrollArea)
+
+from ShaftDesigner.view.Chart.Chart import Chart, Toolbar
 class ShaftDesigner(QMainWindow):
     """
     A class representing chart and interface to design the shaft
@@ -18,22 +20,29 @@ class ShaftDesigner(QMainWindow):
         self.setWindowTitle(window_title)
         self.resize(800,500)
 
-        # Set layout
-        self.main_widget = QWidget()
+        # Set main layout
+        self.main_widget = QWidget(self)
         self.main_layout = QHBoxLayout(self.main_widget)
         self.setCentralWidget(self.main_widget)
 
-    def init_chart(self, chart):
+        self._init_chart()
+
+    def _init_chart(self):
         # Chart section layout
         self._chart_section_layout = QVBoxLayout()
-        
-        # Add Chart
-        self._chart = chart
-        self._chart_section_layout.addWidget(self._chart)
 
-        # Add confirmation button:
+        # Create chart
+        self.chart = Chart()
+
+        # Create toolbar
+        self.toolbar = Toolbar(self.chart, self)
+
+        # Create confirmation button:
         self.confirmation_button = QPushButton('Zatwierdź Projekt')
         self.confirmation_button.setEnabled(False)
+
+        self._chart_section_layout.addWidget(self.toolbar)
+        self._chart_section_layout.addWidget(self.chart)
         self._chart_section_layout.addWidget(self.confirmation_button)
         
         self.main_layout.addLayout(self._chart_section_layout)

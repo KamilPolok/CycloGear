@@ -1,11 +1,12 @@
 import mplcursors
 
 from .Utils.CheckboxDropdown import CheckboxDropdown
-from .Chart import Chart
+from .Chart import Chart, Toolbar
 
 class Chart_Plotter():
-    def __init__(self, chart: Chart):
+    def __init__(self, chart: Chart, toolbar: Toolbar):
         self._chart = chart
+        self._toolbar = toolbar
 
         self._plots = {}            # Dictionary to keep track of plots
         self._active_plots = {}     # Dictionary to keep track of active plots
@@ -14,7 +15,7 @@ class Chart_Plotter():
         self._init_ui()
 
     def _get_chart_controls(self):
-        self._ax, self._canvas, self._toolbar = self._chart.get_controls()
+        self._ax, self._canvas = self._chart.get_controls()
         self._cursor = mplcursors.cursor(self._ax, hover=False)
 
     def _init_ui(self):

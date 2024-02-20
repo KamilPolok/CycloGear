@@ -1,7 +1,6 @@
 from ShaftDesigner.model.ShaftCalculator import ShaftCalculator
 from ShaftDesigner.model.FunctionsCalculator import FunctionsCalculator
 
-from ShaftDesigner.view.Chart.Chart import Chart
 from ShaftDesigner.view.Chart.Chart_Plotter import Chart_Plotter
 from ShaftDesigner.view.Chart.Chart_ShaftViewer import Chart_ShaftViewer
 
@@ -37,7 +36,7 @@ class ShaftDesignerController:
 
     def _init_ui(self):
         self._init_shaft_sections()
-        self._init_chart()
+        self._init_chart_handlers()
     
     def _init_shaft_sections(self):
         # Set instances of sidebar sections
@@ -53,14 +52,13 @@ class ShaftDesignerController:
 
         self._shaft_designer.init_sidebar(self._sections)
 
-    def _init_chart(self):
-        # Set an instance of chart
-        chart = Chart()
-        
-        self._plotter = Chart_Plotter(chart)
-        self._shaft_viewer = Chart_ShaftViewer(chart)
-
-        self._shaft_designer.init_chart(chart)
+    def _init_chart_handlers(self):
+        # Set an instance of chart handlers:
+        # - self._plotter - responsible for plotting functions, provides interface to view and hide plots
+        # - self._shaft_viewer - responsible for darwing shaft and its dimensions and labels, provides interface for viewing shaft dimensions
+        chart, toolbar = self._shaft_designer.chart, self._shaft_designer.toolbar
+        self._plotter = Chart_Plotter(chart, toolbar)
+        self._shaft_viewer = Chart_ShaftViewer(chart, toolbar)
     
     def _handle_subsection_data(self, shaft_subsection_attributes):
         # Update the shaft drawing
