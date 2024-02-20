@@ -3,7 +3,6 @@ from matplotlib.patches import Rectangle
 from .Utils.CheckboxDropdown import CheckboxDropdown
 from .Chart import Chart, Toolbar
 
-
 class Chart_ShaftViewer():
     def __init__(self, chart: Chart, toolbar: Toolbar):
         self._chart = chart
@@ -11,7 +10,6 @@ class Chart_ShaftViewer():
         
         self._active_sections = {}       # Dictionary to keep track of shaft sections
         
-        self._axes_arrows = []           # List to keep track of figure axes
         self._shaft_markers = []         # List to keep track of shaft markers
         self._shaft_coordinates = []     # List to keep track of shaft coordinates
         self._shaft_dimensions = []      # List to keep track of shaft dimensions
@@ -40,33 +38,20 @@ class Chart_ShaftViewer():
         """
         Set the axes limits for the plot based on the data.
 
-        This method calculates the overall maximum and minimum values across all plots
-        and sets the x and y axis limits accordingly.
+        Get the shaft length from the points (last position) 
+        and sets the axes limits.
         """
-        # Set x and y axis limits
         shaft_length = self.points[-1]
         
         offset = 0.1 * shaft_length
-        xmin = -offset
-        xmax = shaft_length + offset
-        ymin = -0.25 * shaft_length
-        ymax = 0.25 * shaft_length
 
-        self._ax.set_xlim(xmin, xmax)
-        self._ax.set_ylim(ymin, ymax)
+        xlim = (-offset, shaft_length + offset)
+        ylim = (-0.25 * shaft_length, 0.25 * shaft_length)
 
-        # Display axes arrows
-        for item in self._axes_arrows:
-            item.remove()
-        self._axes_arrows.clear()
+        self._ax.set_xlim(xlim)
+        self._ax.set_ylim(ylim)
 
-        xlim = self._ax.get_xlim()
-        z_axis = self._ax.annotate('', xy=(xlim[1], 0), xytext=(xlim[0], 0),
-                           arrowprops=dict(arrowstyle="->", color="#1b5e20", lw=1),
-                           zorder=3,
-                           annotation_clip=False)
-        
-        self._axes_arrows.append(z_axis)
+        self._chart.set_initial_axes_limits(xlim, ylim)
     
     def _get_dimension_offset(self):
         """
