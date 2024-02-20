@@ -16,17 +16,20 @@ class Chart(FigureCanvas):
         super(Chart, self).__init__(self.figure)
         self.setParent(parent)
 
+        # Adjust subplot parameters to make the plot fill the figure canvas
+        self.figure.subplots_adjust(left=0, right=1, bottom=0, top=1, wspace=0, hspace=0)
+
         # Set background color
         self._set_background_color()
 
         # Remove axes spines, ticks and grid lines
-        self.strip_canvas()
+        self._strip_canvas()
 
     def _set_background_color(self, color='white'):
         self.figure.set_facecolor(color)
         self.axes.set_facecolor(color)
 
-    def strip_canvas(self):
+    def _strip_canvas(self):
         # Remove spines
         self.axes.spines[['right', 'top', 'bottom', 'left']].set_visible(False)
 
