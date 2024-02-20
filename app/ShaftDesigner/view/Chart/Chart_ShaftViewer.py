@@ -1,12 +1,11 @@
 from matplotlib.patches import Rectangle
 
 from .Utils.CheckboxDropdown import CheckboxDropdown
+from .Chart import Chart
 
 class Chart_ShaftViewer():
-    def __init__(self, ax, canvas, toolbar):
-        self._ax = ax
-        self._canvas = canvas
-        self._toolbar = toolbar
+    def __init__(self, chart: Chart):
+        self._chart = chart
         
         self._active_sections = {}       # Dictionary to keep track of shaft sections
         
@@ -19,7 +18,11 @@ class Chart_ShaftViewer():
 
         self._dimension_offset = 0
 
+        self._get_chart_controls()
         self._init_ui()
+
+    def _get_chart_controls(self):
+        self._ax, self._canvas, self._toolbar = self._chart.get_controls()
     
     def _init_ui(self):
         self._set_dimension_checkbox()

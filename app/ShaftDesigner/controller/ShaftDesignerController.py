@@ -55,11 +55,12 @@ class ShaftDesignerController:
 
     def _init_chart(self):
         # Set an instance of chart
-        self._chart = Chart()
-        self._shaft_designer.init_chart(self._chart)
+        chart = Chart()
         
-        self._plotter = Chart_Plotter(*self._chart.get_chart_controls())
-        self._shaft_viewer = Chart_ShaftViewer(*self._chart.get_chart_controls())
+        self._plotter = Chart_Plotter(chart)
+        self._shaft_viewer = Chart_ShaftViewer(chart)
+
+        self._shaft_designer.init_chart(chart)
     
     def _handle_subsection_data(self, shaft_subsection_attributes):
         # Update the shaft drawing

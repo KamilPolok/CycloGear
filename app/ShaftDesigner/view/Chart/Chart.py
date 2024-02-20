@@ -55,7 +55,7 @@ class Chart(QWidget):
         layout.addWidget(self._toolbar)
         layout.addWidget(self._canvas)
 
-    def get_chart_controls(self):
+    def get_controls(self):
         return (self._ax, self._canvas, self._toolbar)
 
 class CustomToolbar(NavigationToolbar):
