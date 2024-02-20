@@ -60,21 +60,13 @@ class Chart_ShaftViewer():
             item.remove()
         self._axes_arrows.clear()
 
-        arrow_x_max = shaft_length + 0.5 * offset
-       
-        z_axis = self._ax.annotate(
-            '', xy=(0, 0), xycoords='data',
-            xytext=(arrow_x_max, 0), textcoords='data',
-            arrowprops=dict(arrowstyle="<-", color='#1b5e20'),
-            zorder=3
-        )   
-        self._axes_arrows.append(z_axis)
-
-        z_axis_label = self._ax.text(arrow_x_max, 0, 'z [mm]', ha='left', va='center', color='#1b5e20', 
-                                    fontsize=8, fontweight='bold',
-                                    bbox=dict(alpha=0, zorder=3))
+        xlim = self._ax.get_xlim()
+        z_axis = self._ax.annotate('', xy=(xlim[1], 0), xytext=(xlim[0], 0),
+                           arrowprops=dict(arrowstyle="->", color="#1b5e20", lw=1),
+                           zorder=3,
+                           annotation_clip=False)
         
-        self._axes_arrows.append(z_axis_label)
+        self._axes_arrows.append(z_axis)
     
     def _get_dimension_offset(self):
         """
