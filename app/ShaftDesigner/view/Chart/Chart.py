@@ -177,6 +177,27 @@ class Toolbar(NavigationToolbar):
         super(Toolbar, self).__init__(canvas, parent, coordinates)
         self._canvas = canvas
 
+        self._remove_redundant_actions()
+        
+    def _remove_redundant_actions(self):
+        '''
+        Remove not needed actions from the toolbar.
+        '''
+        actions = self.actions()
+        actions_to_remove_labels = ['Pan', 'Zoom', 'Back', 'Forward', 'Save', 'Zoom to rectangle', 'Subplots', 'Customize']
+        actions_to_remove_list = []
+
+        for action in actions:
+            if action.text() in actions_to_remove_labels:
+                actions_to_remove_list.append(action)
+                # Check if the next action is a separator and add it to the removal list
+                next_action_index = actions.index(action) + 1
+                if next_action_index < len(actions) and actions[next_action_index].isSeparator():
+                    actions_to_remove_list.append(actions[next_action_index])
+        
+        for action in actions_to_remove_list:
+            self.removeAction(action)
+
     def home(self, *args):
         '''
         Override home button - custom reset to initial view.
