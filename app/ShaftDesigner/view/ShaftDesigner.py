@@ -1,8 +1,11 @@
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtGui import QIcon 
 from PyQt6.QtWidgets import (QHBoxLayout, QMainWindow, QPushButton, QSizePolicy, QSpacerItem, QStyle,
-                             QVBoxLayout, QWidget, QScrollArea)
+                             QVBoxLayout, QWidget, QScrollArea, QToolBar)
 
-from ShaftDesigner.view.Chart.Chart import Chart, Toolbar
+from ShaftDesigner.view.Chart.Chart import Chart
+
+from config import resource_path
 class ShaftDesigner(QMainWindow):
     """
     A class representing chart and interface to design the shaft
@@ -20,6 +23,10 @@ class ShaftDesigner(QMainWindow):
         self.setWindowTitle(window_title)
         self.resize(800,500)
 
+        # Set toolbar
+        self.toolbar = QToolBar(self)
+        self.addToolBar(self.toolbar)
+
         # Set main layout
         self.main_widget = QWidget(self)
         self.main_layout = QHBoxLayout(self.main_widget)
@@ -34,19 +41,42 @@ class ShaftDesigner(QMainWindow):
         # Create chart
         self.chart = Chart()
 
-        # Create toolbar
-        self.toolbar = Toolbar(self.chart, self)
-
         # Create confirmation button:
         self.confirmation_button = QPushButton('Zatwierdź Projekt')
         self.confirmation_button.setEnabled(False)
 
-        self._chart_section_layout.addWidget(self.toolbar)
         self._chart_section_layout.addWidget(self.chart)
         self._chart_section_layout.addWidget(self.confirmation_button)
-        
+
         self.main_layout.addLayout(self._chart_section_layout)
-    
+
+        # Add actions to the toolbar
+        fit_button = QPushButton(self)
+        fit_button.setIcon(QIcon(resource_path('icons//fit_to_window.png')))
+        fit_button.setToolTip("Dopasuj widok")
+        fit_button.clicked.connect(self.chart.reset_initial_view)
+
+        fit_button.setStyleSheet("""                         
+            QPushButton {
+                background-color: transparent;
+                color: white;
+                border: 2px solid transparent;
+                border-radius: 5px;
+                padding: 5px;
+            }
+            QPushButton:hover {
+                background-color: #c1c9c9;
+                border: 1px solid #a9b0b0;
+            }
+            QPushButton:pressed {
+                background-color: #c1c9c9;
+                border: 1px solid #a9b0b0;
+            }
+        """)
+
+        fit_button.setIconSize(QSize(20, 20))
+        self.toolbar.addWidget(fit_button)
+        
     def init_sidebar(self, sections):
         # Set layout for sidebar and toggle button
         self.sidebar_section_layout = QHBoxLayout()

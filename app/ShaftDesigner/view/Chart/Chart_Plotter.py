@@ -1,10 +1,12 @@
 import mplcursors
 
 from .Utils.CheckboxDropdown import CheckboxDropdown
-from .Chart import Chart, Toolbar
+from .Chart import Chart
+
+from config import resource_path
 
 class Chart_Plotter():
-    def __init__(self, chart: Chart, toolbar: Toolbar):
+    def __init__(self, chart: Chart, toolbar):
         self._chart = chart
         self._toolbar = toolbar
 
@@ -28,7 +30,7 @@ class Chart_Plotter():
         """
         self._plots_selector = CheckboxDropdown()
         self._plots_selector.stateChanged.connect(self._refresh_selected_plots)
-        self._plots_selector.setTitle('f(z)')
+        self._plots_selector.setIcon(resource_path('icons\plots.png'), 'Wyświetl wykresy')
         self._toolbar.addWidget(self._plots_selector)
 
     def _reset_plots(self):

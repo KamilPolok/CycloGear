@@ -1,10 +1,12 @@
 from matplotlib.patches import Rectangle
 
 from .Utils.CheckboxDropdown import CheckboxDropdown
-from .Chart import Chart, Toolbar
+from .Chart import Chart
+
+from config import resource_path
 
 class Chart_ShaftViewer():
-    def __init__(self, chart: Chart, toolbar: Toolbar):
+    def __init__(self, chart: Chart, toolbar):
         self._chart = chart
         self._toolbar = toolbar
         
@@ -29,7 +31,7 @@ class Chart_ShaftViewer():
 
     def _set_dimension_checkbox(self):
         self.dimensions_selector = CheckboxDropdown()
-        self.dimensions_selector.setTitle('Wymiary')
+        self.dimensions_selector.setIcon(resource_path('icons\dimensions.png'), 'Wyświetl wymiary')
         self.dimensions_selector.addItem('dimensions', 'Wymiary stopni', self._draw_shaft_dimensions)
         self.dimensions_selector.addItem('coordinates', 'Współrzędne wału', self._draw_shaft_coordinates)
         self._toolbar.addWidget(self.dimensions_selector)

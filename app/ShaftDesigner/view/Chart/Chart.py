@@ -1,7 +1,5 @@
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_qtagg import (
-    FigureCanvasQTAgg as FigureCanvas,
-    NavigationToolbar2QT as NavigationToolbar)
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 
 import numpy as np
 
@@ -159,47 +157,3 @@ def pan_factory(axis):
     fig.canvas.mpl_connect('button_press_event', on_press)
     fig.canvas.mpl_connect('button_release_event', on_release)
     fig.canvas.mpl_connect('motion_notify_event', on_motion)
-
-class Toolbar(NavigationToolbar):
-    """
-    A custom toolbar class for the chart widget, extending the NavigationToolbar.
-    """
-
-    def __init__(self, canvas: Chart, parent=None, coordinates=False):
-        """
-        Initialize the custom toolbar.
-
-        Args:
-            canvas (FigureCanvas): The canvas associated with the toolbar.
-            parent (QWidget): The parent of the toolbar.
-            coordinates (bool): Flag to show coordinates on the toolbar.
-        """
-        super(Toolbar, self).__init__(canvas, parent, coordinates)
-        self._canvas = canvas
-
-        self._remove_redundant_actions()
-        
-    def _remove_redundant_actions(self):
-        '''
-        Remove not needed actions from the toolbar.
-        '''
-        actions = self.actions()
-        actions_to_remove_labels = ['Pan', 'Zoom', 'Back', 'Forward', 'Save', 'Zoom to rectangle', 'Subplots', 'Customize']
-        actions_to_remove_list = []
-
-        for action in actions:
-            if action.text() in actions_to_remove_labels:
-                actions_to_remove_list.append(action)
-                # Check if the next action is a separator and add it to the removal list
-                next_action_index = actions.index(action) + 1
-                if next_action_index < len(actions) and actions[next_action_index].isSeparator():
-                    actions_to_remove_list.append(actions[next_action_index])
-        
-        for action in actions_to_remove_list:
-            self.removeAction(action)
-
-    def home(self, *args):
-        '''
-        Override home button - custom reset to initial view.
-        '''
-        self._canvas.reset_initial_view()
