@@ -2,7 +2,7 @@ import os
 import sys
 
 # Set folder path relative to root of the application
-def resource_path(relative_path):
+def dependencies_path(relative_path):
     # Check if running as a bundled application
     if getattr(sys, 'frozen', False):
         # If bundled, the executable's directory is the base path
@@ -17,8 +17,9 @@ def resource_path(relative_path):
 
 # Set data directory
 DATA_DIR = 'data'
-# Set database name
-DATABASE_NAME = 'baza_elementow.db'
 
 # Set path to data directory
-DATA_PATH = resource_path(DATA_DIR)
+DATA_PATH = dependencies_path(DATA_DIR)
+
+def resource_path(relative_path):
+    return os.path.normpath(os.path.join(DATA_PATH, relative_path))

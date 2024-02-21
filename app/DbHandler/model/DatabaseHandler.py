@@ -4,7 +4,7 @@ import os
 import sys
 import re
 
-from config import DATA_PATH, DATABASE_NAME
+from config import DATA_PATH, resource_path
 
 class DatabaseHandler:
     def __init__(self):
@@ -16,7 +16,7 @@ class DatabaseHandler:
             sys.stderr.write(f"Error: Directory {DATA_PATH} does not exist.\n")
             sys.exit(1)
         # Check if database file exists
-        self._databaseAbsPath = os.path.normpath(os.path.join(DATA_PATH, DATABASE_NAME))
+        self._databaseAbsPath = resource_path('baza_elementow.db')
         if not os.path.exists(self._databaseAbsPath):
             sys.stderr.write(f"Error: Database file {self._databaseAbsPath} does not exist.\n")
             sys.exit(1)

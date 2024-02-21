@@ -30,7 +30,7 @@ if config_dir not in sys.path:
     sys.path.append(config_dir)
 
 
-from config import DATA_PATH, DATABASE_NAME
+from config import DATA_PATH, resource_path
 
 database_tables = [
     {   
@@ -97,7 +97,7 @@ class DatabaseCreator:
             sys.exit(1)
 
         # Get the absoulte path of the created database
-        self._databasePath = os.path.normpath(os.path.join(self._dataPath, DATABASE_NAME))
+        self._databasePath = resource_path('baza_elementow.db')
 
         conn = sqlite3.connect(self._databasePath)
         conn.close
@@ -121,7 +121,7 @@ class DatabaseCreator:
        
         for table in self._tables:
             # Get the associated csv file absolute path 
-            csvPath = os.path.normpath(os.path.join(self._dataPath,table["csvName"]))
+            csvPath = resource_path(table["csvName"])
             # Check if the csv file exists
             if not os.path.exists(csvPath):
                 sys.stderr.write(f"Error: {csvPath} does not exist.\n")
