@@ -179,7 +179,7 @@ class ShaftDesignerController:
             for subsection_number, subsection in section.items():
                 if section_name != 'Wykorbienia':
                     self._sections[section_name].add_subsection()
-                data = (section_name, subsection_number, subsection, None)
+                data = (section_name, int(subsection_number), subsection, None)
                 self._draw_shaft(data)
                 self._enable_sections()
 
