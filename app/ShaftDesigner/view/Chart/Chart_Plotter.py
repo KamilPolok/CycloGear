@@ -149,7 +149,8 @@ class Chart_Plotter():
         for id, function in functions.items():
             if id not in self._plots:
                 label = function[0]
-                self._plots_selector.addItem(id, label)
+                description = function[1]
+                self._plots_selector.addItem(id, label, description)
             if function[3] is not None:
                 self._plots[id] = function
                 self._plots_selector.enableItem(id, True)

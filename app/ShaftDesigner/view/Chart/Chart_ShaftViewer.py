@@ -32,8 +32,8 @@ class Chart_ShaftViewer():
     def _set_dimension_checkbox(self):
         self.dimensions_selector = CheckboxDropdown()
         self.dimensions_selector.setIcon(resource_path('icons\dimensions.png'), 'Wyświetl wymiary')
-        self.dimensions_selector.addItem('dimensions', 'Wymiary stopni', self._draw_shaft_dimensions)
-        self.dimensions_selector.addItem('coordinates', 'Współrzędne wału', self._draw_shaft_coordinates)
+        self.dimensions_selector.addItem('dimensions', 'Wymiary stopni', '', self._draw_shaft_dimensions)
+        self.dimensions_selector.addItem('coordinates', 'Współrzędne wału', '',  self._draw_shaft_coordinates)
         self._toolbar.addWidget(self.dimensions_selector)
 
     def _set_axes_limits(self):

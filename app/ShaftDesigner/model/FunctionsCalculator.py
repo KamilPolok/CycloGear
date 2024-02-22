@@ -253,14 +253,14 @@ class FunctionsCalculator():
         
     def get_shaft_functions(self):
         functions = {
-            'Mg': ('Mg(z)', 'Moment gnący Mg [Nm]', '#1ABC9C', self.bending_moment),
-            'Ms': ('Ms(z)', 'Moment skręcający Ms [Nm]', '#196F3D', self.torque),
-            'Mz': ('Mz(z)', 'Moment zastępczy Mz [Nm]', '#1F618D', self.equivalent_moment), 
-            'dMs': ('d(Ms)', 'Średnica minimalna ze względu na moment skręcający dMs [mm]', '#196F3D', self.d_min_by_torsional_strength),
-            'dMz': ('d(Mz)', 'Średnica minimalna ze względu na moment zastępczy dMz [mm]', '#1F618D', self.d_min_by_equivalent_stress),
-            'dqdop': ('d(φ\')', 'Średnica minimalna ze względu na dopuszczalny kąt skręcenia dq\' [mm]', '#F1C40F', self.d_min_by_permissible_angle_of_twist),
+            'Mg': ('Mg(z)', 'Moment gnący [Nm]', '#1ABC9C', self.bending_moment),
+            'Ms': ('Ms(z)', 'Moment skręcający [Nm]', '#196F3D', self.torque),
+            'Mz': ('Mz(z)', 'Moment zastępczy [Nm]', '#1F618D', self.equivalent_moment), 
+            'dMs': ('d(Ms)', 'Średnica minimalna ze względu na moment skręcający [mm]', '#196F3D', self.d_min_by_torsional_strength),
+            'dMz': ('d(Mz)', 'Średnica minimalna ze względu na moment zastępczy [mm]', '#1F618D', self.d_min_by_equivalent_stress),
+            'dqdop': ('d(φ\')', 'Średnica minimalna ze względu na dopuszczalny kąt skręcenia [mm]', '#F1C40F', self.d_min_by_permissible_angle_of_twist),
             'dkdop': ('d(θdop)', 'Średnica minimalna ze względu na dopuszczalny kąt ugięcia [mm]', '#6C3483', self.d_min_by_permissible_deflection_angle), 
-            'dfdop': ('d(fdop)', 'Średnica minimalna ze względu na dopuszczalną stzrałkę ugięcia [mm]', '#D35400', self.d_min_by_permissible_deflection_arrow),
+            'dfdop': ('d(fdop)', 'Średnica minimalna ze względu na dopuszczalną strzałkę ugięcia [mm]', '#D35400', self.d_min_by_permissible_deflection_arrow),
             'dmin': ('dmin', 'Średnica minimalna [mm]', '#C0392B', self.d_min)}
         
         return functions

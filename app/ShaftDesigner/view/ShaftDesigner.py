@@ -25,7 +25,7 @@ class ShaftDesigner(QMainWindow):
 
         # Set toolbar
         self.toolbar = QToolBar(self)
-        self.addToolBar(self.toolbar)
+        self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.toolbar)
 
         # Set main layout
         self.main_widget = QWidget(self)
