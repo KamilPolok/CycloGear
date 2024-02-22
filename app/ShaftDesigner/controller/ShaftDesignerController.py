@@ -115,7 +115,9 @@ class ShaftDesignerController:
                 self.all_sections_enabled == True
 
     def _enable_shaft_design_confirmation(self):
-        if self.is_whole_shaft_designed or self._is_whole_shaft_designed_state_changed():
+        is_whole_shaft_designed_state_changed = self._is_whole_shaft_designed_state_changed()
+        
+        if self.is_whole_shaft_designed or is_whole_shaft_designed_state_changed:
             self._toogle_remaining_plots_visibility()
             self._shaft_designer.confirmation_button.setEnabled(self.is_whole_shaft_designed)
             
