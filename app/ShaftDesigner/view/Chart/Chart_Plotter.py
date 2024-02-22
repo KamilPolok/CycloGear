@@ -65,12 +65,12 @@ class Chart_Plotter():
                     d_half_above_axis = y / 2
                     d_half_below_axis = [-d for d in d_half_above_axis]
 
-                    above, = self._ax.plot(self._z, d_half_above_axis, linewidth = 1, color=color)
-                    below, = self._ax.plot(self._z, d_half_below_axis, linewidth = 1, color=color)
+                    above, = self._ax.plot(self._z, d_half_above_axis, linewidth = 1, color=color, zorder=self._chart.plots_layer)
+                    below, = self._ax.plot(self._z, d_half_below_axis, linewidth = 1, color=color, zorder=self._chart.plots_layer)
                     plot_elements = [above, below]
                 else:
-                    plot, = self._ax.plot(self._z, y, linewidth = 1, color=color)
-                    filling = self._ax.fill_between(self._z, y, alpha=0.3, color=color)
+                    plot, = self._ax.plot(self._z, y, linewidth = 1, color=color, zorder=self._chart.plots_layer)
+                    filling = self._ax.fill_between(self._z, y, alpha=0.3, color=color, zorder=self._chart.plots_layer)
                     plot_elements = [plot, filling]
                 self._active_plots[plot_name] = plot_elements
         

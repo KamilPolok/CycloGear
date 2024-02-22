@@ -22,14 +22,29 @@ class Chart(FigureCanvas):
         self.figure.subplots_adjust(left=0, right=1, bottom=0, top=1, wspace=0, hspace=0)
 
         # Set background color
-        self._set_background_color()
+        self._set_colors()
 
         # Remove axes spines, ticks and grid lines
         self._strip_canvas()
 
-    def _set_background_color(self, color='white'):
-        self.figure.set_facecolor(color)
-        self.axes.set_facecolor(color)
+    def _set_colors(self):
+        # Set background color
+        self.background_color = '#212830'   # dark gray
+        self.figure.set_facecolor( self.background_color)
+        self.axes.set_facecolor( self.background_color)
+
+        # Set other items colors
+        self.shaft_color = '#89a0b0'        # bluey grey
+        self.axes_color = '#ff073a'         # nenon red
+        self.dimensions_color = '#1bfc06'   # neon green
+        self.markers_color = '#ffffe4'       # off white
+
+        # Set zorder - order of layers
+        self.axes_layer = 1
+        self.plots_layer = 2
+        self.markers_layer = 3
+        self.shaft_layer = 4
+        self.dimensions_layer = 5
 
     def _strip_canvas(self):
         # Remove spines
@@ -60,8 +75,8 @@ class Chart(FigureCanvas):
 
         xlim = self.axes.get_xlim()
         z_axis = self.axes.annotate('', xy=(xlim[1], 0), xytext=(xlim[0], 0),
-                           arrowprops=dict(arrowstyle="->", color="#1b5e20", lw=1),
-                           zorder=3,
+                           arrowprops=dict(arrowstyle="->", color=self.axes_color, lw=1),
+                           zorder=self.axes_layer,
                            annotation_clip=False)
         
         self._axes_arrows.append(z_axis)

@@ -85,14 +85,24 @@ class Chart_ShaftViewer():
         self._shaft_markers.clear()
 
         # Draw markers
-        markers = self._ax.scatter(self.points, [0] * len(self.points), color='black', s=8, zorder=5)
+        markers = self._ax.scatter(self.points, [0] * len(self.points),
+                                   color=self._chart.markers_color,
+                                   s=8,
+                                   zorder=self._chart.markers_layer
+                                   )
         self._shaft_markers.append(markers)
-
-        # Add labels for the markers
+        
+        # Draw labels for the markers
         for marker, label in zip(self.points, self.labels):
-            annotation_labels = self._ax.annotate(label, (marker, 0), textcoords="offset points", xytext=(10, -15), ha='center', zorder=5)
-            self._shaft_markers.append(annotation_labels)
-
+            annotation_label = self._ax.annotate(label, (marker, 0), 
+                                                  textcoords="offset points",
+                                                  xytext=(10, -15),
+                                                  ha='center',
+                                                  color=self._chart.markers_color,
+                                                  zorder=self._chart.markers_layer
+                                                  )
+            self._shaft_markers.append(annotation_label)
+            
         self._canvas.draw()
 
         self._draw_shaft_coordinates()
@@ -106,8 +116,6 @@ class Chart_ShaftViewer():
         if self.dimensions_selector.isChecked('coordinates'):
             self._get_dimension_offset()
 
-            # Draw dimension lines between points
-            dimensions_color = 'SkyBlue'
             for i in range(len(self.points) - 1):
                 start, end = self.points[i], self.points[i + 1]
                 mid_point = (start + end) / 2
@@ -161,16 +169,13 @@ class Chart_ShaftViewer():
 
     def _draw_dimension(self, text, start_z, end_z, label_z_position, start_y=0, end_y=0, label_y_position=0):
         lines = []
-        # Set dimensions color
-        dimensions_color = '#c62828'
 
         # Draw dimension line
-        dimension_line = self._ax.annotate(
-            '', xy=(start_z, start_y), xycoords='data',
-            xytext=(end_z, end_y), textcoords='data',
-            arrowprops=dict(arrowstyle="<->", color=dimensions_color),
-            zorder=3
-        )
+        dimension_line = self._ax.annotate('', xy=(start_z, start_y), xycoords='data',
+                                           xytext=(end_z, end_y), textcoords='data',
+                                           arrowprops=dict(arrowstyle="<->", color=self._chart.dimensions_color),
+                                           zorder=self._chart.dimensions_layer
+                                           )
         lines.append(dimension_line)
 
         # Perfrom actions depending of dimension line orientation
@@ -186,13 +191,23 @@ class Chart_ShaftViewer():
 
             # draw reference lines for horizontal dimension lines
             for position in [start_z, end_z]:
-                reference_line = self._ax.plot([position, position], [0, end_y], linestyle='-', color=dimensions_color, linewidth=0.5, zorder=0)
+                reference_line = self._ax.plot([position, position], [0, end_y], 
+                                               linestyle='-',
+                                               linewidth=0.5,
+                                               color=self._chart.dimensions_color,
+                                               zorder=self._chart.dimensions_layer
+                                               )
                 lines.append(reference_line[0])
 
         # Add dimension labels
-        dimension_label = self._ax.text(label_z_position, label_y_position, text, rotation=rotation, ha=ha, va=va, color=dimensions_color,
+        dimension_label = self._ax.text(label_z_position, label_y_position, text,
+                                        rotation=rotation,
+                                        ha=ha,
+                                        va=va,
                                         fontsize=8,
-                                        bbox=dict(alpha=0, zorder=3))
+                                        color=self._chart.dimensions_color,
+                                        bbox=dict(alpha=0, zorder=self._chart.dimensions_layer)
+                                        )
         lines.append(dimension_label)
         
         return lines
@@ -214,7 +229,12 @@ class Chart_ShaftViewer():
 
                 subsection_id = f"{section_name}_{subsection_number}"
 
-                subsection_plot = Rectangle(start, length, diameter, color='grey', linewidth=2, fill=False)
+                subsection_plot = Rectangle(start, length, diameter,
+                                            linewidth=2,
+                                            fill=False,
+                                            color=self._chart.shaft_color,
+                                            zorder=self._chart.shaft_layer
+                                            )
                 self._active_sections[subsection_id] = subsection_plot
                 self._ax.add_patch(subsection_plot)
     
