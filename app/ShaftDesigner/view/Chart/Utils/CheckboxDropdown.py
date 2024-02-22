@@ -23,24 +23,7 @@ class CheckboxDropdown(QToolButton):
         self.setStyleSheet("""
             * { padding-right: 3px }
             QToolButton::menu-indicator { image: none }                                
-            QToolButton {
-                background-color: transparent;
-                color: white;
-                border: 2px solid transparent;
-                border-radius: 5px;
-                padding: 5px;
-            }
-            QToolButton:hover {
-                background-color: #c1c9c9;
-                border: 1px solid #a9b0b0;
-            }
-            QToolButton:pressed {
-                background-color: #c1c9c9;
-                border: 1px solid #a9b0b0;
-            }
         """)
-        self.setIconSize(QSize(20, 20))
-        self.setFixedSize(QSize(35, 35))
 
         self.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
 

@@ -1,5 +1,5 @@
 from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QIcon 
+from PyQt6.QtGui import QIcon , QAction
 from PyQt6.QtWidgets import (QHBoxLayout, QMainWindow, QPushButton, QSizePolicy, QSpacerItem, QStyle,
                              QVBoxLayout, QWidget, QScrollArea, QToolBar)
 
@@ -25,6 +25,7 @@ class ShaftDesigner(QMainWindow):
 
         # Set toolbar
         self.toolbar = QToolBar(self)
+        self.toolbar.setIconSize(QSize(24, 24))
         self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.toolbar)
 
         # Set main layout
@@ -51,31 +52,12 @@ class ShaftDesigner(QMainWindow):
         self.main_layout.addLayout(self._chart_section_layout)
 
         # Add actions to the toolbar
-        fit_button = QPushButton(self)
-        fit_button.setIcon(QIcon(resource_path('icons//fit_to_window.png')))
-        fit_button.setToolTip("Dopasuj widok")
-        fit_button.clicked.connect(self.chart.reset_initial_view)
+        fit_to_window_action = QAction(self)
+        fit_to_window_action.setIcon(QIcon(resource_path('icons//fit_to_window.png')))
+        fit_to_window_action.setToolTip("Dopasuj widok")
+        fit_to_window_action.triggered.connect(self.chart.reset_initial_view)
 
-        fit_button.setStyleSheet("""                         
-            QPushButton {
-                background-color: transparent;
-                color: white;
-                border: 2px solid transparent;
-                border-radius: 5px;
-                padding: 5px;
-            }
-            QPushButton:hover {
-                background-color: #c1c9c9;
-                border: 1px solid #a9b0b0;
-            }
-            QPushButton:pressed {
-                background-color: #c1c9c9;
-                border: 1px solid #a9b0b0;
-            }
-        """)
-
-        fit_button.setIconSize(QSize(20, 20))
-        self.toolbar.addWidget(fit_button)
+        self.toolbar.addAction(fit_to_window_action)
         
     def init_sidebar(self, sections):
         # Set layout for sidebar and toggle button
