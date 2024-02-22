@@ -50,7 +50,7 @@ class ShaftDesignerController:
 
         self.all_sections_enabled = False
 
-        self._shaft_designer.init_sidebar(self._sections)
+        self._shaft_designer.set_sidebar_sections(self._sections)
 
     def _init_chart_handlers(self):
         # Set an instance of chart handlers:

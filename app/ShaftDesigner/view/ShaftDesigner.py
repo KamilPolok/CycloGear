@@ -27,13 +27,36 @@ class ShaftDesigner(QMainWindow):
         self.toolbar = QToolBar(self)
         self.toolbar.setIconSize(QSize(24, 24))
         self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.toolbar)
+        self.toolbar.toggleViewAction().setVisible(False)
 
         # Set main layout
         self.main_widget = QWidget(self)
         self.main_layout = QHBoxLayout(self.main_widget)
         self.setCentralWidget(self.main_widget)
 
+        self._init_sidebar()
         self._init_chart()
+
+    def _init_sidebar(self):
+        # Set sidebar
+        self.sidebar = QWidget()
+        self.sidebar_layout = QVBoxLayout(self.sidebar)
+
+        # Set a scroll area for the sidebar - make the sidebar scrollable
+        self.scroll_area = QScrollArea()
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setWidget(self.sidebar)
+        self.scroll_area.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self.scroll_area.setFixedWidth(220)  # Slightly larger to accommodate scrollbar
+
+        self.main_layout.addWidget(self.scroll_area)
+
+        # Set sidebar toggle button
+        toggle_sidebar_action = QAction(self)
+        toggle_sidebar_action.setIcon(QIcon(resource_path('icons//menu.png')))
+        toggle_sidebar_action.setToolTip('Otwórz/zamknij pasek boczny')
+        toggle_sidebar_action.triggered.connect(self.toggle_sidebar)
+        self.toolbar.addAction(toggle_sidebar_action)
 
     def _init_chart(self):
         # Chart section layout
@@ -56,52 +79,16 @@ class ShaftDesigner(QMainWindow):
         fit_to_window_action.setIcon(QIcon(resource_path('icons//fit_to_window.png')))
         fit_to_window_action.setToolTip("Dopasuj widok")
         fit_to_window_action.triggered.connect(self.chart.reset_initial_view)
-
         self.toolbar.addAction(fit_to_window_action)
         
-    def init_sidebar(self, sections):
-        # Set layout for sidebar and toggle button
-        self.sidebar_section_layout = QHBoxLayout()
-
-        # Set sidebar
-        self.sidebar = QWidget()
-        self.sidebar_layout = QVBoxLayout(self.sidebar)
-
+    def set_sidebar_sections(self, sections):
         # Set contents of the sidebar
         for section in sections.values():
             self.sidebar_layout.addWidget(section)
 
         # Add a spacer item at the end of the sidebar layout - keeps the contents aligned to the top
         spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
-        self.sidebar_layout .addSpacerItem(spacer)
-
-        # Set a scroll area for the sidebar - make the sidebar scrollable
-        self.scroll_area = QScrollArea()
-        self.scroll_area.setWidgetResizable(True)
-        self.scroll_area.setWidget(self.sidebar)
-        self.scroll_area.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        self.scroll_area.setFixedWidth(220)  # Slightly larger to accommodate scrollbar
-
-        # Set sidebar toggle button
-        self.toggle_button_layout = QVBoxLayout()
-
-        icon = self.style().standardIcon(QStyle.StandardPixmap.SP_FileDialogDetailedView)  # Example icon
-        self.toggle_button = QPushButton(icon, '')
-        self.toggle_button.setStyleSheet("""
-            QPushButton {
-                background-color: none;
-                border: none;
-            }                               
-        """)
-        self.toggle_button.setFixedWidth(50)
-        self.toggle_button.clicked.connect(self.toggle_sidebar)
-        self.toggle_button_layout.addWidget(self.toggle_button)
-        self.toggle_button_layout.addStretch(1)
-
-        self.sidebar_section_layout.addWidget(self.scroll_area)
-        self.sidebar_section_layout.addLayout(self.toggle_button_layout)
-
-        self.main_layout.addLayout(self.sidebar_section_layout)
+        self.sidebar_layout.addSpacerItem(spacer)
 
     def toggle_sidebar(self):
         self.scroll_area.setVisible(not self.scroll_area.isVisible())
