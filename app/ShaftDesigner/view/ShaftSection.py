@@ -2,11 +2,34 @@
 from abc import ABC, ABCMeta, abstractmethod
 from ast import literal_eval
 
-from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget, QSizePolicy
+from PyQt6.QtCore import pyqtSignal, Qt, QSize
+from PyQt6.QtWidgets import QFrame, QHBoxLayout, QPushButton, QVBoxLayout, QWidget, QSizePolicy 
+from PyQt6.QtGui import QIcon
 
-from .CommonFunctions import create_data_input_row, format_input
+from .CommonFunctions import create_data_input_row
 from .ShaftSubsection import ShaftSubsection
+
+from config import resource_path
+
+class CustomFrame(QFrame):
+    def __init__(self):
+        super().__init__()
+
+        self._default_style = "QFrame { background-color: #c1c9c9;}"
+        self._on_hover_style = "QFrame { background-color: #9aa1a1;}"
+        self.setStyleSheet(self._default_style)
+
+class HoverButton(QPushButton):
+    def __init__(self, parent: QFrame):
+        super().__init__(parent)
+
+    def enterEvent(self, event):
+        self.parent().setStyleSheet(self.parent()._on_hover_style)
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        self.parent().setStyleSheet(self.parent()._default_style)
+        super().leaveEvent(event)
 
 class ABCQWidgetMeta(ABCMeta, type(QWidget)):
     pass
@@ -15,48 +38,62 @@ class Section(QWidget, metaclass=ABCQWidgetMeta):
 
     def __init__(self, name, parent=None):
         super().__init__(parent)
-        self.name = name
+        self._name = name
         self.subsections = []
         self.subsection_count = 0
 
         self._init_ui()
 
     def _init_ui(self):
-        # Main layout
-        self.main_layout = QVBoxLayout(self)
-
+        self._main_layout = QVBoxLayout(self)
+        self._main_layout.setContentsMargins(0, 0, 0, 0)
+        
         self._init_header()
-        self._init_subsections()
-
-        # Initially collapse Section widget
-        self.expanded = True
-        self.toggle(None)
+        self._init_content()
     
     def _init_header(self):
-        # Header layout
-        self.header_layout = QHBoxLayout()
+        # Set header layout
+        header = CustomFrame()
+        self._header_height = 25
+        header.setFixedHeight(self._header_height)  # Set the height to 30 pixels
+        self._main_layout.addWidget(header)
 
-        # Set header
-        self.header = QLabel(self.name)
-        self.header.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        self.header.setFixedHeight(30)
-        self.header.mousePressEvent = self.toggle
-        self.header_layout.addWidget(self.header)
+        self._header_layout = QHBoxLayout()
+        self._header_layout.setContentsMargins(0, 0, 0, 0)
+        self._header_layout.setSpacing(0)
+        self._header_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        header.setLayout(self._header_layout)
 
-        # Add header layout to main layout
-        self.main_layout.addLayout(self.header_layout)
+        # Set toggle section button
+        self.toggle_section_button = HoverButton(header)
+        self.toggle_section_button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self.toggle_section_button.setStyleSheet("""                                                  
+            QPushButton {
+                background-color: transparent;
+                text-align: left;
+                font-size: 10pt;
+                font-weight: 600;                                
+                padding-left: 10px
+            }
+        """)
+        self.toggle_section_button.setText(self._name)
+        self.toggle_section_button.clicked.connect(self.toggle_content)
+        self._header_layout.addWidget(self.toggle_section_button)
     
-    def _init_subsections(self):
-        # Subsections layout
-        self.subsections_layout = QVBoxLayout()
-        self.subsections_container = QFrame()
-        self.subsections_container.setLayout(self.subsections_layout)
-        self.main_layout.addWidget(self.subsections_container)
+    def _init_content(self):
+        # Set content layout
+        self._content = QFrame()
+        self._content_layout = QVBoxLayout()
+        self._content_layout.setContentsMargins(5, 0, 0, 0)
+        self._content.setLayout(self._content_layout)
 
-    def toggle(self, event):
-        # Expand or collapse the widget
-        self.expanded = not self.expanded
-        self.subsections_container.setVisible(self.expanded)
+        self._main_layout.addWidget(self._content)
+
+    def toggle_content(self, event):
+        '''
+        Toggle the visibility of the content section
+        '''
+        self._content.setVisible(not self._content.isVisible())
 
     @abstractmethod
     def handle_subsection_data(self, data):
@@ -69,18 +106,39 @@ class ShaftSection(Section):
     def _init_header(self):
         super()._init_header()
         # Set add subsection button
-        self.add_subsection_button = QPushButton("+", self)
-        self.add_subsection_button.clicked.connect(self.add_subsection)
-        self.add_subsection_button.setFixedWidth(30)
-        self.header_layout.addWidget(self.add_subsection_button)
+        self._add_subsection_button = QPushButton()
+        button_size = self._header_height
+        icon_size = self._header_height * 0.9
+        self._add_subsection_button.setFixedSize(button_size, button_size)
+        self._add_subsection_button.setIconSize(QSize(icon_size, icon_size))
+        self._add_subsection_button.setIcon(QIcon(resource_path('icons//add_btn.png')))
+        self._add_subsection_button.setStyleSheet("""                         
+            QPushButton {
+                background-color: transparent;
+                color: black;
+                border: 1px solid transparent;
+                border-radius: 5px;
+            }
+            QPushButton:hover {
+                background-color: #9aa1a1;
+                border: 1px solid #9aa1a1;
+            }
+            QPushButton:pressed {
+                background-color: #5a6161;
+                border: 1px solid #5a6161;
+            }
+        """)
+        
+        self._add_subsection_button.clicked.connect(self.add_subsection)
+        self._header_layout.addWidget(self._add_subsection_button)    
 
     def add_subsection(self):
-        subsection = ShaftSubsection(self.name, self.subsection_count, self)
+        subsection = ShaftSubsection(self._name, self.subsection_count, self)
         subsection.set_attributes([('d', 'Ø'), ('l', 'L')])
         subsection.subsection_data_signal.connect(self.handle_subsection_data)
         subsection.remove_subsection_signal.connect(self.remove_subsection)
         self.subsections.append(subsection)
-        self.subsections_layout.addWidget(subsection)
+        self._content_layout.addWidget(subsection)
         self.subsection_count += 1
         self.set_add_subsection_button_enabled(False)
         self.add_subsection_signal.emit()
@@ -90,7 +148,7 @@ class ShaftSection(Section):
         for subsection_number in range(self.subsection_count, subsections_number, -1):
             subsection_to_remove = next((s for s in self.subsections if s.subsection_number == subsection_number), None)
             if subsection_to_remove:
-                self.subsections_layout.removeWidget(subsection_to_remove)
+                self._content_layout.removeWidget(subsection_to_remove)
                 subsection_to_remove.deleteLater()
                 self.subsections.pop()
                 self.subsection_count -= 1
@@ -98,7 +156,7 @@ class ShaftSection(Section):
     def remove_subsection(self, subsection_number):
         # Find and remove the specific subsection
         subsection_to_remove = self.sender()
-        self.subsections_layout.removeWidget(subsection_to_remove)
+        self._content_layout.removeWidget(subsection_to_remove)
         subsection_to_remove.deleteLater()
         self.subsections = [s for s in self.subsections if s != subsection_to_remove]
     
@@ -109,53 +167,49 @@ class ShaftSection(Section):
         # Update the subsection count
         self.subsection_count -= 1
         
-        self.remove_subsection_plot_signal.emit(self.name, subsection_number)
+        self.remove_subsection_plot_signal.emit(self._name, subsection_number)
 
     def set_limits(self, limits):
         for subsection_number, attributes in limits.items():
             self.subsections[subsection_number].set_limits(attributes)
     
     def set_add_subsection_button_enabled(self, enabled):
-        self.add_subsection_button.setEnabled(enabled)
+        self._add_subsection_button.setEnabled(enabled)
     
-    def toggle(self, event):
-        super().toggle(event)
-        self.add_subsection_button.setVisible(self.expanded)
+    def toggle_content(self, event):
+        super().toggle_content(event)
+        self._add_subsection_button.setVisible(not self._add_subsection_button.isVisible())
 
     def handle_subsection_data(self, subsection_data):
         subsection = self.sender()
         common_section_data = None
-        data = (self.name, subsection.subsection_number, subsection_data, common_section_data)
+        data = (self._name, subsection.subsection_number, subsection_data, common_section_data)
         self.subsection_data_signal.emit(data)
 
 class EccentricsSection(Section):
-    def _init_subsections(self):
-        # Set subsections layout
-        self.subsections_layout = QVBoxLayout()
-        self.subsections_container = QFrame()
-        self.subsections_container.setLayout(self.subsections_layout)
-        self.main_layout.addWidget(self.subsections_container)
+    def _init_content(self):
+        super()._init_content()
 
         # Set data entries
         self.inputs = {}
         
         attribute, symbol = ('d', 'Ø')
         attribute_row, input = create_data_input_row(symbol)
-        self.subsections_layout.addLayout(attribute_row)
+        self._content_layout.addLayout(attribute_row)
         
         self.inputs[attribute] = input
 
     def set_subsections_number(self, sections_number):
         if self.subsection_count != sections_number:
             for _ in range(self.subsection_count, sections_number):
-                subsection = ShaftSubsection(self.name, self.subsection_count, self)
+                subsection = ShaftSubsection(self._name, self.subsection_count, self)
                 subsection.set_attributes([('l', 'L')])
                 for attribute, input in self.inputs.items():
                     subsection.add_input(attribute, input)
                 subsection.remove_button.hide()
                 subsection.subsection_data_signal.connect(self.handle_subsection_data)
                 self.subsections.append(subsection)
-                self.subsections_layout.addWidget(subsection)
+                self._content_layout.addWidget(subsection)
                 self.subsection_count += 1
     
     def set_limits(self, limits):
@@ -165,5 +219,5 @@ class EccentricsSection(Section):
     def handle_subsection_data(self, subsection_data):
         subsection = self.sender()
         common_section_data = {key: literal_eval(input.text()) for key, input in self.inputs.items()}
-        data = (self.name, subsection.subsection_number, subsection_data, common_section_data)
+        data = (self._name, subsection.subsection_number, subsection_data, common_section_data)
         self.subsection_data_signal.emit(data)

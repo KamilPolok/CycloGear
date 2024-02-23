@@ -40,7 +40,9 @@ class ShaftDesigner(QMainWindow):
     def _init_sidebar(self):
         # Set sidebar
         self.sidebar = QWidget()
+
         self.sidebar_layout = QVBoxLayout(self.sidebar)
+        self.sidebar_layout.setContentsMargins(0, 0, 0, 0)
 
         # Set a scroll area for the sidebar - make the sidebar scrollable
         self.scroll_area = QScrollArea()

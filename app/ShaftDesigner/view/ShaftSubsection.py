@@ -1,9 +1,31 @@
 from ast import literal_eval
 
-from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QSizePolicy, QVBoxLayout, QWidget
+from PyQt6.QtCore import pyqtSignal, Qt, QSize
+from PyQt6.QtWidgets import QFrame, QHBoxLayout, QPushButton, QSizePolicy, QVBoxLayout, QWidget
+from PyQt6.QtGui import QIcon
+
+from config import resource_path
 
 from .CommonFunctions import create_data_input_row, format_input
+
+class CustomFrame(QFrame):
+    def __init__(self):
+        super().__init__()
+        self._default_style = "QFrame { background-color: #c1c9c9; }"
+        self._on_hover_style = "QFrame { background-color: #9aa1a1; }"
+        self.setStyleSheet(self._default_style)
+
+class HoverButton(QPushButton):
+    def __init__(self, parent: QFrame):
+        super().__init__(parent)
+
+    def enterEvent(self, event):
+        self.parent().setStyleSheet(self.parent()._on_hover_style)
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        self.parent().setStyleSheet(self.parent()._default_style)
+        super().leaveEvent(event)
 
 class ShaftSubsection(QWidget):
     subsection_data_signal = pyqtSignal(dict)
@@ -21,58 +43,92 @@ class ShaftSubsection(QWidget):
 
     def _init_ui(self):
         # Main layout
-        self.main_layout = QVBoxLayout(self)
-        self.main_layout.setContentsMargins(0, 0, 0, 0)
+        self._main_layout = QVBoxLayout(self)
+        self._main_layout.setContentsMargins(0, 0, 0, 0)
 
         self._init_header()
         self._init_content()
 
     def _init_header(self):
-        # Header layout
-        self.header_layout = QHBoxLayout()
-        self.main_layout.addLayout(self.header_layout)
+        # Set header layout
+        header = CustomFrame()
+        self.header_height = 25
+        header.setFixedHeight(self.header_height)  # Set the height to 30 pixels
+        self._main_layout.addWidget(header)
 
-        # Set header label
-        self.header = QLabel()
-        self._set_header()
-        self.header.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        self.header.setFixedHeight(30)
-        self.header.mousePressEvent = self.toggle
-        self.header_layout.addWidget(self.header)
+        self._header_layout = QHBoxLayout()
+        self._header_layout.setContentsMargins(0, 0, 0, 0)
+        self._header_layout.setSpacing(0)
+        self._header_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        header.setLayout(self._header_layout)
+
+        # Set toggle section button
+        self._toggle_section_button = HoverButton(header)
+        self._toggle_section_button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self._toggle_section_button.setStyleSheet("""                                                  
+            QPushButton {
+                background-color: transparent;
+                text-align: left;
+                font-size: 10pt;
+                font-weight: 600;                                
+                padding-left: 10px
+            }
+        """)
+
+        self._set_name()
+        self._toggle_section_button.clicked.connect(self.toggle_content)
+        self._header_layout.addWidget(self._toggle_section_button)
 
         # Set removal button
-        self.remove_button = QPushButton("-", self)
-        self.remove_button.setFixedWidth(30)
+        self.remove_button = QPushButton()
+        button_size = self.header_height
+        icon_size = self.header_height * 0.9
+        self.remove_button.setFixedSize(button_size, button_size)
+        self.remove_button.setIconSize(QSize(icon_size, icon_size))
+        self.remove_button.setIcon(QIcon(resource_path('icons//remove_btn.png')))
+        self.remove_button.setStyleSheet("""                         
+            QPushButton {
+                background-color: transparent;
+                color: black;
+                border: 1px solid transparent;
+                border-radius: 5px;
+            }
+            QPushButton:hover {
+                background-color: #9aa1a1;
+                border: 1px solid #9aa1a1;
+            }
+            QPushButton:pressed {
+                background-color: #5a6161;
+                border: 1px solid #5a6161;
+            }
+        """)
         self.remove_button.clicked.connect(self.emit_remove_signal)
-        self.header_layout.addWidget(self.remove_button)
+        self._header_layout.addWidget(self.remove_button)
 
     def _init_content(self):
-        # Content layout
-        self.content_layout = QVBoxLayout()
-        self.content_container = QFrame()
-        self.content_container.setLayout(self.content_layout)
-        self.content_container.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
-        self.main_layout.addWidget(self.content_container)
+        # _content layout
+        self._content = QFrame()
+        self._content_layout = QVBoxLayout()
+        self._content.setLayout(self._content_layout)
+        self._content_layout.setContentsMargins(5, 0, 0, 0)
+        self._main_layout.addWidget(self._content)
         
         # Inputs layout
-        self.inputs_layout = QVBoxLayout()
-        self.content_layout.addLayout(self.inputs_layout)
+        self._inputs_layout = QVBoxLayout()
+        self._content_layout.addLayout(self._inputs_layout)
 
         # Set OK button
-        self.confirm_button = QPushButton("OK", self)
-        self.confirm_button.clicked.connect(self.emit_data_signal)
-        self.confirm_button.setEnabled(False)
-        self.content_layout.addWidget(self.confirm_button)
+        self._confirm_button = QPushButton("OK", self)
+        self._confirm_button.clicked.connect(self.emit_data_signal)
+        self._confirm_button.setEnabled(False)
+        self._content_layout.addWidget(self._confirm_button)
 
-        # Initially collapse ShaftSubsection widget
-        self.expanded = True
-        self.toggle(None)
     
-    def _set_header(self):
-        self.header.setText(f'{self.subsection_number + 1}.')
+    def _set_name(self):
+        self._toggle_section_button.setText(f'Stopień {self.subsection_number + 1}')
     
     def _check_if_all_inputs_provided(self):
-        self.confirm_button.setEnabled(all(input.text() != '' for input in self.inputs.values()) and all(literal_eval(input.text()) != 0 for input in self.inputs.values()))
+        self._confirm_button.setEnabled(all(input.text() != '' for input in self.inputs.values()) and all(literal_eval(input.text()) != 0 for input in self.inputs.values()))
     
     def _check_if_meets_limits(self, input=None):
         input = self.sender() if input == None else input
@@ -96,7 +152,7 @@ class ShaftSubsection(QWidget):
             symbol = attribute[1]
 
             attribute_row, input = create_data_input_row(symbol)
-            self.inputs_layout.addLayout(attribute_row)
+            self._inputs_layout.addLayout(attribute_row)
 
             self.add_input(id, input)
     
@@ -110,7 +166,7 @@ class ShaftSubsection(QWidget):
     
     def update_subsection_name(self, new_number):
         self.subsection_number = new_number
-        self._set_header()
+        self._set_name()
     
     def set_limits(self, limits):
         for attribute, attribute_limits in limits.items():
@@ -120,10 +176,8 @@ class ShaftSubsection(QWidget):
                     self.limits[attribute][limit] = value
                 self._check_if_meets_limits(self.inputs[attribute])
 
-    def toggle(self, event):
-        # Collapse or expand contents of section
-        self.expanded = not self.expanded
-        self.content_container.setVisible(self.expanded)
+    def toggle_content(self, event):
+        self._content.setVisible(not self._content.isVisible())
 
         self.adjustSize()
         self.updateGeometry()
