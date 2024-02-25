@@ -34,13 +34,15 @@
     ```shell
     flet app/main.py
     ```
-## CREATE EXECUTABLE
-- Run from repository base directory:
+## BUILD EXECUTABLE
 
-    ```shell
-        mkdir -p appexe && cd appexe && flet pack ../app/main.py --name dbsample --add-data "../app/lozyska_kulkowe.csv;." && cd ..
-    ```
-  The path to executable will be: ```appexe/dist/dbsample.exe```
+### FOR WINDOWS
+- From repository root run:
+
+   ```shell
+    pyinstaller --name 'CycloGear2024' --noconsole --distpath .\build\dist --specpath .\build\spec .\app\main.py ; Copy-Item -Path ".\data" -Destination ".\build\dist\CycloGear2024\data" -Recurse
+   ```
+- Copy 'data' folder to build 
 
 ## EXECUTABLE
 Executable can be also found in compressed form: ```dbsample.zip```. Just unzip it and find ```dbsample.exe```
