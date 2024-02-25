@@ -51,7 +51,7 @@ class ShaftCalculator:
             start_z = position - length / 2
             start_y = - diameter / 2 + offset 
 
-            self.shaft_sections_plots_attributes[section][subsection_number] = [(start_z, start_y), length, diameter]
+            self.shaft_sections_plots_attributes[section][subsection_number] = {'start': (start_z, start_y), 'l': length, 'd': diameter, 'e': offset}
 
     def _calculate_section_between_eccentricities(self):
         # Draw the shaft section between the eccentrics
@@ -63,7 +63,7 @@ class ShaftCalculator:
             diameter = subsection_data['d']
             start_y = -diameter / 2
 
-            self.shaft_sections_plots_attributes[section][subsection_number] = [(start_z, start_y), length, diameter]
+            self.shaft_sections_plots_attributes[section][subsection_number] = {'start': (start_z, start_y), 'l': length, 'd': diameter}
 
             start_z += length # Update start_z for the next subsection
 
@@ -79,7 +79,7 @@ class ShaftCalculator:
             start_z -= length
             start_y = -diameter / 2
 
-            self.shaft_sections_plots_attributes[section][subsection_number] = [(start_z, start_y), length, diameter]
+            self.shaft_sections_plots_attributes[section][subsection_number] = {'start': (start_z, start_y), 'l': length, 'd': diameter}
         
     def _calculate_section_after_eccentricities(self):
         # Draw the shaft section after the second eccentric
@@ -91,7 +91,7 @@ class ShaftCalculator:
             diameter = subsection_data['d']
             start_y = -diameter / 2
             
-            self.shaft_sections_plots_attributes[section][subsection_number] = [(start_z, start_y), length, diameter]
+            self.shaft_sections_plots_attributes[section][subsection_number] = {'start': (start_z, start_y), 'l': length, 'd': diameter}
             
             start_z += length  # Update start_z for the next subsection
     
@@ -175,7 +175,7 @@ class ShaftCalculator:
     
         for section in self.shaft_sections_plots_attributes.values():
             for subsection_attributes in section.values(): 
-                length = subsection_attributes[1]
+                length = subsection_attributes['l']
                 total_length += length
         
         return total_length == self._shaft_attributes['L']
@@ -184,9 +184,9 @@ class ShaftCalculator:
         shaft_steps = []
         for section in self.shaft_sections_plots_attributes.values():
             for subsection_attributes in section.values():
-                z = subsection_attributes[0][0]
-                l = subsection_attributes[1]
-                d = subsection_attributes[2]
+                z = subsection_attributes['start'][0]
+                l = subsection_attributes['l']
+                d = subsection_attributes['d']
 
                 shaft_steps.append({'z': z, 'l': l, 'd': d})
         

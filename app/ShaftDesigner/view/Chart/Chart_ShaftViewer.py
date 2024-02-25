@@ -65,7 +65,7 @@ class Chart_ShaftViewer():
 
         for section in self._shaft_attributes.values():
             for subsection in section.values():
-                subsection_diameter = subsection[-1]
+                subsection_diameter = subsection['d']
                 if subsection_diameter > highest_diameter:
                     highest_diameter = subsection_diameter
 
@@ -140,11 +140,10 @@ class Chart_ShaftViewer():
 
             for section_name, section in self._shaft_attributes.items():
                 for subsection_number, subsection in section.items():
-
                     # Draw length dimension
-                    start = subsection[0]
-                    length = subsection[1]
-                    diameter = subsection[2]
+                    start = subsection['start']
+                    length = subsection['l']
+                    diameter = subsection['d']
 
                     start_z = start[0]
                     end_z = start[0] + length
@@ -165,6 +164,17 @@ class Chart_ShaftViewer():
                     diameter_dimension = self._draw_dimension(text, z_position, z_position, z_position, start_y, end_y, y_position)
                     self._shaft_dimensions.extend(diameter_dimension)
 
+                    # Draw eccentric
+                    if 'e' in subsection:
+                        eccentric = subsection['e']
+                        start_y = eccentric
+                        end_y = 0
+                        z_position = start_z + length * 0.5
+                        y_position = eccentric * 0.5
+                        text = "{:.1f}".format(abs(eccentric))
+                        diameter_dimension = self._draw_dimension(text, z_position, z_position, z_position, start_y, end_y, y_position)
+                        self._shaft_dimensions.extend(diameter_dimension)
+
         self._canvas.draw()
 
     def _draw_dimension(self, text, start_z, end_z, label_z_position, start_y=0, end_y=0, label_y_position=0):
@@ -183,7 +193,16 @@ class Chart_ShaftViewer():
         if start_z == end_z:                # Vertical line
             ha, va = 'right', 'center'
             rotation = 90
-            label_z_position -= offset            
+            label_z_position -= offset
+
+            # if it is eccentric dimension, draw additional point marking the middle (y) of the section
+            if end_y == 0:
+                middle_point = self._ax.scatter(start_z, start_y,
+                                   s=8,
+                                   color=self._chart.dimensions_color,
+                                   zorder=self._chart.dimensions_layer
+                                   )
+                lines.append(middle_point)            
         else:                               # Horizontal line
             ha, va = 'center', 'bottom'
             rotation = 0
@@ -223,9 +242,9 @@ class Chart_ShaftViewer():
         # Draw new sections
         for section_name, section in self._shaft_attributes.items():
             for subsection_number, subsection in section.items():
-                start = subsection[0]
-                length = subsection[1]
-                diameter = subsection[2]
+                start = subsection['start']
+                length = subsection['l']
+                diameter = subsection['d']
 
                 subsection_id = f"{section_name}_{subsection_number}"
 
