@@ -11,11 +11,9 @@ class ABCQWidgetMeta(ABCMeta, type(QWidget)):
 
 class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
     """
-    Widget which inputs - line edits, items that have to be selected by the
-    user are tracked.
+    Widget that tracks its status.
 
-    It provides a reusable interface for checking if all the inputs are provided
-    and/or changed.
+    It provides a reusable interface for checking if all the inputs are provided and/or changed.
     """
     def __init__(self, parent, callback):
         super().__init__(parent)
@@ -27,15 +25,17 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
 
     @abstractmethod
     def _init_ui(self):
-        """Initialize the user interface for the widget. Must be overridden in subclasses."""
+        """
+        Initialize the user interface for the widget. Must be overridden in subclasses.
+        """
         pass
     
     def _setup_state_tracking(self):
         """
         Set up inputs tracking.
 
-        Connects textChanged signals of QLineEdit widgets to the _check_state method,
-        and provides a dictionary where subclasses can add other inputs that should be tracked.
+        Connect inputConfirmedSignal and dataChangedSignal signals of custom Input and DataButton 
+        widgets to the _check_state method.
         """
         self._inputs_to_provide = self.findChildren(Input)
 
@@ -58,7 +58,8 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
         """
         inputs_states = [input.text() for input in self._inputs_to_provide]
         inputs_states += [item.id() for item in self._items_to_select]
-        return None if '' in inputs_states or None in inputs_states else inputs_states
+
+        return inputs_states
 
     def _check_state(self):
         """
@@ -69,27 +70,40 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
         """
         current_state = self._get_state()
 
-        all_filled = current_state is not None
         state_changed = current_state != self._original_state
 
-        if all_filled:
+        all_provided = not ('' in current_state or None in current_state)
+        if all_provided:
             self._original_state = current_state
-        
-        self._callback(all_filled, state_changed)
+
+        self._on_state_checked(all_provided, state_changed)
+
+    def _on_state_checked(self, all_provided, state_changed):
+        """
+        Perform tasks after state checking.
+
+        Call the callback function with widget status attributes.
+
+        Args:
+            all_provided (bool): Are all inputs provided?
+            state_changed (bool): Were the inputs changed?
+        """
+        self._callback(all_provided, state_changed)
+
+    def _on_activated(self):
+        """
+        Call appropriate methods time when the widget becomes visible.
+        """
+        self._check_state()
     
     def showEvent(self, event):
         """
         Override the showEvent method of the QWidget to implement custom logic
-        (call _on_tab_activated() method) to execute when the widget is shown.
+        (call _on_tab_activated() method) to execute when the widget becomes visible.
 
-        param: event
+        Args:
+            event: (QEvent)
         """
         if event.type() == QEvent.Type.Show:
             self._on_activated()
         super().showEvent(event)
-    
-    def _on_activated(self):
-        """
-        This method is triggered every time when widget becomes visible and calls appropriate methods.
-        """
-        self._check_state()

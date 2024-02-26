@@ -2,8 +2,9 @@ from .ITrackedWidget import ITrackedWidget
 
 class ITrackedTab(ITrackedWidget):
     """
-    Tab that extends the ITrackedWidget abstract class with methods that should be overriden 
-    (but do not have to) by subclasses 
+    Tab widget that extends the ITrackedWidget abstract class:
+    - implement methods that should be overriden (but do not have to) by subclasses
+    - override parent class method to implement additional functionalities
     """
     def __init__(self, parent, callback):
         # Set the dict of inputs that hold provided by user attribute values
@@ -13,33 +14,32 @@ class ITrackedTab(ITrackedWidget):
         super().__init__(parent, callback)
 
     def update_tab(self):
-        """Update the tab data. This method can be overridden in subclasses to provide specific update logic."""
+        """
+        Update the tab data. This method can be overridden in subclasses to provide specific update logic.
+        """
         pass
 
     def update_data(self):
-        """Update the data. This method can be overridden in subclasses to provide specific update logic."""
+        """
+        Update the data. This method can be overridden in subclasses to provide specific update logic.
+        """
         pass
+
+    def _on_state_checked(self, all_filled, state_changed):
+        """
+        Override parent class method to perform additional tasks after state checking.
+
+        Update the data.
+        """
+        if all_filled:
+            self.update_data()
+
+        super()._on_state_checked(all_filled, state_changed)
     
     def _on_activated(self):
         """
-        Overrdie parent class method to add another methods to be triggered uppon activation.
+        Override parent class method to call additional methods uppon activation.
         """
         super()._on_activated()
 
         self.update_tab()
-
-    def _check_state(self):
-        """
-        Overloads the parent class method - execute the the update_data method
-        when all the inputs are filled.
-        """
-        current_state = self._get_state()
-
-        all_filled = current_state is not None
-        state_changed = current_state != self._original_state
-
-        if all_filled:
-            self.update_data()
-            self._original_state = current_state
-        
-        self._callback(all_filled, state_changed)
