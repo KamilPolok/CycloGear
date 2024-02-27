@@ -94,8 +94,8 @@ class PreliminaryDataTab(ITrackedTab):
         value = self._inputs['L1'].value()
         if value:
             L1 = value
-            x = self._parent.data['x'][0]
-            B = self._parent.data['B'][0]
+            x = self.data['x'][0]
+            B = self.data['B'][0]
             L2 = L1 + x + B
             self._outputs['L2'].setValue(L2)
         else:

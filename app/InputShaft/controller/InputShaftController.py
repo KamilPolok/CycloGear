@@ -2,11 +2,10 @@ from InputShaft.Mediator import Mediator
 from InputShaft.view.InputShaft import InputShaft
 from InputShaft.model.InputShaftCalculator import InputShaftCalculator
 
-from InputShaft.view.Tabs.PreliminaryDataTab import PreliminaryDataTab
-from InputShaft.view.Tabs.BearingsTab import BearingsTab
-from InputShaft.view.Tabs.PowerLossTab import PowerLossTab
-from InputShaft.view.Tabs.ResultsTab import ResultsTab
-
+from InputShaft.Tabs.PreliminaryDataTab import PreliminaryDataTab
+from InputShaft.Tabs.BearingsTab import BearingsTab
+from InputShaft.Tabs.PowerLossTab import PowerLossTab
+from InputShaft.Tabs.ResultsTab import ResultsTab
 
 from ShaftDesigner.controller.ShaftDesignerController import ShaftDesignerController
 from ShaftDesigner.view.ShaftDesigner import ShaftDesigner
