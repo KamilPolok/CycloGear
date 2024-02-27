@@ -11,12 +11,6 @@ class InputShaft(QWidget):
         self._init_ui()
 
         self.is_shaft_designed = False
-    
-    def set_data(self, data):
-        """
-        Set data needed for or from GUI.
-        """
-        self.data = data
 
     def _init_ui(self):
         """
@@ -43,35 +37,16 @@ class InputShaft(QWidget):
         self.buttons_section_layout.addWidget(self._next_tab_button)
         self.buttons_section_layout.addWidget(self.preview_button)
     
-    def init_tabs(self):
+    def init_tabs(self, tabs, tabs_titles):
         """
         Initialize tabs in the main window.
         """
-        from .Tabs.BearingsTab import BearingsTab
-        from .Tabs.PreliminaryDataTab import PreliminaryDataTab
-        from .Tabs.ResultsTab import ResultsTab
-        from .Tabs.PowerLossTab import PowerLossTab
-        
+        # Append tabs to tab widget
         self._tab_widget = QTabWidget(self)
 
-        self.tabs = []
-
-        # Add tabs
-        tab1 = PreliminaryDataTab(self, self.update_access_to_next_tabs)
-        self.tabs.append(tab1)
-        self._tab_widget.addTab(tab1, 'Założenia wstępne')
-
-        tab2 = BearingsTab(self, self.update_access_to_next_tabs)
-        self.tabs.append(tab2)
-        self._tab_widget.addTab(tab2, 'Dobór łożysk')
-
-        tab3 = PowerLossTab(self, self.update_access_to_next_tabs)
-        self.tabs.append(tab3)
-        self._tab_widget.addTab(tab3, 'Straty Mocy')
-
-        tab4 = ResultsTab(self, self.update_access_to_next_tabs)
-        self.tabs.append(tab4)
-        self._tab_widget.addTab(tab4, 'Wyniki obliczeń')
+        for tab, title in zip(tabs, tabs_titles):
+            self._tab_widget.addTab(tab, title)
+            tab.set_callback(self.update_access_to_next_tabs)
         
         # Disable all tabs except the first one
         for i in range(1, self._tab_widget.count()):

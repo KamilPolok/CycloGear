@@ -10,28 +10,6 @@ from .common.common_functions import create_data_input_row, create_data_display_
 class PreliminaryDataTab(ITrackedTab):
     update_data_signal = pyqtSignal(dict)
 
-    def _init_tab_data(self):
-        """
-        Initialize tab data from the parent's data.
-        """
-        attributes_to_acquire = ['L', 'LA', 'LB', 'L1', 'L2', 'Materiał', 'xz', 'qdop', 'tetadop', 'fdop']
-        self.tab_data = {attr: deepcopy(self._parent.data[attr]) for attr in attributes_to_acquire}
-        self._items = {}
-
-    def _init_ui(self):
-        """
-        Initialize the user interface for this tab.
-        """
-        self._init_tab_data()
-
-        self.setLayout(QVBoxLayout())
-
-        self._view_dimensions_component()
-        self._view_material_stength_component()
-        self._view_material_component()
-
-        self._connect_signals_and_slots()
-
     def _view_dimensions_component(self):
         """
         Create and layout the dimensions component of the tab.
@@ -43,9 +21,9 @@ class PreliminaryDataTab(ITrackedTab):
         roller_support = create_data_input_row(self, 'LA', 'Współrzędne podpory przesuwnej', 'L<sub>A</sub>', decimal_precision=2)
         pin_support = create_data_input_row(self, 'LB', 'Współrzędne podpory nieprzesuwnej', 'L<sub>B</sub>', decimal_precision=2)
         cyclo_disc1 = create_data_input_row(self, 'L1', 'Współrzędne koła obiegowego 1', 'L<sub>1</sub>', decimal_precision=2)
-        cyclo_disc2 = create_data_display_row(self, 'L2', self._parent.data['L2'], 'L<sub>2</sub>', 'Współrzędne koła obiegowego 2', decimal_precision=2)
-        disc_width = create_data_display_row(self, 'x', self._parent.data['x'], 'x', 'Odległość pomiędzy tarczami', decimal_precision=2)
-        discs_distance = create_data_display_row(self, 'B', self._parent.data['B'], 'B', 'Grubość tarczy', decimal_precision=2)
+        cyclo_disc2 = create_data_display_row(self, 'L2', self.data['L2'], 'L<sub>2</sub>', 'Współrzędne koła obiegowego 2', decimal_precision=2)
+        disc_width = create_data_display_row(self, 'x', self.data['x'], 'x', 'Odległość pomiędzy tarczami', decimal_precision=2)
+        discs_distance = create_data_display_row(self, 'B', self.data['B'], 'B', 'Grubość tarczy', decimal_precision=2)
 
         component_layout.addWidget(component_label)
         component_layout.addLayout(shaft_length)
@@ -200,17 +178,17 @@ class PreliminaryDataTab(ITrackedTab):
         """
 
         if input_name == 'L':
-            min_value = self._parent.data['x'][0] + 2 * self._parent.data['B'][0]
+            min_value = self.data['x'][0] + 2 * self.data['B'][0]
             max_value = 1000
         elif input_name == 'LA':
             min_value = 0
             max_value = self.validated_inputs_values['L']
         elif input_name == 'LB':
-            min_value = self.validated_inputs_values['LA'] + 2 * self._parent.data['B'][0] + self._parent.data['x'][0]
+            min_value = self.validated_inputs_values['LA'] + 2 * self.data['B'][0] + self.data['x'][0]
             max_value = self.validated_inputs_values['L']
         elif input_name == 'L1':
-            min_value =  self.validated_inputs_values['LA'] + 0.5 * self._parent.data['B'][0]
-            max_value = self.validated_inputs_values['LB'] - self._parent.data['x'][0] - 1.5 * self._parent.data['B'][0]
+            min_value =  self.validated_inputs_values['LA'] + 0.5 * self.data['B'][0]
+            max_value = self.validated_inputs_values['LB'] - self.data['x'][0] - 1.5 * self.data['B'][0]
         
         self.validated_inputs_limits[input_name] = (round(min_value, 2), round(max_value, 2))
         self._inputs[input_name].setPlaceholderText(f"{min_value:.2f}-{max_value:.2f}")
@@ -270,7 +248,7 @@ class PreliminaryDataTab(ITrackedTab):
         Update the tab with parent data.
         """
         for attribute in self._outputs.keys():
-            new_value = self._parent.data[attribute][0]
+            new_value = self.data[attribute][0]
             if new_value is not None:
                 self._outputs[attribute].setValue(new_value)
 
@@ -289,3 +267,28 @@ class PreliminaryDataTab(ITrackedTab):
         self._update_eccentrics_position()
 
         self.select_material_button.setData(data['Materiał'])
+    
+    def init_data(self, data):
+        """
+        Override parent method. Set the initial data for the tab from the parent's data.
+
+        Args:
+            data (dict): Component data.
+        """
+        super().init_data(data)
+        attributes_to_acquire = ['L', 'LA', 'LB', 'L1', 'L2', 'Materiał', 'xz', 'qdop', 'tetadop', 'fdop']
+        self.tab_data = {attr: deepcopy(self.data[attr]) for attr in attributes_to_acquire}
+        self._items = {}
+
+    def init_ui(self):
+        """
+        Initialize the user interface for this tab.
+        """
+        self.setLayout(QVBoxLayout())
+
+        self._view_dimensions_component()
+        self._view_material_stength_component()
+        self._view_material_component()
+
+        self._connect_signals_and_slots()
+        super().init_ui()

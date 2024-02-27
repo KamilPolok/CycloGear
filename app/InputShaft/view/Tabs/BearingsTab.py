@@ -9,7 +9,11 @@ from .common.ITrackedTab import ITrackedTab
 from .common.common_functions import create_data_display_row, create_data_input_row
 
 class Section(ITrackedWidget):
-    def _init_ui(self):
+    def __init__(self, parent, callback):
+        super().__init__(parent, callback)
+        self.init_ui()
+
+    def init_ui(self):
         self.main_layout = QVBoxLayout()
         self.setLayout(self.main_layout)
 
@@ -22,28 +26,6 @@ class BearingsTab(ITrackedTab):
     select_support_A_bearing_signal = pyqtSignal(dict)
     select_support_B_bearing_signal = pyqtSignal(dict)
     select_central_bearing_signal = pyqtSignal(dict)
-
-    def _init_tab_data(self):
-        """
-        Set the initial data for the tab from the main parent's data.
-        """
-        attributes_to_acquire = ['LhA', 'fdA', 'ftA',
-                                 'LhB', 'fdB', 'ftB', 
-                                 'Lhc', 'fdc', 'ftc']
-        self.tab_data = {attr: deepcopy(self._parent.data[attr]) for attr in attributes_to_acquire}
-        self._items = {}
-
-    def _init_ui(self):
-        """
-        Initialize the user interface for this tab.
-        """
-        self._init_tab_data()
-
-        self.main_layout = QVBoxLayout()
-        self.setLayout(self.main_layout)
-
-        self._init_selector()
-        self._init_sections()
 
     def _init_selector(self):
         self.layout_selector = QComboBox()
@@ -76,7 +58,7 @@ class BearingsTab(ITrackedTab):
         self.support_A_bearing_section = Section(self, self._enable_select_support_A_bearing_button)
 
         # Set data display and input rows
-        self.support_A_bearing_section.addLayout(create_data_display_row(self, 'dA', self._parent.data['dA'], 'd<sub>s</sub>', 'Średnica wewnętrzna', decimal_precision=2))
+        self.support_A_bearing_section.addLayout(create_data_display_row(self, 'dA', self.data['dA'], 'd<sub>s</sub>', 'Średnica wewnętrzna', decimal_precision=2))
         self.support_A_bearing_section.addLayout(create_data_input_row(self, 'LhA', 'Trwałość godzinowa łożyska', 'L<sub>h</sub>', decimal_precision=0))
         self.support_A_bearing_section.addLayout(create_data_input_row(self, 'ftA', 'Współczynnik zależny od zmiennych obciążeń dynamicznych', 'f<sub>d</sub>', decimal_precision=2))
         self.support_A_bearing_section.addLayout(create_data_input_row(self, 'fdA', 'Współczynnik zależny od temperatury pracy', 'f<sub>t</sub>', decimal_precision=2))
@@ -108,7 +90,7 @@ class BearingsTab(ITrackedTab):
         self.support_B_bearing_section = Section(self, self._enable_select_support_B_bearing_button)
 
         # Set data display and input rows
-        self.support_B_bearing_section.addLayout(create_data_display_row(self, 'dB', self._parent.data['dB'], 'd<sub>s</sub>', 'Średnica wewnętrzna', decimal_precision=2))
+        self.support_B_bearing_section.addLayout(create_data_display_row(self, 'dB', self.data['dB'], 'd<sub>s</sub>', 'Średnica wewnętrzna', decimal_precision=2))
         self.support_B_bearing_section.addLayout(create_data_input_row(self, 'LhB', 'Trwałość godzinowa łożyska', 'L<sub>h</sub>', decimal_precision=0))
         self.support_B_bearing_section.addLayout(create_data_input_row(self, 'ftB', 'Współczynnik zależny od zmiennych obciążeń dynamicznych', 'f<sub>d</sub>', decimal_precision=2))
         self.support_B_bearing_section.addLayout(create_data_input_row(self, 'fdB', 'Współczynnik zależny od temperatury pracy', 'f<sub>t</sub>', decimal_precision=2))
@@ -140,7 +122,7 @@ class BearingsTab(ITrackedTab):
         self.central_bearing_section = Section(self, self._enable_select_central_bearing_button)
 
         # Set data display and input rows
-        self.central_bearing_section.addLayout(create_data_display_row(self, 'de', self._parent.data['de'], 'd<sub>e</sub>', 'Średnica wewnętrzna', decimal_precision=2))
+        self.central_bearing_section.addLayout(create_data_display_row(self, 'de', self.data['de'], 'd<sub>e</sub>', 'Średnica wewnętrzna', decimal_precision=2))
         self.central_bearing_section.addLayout(create_data_input_row(self, 'Lhc', 'Trwałość godzinowa łożyska', 'L<sub>h</sub>', decimal_precision=0))
         self.central_bearing_section.addLayout(create_data_input_row(self, 'ftc', 'Współczynnik zależny od zmiennych obciążeń dynamicznych', 'f<sub>d</sub>', decimal_precision=2))
         self.central_bearing_section.addLayout(create_data_input_row(self, 'fdc', 'Współczynnik zależny od temperatury pracy', 'f<sub>t</sub>', decimal_precision=2))
@@ -264,7 +246,7 @@ class BearingsTab(ITrackedTab):
         Update the tab with parent data.
         """
         for attribute in self._outputs.keys():
-            new_value = self._parent.data[attribute][0]
+            new_value = self.data[attribute][0]
             self._outputs[attribute].setValue(new_value)
 
     def set_state(self, data):
@@ -282,3 +264,28 @@ class BearingsTab(ITrackedTab):
         self.update_selected_support_A_bearing(data['Łożyska_podpora_A'])
         self.update_selected_support_B_bearing(data['Łożyska_podpora_B'])
         self.update_selected_central_bearing(data['Łożyska_centralne'])
+    
+    def init_data(self, data):
+        """
+        Override parent method. Set the initial data for the tab from the parent's data.
+
+        Args:
+            data (dict): Component data.
+        """
+        super().init_data(data)
+        attributes_to_acquire = ['LhA', 'fdA', 'ftA',
+                                 'LhB', 'fdB', 'ftB', 
+                                 'Lhc', 'fdc', 'ftc']
+        self.tab_data = {attr: deepcopy(self.data[attr]) for attr in attributes_to_acquire}
+        self._items = {}
+    
+    def init_ui(self):
+        """
+        Initialize the user interface for this tab.
+        """
+        self.main_layout = QVBoxLayout()
+        self.setLayout(self.main_layout)
+
+        self._init_selector()
+        self._init_sections()
+        super().init_ui()

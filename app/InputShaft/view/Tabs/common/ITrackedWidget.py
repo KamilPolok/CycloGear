@@ -15,20 +15,12 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
 
     It provides a reusable interface for checking if all the inputs are provided and/or changed.
     """
-    def __init__(self, parent, callback):
+    def __init__(self, parent, callback=None):
         super().__init__(parent)
         self._parent = parent
-        self._callback = callback
 
-        self._init_ui()
-        self._setup_state_tracking()
-
-    @abstractmethod
-    def _init_ui(self):
-        """
-        Initialize the user interface for the widget. Must be overridden in subclasses.
-        """
-        pass
+        if callback:
+            self._callback = callback
     
     def _setup_state_tracking(self):
         """
@@ -107,3 +99,19 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
         if event.type() == QEvent.Type.Show:
             self._on_activated()
         super().showEvent(event)
+    
+    def set_callback(self, callback):
+        """
+        Set callback
+
+        Args:
+            callback (callable): Function that should be called after state checking.
+        """
+        self._callback = callback
+    
+    @abstractmethod
+    def init_ui(self):
+        """
+        Initialize the user interface for the widget. Must be overridden in subclasses.
+        """
+        self._setup_state_tracking()
