@@ -1,7 +1,7 @@
 from copy import deepcopy
 
-from PyQt6.QtCore import QEvent, pyqtSignal
-from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QLabel
+from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel
 
 from .common.DataButton import DataButton
 from .common.ITrackedTab import ITrackedTab
@@ -10,7 +10,7 @@ from .common.common_functions import create_data_input_row, create_data_display_
 class PreliminaryDataTab(ITrackedTab):
     update_data_signal = pyqtSignal(dict)
 
-    def _set_tab_data(self):
+    def _init_tab_data(self):
         """
         Initialize tab data from the parent's data.
         """
@@ -22,7 +22,7 @@ class PreliminaryDataTab(ITrackedTab):
         """
         Initialize the user interface for this tab.
         """
-        self._set_tab_data()
+        self._init_tab_data()
 
         self.setLayout(QVBoxLayout())
 
@@ -94,15 +94,18 @@ class PreliminaryDataTab(ITrackedTab):
 
         self.layout().addLayout(component_layout)
 
-    def _connect_signals_and_slots(self):
+    def _setup_inputs_validation(self):
         """
-        Connect signals and slots for interactivity in the tab
+        This function gets triggered when the user switches onto current ITrackedTab.
+        It (re)initializes and applies the input limits of the validated_inputs.
         """
-        self._inputs['L1'].inputConfirmedSignal.connect(self._update_eccentrics_position)
+        self.validated_inputs_limits = {}
+        self.validated_inputs_values = {}
 
-        self.validated_inputs = ['L', 'LA', 'LB', 'L1']
+        self._set_input_limits('L')
         for name in self.validated_inputs:
-            self._inputs[name].inputConfirmedSignal.connect(self._validate_input)
+            if self._inputs[name].isEnabled():
+                self._validate_input(self._inputs[name])
 
     def _update_eccentrics_position(self):
         """
@@ -119,26 +122,14 @@ class PreliminaryDataTab(ITrackedTab):
             self._outputs['L2'].setValue(L2)
         else:
             self._outputs['L2'].clear()
-    
-    def _setup_inputs_validation(self):
-        """
-        This function gets triggered when the user switches onto current ITrackedTab.
-        It (re)initializes and applies the input limits of the validated_inputs.
-        """
-        self.validated_inputs_limits = {}
-        self.validated_inputs_values = {}
-
-        self._set_input_limits('L')
-        for name in self.validated_inputs:
-            if self._inputs[name].isEnabled():
-                self._validate_input(self._inputs[name])
 
     def _validate_input(self, input=None):
         """
         This function gets triggered when the user confirms the given input or at the limits 
         (re)initialization. It checks if the input is valid and depending on the result, takes actions.
 
-        :param input: input which content is validated
+        Args:
+            input (Input): input which content is validated
         """
         input = self.sender() if input == None else input
         input_name = next((name for name, i in self._inputs.items() if i == input), None)
@@ -153,8 +144,10 @@ class PreliminaryDataTab(ITrackedTab):
         This function gets triggered when the user confirms the given input or at the limits 
         (re)initialization. It checks if the input is valid and depending on the result, takes actions.
 
-        :param input: input which content is validated
-        :return: Boolean value representing the validity of teh input
+        Args:
+            input_name (str): Name of input which content is validated
+        Returns:
+            (bool): Value representing the validity of teh input
         """
         input = self._inputs[input_name]
         value = input.value()
@@ -170,9 +163,10 @@ class PreliminaryDataTab(ITrackedTab):
     def _enable_next_input(self, input_name):
         """
         Enable the next input from validated inputs after the one which name is provided and if its value 
-        is invalid clears its text.
+        is invalid, clear its text.
 
-        :param input: name of input before the input to enable
+        Args:
+            input_name (str): Name of input before the input to enable.
         """
         idx = self.validated_inputs.index(input_name)
         if idx < len(self.validated_inputs) - 1:
@@ -184,10 +178,11 @@ class PreliminaryDataTab(ITrackedTab):
     
     def _clear_and_disable_subsequent_inputs(self, input_name):
         """
-        Clear text from and disable all the validated inputs that come after the input which name is 
+        Clear and disable all the validated inputs that come after the input which name is 
         provided.
 
-        :param input: name of the input after which perform the the disabling
+        Args:
+            input_name (str): name of the input after which perform the the disabling
         """
         idx = self.validated_inputs.index(input_name)
         for name in self.validated_inputs[idx + 1:]:
@@ -200,7 +195,8 @@ class PreliminaryDataTab(ITrackedTab):
         """
         Calculate, set and save the limits for the input which name was provided.
 
-        :param input: name of the input for which the limits are set
+        Args:
+            input_name (str): name of the input for which the limits are set
         """
 
         if input_name == 'L':
@@ -227,20 +223,39 @@ class PreliminaryDataTab(ITrackedTab):
         
         self._update_eccentrics_position()
         self._setup_inputs_validation()
+    
+    def _connect_signals_and_slots(self):
+        """
+        Connect signals and slots for interactivity in the tab
+        """
+        self._inputs['L1'].inputConfirmedSignal.connect(self._update_eccentrics_position)
+
+        self.validated_inputs = ['L', 'LA', 'LB', 'L1']
+        for name in self.validated_inputs:
+            self._inputs[name].inputConfirmedSignal.connect(self._validate_input)
+
+    def _emit_tab_data(self):
+        """
+        Emit a signal to update the data with the tab's one.
+        """
+        tab_data = self.get_data()
+        self.update_data_signal.emit(tab_data)
 
     def update_selected_material(self, item_data):
         """
         Update the displayed material information.
 
-        :param item_data: Dictionary containing material data.
+        Args:
+            item_data (dict): Material data.
         """
         self.select_material_button.setData(item_data)
 
     def get_data(self):
         """
-        Retrieve data from the input fields.
+        Retrieve data from the tab.
 
-        :return: Dictionary of the tab's data.
+        Returns:
+            (dict): The formatted data from the tab.
         """
         for attribute, input in self._inputs.items():
             self.tab_data[attribute][0] = input.value()
@@ -249,20 +264,28 @@ class PreliminaryDataTab(ITrackedTab):
             self.tab_data[attribute] = item.data()
 
         return self.tab_data
-    
-    def set_tab(self, data):
-        for attribute, line_edit in self._inputs.items():
+
+    def update_state(self):
+        """
+        Update the tab with parent data.
+        """
+        for attribute in self._outputs.keys():
+            new_value = self._parent.data[attribute][0]
+            if new_value is not None:
+                self._outputs[attribute].setValue(new_value)
+
+    def set_state(self, data):
+        """
+        Set tab's state.
+
+        Args:
+            data (dict): Data to set the state of the tab with.
+        """
+        for attribute, input in self._inputs.items():
             value = data[attribute][0]
             if value is not None:
-                line_edit.setValue(value)
+                input.setValue(value)
 
         self._update_eccentrics_position()
 
         self.select_material_button.setData(data['Materiał'])
-
-    def update_data(self):
-        """
-        Emit a signal to update the tab's data.
-        """
-        tab_data = self.get_data()
-        self.update_data_signal.emit(tab_data)

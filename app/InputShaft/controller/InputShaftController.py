@@ -153,7 +153,7 @@ class InputShaftController:
 
         # Set every tab data
         for idx, tab in enumerate(self._input_shaft.tabs[:-1]):
-            tab.set_tab(data[idx+2])
+            tab.set_state(data[idx+2])
         
         # Set is_shaft_designed_flag
         self._input_shaft.is_shaft_designed = data[-1]

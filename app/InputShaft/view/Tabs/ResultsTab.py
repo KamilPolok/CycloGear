@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QTabWidget, QWidget, QVBoxLayout, QLabel, QScrollArea
+from PyQt6.QtWidgets import QVBoxLayout, QLabel, QScrollArea
 
 from .common.ITrackedTab import ITrackedTab
 from .common.common_functions import create_data_display_row
@@ -10,13 +10,7 @@ class ResultsTab(ITrackedTab):
         """
         self.main_layout = QVBoxLayout()
         self.setLayout(self.main_layout)
-        
-        self.init_view()
 
-    def init_view(self):
-        """
-        Add a subtab for displaying data.
-        """
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
         self.main_layout.addWidget(scroll_area)
@@ -44,8 +38,10 @@ class ResultsTab(ITrackedTab):
         self.scroll_area_layout.addLayout(create_data_display_row(self, 'NB',  self._parent.data['NB'], 'N<sub>B</sub>', 'Podpora stała B', decimal_precision=2))
         self.scroll_area_layout.addLayout(create_data_display_row(self, 'Nc',  self._parent.data['Nc'], 'N<sub>c</sub>', 'Koła obiegowe', decimal_precision=2))
 
-    def update_tab(self):
-        for key, value in self._outputs.items():
-            if value != self._parent.data[key][0]:
-                value = self._parent.data[key][0]
-                self._outputs[key].setValue(value)
+    def update_state(self):
+        """
+        Update the tab with parent data.
+        """
+        for attribute in self._outputs.keys():
+            new_value = self._parent.data[attribute][0]
+            self._outputs[attribute].setValue(new_value)

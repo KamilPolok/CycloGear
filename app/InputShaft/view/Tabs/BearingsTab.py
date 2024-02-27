@@ -8,8 +8,6 @@ from .common.ITrackedWidget import ITrackedWidget
 from .common.ITrackedTab import ITrackedTab
 from .common.common_functions import create_data_display_row, create_data_input_row
 
-from InputShaft.view.InputShaft import InputShaft
-
 class Section(ITrackedWidget):
     def _init_ui(self):
         self.main_layout = QVBoxLayout()
@@ -25,7 +23,7 @@ class BearingsTab(ITrackedTab):
     select_support_B_bearing_signal = pyqtSignal(dict)
     select_central_bearing_signal = pyqtSignal(dict)
 
-    def _set_tab_data(self):
+    def _init_tab_data(self):
         """
         Set the initial data for the tab from the main parent's data.
         """
@@ -39,7 +37,7 @@ class BearingsTab(ITrackedTab):
         """
         Initialize the user interface for this tab.
         """
-        self._set_tab_data()
+        self._init_tab_data()
 
         self.main_layout = QVBoxLayout()
         self.setLayout(self.main_layout)
@@ -89,7 +87,7 @@ class BearingsTab(ITrackedTab):
 
         self._select_support_A_bearing_button = DataButton('Wybierz łożysko')
         self._items['Łożyska_podpora_A'] = self._select_support_A_bearing_button
-        self._select_support_A_bearing_button.clicked.connect(self.select_support_A_bearing)
+        self._select_support_A_bearing_button.clicked.connect(self._select_support_A_bearing)
 
         button_layout.addWidget(button_label)
         button_layout.addWidget(self._select_support_A_bearing_button)
@@ -121,7 +119,7 @@ class BearingsTab(ITrackedTab):
 
         self._select_support_B_bearing_button = DataButton('Wybierz łożysko')
         self._items['Łożyska_podpora_B'] = self._select_support_B_bearing_button
-        self._select_support_B_bearing_button.clicked.connect(self.select_support_B_bearing)
+        self._select_support_B_bearing_button.clicked.connect(self._select_support_B_bearing)
 
         button_layout.addWidget(button_label)
         button_layout.addWidget(self._select_support_B_bearing_button)
@@ -153,7 +151,7 @@ class BearingsTab(ITrackedTab):
 
         self._select_central_bearing_button = DataButton('Wybierz łożysko')
         self._items['Łożyska_centralne'] = self._select_central_bearing_button
-        self._select_central_bearing_button.clicked.connect(self.select_central_bearing)
+        self._select_central_bearing_button.clicked.connect(self._select_central_bearing)
 
         button_layout.addWidget(button_label)
         button_layout.addWidget(self._select_central_bearing_button)
@@ -191,6 +189,34 @@ class BearingsTab(ITrackedTab):
         if delete_choice:
             self._select_central_bearing_button.clear()
 
+    def _select_support_A_bearing(self):
+        """
+        Emit a signal with the updated data for the selected bearing.
+        """
+        tab_data = self.get_data()
+        self.select_support_A_bearing_signal.emit(tab_data)
+
+    def _select_support_B_bearing(self):
+        """
+        Emit a signal with the updated data for the selected bearing.
+        """
+        tab_data = self.get_data()
+        self.select_support_B_bearing_signal.emit(tab_data)
+
+    def _select_central_bearing(self):
+        """
+        Emit a signal with the updated data for the selected bearing.
+        """
+        tab_data = self.get_data()
+        self.select_central_bearing_signal.emit(tab_data)
+    
+    def _emit_tab_data(self):
+        """
+        Emit a signal to update the data withe tab's one.
+        """
+        tab_data = self.get_data()
+        self.update_data_signal.emit(tab_data)
+    
     def update_selected_support_A_bearing(self, item_data):
         """
         Update the displayed code for the selected bearing.
@@ -217,10 +243,10 @@ class BearingsTab(ITrackedTab):
             item_data (dict): Data of the selected item.
         """
         self._select_central_bearing_button.setData(item_data)
-    
+
     def get_data(self):
         """
-        Retrieve and format the data from the input fields.
+        Retrieve data from the tab.
 
         Returns:
             dict: The formatted data from the tab.
@@ -233,48 +259,25 @@ class BearingsTab(ITrackedTab):
 
         return self.tab_data
     
-    def select_support_A_bearing(self):
+    def update_state(self):
         """
-        Emit a signal with the updated data for the selected bearing.
+        Update the tab with parent data.
         """
-        tab_data = self.get_data()
-        self.select_support_A_bearing_signal.emit(tab_data)
+        for attribute in self._outputs.keys():
+            new_value = self._parent.data[attribute][0]
+            self._outputs[attribute].setValue(new_value)
 
-    def select_support_B_bearing(self):
+    def set_state(self, data):
         """
-        Emit a signal with the updated data for the selected bearing.
-        """
-        tab_data = self.get_data()
-        self.select_support_B_bearing_signal.emit(tab_data)
+        Set tab's state.
 
-    def select_central_bearing(self):
+        Args:
+            data (dict): Data to set the state of the tab with.
         """
-        Emit a signal with the updated data for the selected bearing.
-        """
-        tab_data = self.get_data()
-        self.select_central_bearing_signal.emit(tab_data)
-
-    def update_data(self):
-        """
-        Emit a signal with the updated data from the tab.
-        """
-        tab_data = self.get_data()
-        self.update_data_signal.emit(tab_data)
-    
-    def update_tab(self):
-        """
-        Update the tab with data from the parent.
-        """
-        for key, value in self._outputs.items():
-            if value != self._parent.data[key][0]:
-                value = self._parent.data[key][0]
-                self._outputs[key].setValue(self._parent.data[key][0])
-
-    def set_tab(self, data):
-        for attribute, line_edit in self._inputs.items():
+        for attribute, input in self._inputs.items():
             value = data[attribute][0]
             if value is not None:
-                line_edit.setValue(value)
+                input.setValue(value)
 
         self.update_selected_support_A_bearing(data['Łożyska_podpora_A'])
         self.update_selected_support_B_bearing(data['Łożyska_podpora_B'])

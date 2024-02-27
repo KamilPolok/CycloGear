@@ -28,7 +28,7 @@ class PowerLossTab(ITrackedTab):
     select_support_B_bearing_rolling_element_signal = pyqtSignal(dict)
     select_central_bearing_rolling_element_signal = pyqtSignal(dict)
 
-    def _set_tab_data(self):
+    def _init_tab_data(self):
         """
         Set the initial data for the tab from the parent's data.
         """
@@ -40,7 +40,7 @@ class PowerLossTab(ITrackedTab):
         """
         Initialize the user interface for this tab.
         """
-        self._set_tab_data()
+        self._init_tab_data()
 
         self.main_layout = QVBoxLayout()
         self.setLayout(self.main_layout)
@@ -94,7 +94,7 @@ class PowerLossTab(ITrackedTab):
 
         self._select_support_A_bearing_rolling_element_button = DataButton('Wybierz elementy toczne')
         self._items['Toczne_podpora_A'] = self._select_support_A_bearing_rolling_element_button
-        self._select_support_A_bearing_rolling_element_button.clicked.connect(self.select_support_A_bearing_rolling_element)
+        self._select_support_A_bearing_rolling_element_button.clicked.connect(self._select_support_A_bearing_rolling_element)
 
         button_layout.addWidget(button_label)
         button_layout.addWidget(self._select_support_A_bearing_rolling_element_button)
@@ -123,7 +123,7 @@ class PowerLossTab(ITrackedTab):
 
         self._select_support_B_bearing_rolling_element_button = DataButton('Wybierz elementy toczne')
         self._items['Toczne_podpora_B'] = self._select_support_B_bearing_rolling_element_button
-        self._select_support_B_bearing_rolling_element_button.clicked.connect(self.select_support_B_bearing_rolling_element)
+        self._select_support_B_bearing_rolling_element_button.clicked.connect(self._select_support_B_bearing_rolling_element)
 
         button_layout.addWidget(button_label)
         button_layout.addWidget(self._select_support_B_bearing_rolling_element_button)
@@ -152,7 +152,7 @@ class PowerLossTab(ITrackedTab):
 
         self._select_central_bearing_rolling_element_button = DataButton('Wybierz elementy toczne')
         self._items['Toczne_centralnych'] = self._select_support_B_bearing_rolling_element_button
-        self._select_central_bearing_rolling_element_button.clicked.connect(self.select_central_bearing_rolling_element)
+        self._select_central_bearing_rolling_element_button.clicked.connect(self._select_central_bearing_rolling_element)
 
         button_layout.addWidget(button_label)
         button_layout.addWidget(self._select_central_bearing_rolling_element_button)
@@ -192,6 +192,35 @@ class PowerLossTab(ITrackedTab):
         if delete_choice:
             self._select_central_bearing_rolling_element_button.clear()
 
+
+    def _select_support_A_bearing_rolling_element(self):
+        """
+        Emit a signal with the updated data for the selected rolling element.
+        """
+        tab_data = self.get_data()
+        self.select_support_A_bearing_rolling_element_signal.emit(tab_data)
+
+    def _select_support_B_bearing_rolling_element(self):
+        """
+        Emit a signal with the updated data for the selected rolling element.
+        """
+        tab_data = self.get_data()
+        self.select_support_B_bearing_rolling_element_signal.emit(tab_data)
+
+    def _select_central_bearing_rolling_element(self):
+        """
+        Emit a signal with the updated data for the selected rolling element.
+        """
+        tab_data = self.get_data()
+        self.select_central_bearing_rolling_element_signal.emit(tab_data)
+
+    def _emit_tab_data(self):
+        """
+        Emit a signal to update the data with the tab's one.
+        """
+        tab_data = self.get_data()
+        self.update_data_signal.emit(tab_data)
+    
     def update_selected_support_A_bearing_rolling_element(self, item_data):
         """
         Update selected rolling element.
@@ -221,7 +250,7 @@ class PowerLossTab(ITrackedTab):
 
     def get_data(self):
         """
-        Retrieve and format the data from the input fields.
+        Retrieve data from the tab.
 
         Returns:
             dict: The formatted data from the tab.
@@ -233,48 +262,10 @@ class PowerLossTab(ITrackedTab):
             self.tab_data[attribute] = item.data()
 
         return self.tab_data
-    
-    def select_support_A_bearing_rolling_element(self):
-        """
-        Emit a signal with the updated data for the selected rolling element.
-        """
-        tab_data = self.get_data()
-        self.select_support_A_bearing_rolling_element_signal.emit(tab_data)
 
-    def select_support_B_bearing_rolling_element(self):
+    def update_state(self):
         """
-        Emit a signal with the updated data for the selected rolling element.
-        """
-        tab_data = self.get_data()
-        self.select_support_B_bearing_rolling_element_signal.emit(tab_data)
-
-    def select_central_bearing_rolling_element(self):
-        """
-        Emit a signal with the updated data for the selected rolling element.
-        """
-        tab_data = self.get_data()
-        self.select_central_bearing_rolling_element_signal.emit(tab_data)
-
-    def update_data(self):
-        """
-        Emit a signal with the updated data from the tab.
-        """
-        tab_data = self.get_data()
-        self.update_data_signal.emit(tab_data)
-
-    def set_tab(self, data):
-        for attribute, line_edit in self._inputs.items():
-            value = data[attribute][0]
-            if value is not None:
-                line_edit.setValue(value)
-
-        self.update_selected_support_A_bearing_rolling_element(data['Toczne_podpora_A'])
-        self.update_selected_support_B_bearing_rolling_element(data['Toczne_podpora_B'])
-        self.update_selected_central_bearing_rolling_element(data['Toczne_centralnych'])
-
-    def update_tab(self):
-        """
-        Update the tab with data from the parent.
+        Update the tab with parent data.
         """
         addData = True
         for key_tuple, value_label in self._outputs.items():
@@ -300,3 +291,19 @@ class PowerLossTab(ITrackedTab):
             self.support_B_bearing_section.insertLayout(0, create_data_display_row(self, ('Łożyska_podpora_B','Dz'), self._parent.data['Łożyska_podpora_B']['Dz'], 'D<sub>z</sub>', 'Średnica zewnętrzna łożyska', decimal_precision=2))
             self.central_bearing_section.insertLayout(0, create_data_display_row(self, ('Łożyska_centralne','Dw'), self._parent.data['Łożyska_centralne']['Dw'], 'D<sub>w</sub>', 'Średnica wewnętrzna łożyska', decimal_precision=2))
             self.central_bearing_section.insertLayout(0, create_data_display_row(self, ('Łożyska_centralne','Dz'), self._parent.data['Łożyska_centralne']['Dz'], 'D<sub>z</sub>', 'Średnica zewnętrzna łożyska', decimal_precision=2))
+    
+    def set_state(self, data):
+        """
+        Set tab's state.
+
+        Args:
+            data (dict): Data to set the state of the tab with.
+        """
+        for attribute, input in self._inputs.items():
+            value = data[attribute][0]
+            if value is not None:
+                input.setValue(value)
+
+        self.update_selected_support_A_bearing_rolling_element(data['Toczne_podpora_A'])
+        self.update_selected_support_B_bearing_rolling_element(data['Toczne_podpora_B'])
+        self.update_selected_central_bearing_rolling_element(data['Toczne_centralnych'])

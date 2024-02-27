@@ -12,14 +12,8 @@ class ITrackedTab(ITrackedWidget):
         # Set the dict of outputs that hold presented to user values
         self._outputs = {}
         super().__init__(parent, callback)
-
-    def update_tab(self):
-        """
-        Update the tab data. This method can be overridden in subclasses to provide specific update logic.
-        """
-        pass
-
-    def update_data(self):
+    
+    def _emit_tab_data(self):
         """
         Update the data. This method can be overridden in subclasses to provide specific update logic.
         """
@@ -32,7 +26,7 @@ class ITrackedTab(ITrackedWidget):
         Update the data.
         """
         if all_filled:
-            self.update_data()
+            self._emit_tab_data()
 
         super()._on_state_checked(all_filled, state_changed)
     
@@ -42,4 +36,10 @@ class ITrackedTab(ITrackedWidget):
         """
         super()._on_activated()
 
-        self.update_tab()
+        self.update_state()
+    
+    def update_state(self):
+        """
+        Update the tab data. This method can be overridden in subclasses to provide specific update logic.
+        """
+        pass
