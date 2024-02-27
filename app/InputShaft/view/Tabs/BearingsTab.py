@@ -225,7 +225,7 @@ class BearingsTab(ITrackedTab):
         Returns:
             dict: The formatted data from the tab.
         """
-        for attribute, input in self.input_values.items():
+        for attribute, input in self._inputs.items():
             self.tab_data[attribute][0] = input.value()
 
         for attribute, item in self._items.items():
@@ -265,13 +265,13 @@ class BearingsTab(ITrackedTab):
         """
         Update the tab with data from the parent.
         """
-        for key, value in self.output_values.items():
+        for key, value in self._outputs.items():
             if value != self._parent.data[key][0]:
                 value = self._parent.data[key][0]
-                self.output_values[key].setValue(self._parent.data[key][0])
+                self._outputs[key].setValue(self._parent.data[key][0])
 
     def set_tab(self, data):
-        for attribute, line_edit in self.input_values.items():
+        for attribute, line_edit in self._inputs.items():
             value = data[attribute][0]
             if value is not None:
                 line_edit.setValue(value)

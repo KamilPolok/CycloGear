@@ -7,10 +7,10 @@ class ITrackedTab(ITrackedWidget):
     - override parent class method to implement additional functionalities
     """
     def __init__(self, parent, callback):
-        # Set the dict of inputs that hold provided by user attribute values
-        self.input_values = {}
+        # Set the dict of inputs that hold provided by user values
+        self._inputs = {}
         # Set the dict of outputs that hold presented to user values
-        self.output_values = {}
+        self._outputs = {}
         super().__init__(parent, callback)
 
     def update_tab(self):

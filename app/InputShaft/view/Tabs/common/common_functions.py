@@ -51,7 +51,7 @@ def create_data_input_row(tab: ITrackedTab, attribute: str, description: str, sy
     layout.addWidget(units_label)
 
     # Save the line_edit for later reference
-    tab.input_values[attribute] = input
+    tab._inputs[attribute] = input
 
     return layout
 
@@ -98,6 +98,6 @@ def create_data_display_row(tab: ITrackedTab, attribute: Tuple[int, str], data: 
     layout.addWidget(units_label)
 
     # Save the label for later reference
-    tab.output_values[attribute] = output
+    tab._outputs[attribute] = output
 
     return layout

@@ -45,7 +45,7 @@ class ResultsTab(ITrackedTab):
         self.scroll_area_layout.addLayout(create_data_display_row(self, 'Nc',  self._parent.data['Nc'], 'N<sub>c</sub>', 'Koła obiegowe', decimal_precision=2))
 
     def update_tab(self):
-        for key, value in self.output_values.items():
+        for key, value in self._outputs.items():
             if value != self._parent.data[key][0]:
                 value = self._parent.data[key][0]
-                self.output_values[key].setValue(value)
+                self._outputs[key].setValue(value)

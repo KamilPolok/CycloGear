@@ -226,7 +226,7 @@ class PowerLossTab(ITrackedTab):
         Returns:
             dict: The formatted data from the tab.
         """
-        for attribute, input in self.input_values.items():
+        for attribute, input in self._inputs.items():
             self.tab_data[attribute][0] = input.value()
 
         for attribute, item in self._items.items():
@@ -263,7 +263,7 @@ class PowerLossTab(ITrackedTab):
         self.update_data_signal.emit(tab_data)
 
     def set_tab(self, data):
-        for attribute, line_edit in self.input_values.items():
+        for attribute, line_edit in self._inputs.items():
             value = data[attribute][0]
             if value is not None:
                 line_edit.setValue(value)
@@ -277,7 +277,7 @@ class PowerLossTab(ITrackedTab):
         Update the tab with data from the parent.
         """
         addData = True
-        for key_tuple, value_label in self.output_values.items():
+        for key_tuple, value_label in self._outputs.items():
             # Check if the key is a tuple (indicating a parent-child relationship)
             if isinstance(key_tuple, tuple):
                 parent_key, attribute = key_tuple

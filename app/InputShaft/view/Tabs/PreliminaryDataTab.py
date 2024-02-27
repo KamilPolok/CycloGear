@@ -98,11 +98,11 @@ class PreliminaryDataTab(ITrackedTab):
         """
         Connect signals and slots for interactivity in the tab
         """
-        self.input_values['L1'].inputConfirmedSignal.connect(self._update_eccentrics_position)
+        self._inputs['L1'].inputConfirmedSignal.connect(self._update_eccentrics_position)
 
         self.validated_inputs = ['L', 'LA', 'LB', 'L1']
         for name in self.validated_inputs:
-            self.input_values[name].inputConfirmedSignal.connect(self._validate_input)
+            self._inputs[name].inputConfirmedSignal.connect(self._validate_input)
 
     def _update_eccentrics_position(self):
         """
@@ -110,15 +110,15 @@ class PreliminaryDataTab(ITrackedTab):
         of the first eccentric. It calculates and updates the positions
         of the following eccentrics.
         """
-        value = self.input_values['L1'].value()
+        value = self._inputs['L1'].value()
         if value:
             L1 = value
             x = self._parent.data['x'][0]
             B = self._parent.data['B'][0]
             L2 = L1 + x + B
-            self.output_values['L2'].setValue(L2)
+            self._outputs['L2'].setValue(L2)
         else:
-            self.output_values['L2'].clear()
+            self._outputs['L2'].clear()
     
     def _setup_inputs_validation(self):
         """
@@ -130,8 +130,8 @@ class PreliminaryDataTab(ITrackedTab):
 
         self._set_input_limits('L')
         for name in self.validated_inputs:
-            if self.input_values[name].isEnabled():
-                self._validate_input(self.input_values[name])
+            if self._inputs[name].isEnabled():
+                self._validate_input(self._inputs[name])
 
     def _validate_input(self, input=None):
         """
@@ -141,11 +141,11 @@ class PreliminaryDataTab(ITrackedTab):
         :param input: input which content is validated
         """
         input = self.sender() if input == None else input
-        input_name = next((name for name, i in self.input_values.items() if i == input), None)
+        input_name = next((name for name, i in self._inputs.items() if i == input), None)
         if self._is_input_valid(input_name):
             self._enable_next_input(input_name)
         else:
-            self.input_values[input_name].clear()
+            self._inputs[input_name].clear()
             self._clear_and_disable_subsequent_inputs(input_name)
     
     def _is_input_valid(self, input_name):
@@ -156,7 +156,7 @@ class PreliminaryDataTab(ITrackedTab):
         :param input: input which content is validated
         :return: Boolean value representing the validity of teh input
         """
-        input = self.input_values[input_name]
+        input = self._inputs[input_name]
         value = input.value()
         if value is None:
             return False
@@ -177,10 +177,10 @@ class PreliminaryDataTab(ITrackedTab):
         idx = self.validated_inputs.index(input_name)
         if idx < len(self.validated_inputs) - 1:
             next_input_name = self.validated_inputs[idx + 1]
-            self.input_values[next_input_name].setEnabled(True)
+            self._inputs[next_input_name].setEnabled(True)
             self._set_input_limits(next_input_name)
             if not self._is_input_valid(next_input_name):
-                self.input_values[next_input_name].clear()
+                self._inputs[next_input_name].clear()
     
     def _clear_and_disable_subsequent_inputs(self, input_name):
         """
@@ -191,10 +191,10 @@ class PreliminaryDataTab(ITrackedTab):
         """
         idx = self.validated_inputs.index(input_name)
         for name in self.validated_inputs[idx + 1:]:
-            self.input_values[name].setPlaceholderText('')
-            self.input_values[name].clear()
-            self.input_values[name].setDisabled(True)
-        self.output_values['L2'].clear()
+            self._inputs[name].setPlaceholderText('')
+            self._inputs[name].clear()
+            self._inputs[name].setDisabled(True)
+        self._outputs['L2'].clear()
 
     def _set_input_limits(self, input_name):
         """
@@ -217,7 +217,7 @@ class PreliminaryDataTab(ITrackedTab):
             max_value = self.validated_inputs_values['LB'] - self._parent.data['x'][0] - 1.5 * self._parent.data['B'][0]
         
         self.validated_inputs_limits[input_name] = (round(min_value, 2), round(max_value, 2))
-        self.input_values[input_name].setPlaceholderText(f"{min_value:.2f}-{max_value:.2f}")
+        self._inputs[input_name].setPlaceholderText(f"{min_value:.2f}-{max_value:.2f}")
 
     def _on_activated(self):
         """
@@ -242,7 +242,7 @@ class PreliminaryDataTab(ITrackedTab):
 
         :return: Dictionary of the tab's data.
         """
-        for attribute, input in self.input_values.items():
+        for attribute, input in self._inputs.items():
             self.tab_data[attribute][0] = input.value()
 
         for attribute, item in self._items.items():
@@ -251,7 +251,7 @@ class PreliminaryDataTab(ITrackedTab):
         return self.tab_data
     
     def set_tab(self, data):
-        for attribute, line_edit in self.input_values.items():
+        for attribute, line_edit in self._inputs.items():
             value = data[attribute][0]
             if value is not None:
                 line_edit.setValue(value)
