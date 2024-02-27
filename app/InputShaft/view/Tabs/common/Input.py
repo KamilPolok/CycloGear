@@ -1,14 +1,17 @@
+from typing import Optional
+
 from PyQt6.QtGui import QFocusEvent, QKeyEvent, QRegularExpressionValidator
 from PyQt6.QtCore import Qt, QRegularExpression, QTimer, pyqtSignal, QObject
-from PyQt6.QtWidgets import QApplication, QLineEdit
+from PyQt6.QtWidgets import QApplication, QLineEdit, QWidget
 
 class Input(QLineEdit):
-    """Custom QLineEdit that validates input and monitors for inactivity."""
+    """Custom QLineEdit that validates numeric input and monitors for inactivity."""
 
     inputConfirmedSignal = pyqtSignal(object)
 
-    def __init__(self, parent=None, text = '', decimal_precision = 2):
-        """Initializes the custom line edit with validation and inactivity monitoring.
+    def __init__(self, parent: QWidget, decimal_precision: int=2):
+        """
+        Initialize the custom line edit with validation and inactivity monitoring.
 
         Args:
             parent (QWidget, optional): Parent widget. Defaults to None.
@@ -26,20 +29,20 @@ class Input(QLineEdit):
         self.textEdited.connect(self._inactivity_monitor.reset_timer)
 
         self.setAlignment(Qt.AlignmentFlag.AlignRight)
-
-        if text:
-            self.setText(text)
        
     def _emit_input_confirmed_signal(self):
-        """Validates the current text and emits a signal if the text has changed."""
+        """
+        Validate the current text and emit a signal if the text has changed.
+        """
         validated_text = self._validation_handler.validate(self.text())
         super().setText(validated_text)
         if validated_text != self._last_text:
             self._last_text = validated_text
             self.inputConfirmedSignal.emit(self)
 
-    def setDecimalPrecision(self, max_decimal_digits):
-        """Updates the maximum decimal precision of the validator.
+    def setDecimalPrecision(self, max_decimal_digits: int):
+        """
+        Update the maximum decimal precision of the validator.
 
         Args:
             max_decimal_digits (int): New maximum number of decimal digits.
@@ -48,8 +51,9 @@ class Input(QLineEdit):
         self.setValidator(self._validation_handler.get_validator())
         self.setText(self.text())
 
-    def setText(self, text):
-        """Sets the text after validation.
+    def setText(self, text: str):
+        """
+        Validate and set text.
 
         Args:
             text (str): The text to set.
@@ -58,13 +62,37 @@ class Input(QLineEdit):
         self._last_text = validated_text
         super().setText(validated_text)
 
+    def setValue(self, value: float):
+        """
+        Validate and set value.
+
+        Args:
+            value (float): The value to set.
+        """
+        validated_text = self._validation_handler.validate_value(value)
+        self._last_text = validated_text
+        super().setText(validated_text)
+    
+    def value(self) -> Optional[float]:
+        """
+        Retutn value.
+
+        Returns:
+            (float | None): The value the input is holding or None if text.
+        """
+        text = self.text()
+        return None if text == "" else float(text)
+
     def clear(self):
-        """Clears the current text and resets the last text record."""
+        """
+        Clear the current text and reset the last text record.
+        """
         self._last_text = ''
         super().clear()
 
     def keyPressEvent(self, event: QKeyEvent):
-        """Handles key press events, validating and confirming input on Enter or Return.
+        """
+        Handle key press events, validating and confirming input on Enter or Return.
 
         Args:
             event (QKeyEvent): The key event.
@@ -75,7 +103,8 @@ class Input(QLineEdit):
             self._emit_input_confirmed_signal()
 
     def focusOutEvent(self, event: QFocusEvent):
-        """Handles focus out events, validating and confirming input when focus is lost.
+        """
+        Handle focus out events, validating and confirming input when focus is lost.
 
         Args:
             event (QFocusEvent): The focus event.
@@ -85,12 +114,15 @@ class Input(QLineEdit):
         self._emit_input_confirmed_signal()
 
 class InactivityMonitor(QObject):
-    """Monitors inactivity and emits a signal after a specified timeout interval."""
+    """
+    Monitor inactivity and emits a signal after a specified timeout interval.
+    """
     
     inactivitySignal = pyqtSignal()
 
-    def __init__(self, timeout_interval=1000):
-        """Initializes the monitor with a specified timeout interval.
+    def __init__(self, timeout_interval: int=1000):
+        """
+        Initialize the monitor with a specified timeout interval.
 
         Args:
             timeout_interval (int): The inactivity timeout interval in milliseconds.
@@ -101,15 +133,20 @@ class InactivityMonitor(QObject):
         self._timer.setInterval(self._timeout_interval)
         self._timer.setSingleShot(True)
         self._timer.timeout.connect(self.inactivitySignal.emit)
+        # Ensure that every timer is stopped before closing the app
         QApplication.instance().aboutToQuit.connect(self.handleAboutToQuit)
     
     def stop_timer(self):
-        """Stops the inactivity timer if it is active."""
+        """
+        Stop the inactivity timer if it is active.
+        """
         if self._timer.isActive():
             self._timer.stop()
 
     def reset_timer(self):
-        """Resets the inactivity timer, restarting it from the beginning."""
+        """
+        Reset the inactivity timer, restarting it from the beginning.
+        """
         self.stop_timer()
         self._timer.start()
     
@@ -117,21 +154,25 @@ class InactivityMonitor(QObject):
         self.stop_timer()
 
 class ValidationHandler:
-    """Handles input validation based on specified rules for decimal digits."""
+    """
+    Handle input validation based on specified rules for decimal digits.
+    """
     
-    def __init__(self, max_decimal_digits):
-        """Initializes the validator with a maximum number of decimal digits.
+    def __init__(self, max_decimal_digits: int):
+        """
+        Initialize the validator with a maximum number of decimal digits.
 
         Args:
-            max_decimal_digits (int): Maximum allowed decimal digits in the input.
+            max_decimal_digits (int): Maximum number of decimal places permitted in the input.
         """
         self.update_validator(max_decimal_digits)
 
-    def update_validator(self, max_decimal_digits):
-        """Updates the validation pattern based on the maximum decimal digits.
+    def update_validator(self, max_decimal_digits: int):
+        """
+        Update the validation pattern based on the maximum decimal digits.
 
         Args:
-            max_decimal_digits (int): New maximum number of decimal digits.
+            max_decimal_digits (int): New maximum number of decimal places permitted in the input.
         """
         self._max_decimal_digits = max_decimal_digits
       
@@ -146,27 +187,49 @@ class ValidationHandler:
 
         self.validator = QRegularExpressionValidator(QRegularExpression(pattern))
     
-    def get_validator(self):
-        """Returns the current validator."""
+    def get_validator(self) -> QRegularExpressionValidator:
+        """
+        Return the current validator.
+        """
         return self.validator
 
-    def validate(self, text):
-        """Validates the input text, ensuring it's a positive number formatted to the specified precision.
+    def validate(self, text: str) -> str:
+        """
+        Validate input text, ensuring it's a string or float and format it adequately.
 
         Args:
-            text (str): The input text to validate.
+            text (str): The text to validate.
 
         Returns:
-            str: The validated text formatted to the specified precision, or an empty string if invalid.
+            validated_text (str): The validated text.
         """
         try:
             value = float(text)
-            if value <= 0:
-                res = ''
-            else:
-                rounded_value = round(value, self._max_decimal_digits)
-                res = f'{rounded_value:.{self._max_decimal_digits}f}'
+            validated_text = self.validate_value(value)
         except (ValueError, TypeError):
-            res = ''
+            # If the conversion fails (ValueError) or if text is not a string (TypeError),
+            # return an empty string
+            validated_text = ''
         
-        return res
+        return validated_text
+    
+    def validate_value(self, value: float) -> str:
+        """
+        Validate input value, ensuring it's a positive number formatted to the specified precision.
+
+        Args:
+            value (float): The value to validate.
+
+        Returns:
+            validated_text (str): The validated value formatted to the specified precision, or an empty string if invalid.
+        """
+        if value > 0:
+                # Round the value to the maximum allowed decimal digits
+                rounded_value = round(value, self._max_decimal_digits)
+                # Format the rounded value to a string with the specified number of decimal places
+                validated_text = f'{rounded_value:.{self._max_decimal_digits}f}'
+        else:
+            # If the value is not positive, return an empty string
+            validated_text = ''
+        
+        return validated_text

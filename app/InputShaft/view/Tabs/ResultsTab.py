@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QTabWidget, QWidget, QVBoxLayout, QLabel, QScrollArea
 
 from .common.ITrackedTab import ITrackedTab
-from .common.common_functions import create_data_display_row, format_value
+from .common.common_functions import create_data_display_row
 
 class ResultsTab(ITrackedTab):
     def _init_ui(self):
@@ -48,4 +48,4 @@ class ResultsTab(ITrackedTab):
         for key, value in self.output_values.items():
             if value != self._parent.data[key][0]:
                 value = self._parent.data[key][0]
-                self.output_values[key].setText(format_value(value))
+                self.output_values[key].setValue(value)

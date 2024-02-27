@@ -1,5 +1,4 @@
 from copy import deepcopy
-from ast import literal_eval
 
 from PyQt6.QtCore import QEvent, pyqtSignal
 from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QLabel
@@ -111,13 +110,13 @@ class PreliminaryDataTab(ITrackedTab):
         of the first eccentric. It calculates and updates the positions
         of the following eccentrics.
         """
-        text = self.input_values['L1'].text()
-        if text:
-            L1 = float(text)
+        value = self.input_values['L1'].value()
+        if value:
+            L1 = value
             x = self._parent.data['x'][0]
             B = self._parent.data['B'][0]
             L2 = L1 + x + B
-            self.output_values['L2'].setText("{:.2f}".format(L2))
+            self.output_values['L2'].setValue(L2)
         else:
             self.output_values['L2'].clear()
     
@@ -158,9 +157,8 @@ class PreliminaryDataTab(ITrackedTab):
         :return: Boolean value representing the validity of teh input
         """
         input = self.input_values[input_name]
-        try:
-            value = round(float(input.text()), 2)
-        except ValueError:
+        value = input.value()
+        if value is None:
             return False
         
         min_value, max_value = self.validated_inputs_limits[input_name]
@@ -196,7 +194,7 @@ class PreliminaryDataTab(ITrackedTab):
             self.input_values[name].setPlaceholderText('')
             self.input_values[name].clear()
             self.input_values[name].setDisabled(True)
-        self.output_values['L2'].setText('')
+        self.output_values['L2'].clear()
 
     def _set_input_limits(self, input_name):
         """
@@ -245,9 +243,7 @@ class PreliminaryDataTab(ITrackedTab):
         :return: Dictionary of the tab's data.
         """
         for attribute, input in self.input_values.items():
-            text = input.text()
-            value = None if text == "" else literal_eval(text)
-            self.tab_data[attribute][0] = value
+            self.tab_data[attribute][0] = input.value()
 
         for attribute, item in self._items.items():
             self.tab_data[attribute] = item.data()
@@ -256,8 +252,9 @@ class PreliminaryDataTab(ITrackedTab):
     
     def set_tab(self, data):
         for attribute, line_edit in self.input_values.items():
-            value = data[attribute][0] if data[attribute][0] is not None else ''
-            line_edit.setText(value)
+            value = data[attribute][0]
+            if value is not None:
+                line_edit.setValue(value)
 
         self._update_eccentrics_position()
 

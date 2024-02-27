@@ -1,5 +1,4 @@
 from copy import deepcopy
-from ast import literal_eval
 
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QComboBox, QVBoxLayout, QHBoxLayout, QLabel, QStackedWidget, QWidget
@@ -7,7 +6,7 @@ from PyQt6.QtWidgets import QComboBox, QVBoxLayout, QHBoxLayout, QLabel, QStacke
 from .common.DataButton import DataButton
 from .common.ITrackedWidget import ITrackedWidget
 from .common.ITrackedTab import ITrackedTab
-from .common.common_functions import create_data_display_row, create_data_input_row, format_value
+from .common.common_functions import create_data_display_row, create_data_input_row
 
 from InputShaft.view.InputShaft import InputShaft
 
@@ -228,9 +227,7 @@ class PowerLossTab(ITrackedTab):
             dict: The formatted data from the tab.
         """
         for attribute, input in self.input_values.items():
-            text = input.text()
-            value = None if text == "" else literal_eval(text)
-            self.tab_data[attribute][0] = value
+            self.tab_data[attribute][0] = input.value()
 
         for attribute, item in self._items.items():
             self.tab_data[attribute] = item.data()
@@ -267,8 +264,10 @@ class PowerLossTab(ITrackedTab):
 
     def set_tab(self, data):
         for attribute, line_edit in self.input_values.items():
-            value = data[attribute][0] if data[attribute][0] is not None else ''
-            line_edit.setText(value)
+            value = data[attribute][0]
+            if value is not None:
+                line_edit.setValue(value)
+
         self.update_selected_support_A_bearing_rolling_element(data['Toczne_podpora_A'])
         self.update_selected_support_B_bearing_rolling_element(data['Toczne_podpora_B'])
         self.update_selected_central_bearing_rolling_element(data['Toczne_centralnych'])
@@ -285,13 +284,14 @@ class PowerLossTab(ITrackedTab):
                 if parent_key in self._parent.data and attribute in self._parent.data[parent_key]:
                     addData = False
                     new_value = self._parent.data[parent_key][attribute][0]
-                    value_label.setText(format_value(new_value))
+                    value_label.setValue(new_value)
+                                        
             else:
                 # Handle keys without a parent
                 attribute = key_tuple
                 if attribute in self._parent.data:
                     new_value = self._parent.data[attribute][0]
-                    value_label.setText(format_value(new_value))
+                    value_label.setValue(new_value)
 
         if addData:
             self.support_A_bearing_section.insertLayout(0, create_data_display_row(self, ('Łożyska_podpora_A','Dw'), self._parent.data['Łożyska_podpora_A']['Dw'], 'D<sub>w</sub>', 'Średnica wewnętrzna łożyska', decimal_precision=2))

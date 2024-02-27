@@ -56,7 +56,7 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
         Returns:
             list or None: A list of input states if all inputs are filled, otherwise None.
         """
-        inputs_states = [input.text() for input in self._inputs_to_provide]
+        inputs_states = [input.value() for input in self._inputs_to_provide]
         inputs_states += [item.id() for item in self._items_to_select]
 
         return inputs_states
@@ -72,7 +72,7 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
 
         state_changed = current_state != self._original_state
 
-        all_provided = not ('' in current_state or None in current_state)
+        all_provided = not None in current_state
         if all_provided:
             self._original_state = current_state
 
