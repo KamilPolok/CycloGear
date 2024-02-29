@@ -57,7 +57,7 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
             list or None: A list of input states if all inputs are filled, otherwise None.
         """
         inputs_states = [input.text() for input in self._inputs_to_provide]
-        inputs_states += [item.data() for item in self._items_to_select]
+        inputs_states += [item.id() for item in self._items_to_select]
         return None if '' in inputs_states or None in inputs_states else inputs_states
 
     def _check_state(self):
