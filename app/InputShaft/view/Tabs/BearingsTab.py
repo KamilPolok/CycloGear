@@ -169,35 +169,29 @@ class BearingsTab(ITrackedTab):
         """
         Enable or disable the selection button based on whether all inputs are filled.
         """
-        if enable_button:
-            self._select_support_A_bearing_button.setEnabled(True)
-            if delete_choice:
-                self._select_support_A_bearing_button.clear()
-        else:
-            self._select_support_A_bearing_button.setEnabled(False)
-    
+        self._select_support_A_bearing_button.setEnabled(enable_button)
+
+        if delete_choice:
+            self._select_support_A_bearing_button.clear()
+
     def _enable_select_support_B_bearing_button(self, enable_button, delete_choice):
         """
         Enable or disable the selection button based on whether all inputs are filled.
         """
-        if enable_button:
-            self._select_support_B_bearing_button.setEnabled(True)
-            if delete_choice:
-                self._select_support_B_bearing_button.clear()
-        else:
-            self._select_support_B_bearing_button.setEnabled(False)
-    
+        self._select_support_B_bearing_button.setEnabled(enable_button)
+
+        if delete_choice:
+            self._select_support_B_bearing_button.clear()
+
     def _enable_select_central_bearing_button(self, enable_button, delete_choice):
         """
         Enable or disable the selection button based on whether all inputs are filled.
         """
-        if enable_button:
-            self._select_central_bearing_button.setEnabled(True)
-            if delete_choice:
-                self._select_central_bearing_button.clear()
-        else:
-            self._select_central_bearing_button.setEnabled(False)
-    
+        self._select_central_bearing_button.setEnabled(enable_button)
+
+        if delete_choice:
+            self._select_central_bearing_button.clear()
+
     def update_selected_support_A_bearing(self, item_data):
         """
         Update the displayed code for the selected bearing.
