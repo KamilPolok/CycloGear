@@ -183,7 +183,7 @@ class BearingsTab(ITrackedTab):
         if enable_button:
             self._select_support_B_bearing_button.setEnabled(True)
             if delete_choice:
-                self._select_support_A_bearing_button.clear()
+                self._select_support_B_bearing_button.clear()
         else:
             self._select_support_B_bearing_button.setEnabled(False)
     
