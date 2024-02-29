@@ -60,13 +60,18 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
         This function is called whenever an input is changed. It checks the state of inputs in the
         widget, and calls the callback function.
         """
+        state_changed = False
         current_state = self._get_state()
 
-        state_changed = current_state != self._original_state
+        # Check if all inputs were provided
+        all_provided = all(current_state)
 
-        all_provided = not None in current_state
-        if all_provided:
-            self._original_state = current_state
+        # Check if current state changed from no inputs provided to all inputs provided
+        # It is for ignoring the state change after setting the widget initial state
+        if not (all(input is None for input in self._original_state) and all_provided):
+            state_changed = current_state != self._original_state
+
+        self._original_state = current_state
 
         self._on_state_checked(all_provided, state_changed)
 
