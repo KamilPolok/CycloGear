@@ -7,7 +7,8 @@ class FunctionsCalculator():
         self.d_min_by_permissible_deflection_arrow = None
 
         self._min_diameters = {}
-        
+        self._initial_min_diameters = {}
+
     def _calculate_support_reactions(self):
         LA = self._data['LA'][0]
         LB =  self._data['LB'][0]
@@ -100,6 +101,7 @@ class FunctionsCalculator():
         kgo = Zgo / xz                                                                                          
         self.d_min_by_equivalent_stress = np.power(32 * self.equivalent_moment / (np.pi * kgo), 1/3) * 1000
         self._min_diameters['dMz'] = self.d_min_by_equivalent_stress
+        self._initial_min_diameters['dMz'] = self.d_min_by_equivalent_stress
     
     def _calculate_dmin_function_by_torsional_strength(self):
         # Calculate minimal shaft diameter based on torsional strength condition
@@ -108,6 +110,7 @@ class FunctionsCalculator():
         ksj = Zsj / xz
         self.d_min_by_torsional_strength = np.sqrt(16 * self.torque / (np.pi * ksj)) * 1000
         self._min_diameters['dMs'] = self.d_min_by_torsional_strength
+        self._initial_min_diameters['dMs'] = self.d_min_by_torsional_strength
 
     def _calculate_dmin_function_by_permissible_angle_of_twist(self):   
         # Calculate minimal shaft diameter d - based permissible angle of twist condition
@@ -115,6 +118,7 @@ class FunctionsCalculator():
         qdop = self._data['qdop'][0]
         self.d_min_by_permissible_angle_of_twist = np.sqrt(32 * self.torque / (np.pi * G * qdop)) * 1000
         self._min_diameters['dqdop'] = self.d_min_by_permissible_angle_of_twist
+        self._initial_min_diameters['dqdop'] = self.d_min_by_permissible_angle_of_twist
 
     def _calculate_dmin_function_by_all_conditions(self):
         self.d_min = np.max(np.stack(list(function for function in self._min_diameters.values() if function is not None)), axis=0)
@@ -171,7 +175,9 @@ class FunctionsCalculator():
         self._calculate_dmin_function_by_torsional_strength()
         self._calculate_dmin_function_by_equivalent_stress()
         self._calculate_dmin_function_by_permissible_angle_of_twist()
-        self._calculate_dmin_function_by_all_conditions()
+        
+        # calculate d min by all initial conditions
+        self.d_min = np.max(np.stack(list(function for function in self._initial_min_diameters.values() if function is not None)), axis=0)
 
         self._calculate_minimal_shaft_diameter()
         
