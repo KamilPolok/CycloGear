@@ -1,6 +1,3 @@
-from copy import deepcopy
-
-from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel
 
 from .common.DataButton import DataButton
@@ -8,8 +5,6 @@ from .common.ITrackedTab import ITrackedTab
 from .common.common_functions import create_data_input_row, create_data_display_row
 
 class PreliminaryDataTab(ITrackedTab):
-    update_data_signal = pyqtSignal(dict)
-
     def _view_dimensions_component(self):
         """
         Create and layout the dimensions component of the tab.
@@ -21,9 +16,9 @@ class PreliminaryDataTab(ITrackedTab):
         roller_support = create_data_input_row(self, 'LA', 'Współrzędne podpory przesuwnej', 'L<sub>A</sub>', decimal_precision=2)
         pin_support = create_data_input_row(self, 'LB', 'Współrzędne podpory nieprzesuwnej', 'L<sub>B</sub>', decimal_precision=2)
         cyclo_disc1 = create_data_input_row(self, 'L1', 'Współrzędne koła obiegowego 1', 'L<sub>1</sub>', decimal_precision=2)
-        cyclo_disc2 = create_data_display_row(self, 'L2', self.data['L2'], 'L<sub>2</sub>', 'Współrzędne koła obiegowego 2', decimal_precision=2)
-        disc_width = create_data_display_row(self, 'x', self.data['x'], 'x', 'Odległość pomiędzy tarczami', decimal_precision=2)
-        discs_distance = create_data_display_row(self, 'B', self.data['B'], 'B', 'Grubość tarczy', decimal_precision=2)
+        cyclo_disc2 = create_data_display_row(self, 'L2', self._component_data['L2'], 'L<sub>2</sub>', 'Współrzędne koła obiegowego 2', decimal_precision=2)
+        disc_width = create_data_display_row(self, 'x', self._component_data['x'], 'x', 'Odległość pomiędzy tarczami', decimal_precision=2)
+        discs_distance = create_data_display_row(self, 'B', self._component_data['B'], 'B', 'Grubość tarczy', decimal_precision=2)
 
         component_layout.addWidget(component_label)
         component_layout.addLayout(shaft_length)
@@ -72,153 +67,6 @@ class PreliminaryDataTab(ITrackedTab):
 
         self.layout().addLayout(component_layout)
 
-    def _setup_inputs_validation(self):
-        """
-        This function gets triggered when the user switches onto current ITrackedTab.
-        It (re)initializes and applies the input limits of the validated_inputs.
-        """
-        self.validated_inputs_limits = {}
-        self.validated_inputs_values = {}
-
-        self._set_input_limits('L')
-        for name in self.validated_inputs:
-            if self._inputs[name].isEnabled():
-                self._validate_input(self._inputs[name])
-
-    def _update_eccentrics_position(self):
-        """
-        This function gets triggered when the user changes the position
-        of the first eccentric. It calculates and updates the positions
-        of the following eccentrics.
-        """
-        value = self._inputs['L1'].value()
-        if value:
-            L1 = value
-            x = self.data['x'][0]
-            B = self.data['B'][0]
-            L2 = L1 + x + B
-            self._outputs['L2'].setValue(L2)
-        else:
-            self._outputs['L2'].clear()
-
-    def _validate_input(self, input=None):
-        """
-        This function gets triggered when the user confirms the given input or at the limits 
-        (re)initialization. It checks if the input is valid and depending on the result, takes actions.
-
-        Args:
-            input (Input): input which content is validated
-        """
-        input = self.sender() if input == None else input
-        input_name = next((name for name, i in self._inputs.items() if i == input), None)
-        if self._is_input_valid(input_name):
-            self._enable_next_input(input_name)
-        else:
-            self._inputs[input_name].clear()
-            self._clear_and_disable_subsequent_inputs(input_name)
-    
-    def _is_input_valid(self, input_name):
-        """
-        This function gets triggered when the user confirms the given input or at the limits 
-        (re)initialization. It checks if the input is valid and depending on the result, takes actions.
-
-        Args:
-            input_name (str): Name of input which content is validated
-        Returns:
-            (bool): Value representing the validity of teh input
-        """
-        input = self._inputs[input_name]
-        value = input.value()
-        if value is None:
-            return False
-        
-        min_value, max_value = self.validated_inputs_limits[input_name]
-        if min_value <= value <= max_value:
-            self.validated_inputs_values[input_name] = value
-            return True
-        return False
-    
-    def _enable_next_input(self, input_name):
-        """
-        Enable the next input from validated inputs after the one which name is provided and if its value 
-        is invalid, clear its text.
-
-        Args:
-            input_name (str): Name of input before the input to enable.
-        """
-        idx = self.validated_inputs.index(input_name)
-        if idx < len(self.validated_inputs) - 1:
-            next_input_name = self.validated_inputs[idx + 1]
-            self._inputs[next_input_name].setEnabled(True)
-            self._set_input_limits(next_input_name)
-            if not self._is_input_valid(next_input_name):
-                self._inputs[next_input_name].clear()
-    
-    def _clear_and_disable_subsequent_inputs(self, input_name):
-        """
-        Clear and disable all the validated inputs that come after the input which name is 
-        provided.
-
-        Args:
-            input_name (str): name of the input after which perform the the disabling
-        """
-        idx = self.validated_inputs.index(input_name)
-        for name in self.validated_inputs[idx + 1:]:
-            self._inputs[name].setPlaceholderText('')
-            self._inputs[name].clear()
-            self._inputs[name].setDisabled(True)
-        self._outputs['L2'].clear()
-
-    def _set_input_limits(self, input_name):
-        """
-        Calculate, set and save the limits for the input which name was provided.
-
-        Args:
-            input_name (str): name of the input for which the limits are set
-        """
-
-        if input_name == 'L':
-            min_value = self.data['x'][0] + 2 * self.data['B'][0]
-            max_value = 1000
-        elif input_name == 'LA':
-            min_value = 0
-            max_value = self.validated_inputs_values['L']
-        elif input_name == 'LB':
-            min_value = self.validated_inputs_values['LA'] + 2 * self.data['B'][0] + self.data['x'][0]
-            max_value = self.validated_inputs_values['L']
-        elif input_name == 'L1':
-            min_value =  self.validated_inputs_values['LA'] + 0.5 * self.data['B'][0]
-            max_value = self.validated_inputs_values['LB'] - self.data['x'][0] - 1.5 * self.data['B'][0]
-        
-        self.validated_inputs_limits[input_name] = (round(min_value, 2), round(max_value, 2))
-        self._inputs[input_name].setPlaceholderText(f"{min_value:.2f}-{max_value:.2f}")
-
-    def _on_activated(self):
-        """
-        Override parents method to call additional methods when this tab becomes active.
-        """
-        super()._on_activated()
-        
-        self._update_eccentrics_position()
-        self._setup_inputs_validation()
-    
-    def _connect_signals_and_slots(self):
-        """
-        Connect signals and slots for interactivity in the tab
-        """
-        self._inputs['L1'].inputConfirmedSignal.connect(self._update_eccentrics_position)
-
-        self.validated_inputs = ['L', 'LA', 'LB', 'L1']
-        for name in self.validated_inputs:
-            self._inputs[name].inputConfirmedSignal.connect(self._validate_input)
-
-    def _emit_tab_data(self):
-        """
-        Emit a signal to update the data with the tab's one.
-        """
-        tab_data = self.get_data()
-        self.update_data_signal.emit(tab_data)
-
     def update_selected_material(self, item_data):
         """
         Update the displayed material information.
@@ -228,67 +76,22 @@ class PreliminaryDataTab(ITrackedTab):
         """
         self.select_material_button.setData(item_data)
 
-    def get_data(self):
-        """
-        Retrieve data from the tab.
-
-        Returns:
-            (dict): The formatted data from the tab.
-        """
-        for attribute, input in self._inputs.items():
-            self.tab_data[attribute][0] = input.value()
-
-        for attribute, item in self._items.items():
-            self.tab_data[attribute] = item.data()
-
-        return self.tab_data
-
-    def update_state(self):
-        """
-        Update the tab with parent data.
-        """
-        for attribute in self._outputs.keys():
-            new_value = self.data[attribute][0]
-            if new_value is not None:
-                self._outputs[attribute].setValue(new_value)
-
-    def set_state(self, data):
-        """
-        Set tab's state.
-
-        Args:
-            data (dict): Data to set the state of the tab with.
-        """
-        for attribute, input in self._inputs.items():
-            value = data[attribute][0]
-            if value is not None:
-                input.setValue(value)
-
-        self._update_eccentrics_position()
-
-        self.select_material_button.setData(data['Materiał'])
-    
-    def init_data(self, data):
-        """
-        Override parent method. Set the initial data for the tab from the parent's data.
-
-        Args:
-            data (dict): Component data.
-        """
-        super().init_data(data)
-        attributes_to_acquire = ['L', 'LA', 'LB', 'L1', 'L2', 'Materiał', 'xz', 'qdop', 'tetadop', 'fdop']
-        self.tab_data = {attr: deepcopy(self.data[attr]) for attr in attributes_to_acquire}
-        self._items = {}
-
-    def init_ui(self):
+    def init_ui(self, component_data, tab_data, items, inputs, outputs):
         """
         Initialize the user interface for this tab.
         """
+        self._component_data = component_data
+
+        self.tab_data = tab_data
+        self._items = items
+
+        self._inputs = inputs
+        self._outputs = outputs
+
         self.setLayout(QVBoxLayout())
 
         self._view_dimensions_component()
         self._view_material_stength_component()
         self._view_material_component()
 
-        self._connect_signals_and_slots()
         super().init_ui()

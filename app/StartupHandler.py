@@ -46,12 +46,12 @@ class StartupHandler():
     def _is_data_valid(self, data):
         if not data:
             return False
-        try:
-            self._try_to_load_data_to_components(data)
-            return True
-        except Exception as e:
-            MessageHandler.critical(self._startup_window, 'Błąd', f'Wczytane dane są niepoprawne.')
-            return False
+        # try:
+        self._try_to_load_data_to_components(data)
+        return True
+        # except Exception as e:
+        #     MessageHandler.critical(self._startup_window, 'Błąd', f'Wczytane dane są niepoprawne.')
+        #     return False
 
     def _get_project_title(self, file_path):
         return os.path.splitext(os.path.basename(file_path))[0]

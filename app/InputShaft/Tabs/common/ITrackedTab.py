@@ -1,3 +1,5 @@
+from PyQt6.QtCore import pyqtSignal
+
 from .ITrackedWidget import ITrackedWidget
 
 class ITrackedTab(ITrackedWidget):
@@ -6,18 +8,11 @@ class ITrackedTab(ITrackedWidget):
     - implement methods that should be overriden (but do not have to) by subclasses
     - override parent class method to implement additional functionalities
     """
+    updateStateSignal = pyqtSignal()
+    allInputsProvided = pyqtSignal()
+
     def __init__(self, parent):
-        # Set the dict of inputs that hold provided by user values
-        self._inputs = {}
-        # Set the dict of outputs that hold presented to user values
-        self._outputs = {}
         super().__init__(parent)
-    
-    def _emit_tab_data(self):
-        """
-        Update the data. This method can be overridden in subclasses to provide specific update logic.
-        """
-        pass
 
     def _on_state_checked(self, all_filled, state_changed):
         """
@@ -26,7 +21,7 @@ class ITrackedTab(ITrackedWidget):
         Update the data.
         """
         if all_filled:
-            self._emit_tab_data()
+            self.allInputsProvided.emit()
 
         super()._on_state_checked(all_filled, state_changed)
     
@@ -36,19 +31,4 @@ class ITrackedTab(ITrackedWidget):
         """
         super()._on_activated()
 
-        self.update_state()
-    
-    def update_state(self):
-        """
-        Update the tab data. This method can be overridden in subclasses to provide specific update logic.
-        """
-        pass
-
-    def init_data(self, data):
-        """
-        Set the tab data
-
-        Args:
-            data (dcit): Component data.
-        """
-        self.data = data
+        self.updateStateSignal.emit()

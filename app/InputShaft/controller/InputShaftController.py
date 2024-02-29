@@ -3,9 +3,17 @@ from InputShaft.view.InputShaft import InputShaft
 from InputShaft.model.InputShaftCalculator import InputShaftCalculator
 
 from InputShaft.Tabs.PreliminaryDataTab import PreliminaryDataTab
+from InputShaft.Tabs.PreliminaryDataTabController import PreliminaryDataTabController
+from InputShaft.Tabs.PreliminaryDataTabCalculator import PreliminaryDataTabCalculator
+
 from InputShaft.Tabs.BearingsTab import BearingsTab
+from InputShaft.Tabs.BearingsTabController import BearingsTabController
+
 from InputShaft.Tabs.PowerLossTab import PowerLossTab
+from InputShaft.Tabs.PowerLossTabController import PowerLossTabController
+
 from InputShaft.Tabs.ResultsTab import ResultsTab
+from InputShaft.Tabs.ResultsTabController import ResultsTabController
 
 from ShaftDesigner.controller.ShaftDesignerController import ShaftDesignerController
 from ShaftDesigner.view.ShaftDesigner import ShaftDesigner
@@ -38,14 +46,33 @@ class InputShaftController:
         self._init_shaft_designer()
 
     def _init_tabs(self):
-        self.tabs = [PreliminaryDataTab(self._input_shaft), BearingsTab(self._input_shaft), PowerLossTab(self._input_shaft), ResultsTab(self._input_shaft)]
-        tabs_titles = ['Założenia wstępne', 'Dobór łożysk', 'Straty Mocy', 'Wyniki obliczeń']
-        for tab in self.tabs:
-            data = self._calculator.get_data()
-            tab.init_data(data)
-            tab.init_ui()
+        tab_id = 1
 
-        self._input_shaft.init_tabs(self.tabs, tabs_titles)
+        tab1 = PreliminaryDataTab(self._input_shaft)
+        tab1_calculator = PreliminaryDataTabCalculator()
+        tab1_controller = PreliminaryDataTabController(tab_id, tab1, tab1_calculator, self._mediator)
+
+        tab_id +=1
+        tab2 = BearingsTab(self._input_shaft)
+        tab2_controller = BearingsTabController(tab_id, tab2, self._mediator)
+
+        tab_id +=1
+        tab3 = PowerLossTab(self._input_shaft)
+        tab3_controller = PowerLossTabController(tab_id, tab3, self._mediator)
+
+        tab_id +=1
+        tab4 = ResultsTab(self._input_shaft)
+        tab4_controller = ResultsTabController(tab_id, tab4, self._mediator)
+
+        self.tabs = [tab1, tab2, tab3, tab4]
+        self.tab_controllers = [tab1_controller, tab2_controller, tab3_controller, tab4_controller]
+        tab_titles = ['Założenia wstępne', 'Dobór łożysk', 'Straty Mocy', 'Wyniki obliczeń']
+
+        for tab in self.tab_controllers:
+            data = self._calculator.get_data()
+            tab.init_state(data)
+
+        self._input_shaft.init_tabs(self.tabs, tab_titles)
 
     def _init_shaft_designer(self):
         # Set an instance of shaft designer
@@ -65,18 +92,27 @@ class InputShaftController:
         self._input_shaft.preview_button.clicked.connect(self._open_shaft_designer_window)
         self._mediator.shaftDesigningFinished.connect(self._on_shaft_designing_finished)
 
-        self.tabs[0].select_material_button.clicked.connect(self._on_select_materials)
-        self.tabs[0].update_data_signal.connect(self._update_input_shaft_attributes)
+        self._mediator.selectMaterial.connect(self._on_select_materials)
 
-        self.tabs[1].select_support_A_bearing_signal.connect(self._on_select_support_A_bearing)
-        self.tabs[1].select_support_B_bearing_signal.connect(self._on_select_support_B_bearing)
-        self.tabs[1].select_central_bearing_signal.connect(self._on_select_central_bearing)
-        self.tabs[1].update_data_signal.connect(self._on_update_bearings_data)
+        self._mediator.selectSupportABearing.connect(self._on_select_support_A_bearing)
+        self._mediator.selectSupportBBearing.connect(self._on_select_support_B_bearing)
+        self._mediator.selectCentralBearing.connect(self._on_select_central_bearing)
 
-        self.tabs[2].select_support_A_bearing_rolling_element_signal.connect(self._on_select_support_A_bearing_rolling_element)
-        self.tabs[2].select_support_B_bearing_rolling_element_signal.connect(self._on_select_support_B_bearing_rolling_element)
-        self.tabs[2].select_central_bearing_rolling_element_signal.connect(self._on_select_central_bearing_rolling_element)
-        self.tabs[2].update_data_signal.connect(self._on_update_power_loss_data)
+        self._mediator.selectSupportABearingRollingElement.connect(self._on_select_support_A_bearing_rolling_element)
+        self._mediator.selectSupportBBearingRollingElement.connect(self._on_select_support_B_bearing_rolling_element)
+        self._mediator.selectCentralBearingRollingElement.connect(self._on_select_central_bearing_rolling_element)
+
+        self._mediator.updateComponentData.connect(self._update_component_data)
+
+    def _update_component_data(self, tab_id, data):
+        self._calculator.update_data(data)
+
+        if tab_id == 1:
+            self._update_input_shaft_attributes()
+        elif tab_id == 2:
+            self._on_update_bearings_data()
+        elif tab_id == 3:
+            self._on_update_power_loss_data()
 
     def _open_shaft_designer_window(self):
         if self._shaft_designer.isHidden():
@@ -100,8 +136,7 @@ class InputShaftController:
         self._calculator.calculate_central_bearing_load_capacity()
         self._calculator.open_central_bearing_selection(self.tabs[1].update_selected_central_bearing)
 
-    def _on_update_bearings_data(self, data):
-        self._calculator.update_data(data)
+    def _on_update_bearings_data(self):
         self._calculator.calculate_bearings_attributes()
 
     def _on_select_support_A_bearing_rolling_element(self, data):
@@ -116,17 +151,15 @@ class InputShaftController:
         self._calculator.update_data(data)
         self._calculator.open_central_bearing_rolling_element_selection(self.tabs[2].update_selected_central_bearing_rolling_element)
 
-    def _on_update_power_loss_data(self, data):
-        self._calculator.update_data(data)
+    def _on_update_power_loss_data(self):
         self._calculator.calculate_bearings_power_loss()
          
-    def _update_input_shaft_attributes(self, data):
+    def _update_input_shaft_attributes(self):
         """
         Calculate attributes for the input shaft.
 
         :param data: Data used for calculating input shaft attributes.
         """
-        self._calculator.update_data(data)
         self._calculator.calculate_preliminary_attributes()
         self._shaft_designer_controller.update_shaft_data(self._calculator.get_data())
 
@@ -145,7 +178,7 @@ class InputShaftController:
         data.append(self._shaft_designer_controller.get_shaft_data())
 
         # Get every tab data
-        for tab in self.tabs[:-1]:
+        for tab in self.tab_controllers[:-1]:
             data.append(tab.get_data())
 
         # Get is_shaft_designed flag
@@ -165,7 +198,7 @@ class InputShaftController:
             self._shaft_designer_controller.set_shaft_data(data[1])
 
         # Set every tab data
-        for idx, tab in enumerate(self.tabs[:-1]):
+        for idx, tab in enumerate(self.tab_controllers[:-1]):
             tab.set_state(data[idx+2])
         
         # Set is_shaft_designed_flag
