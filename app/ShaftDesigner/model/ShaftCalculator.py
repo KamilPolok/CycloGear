@@ -211,6 +211,6 @@ class ShaftCalculator:
                     support[1] = step['d']
                     break
         
-        data['dA'][0] = support_places[0][1]
-        data['dB'][0] = support_places[1][1]
-        data['de'][0] = support_places[2][1]
+        data['Bearings']['support_A']['dip'][0] = support_places[0][1]
+        data['Bearings']['support_B']['dip'][0] = support_places[1][1]
+        data['Bearings']['eccentrics']['dip'][0] = support_places[2][1]

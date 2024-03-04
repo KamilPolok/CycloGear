@@ -1,7 +1,7 @@
-from copy import deepcopy
-
 from .PowerLossTab import PowerLossTab
 from ..Mediator import Mediator
+
+from ..common.common_functions import extract_data, fetch_data_subset, update_data_subset
 
 class PowerLossTabController:
     def __init__(self, id: int, tab: PowerLossTab, mediator: Mediator):
@@ -9,30 +9,23 @@ class PowerLossTabController:
         self._tab = tab
         self._mediator = mediator
 
-        self._inputs = {}
-        self._outputs = {}
-        self._items = {}
-
     def _select_support_A_bearing_rolling_element(self):
         """
         Emit a signal with the updated data for the selected rolling element.
         """
-        tab_data = self.get_data()
-        self._mediator.select_support_A_bearing_rolling_element(tab_data)
+        self._mediator.select_support_A_bearing_rolling_element(self.get_data())
 
     def _select_support_B_bearing_rolling_element(self):
         """
         Emit a signal with the updated data for the selected rolling element.
         """
-        tab_data = self.get_data()
-        self._mediator.select_support_B_bearing_rolling_element(tab_data)
+        self._mediator.select_support_B_bearing_rolling_element(self.get_data())
 
     def _select_central_bearing_rolling_element(self):
         """
         Emit a signal with the updated data for the selected rolling element.
         """
-        tab_data = self.get_data()
-        self._mediator.select_central_bearing_rolling_element(tab_data)
+        self._mediator.select_central_bearing_rolling_element(self.get_data())
     
     def _connect_signals_and_slots(self):
         """
@@ -54,15 +47,18 @@ class PowerLossTabController:
         Retrieve data from the tab.
 
         Returns:
-            dict: The formatted data from the tab.
+            self._tab_data (dict): The entered user data.
         """
-        for attribute, input in self._inputs.items():
-            self.tab_data[attribute][0] = input.value()
+        def get_input(recipient, source, attribute):
+           recipient[attribute][0] = source[attribute][0].value()
 
-        for attribute, item in self._items.items():
-            self.tab_data[attribute] = item.data()
+        def get_item(recipient, source, attribute):
+            recipient[attribute] = source[attribute].data()
 
-        return self.tab_data
+        fetch_data_subset(self._tab_data, self._inputs, get_input)
+        fetch_data_subset(self._tab_data, self._items, get_item)
+
+        return self._tab_data
 
     def init_state(self, component_data):
         """
@@ -72,34 +68,40 @@ class PowerLossTabController:
             data (dict): Component data.
         """
         self._component_data = component_data
-        attributes_to_acquire = ['fA','fB', 'fc']
-        self.tab_data = {attr: deepcopy(self._component_data[attr]) for attr in attributes_to_acquire}
-        self._tab.init_ui(self._component_data, self.tab_data, self._items, self._inputs, self._outputs)
+
+        inputs_keys = [['Bearings', 'support_A', 'f'],
+                       ['Bearings', 'support_B', 'f'],
+                       ['Bearings', 'eccentrics', 'f']
+                       ]
+
+        outputs_keys = [['Bearings', 'support_A', 'di'], ['Bearings', 'support_A', 'do'], ['Bearings', 'support_A', 'drc'],
+                        ['Bearings', 'support_B', 'di'], ['Bearings', 'support_B', 'do'], ['Bearings', 'support_B', 'drc'],
+                        ['Bearings', 'eccentrics', 'di'], ['Bearings', 'eccentrics', 'do'], ['Bearings', 'eccentrics', 'drc']
+                        ]
+
+        items = [['Bearings', 'support_A', 'rolling_elements'],
+                 ['Bearings', 'support_B', 'rolling_elements'],
+                 ['Bearings', 'eccentrics', 'rolling_elements'],
+                 ]
+
+        self._tab_data = extract_data(self._component_data, inputs_keys+items)
+        self._inputs = extract_data(self._component_data, inputs_keys)
+        self._outputs = extract_data(self._component_data, outputs_keys)
+        self._items = extract_data(self._component_data, items)
+
+        self._tab.init_ui(self._items, self._inputs, self._outputs)
         self._connect_signals_and_slots()
 
     def update_state(self):
         """
         Update the tab with parent data.
         """
-        addData = True
-        for key_tuple, value_label in self._outputs.items():
-            # Check if the key is a tuple (indicating a parent-child relationship)
-            if isinstance(key_tuple, tuple):
-                parent_key, attribute = key_tuple
-                if parent_key in self._component_data and attribute in self._component_data[parent_key]:
-                    addData = False
-                    new_value = self._component_data[parent_key][attribute][0]
-                    value_label.setValue(new_value)
-                                        
-            else:
-                # Handle keys without a parent
-                attribute = key_tuple
-                if attribute in self._component_data:
-                    new_value = self._component_data[attribute][0]
-                    value_label.setValue(new_value)
+        def update_output(recipient, source, attribute):
+            new_value = source[attribute][0]
+            if new_value is not None:
+                recipient[attribute][0].setValue(new_value)
 
-        if addData:
-            self._tab.update_state()
+        update_data_subset(self._component_data, self._outputs, update_output)
 
     def set_state(self, data):
         """
@@ -108,11 +110,13 @@ class PowerLossTabController:
         Args:
             data (dict): Data to set the state of the tab with.
         """
-        for attribute, input in self._inputs.items():
-            value = data[attribute][0]
-            if value is not None:
-                input.setValue(value)
+        def update_input(recipient, source, attribute):
+            new_value = source[attribute][0]
+            if new_value is not None:
+                recipient[attribute][0].setValue(new_value)
 
-        self._tab.update_selected_support_A_bearing_rolling_element(data['Toczne_podpora_A'])
-        self._tab.update_selected_support_B_bearing_rolling_element(data['Toczne_podpora_B'])
-        self._tab.update_selected_central_bearing_rolling_element(data['Toczne_centralnych'])
+        update_data_subset(self._component_data, self._inputs, update_input)
+
+        self._tab.update_selected_support_A_bearing_rolling_element(data['Bearings']['support_A']['rolling_elements'])
+        self._tab.update_selected_support_B_bearing_rolling_element(data['Bearings']['support_B']['rolling_elements'])
+        self._tab.update_selected_central_bearing_rolling_element(data['Bearings']['eccentrics']['rolling_elements'])

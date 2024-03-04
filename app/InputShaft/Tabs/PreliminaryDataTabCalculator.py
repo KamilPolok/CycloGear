@@ -15,7 +15,7 @@ class PreliminaryDataTabCalculator:
         Returns:
             (bool): Value representing the validity of the input
         """
-        input = self._inputs[input_name]
+        input = self._inputs[input_name][0]
         value = input.value()
         if value is None:
             return False
@@ -37,10 +37,10 @@ class PreliminaryDataTabCalculator:
         idx = self._validated_inputs.index(input_name)
         if idx < len(self._validated_inputs) - 1:
             next_input_name = self._validated_inputs[idx + 1]
-            self._inputs[next_input_name].setEnabled(True)
+            self._inputs[next_input_name][0].setEnabled(True)
             self._set_input_limits(next_input_name)
             if not self._is_input_valid(next_input_name):
-                self._inputs[next_input_name].clear()
+                self._inputs[next_input_name][0].clear()
     
     def _clear_and_disable_subsequent_inputs(self, input_name):
         """
@@ -52,10 +52,10 @@ class PreliminaryDataTabCalculator:
         """
         idx = self._validated_inputs.index(input_name)
         for name in self._validated_inputs[idx + 1:]:
-            self._inputs[name].setPlaceholderText('')
-            self._inputs[name].clear()
-            self._inputs[name].setDisabled(True)
-        self._outputs['L2'].clear()
+            self._inputs[name][0].setPlaceholderText('')
+            self._inputs[name][0].clear()
+            self._inputs[name][0].setDisabled(True)
+        self._outputs['L2'][0].clear()
 
     def _set_input_limits(self, input_name):
         """
@@ -79,7 +79,7 @@ class PreliminaryDataTabCalculator:
             max_value = self.validated_inputs_values['LB'] - self._component_data['x'][0] - 1.5 * self._component_data['B'][0]
         
         self.validated_inputs_limits[input_name] = (round(min_value, 2), round(max_value, 2))
-        self._inputs[input_name].setPlaceholderText(f"{min_value:.2f}-{max_value:.2f}")
+        self._inputs[input_name][0].setPlaceholderText(f"{min_value:.2f}-{max_value:.2f}")
     
     def setup_inputs_validation(self):
         """
@@ -91,8 +91,8 @@ class PreliminaryDataTabCalculator:
 
         self._set_input_limits('L')
         for name in self._validated_inputs:
-            if self._inputs[name].isEnabled():
-                self.validate_input(self._inputs[name])
+            if self._inputs[name][0].isEnabled():
+                self.validate_input(self._inputs[name][0])
 
     def validate_input(self, input=None):
         """
@@ -103,11 +103,11 @@ class PreliminaryDataTabCalculator:
             input (Input): input which content is validated
         """
         input = self.sender() if input == None else input
-        input_name = next((name for name, i in self._inputs.items() if i == input), None)
+        input_name = next((name for name, i in self._inputs.items() if i[0] == input), None)
         if self._is_input_valid(input_name):
             self._enable_next_input(input_name)
         else:
-            self._inputs[input_name].clear()
+            self._inputs[input_name][0].clear()
             self._clear_and_disable_subsequent_inputs(input_name)
 
     def update_eccentrics_position(self):
@@ -116,12 +116,12 @@ class PreliminaryDataTabCalculator:
         of the first eccentric. It calculates and updates the positions
         of the following eccentrics.
         """
-        value = self._inputs['L1'].value()
+        value = self._inputs['L1'][0].value()
         if value:
             L1 = value
             x = self._component_data['x'][0]
             B = self._component_data['B'][0]
             L2 = L1 + x + B
-            self._outputs['L2'].setValue(L2)
+            self._outputs['L2'][0].setValue(L2)
         else:
-            self._outputs['L2'].clear()
+            self._outputs['L2'][0].clear()

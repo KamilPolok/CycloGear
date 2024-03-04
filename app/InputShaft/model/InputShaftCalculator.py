@@ -5,6 +5,8 @@ from DbHandler.controller.DBController import ViewSelectItemController
 from DbHandler.model.DatabaseHandler import DatabaseHandler
 from DbHandler.view.Window import Window
 
+from ..common.common_functions import fetch_data_subset
+
 class InputShaftCalculator():
     def __init__(self):
         self.data = {
@@ -22,6 +24,13 @@ class InputShaftCalculator():
             'e': [3, 'mm'],                 # Mimośród
             'B': [17, 'mm'],                # Długość koła obiegowego
             'x': [5, 'mm'],                 # Odległość pomiędzy dwoma kołami obiegowymi
+            'rw1': [99, 'mm'],              # Promień koła toczengo (koło obiegowe)
+            # Dobrany materiał i parametry
+            'Materiał' : None,              # Materiał wału
+            'xz': [None, ''],               # Współczynnik bezpieczeństwa
+            'qdop': [None, 'rad/m'],        # Dopuszczalny jednostkowy kąt skręcenia wału
+            'tetadop': [None, 'rad'],       # Dopuszczalny kąt ugięcia wału
+            'fdop': [None, 'mm'],           # Dopuszczalna strzałka ugięcia wału
             # Siły pochodzące od kół obiegowych
             'Fwzx': [4444.44, 'N'],         # Wypadkowa siła międzyzębna działająca w osi x
             'Fwzy': [2799.16, 'N'],         # Wypadkowa siła międzyzębn działająca w osi y
@@ -32,61 +41,63 @@ class InputShaftCalculator():
             'F': [None, 'N'],               # Siła pochodząca od koła obiegowego
             'F1': [None, 'N'],              # Siła na kole obiegowym 1
             'F2': [None, 'N'],              # Siła na kole obiegowym 2
-            # Obliczone i dobrane średnice
+            # Obliczone wymiary wału
             'dsc': [None, 'mm'],            # Średnica wału wejściowego - obliczona
             'dec': [None, 'mm'],            # Średnica mimośrodu - obliczona
-            'dA': [None, 'mm'],             # Średnica pod podporę A
-            'dB': [None, 'mm'],             # Średnica pod podporę B
-            'de': [None, 'mm'],             # Średnica pod tarcze
-            # Dobrany materiał i parametry
-            'Materiał' : None,              # Materiał wału
-            'xz': [None, ''],               # Współczynnik bezpieczeństwa
-            'qdop': [None, 'rad/m'],        # Dopuszczalny jednostkowy kąt skręcenia wału
-            'tetadop': [None, 'rad'],       # Dopuszczalny kąt ugięcia wału
-            'fdop': [None, 'mm'],           # Dopuszczalna strzałka ugięcia wału
-            ## Łożyska podpora A
-            # Dobór łożysk
-            'Łożyska_podpora_A': None,      # Łożyska
-            'LhA': [None, 'h'],             # Trwałość godzinowa
-            'LrA': [None, 'obr'],           # Trwałość
-            'CA': [None, 'kN'],             # Nośność
-            'fdA': [None, ''],              # Współczynnik zależny od zmiennych obciążeń dynamicznych
-            'ftA': [None, ''],              # Współczynnik zależny od temperatury pracy łożyska
-            # Straty mocy
-            'fA': [None, 'mm'],             # Współczynnik tarcia tocznego
-            'dwAc': [None, 'mm'],           # Średnica elementu tocznego ł. podporowych - obliczona
-            'Toczne_podpora_A': None,       # Element toczny
-            'SA': [None, 'mm'],             # Grubość pierścienia
-            'NA': [None, 'W'],              # Starty mocy
-            ## Łożyska podpora B
-            # Dobór łożysk
-            'Łożyska_podpora_B': None,      # Łożyska
-            'LhB': [None, 'h'],             # Trwałość godzinowa
-            'LrB': [None, 'obr'],           # Trwałość
-            'CB': [None, 'kN'],             # Nośność
-            'fdB': [None, ''],              # Współczynnik zależny od zmiennych obciążeń dynamicznych
-            'ftB': [None, ''],              # Współczynnik zależny od temperatury pracy łożyska
-            # Straty mocy
-            'fB': [None, 'mm'],             # Współczynnik tarcia tocznego
-            'dwBc': [None, 'mm'],           # Średnica elementu tocznego ł. podporowych - obliczona
-            'Toczne_podpora_B': None,       # Element toczny
-            'SB': [None, 'mm'],             # Grubość pierścienia
-            'NB': [None, 'W'],              # Starty mocy
-            ## Łożyska centralne
-            # Dobór łożysk
-            'Łożyska_centralne': None,      # Łożyska
-            'Lhc': [None, 'h'],             # Trwałość godzinowa
-            'Ltc': [None, 'obr'],           # Trwałość
-            'Cc': [None, 'kN'],             # Nośność
-            'fdc': [None, ''],              # Współczynnik zależny od zmiennych obciążeń dynamicznych
-            'ftc': [None, ''],              # Współczynnik zależny od temperatury pracy łożyska
-            # Straty mocy
-            'fc': [None, 'mm'],             # Współczynnik tarcia tocznego
-            'rw1': [99, 'mm'],              # Promień koła toczengo (koło obiegowe)
-            'dwcc': [None, 'mm'],           # Średnica elementu tocznego
-            'Toczne_centralnych': None,     # Element toczny
-            'Sc': [None, 'mm'],             # Grubość pierścienia
-            'Nc': [None, 'W'],              # Starty mocy
+            # Łożyska
+            'Bearings': {
+              # Podpora A
+              'support_A': {                         
+                'data': None,               # Parametry łożyska
+                'rolling_elements': None,   # Elementy toczne
+                'dip': [None, 'mm'],        # Średnica wewnętrzna łożyska - na podstawie zaprojektowanego wału
+                'di': [None, 'mm'],         # Średnica wewnętrzna łożyska
+                'do': [None, 'mm'],         # Średnica zewnętrzna łożyska
+                'drc': [None, 'mm'],        # Średnica elementów tocznych - obliczona
+                'Lh': [None, 'h'],          # Trwałość godzinowa
+                'Lr': [None, 'obr'],        # Trwałość
+                'C': [None, 'kN'],          # Nośność
+                'fd': [None, ''],           # Współczynnik zależny od zmiennych obciążeń dynamicznych
+                'ft': [None, ''],           # Współczynnik zależny od temperatury pracy łożyska
+                'f': [None, 'mm'],          # Współczynnik tarcia tocznego
+                'S': [None, 'mm'],          # Grubość pierścienia
+                'N': [None, 'W'],           # Starty mocy           
+              },
+               # Podpora B
+              'support_B': {                         
+                'data': None,               # Parametry łożyska
+                'rolling_elements': None,   # Elementy toczne
+                'dip': [None, 'mm'],       # Średnica wewnętrzna łożyska - na podstawie zaprojektowanego wału
+                'di': [None, 'mm'],         # Średnica wewnętrzna łożyska
+                'do': [None, 'mm'],         # Średnica zewnętrzna łożyska
+                'drc': [None, 'mm'],        # Średnica elementów tocznych - obliczona
+                'Lh': [None, 'h'],          # Trwałość godzinowa
+                'Lr': [None, 'obr'],        # Trwałość
+                'C': [None, 'kN'],          # Nośność
+                'fd': [None, ''],           # Współczynnik zależny od zmiennych obciążeń dynamicznych
+                'ft': [None, ''],           # Współczynnik zależny od temperatury pracy łożyska
+                'f': [None, 'mm'],          # Współczynnik tarcia tocznego
+                'S': [None, 'mm'],          # Grubość pierścienia
+                'N': [None, 'W'],           # Starty mocy           
+              },
+               # Wykorbienia pod koła cykloidalne
+              'eccentrics': {                         
+                'data': None,               # Parametry łożyska
+                'rolling_elements': None,   # Elementy toczne
+                'di': [None, 'mm'],         # Średnica wewnętrzna łożyska
+                'do': [None, 'mm'],         # Średnica zewnętrzna łożyska
+                'dip': [None, 'mm'],       # Średnica wewnętrzna łożyska - na podstawie zaprojektowanego wału
+                'drc': [None, 'mm'],        # Średnica elementów tocznych - obliczona
+                'Lh': [None, 'h'],          # Trwałość godzinowa
+                'Lr': [None, 'obr'],        # Trwałość
+                'C': [None, 'kN'],          # Nośność
+                'fd': [None, ''],           # Współczynnik zależny od zmiennych obciążeń dynamicznych
+                'ft': [None, ''],           # Współczynnik zależny od temperatury pracy łożyska
+                'f': [None, 'mm'],          # Współczynnik tarcia tocznego
+                'S': [None, 'mm'],          # Grubość pierścienia
+                'N': [None, 'W'],           # Starty mocy           
+              }
+            }
         }
 
     def calculate_preliminary_attributes(self):
@@ -101,37 +112,43 @@ class InputShaftCalculator():
         Calculate attributes of support and central bearings.
         """
         # Calculate support A bearing attributes
-        Dw = self.data['Łożyska_podpora_A']['Dw'][0]
-        Dz = self.data['Łożyska_podpora_A']['Dz'][0]
+        Dw = self.data['Bearings']['support_A']['data']['Dw'][0]
+        Dz = self.data['Bearings']['support_A']['data']['Dz'][0]
 
         dw = 0.25 * (Dz - Dw)
 
-        self.data['dwAc'][0] = dw
+        self.data['Bearings']['support_A']['drc'][0] = dw
+        self.data['Bearings']['support_A']['di'][0] = Dw
+        self.data['Bearings']['support_A']['do'][0] = Dz
 
         # Calculate support B bearing attributes
-        Dw = self.data['Łożyska_podpora_B']['Dw'][0]
-        Dz = self.data['Łożyska_podpora_B']['Dz'][0]
+        Dw = self.data['Bearings']['support_B']['data']['Dw'][0]
+        Dz = self.data['Bearings']['support_B']['data']['Dz'][0]
 
         dw = 0.25 * (Dz - Dw)
 
-        self.data['dwBc'][0] = dw
+        self.data['Bearings']['support_B']['drc'][0] = dw
+        self.data['Bearings']['support_B']['di'][0] = Dw
+        self.data['Bearings']['support_B']['do'][0] = Dz
 
         # Calculate central bearings attributes
-        Dw = self.data['Łożyska_centralne']['Dw'][0]
-        Dz = self.data['Łożyska_centralne']['E'][0]
+        Dw = self.data['Bearings']['eccentrics']['data']['Dw'][0]
+        Dz = self.data['Bearings']['eccentrics']['data']['E'][0]
 
         dw = 0.25 * (Dz - Dw)
 
-        self.data['dwcc'][0] = dw
+        self.data['Bearings']['eccentrics']['drc'][0] = dw
+        self.data['Bearings']['eccentrics']['di'][0] = Dw
+        self.data['Bearings']['eccentrics']['do'][0] = Dz
     
     def calculate_support_A_bearing_load_capacity(self):
         """
         Calculate load capacity of the support A bearing.
         """
         nwe = self.data['nwe'][0]
-        lh = self.data['LhA'][0]
-        fd = self.data['fdA'][0]
-        ft = self.data['ftA'][0]
+        lh = self.data['Bearings']['support_A']['Lh'][0]
+        fd = self.data['Bearings']['support_A']['fd'][0]
+        ft = self.data['Bearings']['support_A']['ft'][0]
         p = 3.0
 
         ra = self.data['Ra'][0]
@@ -139,17 +156,17 @@ class InputShaftCalculator():
         l = 60 * lh * nwe / np.power(10, 6)
         c = ra * np.power(l, 1 / p) * ft / fd / 1000 # [kN]
 
-        self.data['LrA'][0] = l
-        self.data['CA'][0] = c
+        self.data['Bearings']['support_A']['Lr'][0] = l
+        self.data['Bearings']['support_A']['C'][0] = c
 
     def calculate_support_B_bearing_load_capacity(self):
         """
         Calculate load capacity of the support B bearing.
         """
         nwe = self.data['nwe'][0]
-        lh = self.data['LhB'][0]
-        fd = self.data['fdB'][0]
-        ft = self.data['ftB'][0]
+        lh = self.data['Bearings']['support_B']['Lh'][0]
+        fd = self.data['Bearings']['support_B']['fd'][0]
+        ft = self.data['Bearings']['support_B']['ft'][0]
         p = 3.0
 
         ra = self.data['Ra'][0]
@@ -157,17 +174,18 @@ class InputShaftCalculator():
         l = 60 * lh * nwe / np.power(10, 6)
         c = ra * np.power(l, 1 / p) * ft / fd / 1000 # [kN]
 
-        self.data['LrB'][0] = l
-        self.data['CB'][0] = c
+        self.data['Bearings']['support_B']['Lr'][0] = l
+        self.data['Bearings']['support_B']['C'][0] = c
 
     def calculate_central_bearing_load_capacity(self):
         """
         Calculate load capacity of central bearing.
         """
         nwe = self.data['nwe'][0]
-        lh = self.data['Lhc'][0]
-        fd = self.data['fdc'][0]
-        ft = self.data['ftc'][0]
+        lh = self.data['Bearings']['eccentrics']['Lh'][0]
+        fd = self.data['Bearings']['eccentrics']['fd'][0]
+        ft = self.data['Bearings']['eccentrics']['ft'][0]
+
         p = 3.0
 
         f = self.data['F'][0]
@@ -175,8 +193,8 @@ class InputShaftCalculator():
         l = 60 * lh * nwe / np.power(10, 6)
         c = f * np.power(l, 1 / p) * ft / fd/ 1000 # [kN]
 
-        self.data['Ltc'][0] = l
-        self.data['Cc'][0] = c
+        self.data['Bearings']['eccentrics']['Lr'][0] = l
+        self.data['Bearings']['eccentrics']['C'][0] = c
 
     def calculate_bearings_power_loss(self):
         """
@@ -184,44 +202,45 @@ class InputShaftCalculator():
         """
         w0 = self.data['w0'][0]
         e = self.data['e'][0]
-        fA = self.data['fA'][0]
-        fc = self.data['fc'][0]
         rw1 = self.data['rw1'][0]
-        Ra = self.data['Ra'][0]
-        Rb = self.data['Rb'][0]
-        F = self.data['F'][0]
 
         # Calculate power loss for support A bearing
-        dw = self.data['Toczne_podpora_A']['D'][0]
-        Dw = self.data['Łożyska_podpora_A']['Dw'][0]
+        dw = self.data['Bearings']['support_A']['rolling_elements']['D'][0]
+        Dw = self.data['Bearings']['support_A']['data']['Dw'][0]
+        f = self.data['Bearings']['support_A']['f'][0]
+        Ra = self.data['Ra'][0]
 
         S = dw / 2
-        NA = fA * 0.001 * w0 * (1 + (Dw + 2 * S) / dw) * (1 + e / rw1) * 4 * np.abs(Ra) / np.pi
+        N = f * 0.001 * w0 * (1 + (Dw + 2 * S) / dw) * (1 + e / rw1) * 4 * np.abs(Ra) / np.pi
 
-        self.data['SA'][0] = S
-        self.data['NA'][0] = NA
+        self.data['Bearings']['support_A']['S'][0] = S
+        self.data['Bearings']['support_A']['N'][0] = N
 
         # Calculate power loss for support B bearing
-        dw = self.data['Toczne_podpora_B']['D'][0]
-        Dw = self.data['Łożyska_podpora_B']['Dw'][0]
+        dw = self.data['Bearings']['support_B']['rolling_elements']['D'][0]
+        Dw = self.data['Bearings']['support_B']['data']['Dw'][0]
+        f = self.data['Bearings']['support_B']['f'][0]
+        Rb = self.data['Rb'][0]
 
         S = dw / 2
-        NB = fA * 0.001 * w0 * (1 + (Dw + 2 * S) / dw) * (1 + e / rw1) * 4 * np.abs(Rb) / np.pi
+        N = f * 0.001 * w0 * (1 + (Dw + 2 * S) / dw) * (1 + e / rw1) * 4 * np.abs(Rb) / np.pi
 
-        self.data['SB'][0] = S
-        self.data['NB'][0] = NB
+        self.data['Bearings']['support_B']['S'][0] = S
+        self.data['Bearings']['support_B']['N'][0] = N
 
         # Calculate power loss for central bearings
-        dw = self.data['Toczne_centralnych']['D'][0]
-        Dw = self.data['Łożyska_centralne']['Dw'][0]
-        Dz = self.data['Łożyska_centralne']['Dz'][0]
+        dw = self.data['Bearings']['eccentrics']['rolling_elements']['D'][0]
+        Dw = self.data['Bearings']['eccentrics']['data']['Dw'][0]
+        Dz = self.data['Bearings']['eccentrics']['data']['Dz'][0]
+        f = self.data['Bearings']['eccentrics']['f'][0]
+        F = self.data['F'][0]
 
         S = 0.15 * (Dz - Dw)
-        Nc = fc * 0.001 * w0 * (1 + (Dw + 2 * S) / dw) * (1 + e / rw1) * 4 * F / np.pi
+        N = f * 0.001 * w0 * (1 + (Dw + 2 * S) / dw) * (1 + e / rw1) * 4 * F / np.pi
 
-        self.data['Sc'][0] = S
-        self.data['Nc'][0] = Nc
-         
+        self.data['Bearings']['eccentrics']['S'][0] = S
+        self.data['Bearings']['eccentrics']['N'][0] = N
+
     def open_shaft_material_selection(self, callback):
         """
         Open the window for selection of the shaft material
@@ -257,8 +276,8 @@ class InputShaftCalculator():
         available_tables = db_handler.getAvailableTables(tables_group_name)
         # Specify the limits for the group of tables
         limits = db_handler.getTableItemsFilters(tables_group_name)
-        limits['Dw']['min'] = self.data['dA'][0]
-        limits['C']['min'] = self.data['CA'][0]
+        limits['Dw']['min'] = self.data['Bearings']['support_A']['dip'][0]
+        limits['C']['min'] = self.data['Bearings']['support_A']['C'][0]
         # Setup the controller for the subwindow
         view_select_items_ctrl = ViewSelectItemController(db_handler, subwindow, available_tables, limits)
         subwindow.itemDataSignal.connect(callback)
@@ -281,8 +300,8 @@ class InputShaftCalculator():
         available_tables = db_handler.getAvailableTables(tables_group_name)
         # Specify the limits for the group of tables
         limits = db_handler.getTableItemsFilters(tables_group_name)
-        limits['Dw']['min'] = self.data['dB'][0]
-        limits['C']['min'] = self.data['CB'][0]
+        limits['Dw']['min'] = self.data['Bearings']['support_B']['dip'][0]
+        limits['C']['min'] = self.data['Bearings']['support_B']['dip'][0]
         # Setup the controller for the subwindow
         view_select_items_ctrl = ViewSelectItemController(db_handler, subwindow, available_tables, limits)
         subwindow.itemDataSignal.connect(callback)
@@ -305,8 +324,8 @@ class InputShaftCalculator():
         available_tables = db_handler.getAvailableTables(tables_group_name)
         # Specify the limits for the group of tables
         limits = db_handler.getTableItemsFilters(tables_group_name)
-        limits['Dw']['min'] = self.data['de'][0]
-        limits['C']['min'] = self.data['Cc'][0]
+        limits['Dw']['min'] = self.data['Bearings']['eccentrics']['dip'][0]
+        limits['C']['min'] = self.data['Bearings']['eccentrics']['dip'][0]
         # Setup the controller for the subwindow
         view_select_items_ctrl = ViewSelectItemController(db_handler, subwindow, available_tables, limits)
         subwindow.itemDataSignal.connect(callback)
@@ -325,12 +344,12 @@ class InputShaftCalculator():
         subwindow = Window()
         subwindow.setWindowTitle("Dobór elementu tocznego")
         # Specify the group name of the tables you want to take for consideration
-        tables_group_name = f"wał wejściowy-elementy toczne-{self.data['Łożyska_podpora_A']['elementy toczne'][0]}"
+        tables_group_name = f"wał wejściowy-elementy toczne-{self.data['Bearings']['support_A']['data']['elementy toczne'][0]}"
         available_tables = db_handler.getAvailableTables(tables_group_name)
         # Specify the limits for the group of tables
         limits = db_handler.getTableItemsFilters(tables_group_name)
-        limits['D']['min'] = math.floor(self.data['dwAc'][0]) - 1
-        limits['D']['max'] = math.ceil(self.data['dwAc'][0]) + 1
+        limits['D']['min'] = math.floor(self.data['Bearings']['support_A']['drc'][0]) - 1
+        limits['D']['max'] = math.ceil(self.data['Bearings']['support_A']['drc'][0]) + 1
         # Setup the controller for the subwindow
         view_select_items_ctrl = ViewSelectItemController(db_handler, subwindow, available_tables, limits)
         subwindow.itemDataSignal.connect(callback)
@@ -349,12 +368,12 @@ class InputShaftCalculator():
         subwindow = Window()
         subwindow.setWindowTitle("Dobór elementu tocznego")
         # Specify the group name of the tables you want to take for consideration
-        tables_group_name = f"wał wejściowy-elementy toczne-{self.data['Łożyska_podpora_B']['elementy toczne'][0]}"
+        tables_group_name = f"wał wejściowy-elementy toczne-{self.data['Bearings']['support_B']['data']['elementy toczne'][0]}"
         available_tables = db_handler.getAvailableTables(tables_group_name)
         # Specify the limits for the group of tables
         limits = db_handler.getTableItemsFilters(tables_group_name)
-        limits['D']['min'] = math.floor(self.data['dwBc'][0]) - 1
-        limits['D']['max'] = math.ceil(self.data['dwBc'][0]) + 1
+        limits['D']['min'] = math.floor(self.data['Bearings']['support_B']['drc'][0]) - 1
+        limits['D']['max'] = math.ceil(self.data['Bearings']['support_B']['drc'][0]) + 1
         # Setup the controller for the subwindow
         view_select_items_ctrl = ViewSelectItemController(db_handler, subwindow, available_tables, limits)
         subwindow.itemDataSignal.connect(callback)
@@ -373,12 +392,12 @@ class InputShaftCalculator():
         subwindow = Window()
         subwindow.setWindowTitle("Dobór elementu tocznego")
         # Specify the group name of the tables you want to take for consideration
-        tables_group_name = f"wał wejściowy-elementy toczne-{self.data['Łożyska_centralne']['elementy toczne'][0]}"
+        tables_group_name = f"wał wejściowy-elementy toczne-{self.data['Bearings']['eccentrics']['data']['elementy toczne'][0]}"
         available_tables = db_handler.getAvailableTables(tables_group_name)
         # Specify the limits for the group of tables
         limits = db_handler.getTableItemsFilters(tables_group_name)
-        limits['D']['min'] = math.floor(self.data['dwcc'][0]) - 1
-        limits['D']['max'] = math.ceil(self.data['dwcc'][0]) + 1
+        limits['D']['min'] = math.floor(self.data['Bearings']['eccentrics']['drc'][0]) - 1
+        limits['D']['max'] = math.ceil(self.data['Bearings']['eccentrics']['drc'][0]) + 1
         # Setup the controller for the subwindow
         view_select_items_ctrl = ViewSelectItemController(db_handler, subwindow, available_tables, limits)
         subwindow.itemDataSignal.connect(callback)
@@ -400,8 +419,6 @@ class InputShaftCalculator():
         """
         Update component data.
 
-        :param data: New data to update with the component data.
-        """
-        for key, value in data.items():
-            if key in self.data:
-                self.data[key] = value
+        Args (dict): New data to update the component data with.
+        """   
+        fetch_data_subset(self.data, data)

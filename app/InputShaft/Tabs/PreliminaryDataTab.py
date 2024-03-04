@@ -7,54 +7,37 @@ from .common.common_functions import create_data_input_row, create_data_display_
 class PreliminaryDataTab(ITrackedTab):
     def _view_dimensions_component(self):
         """
-        Create and layout the dimensions component of the tab.
+        Create and layout a dimensions component.
         """
         component_layout = QVBoxLayout()
-        component_label = QLabel('Wymiary:')
 
-        shaft_length = create_data_input_row(self, 'L', 'Długość wału wejściowego', 'L', decimal_precision=2)
-        roller_support = create_data_input_row(self, 'LA', 'Współrzędne podpory przesuwnej', 'L<sub>A</sub>', decimal_precision=2)
-        pin_support = create_data_input_row(self, 'LB', 'Współrzędne podpory nieprzesuwnej', 'L<sub>B</sub>', decimal_precision=2)
-        cyclo_disc1 = create_data_input_row(self, 'L1', 'Współrzędne koła obiegowego 1', 'L<sub>1</sub>', decimal_precision=2)
-        cyclo_disc2 = create_data_display_row(self, 'L2', self._component_data['L2'], 'L<sub>2</sub>', 'Współrzędne koła obiegowego 2', decimal_precision=2)
-        disc_width = create_data_display_row(self, 'x', self._component_data['x'], 'x', 'Odległość pomiędzy tarczami', decimal_precision=2)
-        discs_distance = create_data_display_row(self, 'B', self._component_data['B'], 'B', 'Grubość tarczy', decimal_precision=2)
+        component_layout.addWidget(QLabel('Wymiary:'))
+        component_layout.addLayout(create_data_input_row(self, self._inputs['L'], 'L', 'Długość wału wejściowego', decimal_precision=2))
+        component_layout.addLayout(create_data_input_row(self, self._inputs['LA'], 'L<sub>A</sub>', 'Współrzędne podpory przesuwnej', decimal_precision=2))
+        component_layout.addLayout(create_data_input_row(self, self._inputs['LB'], 'L<sub>B</sub>', 'Współrzędne podpory nieprzesuwnej', decimal_precision=2))
+        component_layout.addLayout(create_data_input_row(self, self._inputs['L1'], 'L<sub>1</sub>', 'Współrzędne koła obiegowego 1', decimal_precision=2))
+        component_layout.addLayout(create_data_display_row(self, self._outputs['L2'], 'L<sub>2</sub>', 'Współrzędne koła obiegowego 2', decimal_precision=2))
+        component_layout.addLayout(create_data_display_row(self, self._outputs['x'], 'x', 'Odległość pomiędzy tarczami', decimal_precision=2))
+        component_layout.addLayout(create_data_display_row(self, self._outputs['B'], 'B', 'Grubość tarczy', decimal_precision=2))
 
-        component_layout.addWidget(component_label)
-        component_layout.addLayout(shaft_length)
-        component_layout.addLayout(roller_support)
-        component_layout.addLayout(pin_support)
-        component_layout.addLayout(cyclo_disc1)
-        component_layout.addLayout(cyclo_disc2)
-        component_layout.addLayout(disc_width)
-        component_layout.addLayout(discs_distance)
-
-        self.layout().addLayout(component_layout)
+        self.main_layout.addLayout(component_layout)
 
     def _view_material_stength_component(self):
         """
-        Create and layout the  component of the tab.
+        Create and layout a material strength component.
         """
         component_layout = QVBoxLayout()
-        component_label = QLabel('Pozostałe:')
 
-        factor_of_safety = create_data_input_row(self, 'xz', 'Współczynnik bezpieczeństwa', 'x<sub>z</sub>', decimal_precision=1)
-        permissible_angle_of_twist = create_data_input_row(self, 'qdop', 'Dopuszczalny jednostkowy kąt skręcenia wału', 'φ\'<sub>dop</sub>', decimal_precision=5)
-        permissible_deflecton_angle = create_data_input_row(self, 'tetadop', 'Dopuszczalna kąt ugięcia', 'θ<sub>dop</sub>', decimal_precision=5)
-        permissible_deflection_arrow = create_data_input_row(self, 'fdop', 'Dopuszczalna strzałka ugięcia', 'f<sub>dop</sub>', decimal_precision=5)
-
-        component_layout.addWidget(component_label)
-        component_layout.addLayout(factor_of_safety)
-        component_layout.addLayout(permissible_angle_of_twist)
-        component_layout.addLayout(permissible_deflecton_angle)
-        component_layout.addLayout(permissible_deflection_arrow)
-
-
-        self.layout().addLayout(component_layout)
+        component_layout.addWidget(QLabel('Pozostałe:'))
+        component_layout.addLayout(create_data_input_row(self, self._inputs['xz'], 'x<sub>z</sub>', 'Współczynnik bezpieczeństwa', decimal_precision=1))
+        component_layout.addLayout(create_data_input_row(self, self._inputs['qdop'], 'φ\'<sub>dop</sub>', 'Dopuszczalny jednostkowy kąt skręcenia wału', decimal_precision=5))
+        component_layout.addLayout(create_data_input_row(self, self._inputs['tetadop'], 'θ<sub>dop</sub>', 'Dopuszczalny kąt ugięcia', decimal_precision=5))
+        component_layout.addLayout(create_data_input_row(self, self._inputs['fdop'], 'f<sub>dop</sub>', 'Dopuszczalna strzałka ugięcia', decimal_precision=5))
+        self.main_layout.addLayout(component_layout)
 
     def _view_material_component(self):
         """
-        Create and layout the third co mponent of the tab.
+        Create and layout a material selection component.
         """
         component_layout = QHBoxLayout()
         component_label = QLabel('Materiał:')
@@ -65,7 +48,7 @@ class PreliminaryDataTab(ITrackedTab):
         component_layout.addWidget(component_label)
         component_layout.addWidget(self.select_material_button)
 
-        self.layout().addLayout(component_layout)
+        self.main_layout.addLayout(component_layout)
 
     def update_selected_material(self, item_data):
         """
@@ -76,19 +59,21 @@ class PreliminaryDataTab(ITrackedTab):
         """
         self.select_material_button.setData(item_data)
 
-    def init_ui(self, component_data, tab_data, items, inputs, outputs):
+    def init_ui(self, items, inputs, outputs):
         """
         Initialize the user interface for this tab.
+
+        Args:
+            items: (dict): DattaButtons providing storage for selected items
+            inputs (dict): Inputs
+            outputs (dict): Outputs
         """
-        self._component_data = component_data
-
-        self.tab_data = tab_data
         self._items = items
-
         self._inputs = inputs
         self._outputs = outputs
 
-        self.setLayout(QVBoxLayout())
+        self.main_layout = QVBoxLayout()
+        self.setLayout(self.main_layout)
 
         self._view_dimensions_component()
         self._view_material_stength_component()

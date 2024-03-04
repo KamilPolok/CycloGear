@@ -1,4 +1,3 @@
-from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QComboBox, QVBoxLayout, QHBoxLayout, QLabel, QStackedWidget, QWidget
 
 from .common.DataButton import DataButton
@@ -24,11 +23,6 @@ class Section(ITrackedWidget):
         self.main_layout.insertLayout(idx, layout)
 
 class PowerLossTab(ITrackedTab):
-    update_data_signal = pyqtSignal(dict)
-    select_support_A_bearing_rolling_element_signal = pyqtSignal(dict)
-    select_support_B_bearing_rolling_element_signal = pyqtSignal(dict)
-    select_central_bearing_rolling_element_signal = pyqtSignal(dict)
-
     def _init_selector(self):
         self.layout_selector = QComboBox()
         self.layout_selector.addItems(["Podpora przesuwna A", "Podpora przesuwna B", "Wykorbienia"])
@@ -60,15 +54,17 @@ class PowerLossTab(ITrackedTab):
         self.support_A_bearing_section = Section(self, self._enable_select_support_A_bearing_rolling_element_button)
 
         # Set data display and input rows
-        self.support_A_bearing_section.addLayout(create_data_input_row(self, 'fA', 'Współczynnik tarcia tocznego', 'f', decimal_precision=2))
-        self.support_A_bearing_section.addLayout(create_data_display_row(self, 'dwAc', self._component_data['dwAc'], 'd<sub>w</sub>', 'Obliczona średnica elementów tocznych', decimal_precision=2))
+        self.support_A_bearing_section.addLayout(create_data_input_row(self, self._inputs['Bearings']['support_A']['f'], 'f', 'Współczynnik tarcia tocznego', decimal_precision=2))
+        self.support_A_bearing_section.addLayout(create_data_display_row(self, self._outputs['Bearings']['support_A']['di'], 'd', 'Średnica wewnętrzna łożyska', decimal_precision=2))
+        self.support_A_bearing_section.addLayout(create_data_display_row(self, self._outputs['Bearings']['support_A']['do'], 'D', 'Średnica zewnętrzna łożyska', decimal_precision=2))
+        self.support_A_bearing_section.addLayout(create_data_display_row(self, self._outputs['Bearings']['support_A']['drc'], 'd<sub>w</sub>', 'Obliczona średnica elementów tocznych', decimal_precision=2))
         
         # Set button for rolling element selection
         button_layout = QHBoxLayout()
         button_label = QLabel('Elementy toczne:')
 
         self._select_support_A_bearing_rolling_element_button = DataButton('Wybierz elementy toczne')
-        self._items['Toczne_podpora_A'] = self._select_support_A_bearing_rolling_element_button
+        self._items['Bearings']['support_A']['rolling_elements'] = self._select_support_A_bearing_rolling_element_button
 
         button_layout.addWidget(button_label)
         button_layout.addWidget(self._select_support_A_bearing_rolling_element_button)
@@ -88,15 +84,17 @@ class PowerLossTab(ITrackedTab):
         self.support_B_bearing_section = Section(self, self._enable_select_support_B_bearing_rolling_element_button)
 
         # Set data display and input rows
-        self.support_B_bearing_section.addLayout(create_data_input_row(self, 'fB', 'Współczynnik tarcia tocznego', 'f', decimal_precision=2))
-        self.support_B_bearing_section.addLayout(create_data_display_row(self, 'dwBc', self._component_data['dwBc'], 'd<sub>w</sub>', 'Obliczona średnica elementów tocznych', decimal_precision=2))
+        self.support_B_bearing_section.addLayout(create_data_input_row(self, self._inputs['Bearings']['support_B']['f'], 'f', 'Współczynnik tarcia tocznego', decimal_precision=2))
+        self.support_B_bearing_section.addLayout(create_data_display_row(self, self._outputs['Bearings']['support_B']['di'], 'd', 'Średnica wewnętrzna łożyska', decimal_precision=2))
+        self.support_B_bearing_section.addLayout(create_data_display_row(self, self._outputs['Bearings']['support_B']['do'], 'D', 'Średnica zewnętrzna łożyska', decimal_precision=2))
+        self.support_B_bearing_section.addLayout(create_data_display_row(self, self._outputs['Bearings']['support_B']['drc'], 'd<sub>w</sub>', 'Obliczona średnica elementów tocznych', decimal_precision=2))
         
         # Set button for rolling element selection
         button_layout = QHBoxLayout()
         button_label = QLabel('Elementy toczne:')
 
         self._select_support_B_bearing_rolling_element_button = DataButton('Wybierz elementy toczne')
-        self._items['Toczne_podpora_B'] = self._select_support_B_bearing_rolling_element_button
+        self._items['Bearings']['support_B']['rolling_elements'] = self._select_support_B_bearing_rolling_element_button
 
         button_layout.addWidget(button_label)
         button_layout.addWidget(self._select_support_B_bearing_rolling_element_button)
@@ -116,15 +114,17 @@ class PowerLossTab(ITrackedTab):
         self.central_bearing_section = Section(self, self._enable_select_central_bearing_rolling_element_button)
 
         # Create data display and input rows
-        self.central_bearing_section.addLayout(create_data_input_row(self, 'fc', 'Współczynnik tarcia tocznego', 'f', decimal_precision=2))
-        self.central_bearing_section.addLayout(create_data_display_row(self, 'dwcc', self._component_data['dwcc'], 'd<sub>w</sub>', 'Obliczona średnica elementów tocznych', decimal_precision=2))
+        self.central_bearing_section.addLayout(create_data_input_row(self, self._inputs['Bearings']['eccentrics']['f'], 'f', 'Współczynnik tarcia tocznego', decimal_precision=2))
+        self.central_bearing_section.addLayout(create_data_display_row(self, self._outputs['Bearings']['eccentrics']['di'], 'd', 'Średnica wewnętrzna łożyska', decimal_precision=2))
+        self.central_bearing_section.addLayout(create_data_display_row(self, self._outputs['Bearings']['eccentrics']['do'], 'D', 'Średnica zewnętrzna łożyska', decimal_precision=2))
+        self.central_bearing_section.addLayout(create_data_display_row(self, self._outputs['Bearings']['eccentrics']['drc'], 'd<sub>w</sub>', 'Obliczona średnica elementów tocznych', decimal_precision=2))
 
         # Create button for rolling element selection
         button_layout = QHBoxLayout()
         button_label = QLabel('Elementy toczne:')
 
         self._select_central_bearing_rolling_element_button = DataButton('Wybierz elementy toczne')
-        self._items['Toczne_centralnych'] = self._select_support_B_bearing_rolling_element_button
+        self._items['Bearings']['eccentrics']['rolling_elements'] = self._select_support_B_bearing_rolling_element_button
 
         button_layout.addWidget(button_label)
         button_layout.addWidget(self._select_central_bearing_rolling_element_button)
@@ -139,12 +139,10 @@ class PowerLossTab(ITrackedTab):
         """
         Enable or disable the selection button based on whether all inputs are filled.
         """
-        if enable_button:
-            self._select_support_A_bearing_rolling_element_button.setEnabled(True)
-            if delete_choice:
-                self._select_support_A_bearing_rolling_element_button.clear()
-        else:
-            self._select_support_A_bearing_rolling_element_button.setEnabled(False)
+        self._select_support_A_bearing_rolling_element_button.setEnabled(enable_button)
+
+        if delete_choice:
+            self._select_support_A_bearing_rolling_element_button.clear()
 
     def _enable_select_support_B_bearing_rolling_element_button(self, enable_button, delete_choice):
         """
@@ -190,27 +188,17 @@ class PowerLossTab(ITrackedTab):
             item_data (dict): Data of the selected item.
         """
         self._select_central_bearing_rolling_element_button.setData(item_data)
-
-    def update_state(self):
-        """
-        Update the tab with parent data.
-        """
-        self.support_A_bearing_section.insertLayout(0, create_data_display_row(self, ('Łożyska_podpora_A','Dw'), self._component_data['Łożyska_podpora_A']['Dw'], 'D<sub>w</sub>', 'Średnica wewnętrzna łożyska', decimal_precision=2))
-        self.support_A_bearing_section.insertLayout(0, create_data_display_row(self, ('Łożyska_podpora_A','Dz'), self._component_data['Łożyska_podpora_A']['Dz'], 'D<sub>z</sub>', 'Średnica zewnętrzna łożyska', decimal_precision=2))
-        self.support_B_bearing_section.insertLayout(0, create_data_display_row(self, ('Łożyska_podpora_B','Dw'), self._component_data['Łożyska_podpora_B']['Dw'], 'D<sub>w</sub>', 'Średnica wewnętrzna łożyska', decimal_precision=2))
-        self.support_B_bearing_section.insertLayout(0, create_data_display_row(self, ('Łożyska_podpora_B','Dz'), self._component_data['Łożyska_podpora_B']['Dz'], 'D<sub>z</sub>', 'Średnica zewnętrzna łożyska', decimal_precision=2))
-        self.central_bearing_section.insertLayout(0, create_data_display_row(self, ('Łożyska_centralne','Dw'), self._component_data['Łożyska_centralne']['Dw'], 'D<sub>w</sub>', 'Średnica wewnętrzna łożyska', decimal_precision=2))
-        self.central_bearing_section.insertLayout(0, create_data_display_row(self, ('Łożyska_centralne','Dz'), self._component_data['Łożyska_centralne']['Dz'], 'D<sub>z</sub>', 'Średnica zewnętrzna łożyska', decimal_precision=2))
     
-    def init_ui(self, component_data, tab_data, items, inputs, outputs):
+    def init_ui(self, items, inputs, outputs):
         """
         Initialize the user interface for this tab.
+        
+        Args:
+            items: (dict): DattaButtons providing storage for selected items
+            inputs (dict): Inputs
+            outputs (dict): Outputs
         """
-        self._component_data = component_data
-
-        self.tab_data = tab_data
         self._items = items
-
         self._inputs = inputs
         self._outputs = outputs
 
