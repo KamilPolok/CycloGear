@@ -1,3 +1,5 @@
+from functools import partial
+
 from .BearingsTab import BearingsTab
 from ..Mediator import Mediator
 
@@ -9,24 +11,15 @@ class BearingsTabController:
         self._tab = tab
         self._mediator = mediator
 
-    def _select_support_A_bearing(self):
+    def _select_bearing(self, bearing_section_id):
         """
         Emit a signal with the updated data for the selected bearing.
-        """
-        self._mediator.select_support_A_bearing(self.get_data())
 
-    def _select_support_B_bearing(self):
+        Args:
+            bearing_section_id (str): Id of section that specifies the bearing location.
         """
-        Emit a signal with the updated data for the selected bearing.
-        """
-        self._mediator.select_support_B_bearing(self.get_data())
+        self._mediator.select_bearing(bearing_section_id, self.get_data())
 
-    def _select_central_bearing(self):
-        """
-        Emit a signal with the updated data for the selected bearing.
-        """
-        self._mediator.select_central_bearing(self.get_data())
-    
     def _connect_signals_and_slots(self):
         """
         Connect signals and slots for interactivity in the tab.
@@ -34,9 +27,8 @@ class BearingsTabController:
         self._tab.allInputsProvided.connect(self._update_component_data)
         self._tab.updateStateSignal.connect(self.update_state)
 
-        self._tab._select_support_A_bearing_button.clicked.connect(self._select_support_A_bearing)
-        self._tab._select_support_B_bearing_button.clicked.connect(self._select_support_B_bearing)
-        self._tab._select_central_bearing_button.clicked.connect(self._select_central_bearing)
+        for section_name, item in self._items['Bearings'].items():
+            item['data'].clicked.connect(partial(self._select_bearing, section_name))
 
     def _update_component_data(self):
         self._mediator.update_component_data(self._id, self.get_data())
@@ -116,6 +108,5 @@ class BearingsTabController:
         
         update_data_subset(self._component_data, self._inputs, update_input)
 
-        self._tab.update_selected_support_A_bearing(data['Bearings']['support_A']['data'])
-        self._tab.update_selected_support_B_bearing(data['Bearings']['support_B']['data'])
-        self._tab.update_selected_central_bearing(data['Bearings']['eccentrics']['data'])
+        for name, item in self._items['Bearings'].items():
+            item['data'].setData(data['Bearings'][name]['data'])

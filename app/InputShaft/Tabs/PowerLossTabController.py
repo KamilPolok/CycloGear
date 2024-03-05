@@ -1,3 +1,5 @@
+from functools import partial
+
 from .PowerLossTab import PowerLossTab
 from ..Mediator import Mediator
 
@@ -9,23 +11,14 @@ class PowerLossTabController:
         self._tab = tab
         self._mediator = mediator
 
-    def _select_support_A_bearing_rolling_element(self):
+    def _select_rolling_element(self, bearing_section_id):
         """
         Emit a signal with the updated data for the selected rolling element.
-        """
-        self._mediator.select_support_A_bearing_rolling_element(self.get_data())
 
-    def _select_support_B_bearing_rolling_element(self):
+        Args:
+            bearing_section_id (str): Id of section that specifies the bearing location.
         """
-        Emit a signal with the updated data for the selected rolling element.
-        """
-        self._mediator.select_support_B_bearing_rolling_element(self.get_data())
-
-    def _select_central_bearing_rolling_element(self):
-        """
-        Emit a signal with the updated data for the selected rolling element.
-        """
-        self._mediator.select_central_bearing_rolling_element(self.get_data())
+        self._mediator.select_rolling_element(bearing_section_id, self.get_data())
     
     def _connect_signals_and_slots(self):
         """
@@ -34,13 +27,11 @@ class PowerLossTabController:
         self._tab.allInputsProvided.connect(self._update_component_data)
         self._tab.updateStateSignal.connect(self.update_state)
 
-        self._tab._select_support_A_bearing_rolling_element_button.clicked.connect(self._select_support_A_bearing_rolling_element)
-        self._tab._select_support_B_bearing_rolling_element_button.clicked.connect(self._select_support_B_bearing_rolling_element)
-        self._tab._select_central_bearing_rolling_element_button.clicked.connect(self._select_central_bearing_rolling_element)
+        for section_name, item in self._items['Bearings'].items():
+            item['rolling_elements'].clicked.connect(partial(self._select_rolling_element, section_name))
     
     def _update_component_data(self):
-        tab_data = self.get_data()
-        self._mediator.update_component_data(self._id, tab_data)
+        self._mediator.update_component_data(self._id, self.get_data())
     
     def get_data(self):
         """
@@ -117,6 +108,5 @@ class PowerLossTabController:
 
         update_data_subset(self._component_data, self._inputs, update_input)
 
-        self._tab.update_selected_support_A_bearing_rolling_element(data['Bearings']['support_A']['rolling_elements'])
-        self._tab.update_selected_support_B_bearing_rolling_element(data['Bearings']['support_B']['rolling_elements'])
-        self._tab.update_selected_central_bearing_rolling_element(data['Bearings']['eccentrics']['rolling_elements'])
+        for name, item in self._items['Bearings'].items():
+            item['rolling_elements'].setData(data['Bearings'][name]['rolling_elements'])

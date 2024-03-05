@@ -93,14 +93,8 @@ class InputShaftController:
         self._mediator.shaftDesigningFinished.connect(self._on_shaft_designing_finished)
 
         self._mediator.selectMaterial.connect(self._on_select_materials)
-
-        self._mediator.selectSupportABearing.connect(self._on_select_support_A_bearing)
-        self._mediator.selectSupportBBearing.connect(self._on_select_support_B_bearing)
-        self._mediator.selectCentralBearing.connect(self._on_select_central_bearing)
-
-        self._mediator.selectSupportABearingRollingElement.connect(self._on_select_support_A_bearing_rolling_element)
-        self._mediator.selectSupportBBearingRollingElement.connect(self._on_select_support_B_bearing_rolling_element)
-        self._mediator.selectCentralBearingRollingElement.connect(self._on_select_central_bearing_rolling_element)
+        self._mediator.selectBearing.connect(self._on_select_bearing)
+        self._mediator.selectRollingElement.connect(self._on_select_rolling_element)
 
         self._mediator.updateComponentData.connect(self._update_component_data)
 
@@ -108,7 +102,7 @@ class InputShaftController:
         self._calculator.update_data(data)
 
         if tab_id == 1:
-            self._update_input_shaft_attributes()
+            self._on_update_preliminary_data()
         elif tab_id == 2:
             self._on_update_bearings_data()
         elif tab_id == 3:
@@ -121,40 +115,16 @@ class InputShaftController:
     def _on_select_materials(self):
         self._calculator.open_shaft_material_selection(self.tabs[0].update_selected_material)
 
-    def _on_select_support_A_bearing(self, data):
+    def _on_select_bearing(self, bearing_section_id, data):
         self._calculator.update_data(data)
-        self._calculator.calculate_support_A_bearing_load_capacity()
-        self._calculator.open_support_A_bearing_selection(self.tabs[1].update_selected_support_A_bearing)
+        self._calculator.calculate_bearing_load_capacity(bearing_section_id)
+        self._calculator.open_bearing_selection(bearing_section_id, self.tabs[1].update_selected_bearing)
 
-    def _on_select_support_B_bearing(self, data):
+    def _on_select_rolling_element(self, bearing_section_id, data):
         self._calculator.update_data(data)
-        self._calculator.calculate_support_B_bearing_load_capacity()
-        self._calculator.open_support_B_bearing_selection(self.tabs[1].update_selected_support_B_bearing)
+        self._calculator.open_rolling_element_selection(bearing_section_id, self.tabs[2].update_selected_rolling_element)
 
-    def _on_select_central_bearing(self, data):
-        self._calculator.update_data(data)
-        self._calculator.calculate_central_bearing_load_capacity()
-        self._calculator.open_central_bearing_selection(self.tabs[1].update_selected_central_bearing)
-
-    def _on_update_bearings_data(self):
-        self._calculator.calculate_bearings_attributes()
-
-    def _on_select_support_A_bearing_rolling_element(self, data):
-        self._calculator.update_data(data)
-        self._calculator.open_support_A_bearing_rolling_element_selection(self.tabs[2].update_selected_support_A_bearing_rolling_element)
-            
-    def _on_select_support_B_bearing_rolling_element(self, data):
-        self._calculator.update_data(data)
-        self._calculator.open_support_B_bearing_rolling_element_selection(self.tabs[2].update_selected_support_B_bearing_rolling_element)
-            
-    def _on_select_central_bearing_rolling_element(self, data):
-        self._calculator.update_data(data)
-        self._calculator.open_central_bearing_rolling_element_selection(self.tabs[2].update_selected_central_bearing_rolling_element)
-
-    def _on_update_power_loss_data(self):
-        self._calculator.calculate_bearings_power_loss()
-         
-    def _update_input_shaft_attributes(self):
+    def _on_update_preliminary_data(self):
         """
         Calculate attributes for the input shaft.
 
@@ -162,6 +132,12 @@ class InputShaftController:
         """
         self._calculator.calculate_preliminary_attributes()
         self._shaft_designer_controller.update_shaft_data(self._calculator.get_data())
+
+    def _on_update_bearings_data(self):
+        self._calculator.calculate_bearings_attributes()
+
+    def _on_update_power_loss_data(self):
+        self._calculator.calculate_bearings_power_loss()
 
     def _on_shaft_designing_finished(self):
         self._input_shaft.handle_shaft_designing_finished()
