@@ -5,6 +5,8 @@ from PyQt6.QtWidgets import (QHBoxLayout, QMainWindow, QPushButton, QSizePolicy,
 
 from ShaftDesigner.view.Chart.Chart import Chart
 
+from config import APP_NAME
+
 from config import resource_path
 class ShaftDesigner(QMainWindow):
     """
@@ -20,6 +22,7 @@ class ShaftDesigner(QMainWindow):
     
     def _init_ui(self, window_title):
         # Set window parameters
+        window_title = APP_NAME + ' - ' + window_title
         self.setWindowTitle(window_title)
         self.resize(800,500)
 

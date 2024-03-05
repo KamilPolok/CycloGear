@@ -1,6 +1,5 @@
 from PyQt6.QtCore import QTimer, QCoreApplication
 
-from MessageHandler import MessageHandler
 from AppWindow import AppWindow, QuitDialog
 
 from StartupHandler import StartupHandler
@@ -12,15 +11,16 @@ from InputShaft.view.InputShaft import InputShaft
 from InputShaft.controller.InputShaftController import InputShaftController
 from InputShaft.model.InputShaftCalculator import InputShaftCalculator
 
+from config import APP_NAME, INITIAL_PROJECT_NAME
+
 class AppController():
     def __init__(self, app_window: AppWindow):
         self._app_window = app_window
 
-        self._app_title = 'CycloGear2024'
-        self._project_title = 'Projekt1'
+        self._app_title = APP_NAME
+        self._project_title = INITIAL_PROJECT_NAME
 
         self._session_manager = AppSessionManager(self._app_window)
-        MessageHandler.set_attributes(self._app_title)
 
         self._connect_signals_and_slots()
 
@@ -38,7 +38,7 @@ class AppController():
         self._init_components()
 
         startup_window = StartupWindow(self._app_window)
-        startup_handler = StartupHandler(self._app_title, startup_window, self._load_data)
+        startup_handler = StartupHandler(startup_window, self._load_data)
         result = startup_handler.startup()
 
         if result:
@@ -90,7 +90,6 @@ class AppController():
             return
             
         dialog = QuitDialog(self._app_window)
-        dialog.setWindowTitle(self._app_title)
 
         while True:
             result = dialog.exec()

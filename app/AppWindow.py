@@ -2,6 +2,8 @@ from PyQt6.QtWidgets import QDialog, QDialogButtonBox, QMainWindow, QVBoxLayout,
 from PyQt6.QtCore import pyqtSignal, Qt
 from PyQt6.QtGui import QAction
 
+from config import APP_NAME
+
 class AppWindow(QMainWindow):
     '''
     Sets the basic User Interface and access point to 
@@ -72,7 +74,7 @@ class QuitDialog(QDialog):
     '''
     def __init__(self, parent=None):
         super().__init__(parent)
-
+        self.setWindowTitle(APP_NAME)
         # Disable close, minimize, window buttons
         self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.WindowTitleHint | Qt.WindowType.CustomizeWindowHint)
 

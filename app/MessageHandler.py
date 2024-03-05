@@ -1,16 +1,14 @@
 from PyQt6.QtWidgets import QMessageBox
 
+from config import APP_NAME
+
 class MessageHandler:
-    _base_title = ''
+    _base_title = APP_NAME
     _icon = None
 
     @classmethod
     def _title(cls, title):
-        return f"{cls._base_title} - {title}" if cls._base_title else title
-
-    @classmethod
-    def set_attributes(cls, title):
-        cls._base_title = title
+        return f"{cls._base_title} - {title}"
 
     @classmethod
     def critical(cls, parent, title, message):

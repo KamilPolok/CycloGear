@@ -76,7 +76,7 @@ class InputShaftController:
 
     def _init_shaft_designer(self):
         # Set an instance of shaft designer
-        window_title = f'CycloGear2023 - Projektant Wału Wejściowego'
+        window_title = 'wał wejściowy'
         self._shaft_designer = ShaftDesigner(window_title)
 
         # Set an instance of shaft designer controller

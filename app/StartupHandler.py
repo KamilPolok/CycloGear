@@ -5,12 +5,11 @@ import os
 from PyQt6.QtWidgets import QFileDialog
 
 from StartupWindow import StartupWindow
-from MessageHandler import MessageHandler 
+from MessageHandler import MessageHandler
 
 class StartupHandler():
-    def __init__(self, app_name: str, startup_window: StartupWindow, load_data_to_components: callable):
+    def __init__(self, startup_window: StartupWindow, load_data_to_components: callable):
         self._startup_window = startup_window
-        self._startup_window.setWindowTitle(app_name)
         self._try_to_load_data_to_components = load_data_to_components
 
         self._connect_signals_and_slots()

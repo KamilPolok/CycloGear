@@ -3,6 +3,8 @@ from PyQt6.QtCore import pyqtSignal, Qt
 
 from AppWindow import AppWindow
 
+from config import APP_NAME
+
 class StartupWindow(QDialog):
     '''
     Views widnow on startup of the application,
@@ -16,7 +18,7 @@ class StartupWindow(QDialog):
     
     def __init__(self, parent: AppWindow):
         super().__init__(parent)
-
+        self.setWindowTitle(APP_NAME)
         self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.WindowTitleHint | Qt.WindowType.CustomizeWindowHint)
 
         self._init_ui()

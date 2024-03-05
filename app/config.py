@@ -23,3 +23,7 @@ DATA_PATH = dependencies_path(DATA_DIR)
 
 def resource_path(relative_path):
     return os.path.normpath(os.path.join(DATA_PATH, relative_path))
+
+# Set application title and initial project name
+APP_NAME = 'CycloGear2024'
+INITIAL_PROJECT_NAME = 'Projekt1'
