@@ -4,7 +4,7 @@ import os
 from PyQt6.QtWidgets import QFileDialog
 
 from AppWindow import AppWindow
-from MessageHandler import MessageHandler
+from Utility.MessageHandler import MessageHandler
 
 class AppSessionManager:
     '''
