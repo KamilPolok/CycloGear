@@ -4,6 +4,8 @@ from PyQt6.QtCore import QEvent
 from PyQt6.QtWidgets import QWidget
 
 from .Input import Input
+from .Output import Output
+
 from .DataButton import DataButton
 
 class ABCQWidgetMeta(ABCMeta, type(QWidget)):
@@ -21,7 +23,41 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
 
         if callback:
             self._callback = callback
+
+    def _connect_signals_and_slots(self):
+        """
+        Connect signals from every tracket input, output and item
+        to method that checks the state.
+        """
+        for input in self._inputs_to_provide:
+            input.inputConfirmedSignal.connect(self._check_state)
+
+        for output in self._outputs_to_provide:
+            output.textChanged.connect(self._check_state)
+
+        for item in self._items_to_select:
+            item.dataChangedSignal.connect(self._check_state)
     
+    def _disconnect_signals_and_slots(self):
+        """
+        Disconnect signals from every tracket input, output and item
+        from method that checks the state.
+
+        If the objects does not exist or their signals are not connected,
+        do nothing, else disconnect the signals.
+        """
+        try:
+            for input in self._inputs_to_provide:
+                input.inputConfirmedSignal.disconnect(self._check_state)
+
+            for output in self._outputs_to_provide:
+                output.textChanged.disconnect(self._check_state)
+
+            for item in self._items_to_select:
+                item.dataChangedSignal.disconnect(self._check_state)
+        except (TypeError, AttributeError):
+            pass
+
     def _setup_state_tracking(self):
         """
         Set up inputs tracking.
@@ -29,18 +65,15 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
         Connect inputConfirmedSignal and dataChangedSignal signals of custom Input and DataButton 
         widgets to the _check_state method.
         """
+        self._disconnect_signals_and_slots()
+
         self._inputs_to_provide = self.findChildren(Input)
-
-        for input in self._inputs_to_provide:
-            input.inputConfirmedSignal.connect(self._check_state)
-
+        self._outputs_to_provide = self.findChildren(Output)
         self._items_to_select = self.findChildren(DataButton)
 
-        for item in self._items_to_select:
-            item.dataChangedSignal.connect(self._check_state)
+        self._connect_signals_and_slots()
 
         self._original_state = self._get_state()
-
     def _get_state(self):
         """
         Retrieve the current state of all inputs in the widget.
@@ -49,6 +82,7 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
             list or None: A list of input states if all inputs are filled, otherwise None.
         """
         inputs_states = [input.value() for input in self._inputs_to_provide]
+        inputs_states += [output.value() for output in self._outputs_to_provide]
         inputs_states += [item.id() for item in self._items_to_select]
 
         return inputs_states
@@ -66,10 +100,7 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
         # Check if all inputs were provided
         all_provided = all(current_state)
 
-        # Check if current state changed from no inputs provided to all inputs provided
-        # It is for ignoring the state change after setting the widget initial state
-        if not (all(input is None for input in self._original_state) and all_provided):
-            state_changed = current_state != self._original_state
+        state_changed = current_state != self._original_state
 
         self._original_state = current_state
 
@@ -93,6 +124,17 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
         """
         self._check_state()
     
+    def track_state(self, track):
+        if track:
+            self._connect_signals_and_slots()
+            self._original_state = self._get_state()
+        else:
+            self._disconnect_signals_and_slots()
+        
+        tracked_children = self.findChildren(ITrackedWidget)
+        for tracked_child in tracked_children:
+            tracked_child.track_state(track)
+
     def showEvent(self, event):
         """
         Override the showEvent method of the QWidget to implement custom logic
@@ -113,7 +155,6 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
             callback (callable): Function that should be called after state checking.
         """
         self._callback = callback
-    
     @abstractmethod
     def init_ui(self):
         """

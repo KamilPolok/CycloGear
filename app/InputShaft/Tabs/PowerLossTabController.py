@@ -101,6 +101,8 @@ class PowerLossTabController:
         Args:
             data (dict): Data to set the state of the tab with.
         """
+        self._tab.track_state(False)
+
         def update_input(recipient, source, attribute):
             new_value = source[attribute][0]
             if new_value is not None:
@@ -110,3 +112,6 @@ class PowerLossTabController:
 
         for name, item in self._items['Bearings'].items():
             item['rolling_elements'].setData(data['Bearings'][name]['rolling_elements'])
+
+        self.update_state()
+        self._tab.track_state(True)

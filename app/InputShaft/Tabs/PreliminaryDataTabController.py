@@ -94,6 +94,8 @@ class PreliminaryDataTabController():
         Args:
             data (dict): Data to set the state of the tab with.
         """
+        self._tab.track_state(False)
+
         def update_input(recipient, source, attribute):
             new_value = source[attribute][0]
             if new_value is not None:
@@ -103,3 +105,6 @@ class PreliminaryDataTabController():
 
         self._calculator.update_eccentrics_position()
         self._tab.update_selected_material(data['Materiał'])
+
+        self.update_state()
+        self._tab.track_state(True)
