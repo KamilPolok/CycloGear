@@ -86,13 +86,16 @@ class FunctionsCalculator():
     
     def _calculate_bending_moment_function(self):
         self.bending_moment = np.array([self._bending_moment_at_z(self._all_forces, z) for z in self._z_values])
+        self.bending_moment = np.around(self.bending_moment, decimals=2)
 
     def _calculate_torque_function(self):
         self.torque = np.array([self._data['Mwe'][0] if z > self._data['L1'][0] else 0 for z in self._z_values])
+        self.torque = np.around(self.torque, decimals=2)
 
     def _calculate_equivalent_moment_function(self):
         reductionFactor = 2 * np.sqrt(3)
         self.equivalent_moment = np.sqrt(np.power(self.bending_moment, 2) + np.power(reductionFactor / 2 * self.torque, 2))
+        self.equivalent_moment = np.around(self.equivalent_moment, decimals=2)
         
     def _calculate_dmin_function_by_equivalent_stress(self):
         # Calculate minimal shaft diameter based on equivalent stress condition
@@ -100,6 +103,7 @@ class FunctionsCalculator():
         xz = self._data['xz'][0]  
         kgo = Zgo / xz                                                                                          
         self.d_min_by_equivalent_stress = np.power(32 * self.equivalent_moment / (np.pi * kgo), 1/3) * 1000
+        self.d_min_by_equivalent_stress = np.ceil(self.d_min_by_equivalent_stress * 100) / 100
         self._min_diameters['dMz'] = self.d_min_by_equivalent_stress
         self._initial_min_diameters['dMz'] = self.d_min_by_equivalent_stress
     
@@ -109,6 +113,7 @@ class FunctionsCalculator():
         xz = self._data['xz'][0]
         ksj = Zsj / xz
         self.d_min_by_torsional_strength = np.sqrt(16 * self.torque / (np.pi * ksj)) * 1000
+        self.d_min_by_torsional_strength = np.ceil(self.d_min_by_torsional_strength * 100) / 100
         self._min_diameters['dMs'] = self.d_min_by_torsional_strength
         self._initial_min_diameters['dMs'] = self.d_min_by_torsional_strength
 
@@ -117,6 +122,7 @@ class FunctionsCalculator():
         G = self._data['Materiał']['G'][0] * 10**6
         qdop = self._data['qdop'][0]
         self.d_min_by_permissible_angle_of_twist = np.sqrt(32 * self.torque / (np.pi * G * qdop)) * 1000
+        self.d_min_by_permissible_angle_of_twist = np.ceil(self.d_min_by_permissible_angle_of_twist * 100) / 100
         self._min_diameters['dqdop'] = self.d_min_by_permissible_angle_of_twist
         self._initial_min_diameters['dqdop'] = self.d_min_by_permissible_angle_of_twist
 
@@ -239,6 +245,8 @@ class FunctionsCalculator():
             self.deflection_arrow =  double_integral / EI * 1000
             ## Calculate the minimum diameters with respect to the angle θ(z) (theta) and the deflection curve f(z)
             self.d_min_by_permissible_deflection_angle = (64 / (np.pi * E * teta_dop) * np.sqrt(integral**2))**(1 / 4) * 1000
+            self.d_min_by_permissible_deflection_angle = np.ceil(self.d_min_by_permissible_deflection_angle * 100) / 100
+
             self.d_min_by_permissible_deflection_arrow = [] 
             for z, di_at_z in zip(self._z_values, double_integral):
                 if LA <= z <= LB:
@@ -246,6 +254,7 @@ class FunctionsCalculator():
                 else:
                     self.d_min_by_permissible_deflection_arrow.append(0)
             self.d_min_by_permissible_deflection_arrow = np.array(self.d_min_by_permissible_deflection_arrow)
+            self.d_min_by_permissible_deflection_arrow = np.ceil(self.d_min_by_permissible_deflection_arrow * 100) / 100
 
             self._calculate_minimal_shaft_diameter()
         else:
