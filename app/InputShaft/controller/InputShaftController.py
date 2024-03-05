@@ -109,8 +109,7 @@ class InputShaftController:
             self._on_update_power_loss_data()
 
     def _open_shaft_designer_window(self):
-        if self._shaft_designer.isHidden():
-            self._shaft_designer.show()
+        self._shaft_designer.show()
 
     def _on_select_materials(self):
         self._calculator.open_shaft_material_selection(self.tabs[0].update_selected_material)

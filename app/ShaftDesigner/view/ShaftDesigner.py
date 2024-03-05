@@ -97,3 +97,12 @@ class ShaftDesigner(QMainWindow):
 
     def toggle_sidebar(self):
         self.scroll_area.setVisible(not self.scroll_area.isVisible())
+
+    def show(self):
+        if self.isHidden():
+            super().show()
+        else:
+             # Restore the window if it's minimized or in the back
+            self.setWindowState(self.windowState() & ~Qt.WindowState.WindowMinimized)
+            self.activateWindow()
+            self.raise_()
