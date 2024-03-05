@@ -20,10 +20,10 @@ class ShaftDesigner(QMainWindow):
         super().__init__()
         self._init_ui(window_title)
     
-    def _init_ui(self, window_title):
+    def _init_ui(self, designed_part_name):
         # Set window parameters
-        window_title = APP_NAME + ' - ' + window_title
-        self.setWindowTitle(window_title)
+        self._window_title = APP_NAME + ' - ' + designed_part_name
+        self.setWindowTitle(self._window_title)
         self.resize(800,500)
 
         # Set toolbar
@@ -94,6 +94,12 @@ class ShaftDesigner(QMainWindow):
         # Add a spacer item at the end of the sidebar layout - keeps the contents aligned to the top
         spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
         self.sidebar_layout.addSpacerItem(spacer)
+
+    def set_draft_finished_title(self, is_finished):
+        if is_finished:
+            self.setWindowTitle(self._window_title + ' (Projekt Zatwierdzony)')
+        else:
+            self.setWindowTitle(self._window_title)
 
     def toggle_sidebar(self):
         self.scroll_area.setVisible(not self.scroll_area.isVisible())

@@ -1,3 +1,5 @@
+from ShaftDesigner.view.ShaftDesigner import ShaftDesigner
+
 from ShaftDesigner.model.ShaftCalculator import ShaftCalculator
 from ShaftDesigner.model.FunctionsCalculator import FunctionsCalculator
 
@@ -5,9 +7,11 @@ from ShaftDesigner.view.Chart.Chart_Plotter import Chart_Plotter
 from ShaftDesigner.view.Chart.Chart_ShaftViewer import Chart_ShaftViewer
 
 from ShaftDesigner.view.ShaftSection import ShaftSection, EccentricsSection
+
+from Utility.MessageHandler import MessageHandler
         
 class ShaftDesignerController:
-    def __init__(self, view, mediator):
+    def __init__(self, view: ShaftDesigner, mediator):
         self._shaft_designer = view
         self._mediator = mediator
 
@@ -27,7 +31,7 @@ class ShaftDesignerController:
         self.functions_calculator = FunctionsCalculator()
     
     def _connect_signals_and_slots(self):
-        self._shaft_designer.confirmation_button.clicked.connect(self._emit_shaft_designing_finished)
+        self._shaft_designer.confirmation_button.clicked.connect(self._on_finish_draft)
         for section_name, section in self._sections.items():
             section.subsection_data_signal.connect(self._handle_subsection_data)
             if section_name != 'Wykorbienia':
@@ -120,6 +124,8 @@ class ShaftDesignerController:
         if self.is_whole_shaft_designed or is_whole_shaft_designed_state_changed:
             self._toogle_remaining_plots_visibility()
             self._shaft_designer.confirmation_button.setEnabled(self.is_whole_shaft_designed)
+            if not self.is_whole_shaft_designed:
+                self._shaft_designer.set_draft_finished_title(False)
             
     def _is_whole_shaft_designed_state_changed(self):
         is_whole_shaft_designed_new = self.shaft_calculator.is_whole_shaft_designed()
@@ -142,8 +148,10 @@ class ShaftDesignerController:
             last_subsection_number in self.shaft_calculator.shaft_sections_plots_attributes[section_name]):
                 self._sections[section_name].set_add_subsection_button_enabled(True)
 
-    def _emit_shaft_designing_finished(self):
+    def _on_finish_draft(self):
         self.shaft_calculator.save_data(self._data)
+        self._shaft_designer.set_draft_finished_title(True)
+        MessageHandler.information(self._shaft_designer,'', 'Projekt został zatwierdzony')
         self._mediator.emit_shaft_designing_finished()
 
     def update_shaft_data(self, data):
