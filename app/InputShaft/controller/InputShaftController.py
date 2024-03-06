@@ -112,16 +112,22 @@ class InputShaftController:
         self._shaft_designer.show()
 
     def _on_select_materials(self):
-        self._calculator.open_shaft_material_selection(self.tabs[0].update_selected_material)
+        result = self._calculator.open_shaft_material_selection()
+        if result:
+            self.tabs[0].update_selected_material(result)
 
     def _on_select_bearing(self, bearing_section_id, data):
         self._calculator.update_data(data)
         self._calculator.calculate_bearing_load_capacity(bearing_section_id)
-        self._calculator.open_bearing_selection(bearing_section_id, self.tabs[1].update_selected_bearing)
+        result = self._calculator.open_bearing_selection(bearing_section_id)
+        if result:
+            self.tabs[1].update_selected_bearing(bearing_section_id, result)
 
     def _on_select_rolling_element(self, bearing_section_id, data):
         self._calculator.update_data(data)
-        self._calculator.open_rolling_element_selection(bearing_section_id, self.tabs[2].update_selected_rolling_element)
+        result = self._calculator.open_rolling_element_selection(bearing_section_id)
+        if result:
+            self.tabs[2].update_selected_rolling_element(bearing_section_id, result)
 
     def _on_update_preliminary_data(self):
         """

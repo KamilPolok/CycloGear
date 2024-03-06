@@ -1,5 +1,3 @@
-from PyQt6.QtCore import pyqtSignal
-
 from PyQt6.QtWidgets import (
     QComboBox,
     QDialog,
@@ -15,8 +13,6 @@ from .TablesTreeView import TablesTreeView
 class Window(QDialog):
     # Create a custom signal for passing the selected item attributes
     # It is needed for sending the selected item attributes outside the Window
-    itemDataSignal = pyqtSignal(dict)
-
     def __init__(self):
         super().__init__()
         self.generalLayout = QVBoxLayout()
@@ -65,7 +61,3 @@ class Window(QDialog):
         FunctionBtnsLayout.addWidget(self.cancelBtn)
 
         self.generalLayout.addLayout(FunctionBtnsLayout)
-
-    def emitItemDataSignal(self, itemData):
-        # Emit signal with data from selected item
-        self.itemDataSignal.emit(itemData)

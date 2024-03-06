@@ -8,12 +8,11 @@ class ViewSelectItemController:
         self._availableTables = availableTables
         self._limits = limits
 
-        self._selectedItemAttributes = None
-        
-        self._startup()
+        self.selectedItemAttributes = None
+        self._initUI()
         self._connectSignalsAndSlots()
-    
-    def _startup(self):
+
+    def _initUI(self):
         # Set active table
         self._activeTable = self._availableTables[0]
         # Init view
@@ -41,16 +40,19 @@ class ViewSelectItemController:
         # Get the selected item attributes
         itemCode = self._window.TableItemsView.getItemCode(item)
         itemData = self._dbHandler.getSingleItem(self._activeTable, itemCode)
-        self._selectedItemAttributes = itemData
+        self.selectedItemAttributes = itemData
         # Enable the OK button
         self._window.okBtn.setEnabled(True)
     
-    def _closeWindowEvent(self, sendItemData):
-        if sendItemData:
-            self._window.emitItemDataSignal(self._selectedItemAttributes)
+    def _closeWindowEvent(self, itemSelected):
+        if itemSelected:
             self._window.accept()
         else:
             self._window.reject()
+    
+    def startup(self):
+        result = self._window.exec()
+        return result == self._window.DialogCode.Accepted
 
 class ViewDbTablesController:
     def __init__(self, model, view):

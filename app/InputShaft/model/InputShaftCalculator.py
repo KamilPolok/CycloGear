@@ -175,12 +175,12 @@ class InputShaftCalculator():
             attributes['S'][0] = S
             attributes['N'][0] = N
 
-    def open_shaft_material_selection(self, callback):
+    def open_shaft_material_selection(self):
         """
         Open the window for selection of the shaft material
 
-        Args:
-            callback (function): A callback function that will be called with the selected item's data as its argument.
+        Returns:
+            (None or dict): selected item data.
         """
         db_handler = DatabaseHandler()
         subwindow = Window()
@@ -189,16 +189,21 @@ class InputShaftCalculator():
         available_tables = db_handler.getAvailableTables(tables_group_name)
         limits = db_handler.getTableItemsFilters(tables_group_name)
         view_select_items_ctrl = ViewSelectItemController(db_handler, subwindow, available_tables, limits)
-        subwindow.itemDataSignal.connect(callback)
-        subwindow.exec()
+        result = view_select_items_ctrl.startup()
+        if result:
+            return view_select_items_ctrl.selectedItemAttributes
+        else:
+            return None
 
-    def open_bearing_selection(self, bearing_section_id, callback):
+    def open_bearing_selection(self, bearing_section_id):
         """
         Open the window for bearing selection the.
 
         Args:
             bearing_section_id (str): Id of section that specifies the bearing location.
-            callback (function): Callback function that will be called with the selected item's data as its argument.
+
+        Returns:
+            (None or dict): selected item data.
         """
         # Specify the name of the tables to open
         if bearing_section_id == 'support_A' or  bearing_section_id == 'support_B':
@@ -219,17 +224,21 @@ class InputShaftCalculator():
         limits['C']['min'] = self.data['Bearings'][bearing_section_id]['C'][0]
         # Setup the controller for the subwindow
         view_select_items_ctrl = ViewSelectItemController(db_handler, subwindow, available_tables, limits)
-        subwindow.itemDataSignal.connect(partial(callback, bearing_section_id))
-        subwindow.exec()
+        result = view_select_items_ctrl.startup()
+        if result:
+            return view_select_items_ctrl.selectedItemAttributes
+        else:
+            return None
 
-    def open_rolling_element_selection(self, bearing_section_id, callback):
+    def open_rolling_element_selection(self, bearing_section_id):
         """
         Open the window for rolling element selection.
 
         Args:
             bearing_section_id (str): Id of section that specifies the bearing location for which the rollin 
                                       elements are being selected.
-            callback (function): Callback function that will be called with the selected item's data as its argument.
+        Returns:
+            (None or dict): selected item data.
         """
         # Get acces to the database
         db_handler = DatabaseHandler()
@@ -245,8 +254,11 @@ class InputShaftCalculator():
         limits['D']['max'] = math.ceil(self.data['Bearings'][bearing_section_id]['drc'][0]) + 1
         # Setup the controller for the subwindow
         view_select_items_ctrl = ViewSelectItemController(db_handler, subwindow, available_tables, limits)
-        subwindow.itemDataSignal.connect(partial(callback, bearing_section_id))
-        subwindow.exec()
+        result = view_select_items_ctrl.startup()
+        if result:
+            return view_select_items_ctrl.selectedItemAttributes
+        else:
+            return None
 
     def get_data(self):
         """
