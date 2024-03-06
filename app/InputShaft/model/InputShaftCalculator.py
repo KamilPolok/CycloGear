@@ -51,6 +51,7 @@ class InputShaftCalculator():
               'support_A': {                         
                 'data': None,               # Parametry łożyska
                 'rolling_elements': None,   # Elementy toczne
+                'F': None,                  # Siła działająca na łożysko 
                 'dip': [None, 'mm'],        # Średnica wewnętrzna łożyska - na podstawie zaprojektowanego wału
                 'di': [None, 'mm'],         # Średnica wewnętrzna łożyska
                 'do': [None, 'mm'],         # Średnica zewnętrzna łożyska
@@ -68,7 +69,8 @@ class InputShaftCalculator():
               'support_B': {                         
                 'data': None,               # Parametry łożyska
                 'rolling_elements': None,   # Elementy toczne
-                'dip': [None, 'mm'],       # Średnica wewnętrzna łożyska - na podstawie zaprojektowanego wału
+                'F': None,                  # Siła działająca na łożysko
+                'dip': [None, 'mm'],        # Średnica wewnętrzna łożyska - na podstawie zaprojektowanego wału
                 'di': [None, 'mm'],         # Średnica wewnętrzna łożyska
                 'do': [None, 'mm'],         # Średnica zewnętrzna łożyska
                 'drc': [None, 'mm'],        # Średnica elementów tocznych - obliczona
@@ -85,9 +87,11 @@ class InputShaftCalculator():
               'eccentrics': {                         
                 'data': None,               # Parametry łożyska
                 'rolling_elements': None,   # Elementy toczne
+                'F': None,                  # Siła działająca na łożysko
+                'l': None,                  # Położenie łożyska na wale
                 'di': [None, 'mm'],         # Średnica wewnętrzna łożyska
                 'do': [None, 'mm'],         # Średnica zewnętrzna łożyska
-                'dip': [None, 'mm'],       # Średnica wewnętrzna łożyska - na podstawie zaprojektowanego wału
+                'dip': [None, 'mm'],        # Średnica wewnętrzna łożyska - na podstawie zaprojektowanego wału
                 'drc': [None, 'mm'],        # Średnica elementów tocznych - obliczona
                 'Lh': [None, 'h'],          # Trwałość godzinowa
                 'Lr': [None, 'obr'],        # Trwałość
@@ -100,6 +104,16 @@ class InputShaftCalculator():
               }
             }
         }
+        self._add_data_reference()
+
+    def _add_data_reference(self):
+        self.data['Bearings']['support_A']['F'] = self.data['Ra']
+        self.data['Bearings']['support_B']['F'] = self.data['Rb']
+        self.data['Bearings']['eccentrics']['F'] = self.data['F']
+
+        self.data['Bearings']['support_A']['l'] = self.data['LA']
+        self.data['Bearings']['support_B']['l'] = self.data['LB']
+        self.data['Bearings']['eccentrics']['l'] = self.data['L1']
 
     def calculate_preliminary_attributes(self):
         fwzx = self.data['Fwzx'][0]
@@ -112,58 +126,34 @@ class InputShaftCalculator():
         """
         Calculate bearings attributes.
         """
-        # Calculate support A bearing attributes
-        Dw = self.data['Bearings']['support_A']['data']['Dw'][0]
-        Dz = self.data['Bearings']['support_A']['data']['Dz'][0]
+        for bearing_section_id, attributes in self.data['Bearings'].items():
+            Dz = attributes['data']['E'][0] if bearing_section_id == 'eccentrics' else attributes['data']['Dz'][0]
+            Dw = attributes['data']['Dw'][0]
 
-        dw = 0.25 * (Dz - Dw)
+            dw = 0.25 * (Dz - Dw)
 
-        self.data['Bearings']['support_A']['drc'][0] = dw
-        self.data['Bearings']['support_A']['di'][0] = Dw
-        self.data['Bearings']['support_A']['do'][0] = Dz
-
-        # Calculate support B bearing attributes
-        Dw = self.data['Bearings']['support_B']['data']['Dw'][0]
-        Dz = self.data['Bearings']['support_B']['data']['Dz'][0]
-
-        dw = 0.25 * (Dz - Dw)
-
-        self.data['Bearings']['support_B']['drc'][0] = dw
-        self.data['Bearings']['support_B']['di'][0] = Dw
-        self.data['Bearings']['support_B']['do'][0] = Dz
-
-        # Calculate central bearings attributes
-        Dw = self.data['Bearings']['eccentrics']['data']['Dw'][0]
-        Dz = self.data['Bearings']['eccentrics']['data']['E'][0]
-
-        dw = 0.25 * (Dz - Dw)
-
-        self.data['Bearings']['eccentrics']['drc'][0] = dw
-        self.data['Bearings']['eccentrics']['di'][0] = Dw
-        self.data['Bearings']['eccentrics']['do'][0] = Dz
+            attributes['drc'][0] = dw
+            attributes['di'][0] = Dw
+            attributes['do'][0] = Dz
     
     def calculate_bearing_load_capacity(self, bearing_section_id):
         """
-        Calculate bearings load capacity.
+        Calculate bearing load capacity.
         """
-        nwe = self.data['nwe'][0]
-        lh = self.data['Bearings'][bearing_section_id]['Lh'][0]
-        fd = self.data['Bearings'][bearing_section_id]['fd'][0]
-        ft = self.data['Bearings'][bearing_section_id]['ft'][0]
         p = 3.0
-
-        if bearing_section_id == 'support_A':
-            F = self.data['Ra'][0]
-        elif bearing_section_id == 'support_B':
-            F = self.data['Rb'][0]
-        else:
-            F = self.data['F'][0]
+        nwe = self.data['nwe'][0]
+        attributes = self.data['Bearings'][bearing_section_id]
+    
+        lh = attributes['Lh'][0]
+        fd = attributes['fd'][0]
+        ft = attributes['ft'][0]
+        F = attributes['F'][0]
 
         l = 60 * lh * nwe / np.power(10, 6)
-        c = F * np.power(l, 1 / p) * ft / fd / 1000 # [kN]
+        c = np.abs(F) * np.power(l, 1 / p) * ft / fd / 1000 # [kN]
 
-        self.data['Bearings'][bearing_section_id]['Lr'][0] = l
-        self.data['Bearings'][bearing_section_id]['C'][0] = c
+        attributes['Lr'][0] = l
+        attributes['C'][0] = c
 
     def calculate_bearings_power_loss(self):
         """
@@ -172,43 +162,18 @@ class InputShaftCalculator():
         w0 = self.data['w0'][0]
         e = self.data['e'][0]
         rw1 = self.data['rw1'][0]
+        for bearing_section_id, attributes in self.data['Bearings'].items():
+            dw = attributes['rolling_elements']['D'][0]
+            Dw = attributes['data']['Dw'][0]
+            Dz = attributes['data']['Dz'][0]
+            f = attributes['f'][0]
+            F = attributes['F'][0]
+            
+            S = 0.15 * (Dz - Dw) if bearing_section_id == 'eccentrics' else dw / 2
+            N = f * 0.001 * w0 * (1 + (Dw + 2 * S) / dw) * (1 + e / rw1) * 4 * np.abs(F) / np.pi
 
-        # Calculate power loss for support A bearing
-        dw = self.data['Bearings']['support_A']['rolling_elements']['D'][0]
-        Dw = self.data['Bearings']['support_A']['data']['Dw'][0]
-        f = self.data['Bearings']['support_A']['f'][0]
-        Ra = self.data['Ra'][0]
-
-        S = dw / 2
-        N = f * 0.001 * w0 * (1 + (Dw + 2 * S) / dw) * (1 + e / rw1) * 4 * np.abs(Ra) / np.pi
-
-        self.data['Bearings']['support_A']['S'][0] = S
-        self.data['Bearings']['support_A']['N'][0] = N
-
-        # Calculate power loss for support B bearing
-        dw = self.data['Bearings']['support_B']['rolling_elements']['D'][0]
-        Dw = self.data['Bearings']['support_B']['data']['Dw'][0]
-        f = self.data['Bearings']['support_B']['f'][0]
-        Rb = self.data['Rb'][0]
-
-        S = dw / 2
-        N = f * 0.001 * w0 * (1 + (Dw + 2 * S) / dw) * (1 + e / rw1) * 4 * np.abs(Rb) / np.pi
-
-        self.data['Bearings']['support_B']['S'][0] = S
-        self.data['Bearings']['support_B']['N'][0] = N
-
-        # Calculate power loss for central bearings
-        dw = self.data['Bearings']['eccentrics']['rolling_elements']['D'][0]
-        Dw = self.data['Bearings']['eccentrics']['data']['Dw'][0]
-        Dz = self.data['Bearings']['eccentrics']['data']['Dz'][0]
-        f = self.data['Bearings']['eccentrics']['f'][0]
-        F = self.data['F'][0]
-
-        S = 0.15 * (Dz - Dw)
-        N = f * 0.001 * w0 * (1 + (Dw + 2 * S) / dw) * (1 + e / rw1) * 4 * F / np.pi
-
-        self.data['Bearings']['eccentrics']['S'][0] = S
-        self.data['Bearings']['eccentrics']['N'][0] = N
+            attributes['S'][0] = S
+            attributes['N'][0] = N
 
     def open_shaft_material_selection(self, callback):
         """
@@ -293,7 +258,7 @@ class InputShaftCalculator():
         """
         Set component data.
         """
-        self.data.update(data)
+        fetch_data_subset(self.data, data)
     
     def update_data(self, data):
         """
