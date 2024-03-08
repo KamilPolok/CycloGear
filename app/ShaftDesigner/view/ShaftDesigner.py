@@ -4,6 +4,8 @@ from PyQt6.QtWidgets import (QHBoxLayout, QMainWindow, QPushButton, QSizePolicy,
                              QVBoxLayout, QWidget, QScrollArea, QToolBar)
 
 from ShaftDesigner.view.Chart.Chart import Chart
+from ShaftDesigner.view.Chart.Chart_Plotter import Chart_Plotter
+from ShaftDesigner.view.Chart.Chart_ShaftViewer import Chart_ShaftViewer
 
 from config import APP_NAME
 
@@ -85,6 +87,9 @@ class ShaftDesigner(QMainWindow):
         fit_to_window_action.setToolTip("Dopasuj widok")
         fit_to_window_action.triggered.connect(self.chart.reset_initial_view)
         self.toolbar.addAction(fit_to_window_action)
+
+        self.plotter = Chart_Plotter(self.chart, self.toolbar)
+        self.shaft_viewer = Chart_ShaftViewer(self.chart, self.toolbar)
         
     def set_sidebar_sections(self, sections):
         # Set contents of the sidebar

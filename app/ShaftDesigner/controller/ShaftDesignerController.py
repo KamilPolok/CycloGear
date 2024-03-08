@@ -3,9 +3,6 @@ from ShaftDesigner.view.ShaftDesigner import ShaftDesigner
 from ShaftDesigner.model.ShaftCalculator import ShaftCalculator
 from ShaftDesigner.model.FunctionsCalculator import FunctionsCalculator
 
-from ShaftDesigner.view.Chart.Chart_Plotter import Chart_Plotter
-from ShaftDesigner.view.Chart.Chart_ShaftViewer import Chart_ShaftViewer
-
 from ShaftDesigner.view.ShaftSection import ShaftSection, EccentricsSection
 
 from Utility.MessageHandler import MessageHandler
@@ -40,7 +37,6 @@ class ShaftDesignerController:
 
     def _init_ui(self):
         self._init_shaft_sections()
-        self._init_chart_handlers()
     
     def _init_shaft_sections(self):
         # Set instances of sidebar sections
@@ -55,14 +51,6 @@ class ShaftDesignerController:
         self.all_sections_enabled = False
 
         self._shaft_designer.set_sidebar_sections(self._sections)
-
-    def _init_chart_handlers(self):
-        # Set an instance of chart handlers:
-        # - self._plotter - responsible for plotting functions, provides interface to view and hide plots
-        # - self._shaft_viewer - responsible for darwing shaft and its dimensions and labels, provides interface for viewing shaft dimensions
-        chart, toolbar = self._shaft_designer.chart, self._shaft_designer.toolbar
-        self._plotter = Chart_Plotter(chart, toolbar)
-        self._shaft_viewer = Chart_ShaftViewer(chart, toolbar)
     
     def _handle_subsection_data(self, shaft_subsection_attributes):
         # Update the shaft drawing
@@ -79,7 +67,7 @@ class ShaftDesignerController:
     def _draw_shaft(self, shaft_subsection_attributes = None):
         # Calculate shaft subsections plot attributes and draw them on the chart
         shaft_plot_attributes = self.shaft_calculator.calculate_shaft_sections(shaft_subsection_attributes)
-        self._shaft_viewer.draw_shaft(shaft_plot_attributes)
+        self._shaft_designer.shaft_viewer.draw_shaft(shaft_plot_attributes)
 
         # Update limits
         self._set_limits()
@@ -106,7 +94,7 @@ class ShaftDesignerController:
 
         # Recalculate and redraw shaft sections
         shaft_plot_attributes = self.shaft_calculator.calculate_shaft_sections()
-        self._shaft_viewer.draw_shaft(shaft_plot_attributes)
+        self._shaft_designer.shaft_viewer.draw_shaft(shaft_plot_attributes)
         
         self._enable_add_subsection_button(section_name)
     
@@ -138,7 +126,7 @@ class ShaftDesignerController:
     def _toogle_remaining_plots_visibility(self):
         shaft_steps = self.shaft_calculator.get_shaft_attributes()
         self.functions_calculator.calculate_remaining_functions(shaft_steps)
-        self._plotter.set_plots_functions(self.functions_calculator.get_shaft_functions())
+        self._shaft_designer.plotter.set_plots_functions(self.functions_calculator.get_shaft_functions())
     
     def _enable_add_subsection_button(self, section_name):
         # Enable add button if the last subsection in the sidebar was plotted - do not allow to add multiple subsections at once
@@ -162,7 +150,7 @@ class ShaftDesignerController:
         self.functions_calculator.calculate_initial_functions_and_attributes(data)
 
         # (Re)set shaft initial coordinates
-        self._shaft_viewer.init_shaft(self.functions_calculator.get_shaft_coordinates())
+        self._shaft_designer.shaft_viewer.init_shaft(self.functions_calculator.get_shaft_coordinates())
 
         # (Re)set number of eccentrics
         self.eccentrics_number = data['n'][0]
@@ -179,7 +167,7 @@ class ShaftDesignerController:
             self._enable_shaft_design_confirmation()
 
         # (Re)draw shaft plots
-        self._plotter.set_plots_functions(self.functions_calculator.get_shaft_functions(), self.functions_calculator.get_shaft_z())
+        self._shaft_designer.plotter.set_plots_functions(self.functions_calculator.get_shaft_functions(), self.functions_calculator.get_shaft_z())
     
     def get_shaft_data(self):
         return self.shaft_calculator.shaft_sections
