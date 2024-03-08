@@ -10,13 +10,12 @@ class Chart_ShaftViewer():
         self._chart = chart
         self._toolbar = toolbar
         
-        self._active_sections = {}       # Dictionary to keep track of shaft sections
-        
-        self._shaft_markers = []         # List to keep track of shaft markers
-        self._shaft_coordinates = []     # List to keep track of shaft coordinates
-        self._shaft_dimensions = []      # List to keep track of shaft dimensions
+        self._shaft_dimensions = []           # Stores dimensions of every shaft step
 
-        self._shaft_attributes = {}      # List to keep track of current shaft attributes
+        self._shaft_plot = []                 # Keeps track of shaft plot items
+        self._shaft_dimensions_plot = []      # Keeps track of shaft dimensions plot items
+        self._shaft_coordinates_plot = []     # Keeps track of shaft coordinates plot items
+        self._shaft_markers = []              # Keeps track of shaft markers plot items
 
         self._dimension_offset = 0
 
@@ -58,16 +57,15 @@ class Chart_ShaftViewer():
     def _get_dimension_offset(self):
         """
         Get the offset from the shaft that applies to shaft coordinates 
-        and dimensions, so they get displayed neatly and do not
-        overlay with shaft drawing.
+        and dimensions plots, so they get displayed neatly and do not
+        overlay with shaft plot.
         """        
         highest_diameter = 0
 
-        for section in self._shaft_attributes.values():
-            for subsection in section.values():
-                subsection_diameter = subsection['d']
-                if subsection_diameter > highest_diameter:
-                    highest_diameter = subsection_diameter
+        for step_dimensions in self._shaft_dimensions:
+            step_diameter = step_dimensions['d']
+            if step_diameter > highest_diameter:
+                highest_diameter = step_diameter
 
         if highest_diameter != 0:
             self._dimension_offset = ((0.5 * highest_diameter ) * 1.2 + 5)
@@ -109,9 +107,9 @@ class Chart_ShaftViewer():
 
     def _draw_shaft_coordinates(self):
         # Remove old coordinates
-        for item in self._shaft_coordinates:
+        for item in self._shaft_coordinates_plot:
             item.remove()
-        self._shaft_coordinates.clear()
+        self._shaft_coordinates_plot.clear()
 
         if self.dimensions_selector.isChecked('coordinates'):
             self._get_dimension_offset()
@@ -124,56 +122,55 @@ class Chart_ShaftViewer():
 
                 dimension = self._draw_dimension(distance, start, end, mid_point, y_position, y_position, y_position)
 
-                self._shaft_coordinates.extend(dimension)
+                self._shaft_coordinates_plot.extend(dimension)
         
         self._canvas.draw()
     
     def _draw_shaft_dimensions(self):
         # Remove old dimenions
-        for item in self._shaft_dimensions:
+        for item in self._shaft_dimensions_plot:
             item.remove()
-        self._shaft_dimensions.clear()
+        self._shaft_dimensions_plot.clear()
 
         # Draw new dimensions
         if self.dimensions_selector.isChecked('dimensions'):
             self._get_dimension_offset()
 
-            for section_name, section in self._shaft_attributes.items():
-                for subsection_number, subsection in section.items():
-                    # Draw length dimension
-                    start = subsection['start']
-                    length = subsection['l']
-                    diameter = subsection['d']
+            for step_dimensions in self._shaft_dimensions:
+                # Draw length dimension
+                start = step_dimensions['start']
+                length = step_dimensions['l']
+                diameter = step_dimensions['d']
 
-                    start_z = start[0]
-                    end_z = start[0] + length
-                    y_position = self._dimension_offset
-                    label_position = start_z + length * 0.5
-                    text = "{:.1f}".format(length)
+                start_z = start[0]
+                end_z = start[0] + length
+                y_position = self._dimension_offset
+                label_position = start_z + length * 0.5
+                text = "{:.1f}".format(length)
 
-                    length_dimension = self._draw_dimension(text, start_z, end_z, label_position, y_position, y_position, y_position)
-                    self._shaft_dimensions.extend(length_dimension)
+                length_dimension = self._draw_dimension(text, start_z, end_z, label_position, y_position, y_position, y_position)
+                self._shaft_dimensions_plot.extend(length_dimension)
 
-                    # Draw diameter dimension
-                    start_y = start[1]
-                    end_y = start[1] + diameter
-                    z_position = start_z + length * 0.75
-                    y_position = start_y + diameter * 0.5
-                    text = "Ø {:.1f}".format(diameter)
+                # Draw diameter dimension
+                start_y = start[1]
+                end_y = start[1] + diameter
+                z_position = start_z + length * 0.75
+                y_position = start_y + diameter * 0.5
+                text = "Ø {:.1f}".format(diameter)
 
+                diameter_dimension = self._draw_dimension(text, z_position, z_position, z_position, start_y, end_y, y_position)
+                self._shaft_dimensions_plot.extend(diameter_dimension)
+
+                # Draw eccentric
+                if 'e' in step_dimensions:
+                    eccentric = step_dimensions['e']
+                    start_y = eccentric
+                    end_y = 0
+                    z_position = start_z + length * 0.5
+                    y_position = eccentric * 0.5
+                    text = "{:.1f}".format(abs(eccentric))
                     diameter_dimension = self._draw_dimension(text, z_position, z_position, z_position, start_y, end_y, y_position)
-                    self._shaft_dimensions.extend(diameter_dimension)
-
-                    # Draw eccentric
-                    if 'e' in subsection:
-                        eccentric = subsection['e']
-                        start_y = eccentric
-                        end_y = 0
-                        z_position = start_z + length * 0.5
-                        y_position = eccentric * 0.5
-                        text = "{:.1f}".format(abs(eccentric))
-                        diameter_dimension = self._draw_dimension(text, z_position, z_position, z_position, start_y, end_y, y_position)
-                        self._shaft_dimensions.extend(diameter_dimension)
+                    self._shaft_dimensions_plot.extend(diameter_dimension)
 
         self._canvas.draw()
 
@@ -231,32 +228,29 @@ class Chart_ShaftViewer():
         
         return lines
 
-    def draw_shaft(self, shaft_subsections_drawing_attributes):
-        self._shaft_attributes = shaft_subsections_drawing_attributes
+    def draw_shaft(self, shaft_dimensions):
+        self._shaft_dimensions = shaft_dimensions
 
-        # Remove old sections
-        for section in list(self._active_sections.keys()):
-            self._active_sections[section].remove()
-            del self._active_sections[section]
+        # Remove old steps plots
+        for step_plot in self._shaft_plot:
+            step_plot.remove()
+        self._shaft_plot.clear()
 
-        # Draw new sections
-        for section_name, section in self._shaft_attributes.items():
-            for subsection_number, subsection in section.items():
-                start = subsection['start']
-                length = subsection['l']
-                diameter = subsection['d']
+        # Plot new steps
+        for step_dimensions in self._shaft_dimensions:
+            start = step_dimensions['start']
+            length = step_dimensions['l']
+            diameter = step_dimensions['d']
 
-                subsection_id = f"{section_name}_{subsection_number}"
+            step_plot = Rectangle(start, length, diameter,
+                                        linewidth=2,
+                                        fill=False,
+                                        color=self._chart.shaft_color,
+                                        zorder=self._chart.shaft_layer
+                                        )
+            self._shaft_plot.append(step_plot)
+            self._ax.add_patch(step_plot)
 
-                subsection_plot = Rectangle(start, length, diameter,
-                                            linewidth=2,
-                                            fill=False,
-                                            color=self._chart.shaft_color,
-                                            zorder=self._chart.shaft_layer
-                                            )
-                self._active_sections[subsection_id] = subsection_plot
-                self._ax.add_patch(subsection_plot)
-    
         self._canvas.draw()
 
         # Draw shaft dimensions and coordinates

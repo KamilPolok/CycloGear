@@ -25,7 +25,7 @@ class ShaftDesignerController:
         self._connect_signals_and_slots()
 
         # Set an instance of shaft calculator
-        self.shaft_calculator = ShaftCalculator(self.section_names)
+        self.shaft_calculator = ShaftCalculator()
 
         # Set an instance of functions calculator
         self.functions_calculator = FunctionsCalculator()
