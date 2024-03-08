@@ -112,7 +112,7 @@ class ShaftDesignerController:
     
     def _enable_sections(self):
         if self.all_sections_enabled == False:
-            if len(self.shaft_calculator.shaft_sections_plots_attributes['Wykorbienia']) == self.eccentrics_number:
+            if 'Wykorbienia' in self.shaft_calculator.shaft_sections and len(self.shaft_calculator.shaft_sections['Wykorbienia']) == self.eccentrics_number:
                 for section in self._sections.values():
                     if not section.isEnabled():
                         section.setEnabled(True)
@@ -144,8 +144,8 @@ class ShaftDesignerController:
         # Enable add button if the last subsection in the sidebar was plotted - do not allow to add multiple subsections at once
         if section_name != 'Wykorbienia':
             last_subsection_number = self._sections[section_name].subsection_count - 1
-            if self._sections[section_name].subsection_count == 0 or (section_name in self.shaft_calculator.shaft_sections_plots_attributes and
-            last_subsection_number in self.shaft_calculator.shaft_sections_plots_attributes[section_name]):
+            if self._sections[section_name].subsection_count == 0 or (section_name in self.shaft_calculator.shaft_sections and
+            last_subsection_number in self.shaft_calculator.shaft_sections[section_name]):
                 self._sections[section_name].set_add_subsection_button_enabled(True)
 
     def _on_finish_draft(self):
