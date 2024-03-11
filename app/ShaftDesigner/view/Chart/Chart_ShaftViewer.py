@@ -32,7 +32,7 @@ class Chart_ShaftViewer():
         offset = 0.1 * shaft_length
 
         xlim = (-offset, shaft_length + offset)
-        ylim = (-0.25 * shaft_length, 0.25 * shaft_length)
+        ylim = (-0.5 * (shaft_length + offset), 0.5 * (shaft_length + offset))
 
         self._ax.set_xlim(xlim)
         self._ax.set_ylim(ylim)
