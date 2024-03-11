@@ -87,6 +87,7 @@ class ShaftDesigner(QMainWindow):
         toggle_sidebar_action = QAction(self)
         toggle_sidebar_action.setIcon(QIcon(resource_path('icons//menu.png')))
         toggle_sidebar_action.setToolTip('Otwórz/zamknij pasek boczny')
+        toggle_sidebar_action.setCheckable(True)
         toggle_sidebar_action.triggered.connect(self.toggle_sidebar)
         self.toolbar.addAction(toggle_sidebar_action)
 
