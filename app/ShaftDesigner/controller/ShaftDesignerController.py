@@ -180,9 +180,20 @@ class ShaftDesignerController:
         if self.shaft_calculator.shaft_sections:
             self._draw_shaft()
             self._enable_shaft_design_confirmation()
+            self.update_bearing_data()
 
         # (Re)draw shaft plots
         self._set_functions_plots(self.functions_calculator.get_shaft_functions())
+
+    def update_bearing_data(self, bearing_attributes=None):
+        """
+        Calculate bearings dimensions and update them in shaft viewer.
+
+        Args:
+            bearing_attributes (dict): single bearing attributes.
+        """
+        bearings_plot_attributes = self.shaft_calculator.calculate_bearings(bearing_attributes)
+        self._shaft_designer.shaft_viewer.set_bearings(bearings_plot_attributes)
 
     def get_shaft_data(self):
         return self.shaft_calculator.shaft_sections

@@ -28,6 +28,9 @@ class BearingsTabController:
         self._tab.updateStateSignal.connect(self.update_state)
 
         for section_name, item in self._items['Bearings'].items():
+           item['data'].dataChangedSignal.connect(partial(self._mediator.update_bearing, section_name))
+
+        for section_name, item in self._items['Bearings'].items():
             item['data'].clicked.connect(partial(self._select_bearing, section_name))
 
     def _update_component_data(self):

@@ -35,9 +35,10 @@ class Chart(FigureCanvas):
 
         # Set other items colors
         self.shaft_color = '#89a0b0'        # bluey grey
+        self.bearings_color = '#4d5ea8'     # bluey grey
         self.axes_color = '#ff073a'         # nenon red
         self.dimensions_color = '#1bfc06'   # neon green
-        self.markers_color = '#ffffe4'       # off white
+        self.markers_color = '#ffffe4'      # off white
 
         # Set zorder - order of layers
         self.axes_layer = 1

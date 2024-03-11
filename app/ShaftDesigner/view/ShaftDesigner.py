@@ -1,6 +1,6 @@
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QIcon , QAction
-from PyQt6.QtWidgets import (QHBoxLayout, QMainWindow, QPushButton, QSizePolicy, QSpacerItem, QStyle,
+from PyQt6.QtWidgets import (QHBoxLayout, QMainWindow, QPushButton, QSizePolicy, QSpacerItem,
                              QVBoxLayout, QWidget, QScrollArea, QToolBar)
 
 from ShaftDesigner.view.Chart.Chart import Chart
@@ -103,23 +103,42 @@ class ShaftDesigner(QMainWindow):
 
         # Set menu with dimensions to display
         self._dimensions_menu = CheckboxDropdown()
-        self._plots_menu.stateChanged.connect(self._toggle_dimensions)
         self._dimensions_menu.setIcon(resource_path('icons\dimensions.png'), 'Wyświetl wymiary')
         self._dimensions_menu.addItem('dimensions', 'Wymiary wału', 'Wyświetl wymiary wału', self._toggle_dimensions)
         self._dimensions_menu.addItem('coordinates', 'Współrzędne wału', 'Wyświetl współrzędne wału', self._toggle_coordinates)
         self.toolbar.addWidget(self._dimensions_menu)
+        
+        # Set button for displaying bearings
+        self._toggle_bearings_plot_action = QAction(self)
+        self._toggle_bearings_plot_action.setIcon(QIcon(resource_path('icons//bearing.png')))
+        self._toggle_bearings_plot_action.setToolTip("Wyświetl łożyska")
+        self._toggle_bearings_plot_action.setCheckable(True)
+        self._toggle_bearings_plot_action.triggered.connect(self._toggle_bearings)
+        self.toolbar.addAction(self._toggle_bearings_plot_action)
 
     def _toggle_dimensions(self, is_checked):
         if is_checked:
+            if self._toggle_bearings_plot_action.isChecked():
+                self._toggle_bearings_plot_action.trigger()
             self.shaft_viewer.draw_shaft_dimensions()
         else:
             self.shaft_viewer.remove_shaft_dimensions()
 
     def _toggle_coordinates(self, is_checked):
         if is_checked:
+            if self._toggle_bearings_plot_action.isChecked():
+                self._toggle_bearings_plot_action.trigger()
             self.shaft_viewer.draw_shaft_coordinates()
         else:
             self.shaft_viewer.remove_shaft_coordinates()
+
+    def _toggle_bearings(self, is_checked):
+        if is_checked:
+            for id in self._dimensions_menu.getCheckedItems():
+                self._dimensions_menu.checkItem(id, False)
+            self.shaft_viewer.draw_bearings()            
+        else:
+            self.shaft_viewer.remove_bearings()
 
     def set_sidebar_sections(self, sections):
         # Set contents of the sidebar

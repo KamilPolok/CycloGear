@@ -10,6 +10,7 @@ from ..common.common_functions import fetch_data_subset
 
 class InputShaftCalculator():
     def __init__(self):
+        self.bearings = {}
         self.data = {
             # Napęd
             'nwe':[750, 'obr/min'],         # Prędkość obrotowa wejściowa
@@ -259,7 +260,32 @@ class InputShaftCalculator():
             return view_select_items_ctrl.selectedItemAttributes
         else:
             return None
+        
+    def get_bearing_attributes(self, bearing_section_id, bearing_data):
+        """
+        Extract and organize necessary bearing attributes from provided
+        bearing data.
 
+        Args:
+            bearing_section_id (str): The location id of the bearing.
+            bearing_data (dict): Bearing data.
+        Returns:
+            (dict): Bearing attributes.
+        """
+        if bearing_data:
+            Dw = bearing_data['Dw'][0]
+            Dz = bearing_data['Dz'][0]
+            B = bearing_data['B'][0]
+
+            if bearing_section_id == 'eccentrics':
+                e = self.data['e'][0]
+            else:
+                e = 0
+
+            bearing_data = {'Dw': Dw, 'Dz': Dz, 'B': B, 'e': e}
+
+        return {bearing_section_id: bearing_data}
+        
     def get_data(self):
         """
         Get component data.
@@ -271,6 +297,7 @@ class InputShaftCalculator():
         Set component data.
         """
         fetch_data_subset(self.data, data)
+        self._add_data_reference()
     
     def update_data(self, data):
         """
@@ -279,3 +306,4 @@ class InputShaftCalculator():
         Args (dict): New data to update the component data with.
         """   
         fetch_data_subset(self.data, data)
+        self._add_data_reference()

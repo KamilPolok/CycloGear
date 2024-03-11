@@ -60,6 +60,11 @@ class CheckboxDropdown(QToolButton):
         if enable is False:
             self.actions[id].setChecked(enable)
 
+    def checkItem(self, id, check):
+        if id in self.actions:
+            if check != self.isChecked(id):
+                self.actions[id].trigger()
+
     def isChecked(self, id):
         '''
         Check if Checkbox is checked.
@@ -84,8 +89,7 @@ class CheckboxDropdown(QToolButton):
 
     def getItems(self):
         """
-        Return checkboxes that are currently checked
-
+        Return all items ids. 
         Returns:
             res (list): List of tuples (id, text) for of every checked checkbox.
         """
@@ -96,7 +100,7 @@ class CheckboxDropdown(QToolButton):
 
     def getCheckedItems(self):
         """
-        Return checkboxes that are currently checked
+        Return checked items ids.
 
         Returns:
             res (list): List of tuples (id, text) for of every checked checkbox.

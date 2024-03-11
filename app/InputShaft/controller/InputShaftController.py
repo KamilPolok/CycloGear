@@ -98,6 +98,8 @@ class InputShaftController:
 
         self._mediator.updateComponentData.connect(self._update_component_data)
 
+        self._mediator.bearingChanged.connect(self._on_bearing_changed)
+
     def _update_component_data(self, tab_id, data):
         self._calculator.update_data(data)
 
@@ -143,6 +145,10 @@ class InputShaftController:
 
     def _on_update_power_loss_data(self):
         self._calculator.calculate_bearings_power_loss()
+
+    def _on_bearing_changed(self, bearing_section_id, bearing_data):
+        bearing_data = self._calculator.get_bearing_attributes(bearing_section_id, bearing_data)
+        self._shaft_designer_controller.update_bearing_data(bearing_data)
 
     def _on_shaft_designing_finished(self):
         self._input_shaft.handle_shaft_designing_finished()

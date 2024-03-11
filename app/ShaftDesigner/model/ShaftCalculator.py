@@ -1,23 +1,8 @@
 class ShaftCalculator:
     def __init__(self):
         self.shaft_sections = {}
+        self.bearings = {}
         self.limits = {}
-
-    def _save_shaft_sections_attributes(self, attributes):
-        if attributes:
-            section_name = attributes[0]
-            section_number = attributes[1]
-            data = attributes[2]
-            common_section_data = attributes[3]
-            
-            if section_name not in self.shaft_sections:
-                self.shaft_sections[section_name] = {}
-            
-            self.shaft_sections[section_name][section_number] = data
-
-            if isinstance(common_section_data, dict):
-                for subsection_attributes in self.shaft_sections[section_name].values():
-                    subsection_attributes.update(common_section_data)
 
     def calculate_shaft_sections(self, shaft_subsection_attributes = None):
         # Save subsection attrbutes
@@ -113,6 +98,37 @@ class ShaftCalculator:
 
         return meets_limits
 
+    def _save_shaft_sections_attributes(self, attributes):
+        if attributes:
+            section_name = attributes[0]
+            section_number = attributes[1]
+            data = attributes[2]
+            common_section_data = attributes[3]
+            
+            if section_name not in self.shaft_sections:
+                self.shaft_sections[section_name] = {}
+            
+            self.shaft_sections[section_name][section_number] = data
+
+            if isinstance(common_section_data, dict):
+                for subsection_attributes in self.shaft_sections[section_name].values():
+                    subsection_attributes.update(common_section_data)
+    
+    def _set_bearings_attributes(self, bearing_attributes):
+        if bearing_attributes:
+            # If the bearing_attributes are not empty, update self.bearings
+            for bearing, attributes in bearing_attributes.items():
+                if attributes is None:
+                    # If the attributes are None, remove the bearing from self.bearings if it exists
+                    if bearing in self.bearings:
+                        del self.bearings[bearing]
+                else:
+                    # If the bearing does not exist in self.bearings, initialize it
+                    if bearing not in self.bearings:
+                        self.bearings[bearing] = {}
+                    # Update the bearing with the new attributes
+                    self.bearings[bearing] = attributes
+
     def remove_shaft_subsection(self, section_name, subsection_number):
         # Remove the subsection from shaft sections attributes
         if section_name in self.shaft_sections and subsection_number in self.shaft_sections[section_name]:
@@ -168,7 +184,44 @@ class ShaftCalculator:
                 self.limits[section_name][subsection_number] = {'d': {'min': dmin, 'max': dmax}, 'l': {'min': lmin, 'max': lmax}}
 
         return self.limits
-    
+
+    def calculate_bearings(self, bearing_attributes={}):
+        self._set_bearings_attributes(bearing_attributes)
+
+        self.bearings_plots_attributes = {}
+
+        for bearing, attributes in self.bearings.items():
+            Dw = attributes['Dw']
+            Dz = attributes['Dz']
+            B = attributes['B']
+            e = attributes['e']
+
+            length = B
+            diameter = (Dz - Dw) / 2
+            if bearing == 'eccentrics':
+                coordinates = [self._shaft_attributes['L1'], self._shaft_attributes['L2']]
+                for idx, l in enumerate(coordinates):
+                    offset = e * (-1)**idx
+                    start_z = l - 0.5 * B
+                    for position in range(2):
+                        start_y = -0.5 * Dz + (0.5 * (Dw + Dz)) * position + offset
+                        if bearing+f'{idx+1}' not in self.bearings_plots_attributes:
+                             self.bearings_plots_attributes[bearing+f'{idx+1}'] = {}
+                        self.bearings_plots_attributes[bearing+f'{idx+1}'][position] = {'start': (start_z, start_y), 'l': length, 'd': diameter}       
+            else:
+                if bearing == 'support_A':
+                    l = self._shaft_attributes['LA']
+                elif bearing == 'support_B':
+                    l = self._shaft_attributes['LB']
+                start_z = l - 0.5 * B
+                for position in range(2):
+                        start_y = -0.5 * Dz + (0.5 * (Dw + Dz)) * position
+                        if bearing not in self.bearings_plots_attributes:
+                            self.bearings_plots_attributes[bearing] = {}
+                        self.bearings_plots_attributes[bearing][position] = {'start': (start_z, start_y), 'l': length, 'd': diameter}
+            
+        return self.bearings_plots_attributes
+
     def is_whole_shaft_designed(self):
         total_length = 0
     

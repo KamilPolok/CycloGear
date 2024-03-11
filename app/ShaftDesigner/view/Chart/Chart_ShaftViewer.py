@@ -7,10 +7,12 @@ class Chart_ShaftViewer():
         self._chart = chart
         
         self._shaft_dimensions = []           # Stores dimensions of every shaft step
+        self._bearings_dimensions = {}        # Stores dimensions of every bearing
 
         self._shaft_plot = []                 # Keeps track of shaft plot items
         self._shaft_dimensions_plot = []      # Keeps track of shaft dimensions plot items
         self._shaft_coordinates_plot = []     # Keeps track of shaft coordinates plot items
+        self._bearings_plot = []              # Keeps track of bearings plot items
         self._shaft_markers = []              # Keeps track of shaft markers plot items
 
         self._dimension_offset = 0
@@ -125,11 +127,11 @@ class Chart_ShaftViewer():
 
             # draw reference lines for horizontal dimension lines
             for position in [start_z, end_z]:
-                reference_line = self._ax.plot([position, position], [0, end_y], 
+                reference_line = self._ax.plot([position, position], [0.75 * end_y, end_y], 
                                                linestyle='-',
                                                linewidth=0.5,
                                                color=self._chart.dimensions_color,
-                                               zorder=self._chart.dimensions_layer
+                                               zorder=self._chart.dimensions_layer - 2
                                                )
                 lines.append(reference_line[0])
 
@@ -171,12 +173,9 @@ class Chart_ShaftViewer():
 
         self._canvas.draw()
 
-        # Redraw shaft dimensions and coordinates
+        # Redraw shaft dimensions
         if self._shaft_dimensions_plot:
             self.draw_shaft_dimensions()
-            
-        if self._shaft_coordinates_plot:
-            self.draw_shaft_coordinates()
 
     def init_shaft(self, coordinates):
         shaft_points = [(0,0)] + coordinates
@@ -249,6 +248,82 @@ class Chart_ShaftViewer():
         
         self._canvas.draw()
 
+    def set_bearings(self, bearings_dimensions):
+        if bearings_dimensions:
+            self._bearings_dimensions = bearings_dimensions
+
+        if self._bearings_plot:
+            self.draw_bearings()
+
+    def draw_bearings(self):
+        # Remove old bearings
+        self.remove_bearings()
+        
+        # Draw new bearings
+        for bearing in self._bearings_dimensions.values():
+            for bearing_part in bearing.values():
+                start = bearing_part['start']
+                length = bearing_part['l']
+                diameter = bearing_part['d']
+
+                rim = Rectangle(start, length, diameter,
+                                            linewidth=2,
+                                            fill=False,
+                                            color=self._chart.bearings_color,
+                                            zorder=self._chart.shaft_layer
+                                            )
+                self._ax.add_patch(rim)
+                diagonal1 = self._ax.plot([start[0], start[0] + length], [start[1], start[1] + diameter], 
+                                            linestyle='-',
+                                            linewidth=2,
+                                            color=self._chart.bearings_color,
+                                            zorder=self._chart.shaft_layer
+                                            )
+                diagonal2 = self._ax.plot([start[0] , start[0] + length], [start[1] + diameter, start[1] ], 
+                                            linestyle='-',
+                                            linewidth=2,
+                                            color=self._chart.bearings_color,
+                                            zorder=self._chart.shaft_layer
+                                            )
+
+                self._bearings_plot.extend([rim, diagonal1[0], diagonal2[0]])
+            
+            d_in = abs(bearing[1]['start'][1]) + abs(bearing[0]['start'][1] + bearing[0]['d'])
+            d_out = abs(bearing[1]['start'][1] + bearing[1]['d']) + abs(bearing[0]['start'][1])
+            l = bearing[0]['l']
+
+            # Draw length dimension
+            start_z = bearing[0]['start'][0]
+            end_z = start_z + l
+            z_label_position = start_z + l * 0.5
+            y_position = (d_out * 0.5) * 1.2 + 0.1 * (d_out * 0.5)
+            text = "{:.1f}".format(l)
+
+            dimension = self._draw_dimension(text, start_z, end_z, z_label_position, y_position, y_position, y_position)
+            self._bearings_plot.extend(dimension)
+
+            # Draw inner diameter
+            z_position = bearing[0]['start'][0] + l
+            start_y = bearing[0]['start'][1] + bearing[0]['d']
+            end_y = start_y + d_in
+            y_label_position = start_y + d_in * 0.5
+            text = "Ø {:.1f}".format(d_in)
+
+            dimension = self._draw_dimension(text, z_position, z_position, z_position, start_y, end_y, y_label_position)
+            self._bearings_plot.extend(dimension)
+
+            # Draw outer diameter
+            z_position = z_position + 2
+            start_y = bearing[0]['start'][1]
+            end_y = start_y + d_out
+            y_label_position = start_y + d_out * 0.5
+            text = "Ø {:.1f}".format(d_out)
+
+            dimension = self._draw_dimension(text, z_position, z_position, z_position, start_y, end_y, y_label_position)
+            self._bearings_plot.extend(dimension)
+            
+        self._canvas.draw()
+
     def remove_shaft_dimensions(self):
         # Remove dimensions
         for item in self._shaft_dimensions_plot:
@@ -257,10 +332,21 @@ class Chart_ShaftViewer():
 
         self._canvas.draw()
 
+        # Redraw shaft coordinates
+        if self._shaft_coordinates_plot:
+            self.draw_shaft_coordinates()
+
     def remove_shaft_coordinates(self):
         # Remove coordinates
         for item in self._shaft_coordinates_plot:
             item.remove()
         self._shaft_coordinates_plot.clear()
+
+        self._canvas.draw()
+
+    def remove_bearings(self):
+        for bearing in self._bearings_plot:
+            bearing.remove()
+        self._bearings_plot.clear()
 
         self._canvas.draw()
