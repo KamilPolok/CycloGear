@@ -7,6 +7,8 @@ from ShaftDesigner.view.Chart.Chart import Chart
 from ShaftDesigner.view.Chart.Chart_Plotter import Chart_Plotter
 from ShaftDesigner.view.Chart.Chart_ShaftViewer import Chart_ShaftViewer
 
+from ShaftDesigner.view.Chart.Utils.CheckboxDropdown import CheckboxDropdown
+
 from config import APP_NAME
 
 from config import resource_path
@@ -28,19 +30,22 @@ class ShaftDesigner(QMainWindow):
         self.setWindowTitle(self._window_title)
         self.resize(800,500)
 
-        # Set toolbar
-        self.toolbar = QToolBar(self)
-        self.toolbar.setIconSize(QSize(24, 24))
-        self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.toolbar)
-        self.toolbar.toggleViewAction().setVisible(False)
-
         # Set main layout
         self.main_widget = QWidget(self)
         self.main_layout = QHBoxLayout(self.main_widget)
         self.setCentralWidget(self.main_widget)
 
+        self._init_toolbar()
         self._init_sidebar()
         self._init_chart()
+        self._set_toolbar_actions_and_buttons()
+
+    def _init_toolbar(self):
+        # Set toolbar
+        self.toolbar = QToolBar(self)
+        self.toolbar.setIconSize(QSize(24, 24))
+        self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.toolbar)
+        self.toolbar.toggleViewAction().setVisible(False)
 
     def _init_sidebar(self):
         # Set sidebar
@@ -58,13 +63,6 @@ class ShaftDesigner(QMainWindow):
 
         self.main_layout.addWidget(self.scroll_area)
 
-        # Set sidebar toggle button
-        toggle_sidebar_action = QAction(self)
-        toggle_sidebar_action.setIcon(QIcon(resource_path('icons//menu.png')))
-        toggle_sidebar_action.setToolTip('Otwórz/zamknij pasek boczny')
-        toggle_sidebar_action.triggered.connect(self.toggle_sidebar)
-        self.toolbar.addAction(toggle_sidebar_action)
-
     def _init_chart(self):
         # Chart section layout
         self._chart_section_layout = QVBoxLayout()
@@ -81,16 +79,30 @@ class ShaftDesigner(QMainWindow):
 
         self.main_layout.addLayout(self._chart_section_layout)
 
-        # Add actions to the toolbar
+        self.plotter = Chart_Plotter(self.chart)
+        self.shaft_viewer = Chart_ShaftViewer(self.chart, self.toolbar)
+
+    def _set_toolbar_actions_and_buttons(self):
+        # Set sidebar toggle button
+        toggle_sidebar_action = QAction(self)
+        toggle_sidebar_action.setIcon(QIcon(resource_path('icons//menu.png')))
+        toggle_sidebar_action.setToolTip('Otwórz/zamknij pasek boczny')
+        toggle_sidebar_action.triggered.connect(self.toggle_sidebar)
+        self.toolbar.addAction(toggle_sidebar_action)
+
+        # Set adjust view action
         fit_to_window_action = QAction(self)
         fit_to_window_action.setIcon(QIcon(resource_path('icons//fit_to_window.png')))
         fit_to_window_action.setToolTip("Dopasuj widok")
         fit_to_window_action.triggered.connect(self.chart.reset_initial_view)
         self.toolbar.addAction(fit_to_window_action)
 
-        self.plotter = Chart_Plotter(self.chart, self.toolbar)
-        self.shaft_viewer = Chart_ShaftViewer(self.chart, self.toolbar)
-        
+        # Set menu with plots to view
+        self._plots_menu = CheckboxDropdown()
+        self._plots_menu.stateChanged.connect(self.plotter.set_selected_plots)
+        self._plots_menu.setIcon(resource_path('icons\plots.png'), 'Wyświetl wykresy')
+        self.toolbar.addWidget(self._plots_menu)
+
     def set_sidebar_sections(self, sections):
         # Set contents of the sidebar
         for section in sections.values():

@@ -1,37 +1,20 @@
 import mplcursors
 
-from .Utils.CheckboxDropdown import CheckboxDropdown
 from .Chart import Chart
 
-from config import resource_path
-
 class Chart_Plotter():
-    def __init__(self, chart: Chart, toolbar):
+    def __init__(self, chart: Chart):
         self._chart = chart
-        self._toolbar = toolbar
 
-        self._plots = {}            # Dictionary to keep track of plots
-        self._active_plots = {}     # Dictionary to keep track of active plots
+        self._plots = {}            # Keeps track of plots
+        self._active_plots = {}     # Keeps track of active plots
+        self._selected_plots = []   # Keeps track of selected plots
 
         self._get_chart_controls()
-        self._init_ui()
 
     def _get_chart_controls(self):
         self._ax, self._canvas = self._chart.get_controls()
         self._cursor = mplcursors.cursor(self._ax, hover=False)
-
-    def _init_ui(self):
-        self._set_plots_selector()
-
-    def _set_plots_selector(self):
-        """
-        Create a plots selector an add it to the toolbar. Plot selector
-        enables to select plots that will be shown on the chart.
-        """
-        self._plots_selector = CheckboxDropdown()
-        self._plots_selector.stateChanged.connect(self._refresh_selected_plots)
-        self._plots_selector.setIcon(resource_path('icons\plots.png'), 'Wyświetl wykresy')
-        self._toolbar.addWidget(self._plots_selector)
 
     def _reset_plots(self):
         # Remove any active plots so they can be properly redrawn
@@ -46,18 +29,15 @@ class Chart_Plotter():
         """
         Switch the current plots based on the selected plots.
         """
-        # Determine which plots are selected
-        selected_plots = [plot[0] for plot in self._plots_selector.currentOptions()]
-
         # Remove plots that are not selected
         for plot_name in list(self._active_plots.keys()):
-            if plot_name not in selected_plots:
+            if plot_name not in self._selected_plots:
                 for element in self._active_plots[plot_name]:
                     element.remove()
                 del self._active_plots[plot_name]
     
         # Add new selected plots
-        for plot_name in selected_plots:
+        for plot_name in self._selected_plots:
             if plot_name not in self._active_plots:
                 y = self._plots[plot_name][len(self._plots[plot_name]) - 1]
                 color = self._plots[plot_name][2]
@@ -137,7 +117,12 @@ class Chart_Plotter():
         sel.annotation.get_bbox_patch().set_edgecolor(plot_color)
         sel.annotation.arrow_patch.set_color(plot_color)
 
-    def set_plots_functions(self, functions, z=None):
+    def set_selected_plots(self, selected_plots):
+        self._selected_plots = selected_plots
+
+        self._refresh_selected_plots()
+
+    def set_functions_plots(self, arguments, functions):
         """
         Add or update plot functions. Add functions to plot selector and
         update the disabled/enabled state of checkbox if the set plot
@@ -146,18 +131,9 @@ class Chart_Plotter():
         :param z: Numpy array containing the z arguments
         :param functions: Dictionary containing the functions arrays for the plots.
         """
-        for id, function in functions.items():
-            if id not in self._plots:
-                label = function[0]
-                description = function[1]
-                self._plots_selector.addItem(id, label, description)
-            if function[3] is not None:
-                self._plots[id] = function
-                self._plots_selector.enableItem(id, True)
-            else:
-                self._plots_selector.enableItem(id, False)
+        self._z = arguments
 
-        if z is not None:
-            self._z = z
+        for id, function in functions.items():
+            self._plots[id] = function
 
         self._reset_plots()

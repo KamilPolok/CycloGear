@@ -97,6 +97,7 @@ class ShaftDesignerController:
         self._shaft_designer.shaft_viewer.draw_shaft(shaft_plot_attributes)
         
         self._enable_add_subsection_button(section_name)
+        self._enable_shaft_design_confirmation()
     
     def _enable_sections(self):
         if self.all_sections_enabled == False:
@@ -126,7 +127,7 @@ class ShaftDesignerController:
     def _toogle_remaining_plots_visibility(self):
         shaft_steps = self.shaft_calculator.get_shaft_attributes()
         self.functions_calculator.calculate_remaining_functions(shaft_steps)
-        self._shaft_designer.plotter.set_plots_functions(self.functions_calculator.get_shaft_functions())
+        self._set_functions_plots(self.functions_calculator.get_shaft_functions())
     
     def _enable_add_subsection_button(self, section_name):
         # Enable add button if the last subsection in the sidebar was plotted - do not allow to add multiple subsections at once
@@ -135,6 +136,20 @@ class ShaftDesignerController:
             if self._sections[section_name].subsection_count == 0 or (section_name in self.shaft_calculator.shaft_sections and
             last_subsection_number in self.shaft_calculator.shaft_sections[section_name]):
                 self._sections[section_name].set_add_subsection_button_enabled(True)
+
+    def _set_functions_plots(self, shaft_functions):
+        for id, function in list(shaft_functions['f(z)'].items()): 
+            if id not in self._shaft_designer._plots_menu.getItems():
+                label = function[0]
+                description = function[1]
+                self._shaft_designer._plots_menu.addItem(id, label, description)
+            if function[3] is None:
+                del shaft_functions['f(z)'][id]
+                self._shaft_designer._plots_menu.enableItem(id, False)
+            else:
+                self._shaft_designer._plots_menu.enableItem(id, True)
+        
+        self._shaft_designer.plotter.set_functions_plots(shaft_functions['z'], shaft_functions['f(z)'])
 
     def _on_finish_draft(self):
         self.shaft_calculator.save_data(self._data)
@@ -167,11 +182,11 @@ class ShaftDesignerController:
             self._enable_shaft_design_confirmation()
 
         # (Re)draw shaft plots
-        self._shaft_designer.plotter.set_plots_functions(self.functions_calculator.get_shaft_functions(), self.functions_calculator.get_shaft_z())
-    
+        self._set_functions_plots(self.functions_calculator.get_shaft_functions())
+
     def get_shaft_data(self):
         return self.shaft_calculator.shaft_sections
-    
+
     def set_shaft_data(self, data):
         for section_name, section in data.items():
             for subsection_number, subsection in section.items():

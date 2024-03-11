@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QToolButton, QMenu
 from PyQt6.QtGui import QIcon, QAction
-from PyQt6.QtCore import pyqtSignal, QSize
+from PyQt6.QtCore import pyqtSignal
 
 class StayOpenMenu(QMenu):
     def mouseReleaseEvent(self, event):
@@ -14,7 +14,7 @@ class CheckboxDropdown(QToolButton):
     """
     A custom QToolButton that displays a dropdown menu with checkboxes.
     """
-    stateChanged = pyqtSignal()
+    stateChanged = pyqtSignal(list)
     def __init__(self):
         super().__init__()
         
@@ -46,7 +46,7 @@ class CheckboxDropdown(QToolButton):
             self._menu.addAction(action)
             self.actions[id] = action
     
-    def enableItem(self, id, enabled=True):
+    def enableItem(self, id, enable=True):
         '''
         Enables or disables checkbox of given id.
         If disables, unchecks it.
@@ -56,9 +56,9 @@ class CheckboxDropdown(QToolButton):
             enabled (bool): if enable checkbox.
         '''
         if id in self.actions:
-            self.actions[id].setEnabled(enabled)
-        if enabled is False:
-            self.actions[id].setChecked(enabled)
+            self.actions[id].setEnabled(enable)
+        if enable is False:
+            self.actions[id].setChecked(enable)
 
     def isChecked(self, id):
         '''
@@ -82,7 +82,19 @@ class CheckboxDropdown(QToolButton):
 
         self.setToolTip(tootltip)
 
-    def currentOptions(self):
+    def getItems(self):
+        """
+        Return checkboxes that are currently checked
+
+        Returns:
+            res (list): List of tuples (id, text) for of every checked checkbox.
+        """
+        res = []
+        for id in self.actions.keys():
+                res.append(id)
+        return res
+
+    def getCheckedItems(self):
         """
         Return checkboxes that are currently checked
 
@@ -92,8 +104,9 @@ class CheckboxDropdown(QToolButton):
         res = []
         for id, action in self.actions.items():
             if action.isChecked():
-                res.append((id, action.text()))
+                res.append(id)
         return res
 
     def _emitStateChangedSignal(self):
-        self.stateChanged.emit()
+        checked_items = self.getCheckedItems()
+        self.stateChanged.emit(checked_items)
