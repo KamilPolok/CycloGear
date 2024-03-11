@@ -94,6 +94,95 @@ class Chart_ShaftViewer():
         if self._shaft_coordinates_plot:
             self.draw_shaft_coordinates()
 
+    def _draw_horizontal_dimension(self, text, start_z, end_z, label_z_position, y_position, item_y_position=0):
+        lines = []
+
+        # Draw dimension line
+        dimension_line = self._ax.annotate('', xy=(start_z, y_position), xycoords='data',
+                                           xytext=(end_z, y_position), textcoords='data',
+                                           arrowprops=dict(arrowstyle="<->", color=self._chart.dimensions_color),
+                                           zorder=self._chart.dimensions_layer
+                                           )
+        lines.append(dimension_line)
+
+        # draw reference lines
+        for position in [start_z, end_z]:
+            reference_line = self._ax.plot([position, position], [item_y_position, y_position], 
+                                            linestyle='-',
+                                            linewidth=0.5,
+                                            color=self._chart.dimensions_color,
+                                            zorder=self._chart.dimensions_layer - 2
+                                            )
+            lines.append(reference_line[0])
+
+        # Add dimension labels
+        label_offset = 0.3
+        label_y_position = y_position + label_offset
+        ha, va = 'center', 'bottom'
+        rotation = 0
+
+        dimension_label = self._ax.text(label_z_position, label_y_position, text,
+                                        rotation=rotation,
+                                        ha=ha,
+                                        va=va,
+                                        fontsize=8,
+                                        color=self._chart.dimensions_color,
+                                        bbox=dict(alpha=0, zorder=self._chart.dimensions_layer)
+                                        )
+        lines.append(dimension_label)
+
+        return lines
+
+    def _draw_vertical_dimension(self, text, z_position, start_y, end_y, label_y_position, item_z_position=-1):
+        lines = []
+
+        # Draw dimension line
+        dimension_line = self._ax.annotate('', xy=(z_position, start_y), xycoords='data',
+                                           xytext=(z_position, end_y), textcoords='data',
+                                           arrowprops=dict(arrowstyle="<->", color=self._chart.dimensions_color),
+                                           zorder=self._chart.dimensions_layer
+                                           )
+        lines.append(dimension_line)
+
+        # if it is eccentric dimension, draw additional point marking the middle (y) of the section
+        if end_y == 0:
+            middle_point = self._ax.scatter(z_position, start_y,
+                                s=8,
+                                color=self._chart.dimensions_color,
+                                zorder=self._chart.dimensions_layer
+                                )
+            lines.append(middle_point)
+
+        # draw reference lines
+        if item_z_position >= 0:
+            for position in [start_y, end_y]:
+                reference_line = self._ax.plot([item_z_position, z_position], [position, position], 
+                                                linestyle='-',
+                                                linewidth=0.5,
+                                                color=self._chart.dimensions_color,
+                                                zorder=self._chart.dimensions_layer - 2
+                                                )
+                lines.append(reference_line[0])
+
+        # draw reference lines
+        offset = 0.3
+        ha, va = 'right', 'center'
+        rotation = 90
+        label_z_position = z_position - offset
+
+        # Add dimension labels
+        dimension_label = self._ax.text(label_z_position, label_y_position, text,
+                                        rotation=rotation,
+                                        ha=ha,
+                                        va=va,
+                                        fontsize=8,
+                                        color=self._chart.dimensions_color,
+                                        bbox=dict(alpha=0, zorder=self._chart.dimensions_layer)
+                                        )
+        lines.append(dimension_label)
+            
+        return lines
+
     def _draw_dimension(self, text, start_z, end_z, label_z_position, start_y=0, end_y=0, label_y_position=0):
         lines = []
 
@@ -202,19 +291,21 @@ class Chart_ShaftViewer():
             end_z = start[0] + length
             y_position = self._dimension_offset
             label_position = start_z + length * 0.5
+            item_y_position = start[1]
             text = "{:.1f}".format(length)
 
-            length_dimension = self._draw_dimension(text, start_z, end_z, label_position, y_position, y_position, y_position)
+            length_dimension = self._draw_horizontal_dimension(text, start_z, end_z, label_position, y_position, item_y_position)
             self._shaft_dimensions_plot.extend(length_dimension)
 
             # Draw diameter dimension
             start_y = start[1]
             end_y = start[1] + diameter
             z_position = start_z + length * 0.75
-            y_position = start_y + diameter * 0.5
+            label_position = start_y + diameter * 0.5
+            item_z_position = start[0]
             text = "Ø {:.1f}".format(diameter)
 
-            diameter_dimension = self._draw_dimension(text, z_position, z_position, z_position, start_y, end_y, y_position)
+            diameter_dimension = self._draw_vertical_dimension(text, z_position, start_y, end_y, label_position, item_z_position)
             self._shaft_dimensions_plot.extend(diameter_dimension)
 
             # Draw eccentric
@@ -223,9 +314,11 @@ class Chart_ShaftViewer():
                 start_y = eccentric
                 end_y = 0
                 z_position = start_z + length * 0.5
-                y_position = eccentric * 0.5
+                label_position = eccentric * 0.5
+                item_z_position = start[0]
                 text = "{:.1f}".format(abs(eccentric))
-                diameter_dimension = self._draw_dimension(text, z_position, z_position, z_position, start_y, end_y, y_position)
+
+                diameter_dimension = self._draw_vertical_dimension(text, z_position, start_y, end_y, label_position)
                 self._shaft_dimensions_plot.extend(diameter_dimension)
 
         self._canvas.draw()
@@ -239,10 +332,11 @@ class Chart_ShaftViewer():
         for i in range(len(self.points) - 1):
             start, end = self.points[i], self.points[i + 1]
             mid_point = (start + end) / 2
-            distance = "{:.1f}".format(end - start)
+            text = "{:.1f}".format(end - start)
             y_position = -self._dimension_offset
+            item_y_position = y_position + self._dimension_offset*0.1
 
-            dimension = self._draw_dimension(distance, start, end, mid_point, y_position, y_position, y_position)
+            dimension = self._draw_horizontal_dimension(text, start, end, mid_point, y_position, item_y_position)
 
             self._shaft_coordinates_plot.extend(dimension)
         
@@ -296,10 +390,11 @@ class Chart_ShaftViewer():
             start_z = bearing[0]['start'][0]
             end_z = start_z + l
             z_label_position = start_z + l * 0.5
-            y_position = (d_out * 0.5) * 1.2 + 0.1 * (d_out * 0.5)
+            y_position = (d_out * 0.5) * 1.5
+            item_y_position = bearing[1]['start'][1] + bearing[1]['d']
             text = "{:.1f}".format(l)
 
-            dimension = self._draw_dimension(text, start_z, end_z, z_label_position, y_position, y_position, y_position)
+            dimension = self._draw_horizontal_dimension(text, start_z, end_z, z_label_position, y_position, item_y_position)
             self._bearings_plot.extend(dimension)
 
             # Draw inner diameter
@@ -307,9 +402,10 @@ class Chart_ShaftViewer():
             start_y = bearing[0]['start'][1] + bearing[0]['d']
             end_y = start_y + d_in
             y_label_position = start_y + d_in * 0.5
+            item_z_position = bearing[0]['start'][0]
             text = "Ø {:.1f}".format(d_in)
 
-            dimension = self._draw_dimension(text, z_position, z_position, z_position, start_y, end_y, y_label_position)
+            dimension = self._draw_vertical_dimension(text, z_position, start_y, end_y, y_label_position, item_z_position)
             self._bearings_plot.extend(dimension)
 
             # Draw outer diameter
@@ -319,7 +415,7 @@ class Chart_ShaftViewer():
             y_label_position = start_y + d_out * 0.5
             text = "Ø {:.1f}".format(d_out)
 
-            dimension = self._draw_dimension(text, z_position, z_position, z_position, start_y, end_y, y_label_position)
+            dimension = self._draw_vertical_dimension(text, z_position, start_y, end_y, y_label_position, item_z_position)
             self._bearings_plot.extend(dimension)
             
         self._canvas.draw()
