@@ -35,17 +35,9 @@ class ShaftDesigner(QMainWindow):
         self.main_layout = QHBoxLayout(self.main_widget)
         self.setCentralWidget(self.main_widget)
 
-        self._init_toolbar()
         self._init_sidebar()
         self._init_chart()
-        self._set_toolbar_actions_and_buttons()
-
-    def _init_toolbar(self):
-        # Set toolbar
-        self.toolbar = QToolBar(self)
-        self.toolbar.setIconSize(QSize(24, 24))
-        self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.toolbar)
-        self.toolbar.toggleViewAction().setVisible(False)
+        self._init_toolbar()
 
     def _init_sidebar(self):
         # Set sidebar
@@ -80,9 +72,15 @@ class ShaftDesigner(QMainWindow):
         self.main_layout.addLayout(self._chart_section_layout)
 
         self.plotter = Chart_Plotter(self.chart)
-        self.shaft_viewer = Chart_ShaftViewer(self.chart, self.toolbar)
+        self.shaft_viewer = Chart_ShaftViewer(self.chart)
 
-    def _set_toolbar_actions_and_buttons(self):
+    def _init_toolbar(self):
+        # Set toolbar
+        self.toolbar = QToolBar(self)
+        self.toolbar.setIconSize(QSize(24, 24))
+        self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.toolbar)
+        self.toolbar.toggleViewAction().setVisible(False)
+
         # Set sidebar toggle button
         toggle_sidebar_action = QAction(self)
         toggle_sidebar_action.setIcon(QIcon(resource_path('icons//menu.png')))
@@ -102,6 +100,26 @@ class ShaftDesigner(QMainWindow):
         self._plots_menu.stateChanged.connect(self.plotter.set_selected_plots)
         self._plots_menu.setIcon(resource_path('icons\plots.png'), 'Wyświetl wykresy')
         self.toolbar.addWidget(self._plots_menu)
+
+        # Set menu with dimensions to display
+        self._dimensions_menu = CheckboxDropdown()
+        self._plots_menu.stateChanged.connect(self._toggle_dimensions)
+        self._dimensions_menu.setIcon(resource_path('icons\dimensions.png'), 'Wyświetl wymiary')
+        self._dimensions_menu.addItem('dimensions', 'Wymiary wału', 'Wyświetl wymiary wału', self._toggle_dimensions)
+        self._dimensions_menu.addItem('coordinates', 'Współrzędne wału', 'Wyświetl współrzędne wału', self._toggle_coordinates)
+        self.toolbar.addWidget(self._dimensions_menu)
+
+    def _toggle_dimensions(self, is_checked):
+        if is_checked:
+            self.shaft_viewer.draw_shaft_dimensions()
+        else:
+            self.shaft_viewer.remove_shaft_dimensions()
+
+    def _toggle_coordinates(self, is_checked):
+        if is_checked:
+            self.shaft_viewer.draw_shaft_coordinates()
+        else:
+            self.shaft_viewer.remove_shaft_coordinates()
 
     def set_sidebar_sections(self, sections):
         # Set contents of the sidebar

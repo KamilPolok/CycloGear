@@ -1,14 +1,10 @@
 from matplotlib.patches import Rectangle
 
-from .Utils.CheckboxDropdown import CheckboxDropdown
 from .Chart import Chart
 
-from config import resource_path
-
 class Chart_ShaftViewer():
-    def __init__(self, chart: Chart, toolbar):
+    def __init__(self, chart: Chart):
         self._chart = chart
-        self._toolbar = toolbar
         
         self._shaft_dimensions = []           # Stores dimensions of every shaft step
 
@@ -20,20 +16,9 @@ class Chart_ShaftViewer():
         self._dimension_offset = 0
 
         self._get_chart_controls()
-        self._init_ui()
 
     def _get_chart_controls(self):
         self._ax, self._canvas = self._chart.get_controls()
-
-    def _init_ui(self):
-        self._set_dimension_checkbox()
-
-    def _set_dimension_checkbox(self):
-        self.dimensions_selector = CheckboxDropdown()
-        self.dimensions_selector.setIcon(resource_path('icons\dimensions.png'), 'Wyświetl wymiary')
-        self.dimensions_selector.addItem('dimensions', 'Wymiary stopni', '', self._draw_shaft_dimensions)
-        self.dimensions_selector.addItem('coordinates', 'Współrzędne wału', '',  self._draw_shaft_coordinates)
-        self._toolbar.addWidget(self.dimensions_selector)
 
     def _set_axes_limits(self):
         """
@@ -103,76 +88,9 @@ class Chart_ShaftViewer():
             
         self._canvas.draw()
 
-        self._draw_shaft_coordinates()
-
-    def _draw_shaft_coordinates(self):
-        # Remove old coordinates
-        for item in self._shaft_coordinates_plot:
-            item.remove()
-        self._shaft_coordinates_plot.clear()
-
-        if self.dimensions_selector.isChecked('coordinates'):
-            self._get_dimension_offset()
-
-            for i in range(len(self.points) - 1):
-                start, end = self.points[i], self.points[i + 1]
-                mid_point = (start + end) / 2
-                distance = "{:.1f}".format(end - start)
-                y_position = -self._dimension_offset
-
-                dimension = self._draw_dimension(distance, start, end, mid_point, y_position, y_position, y_position)
-
-                self._shaft_coordinates_plot.extend(dimension)
-        
-        self._canvas.draw()
-    
-    def _draw_shaft_dimensions(self):
-        # Remove old dimenions
-        for item in self._shaft_dimensions_plot:
-            item.remove()
-        self._shaft_dimensions_plot.clear()
-
-        # Draw new dimensions
-        if self.dimensions_selector.isChecked('dimensions'):
-            self._get_dimension_offset()
-
-            for step_dimensions in self._shaft_dimensions:
-                # Draw length dimension
-                start = step_dimensions['start']
-                length = step_dimensions['l']
-                diameter = step_dimensions['d']
-
-                start_z = start[0]
-                end_z = start[0] + length
-                y_position = self._dimension_offset
-                label_position = start_z + length * 0.5
-                text = "{:.1f}".format(length)
-
-                length_dimension = self._draw_dimension(text, start_z, end_z, label_position, y_position, y_position, y_position)
-                self._shaft_dimensions_plot.extend(length_dimension)
-
-                # Draw diameter dimension
-                start_y = start[1]
-                end_y = start[1] + diameter
-                z_position = start_z + length * 0.75
-                y_position = start_y + diameter * 0.5
-                text = "Ø {:.1f}".format(diameter)
-
-                diameter_dimension = self._draw_dimension(text, z_position, z_position, z_position, start_y, end_y, y_position)
-                self._shaft_dimensions_plot.extend(diameter_dimension)
-
-                # Draw eccentric
-                if 'e' in step_dimensions:
-                    eccentric = step_dimensions['e']
-                    start_y = eccentric
-                    end_y = 0
-                    z_position = start_z + length * 0.5
-                    y_position = eccentric * 0.5
-                    text = "{:.1f}".format(abs(eccentric))
-                    diameter_dimension = self._draw_dimension(text, z_position, z_position, z_position, start_y, end_y, y_position)
-                    self._shaft_dimensions_plot.extend(diameter_dimension)
-
-        self._canvas.draw()
+        # Redraw shaft coordinates
+        if self._shaft_coordinates_plot:
+            self.draw_shaft_coordinates()
 
     def _draw_dimension(self, text, start_z, end_z, label_z_position, start_y=0, end_y=0, label_y_position=0):
         lines = []
@@ -253,9 +171,12 @@ class Chart_ShaftViewer():
 
         self._canvas.draw()
 
-        # Draw shaft dimensions and coordinates
-        self._draw_shaft_dimensions()
-        self._draw_shaft_coordinates()
+        # Redraw shaft dimensions and coordinates
+        if self._shaft_dimensions_plot:
+            self.draw_shaft_dimensions()
+            
+        if self._shaft_coordinates_plot:
+            self.draw_shaft_coordinates()
 
     def init_shaft(self, coordinates):
         shaft_points = [(0,0)] + coordinates
@@ -264,3 +185,82 @@ class Chart_ShaftViewer():
 
         self._set_axes_limits()
         self._draw_shaft_markers()
+    
+    def draw_shaft_dimensions(self):
+        # Remove old dimensions
+        self.remove_shaft_dimensions()
+
+        # Draw new dimensions
+        self._get_dimension_offset()
+
+        for step_dimensions in self._shaft_dimensions:
+            # Draw length dimension
+            start = step_dimensions['start']
+            length = step_dimensions['l']
+            diameter = step_dimensions['d']
+
+            start_z = start[0]
+            end_z = start[0] + length
+            y_position = self._dimension_offset
+            label_position = start_z + length * 0.5
+            text = "{:.1f}".format(length)
+
+            length_dimension = self._draw_dimension(text, start_z, end_z, label_position, y_position, y_position, y_position)
+            self._shaft_dimensions_plot.extend(length_dimension)
+
+            # Draw diameter dimension
+            start_y = start[1]
+            end_y = start[1] + diameter
+            z_position = start_z + length * 0.75
+            y_position = start_y + diameter * 0.5
+            text = "Ø {:.1f}".format(diameter)
+
+            diameter_dimension = self._draw_dimension(text, z_position, z_position, z_position, start_y, end_y, y_position)
+            self._shaft_dimensions_plot.extend(diameter_dimension)
+
+            # Draw eccentric
+            if 'e' in step_dimensions:
+                eccentric = step_dimensions['e']
+                start_y = eccentric
+                end_y = 0
+                z_position = start_z + length * 0.5
+                y_position = eccentric * 0.5
+                text = "{:.1f}".format(abs(eccentric))
+                diameter_dimension = self._draw_dimension(text, z_position, z_position, z_position, start_y, end_y, y_position)
+                self._shaft_dimensions_plot.extend(diameter_dimension)
+
+        self._canvas.draw()
+
+    def draw_shaft_coordinates(self):
+        # Remove old coordinates
+        self.remove_shaft_coordinates()
+
+        # Draw new coordinates
+        self._get_dimension_offset()
+        for i in range(len(self.points) - 1):
+            start, end = self.points[i], self.points[i + 1]
+            mid_point = (start + end) / 2
+            distance = "{:.1f}".format(end - start)
+            y_position = -self._dimension_offset
+
+            dimension = self._draw_dimension(distance, start, end, mid_point, y_position, y_position, y_position)
+
+            self._shaft_coordinates_plot.extend(dimension)
+        
+        self._canvas.draw()
+
+    def remove_shaft_dimensions(self):
+        # Remove dimensions
+        for item in self._shaft_dimensions_plot:
+            item.remove()
+        self._shaft_dimensions_plot.clear()
+
+        self._canvas.draw()
+
+    def remove_shaft_coordinates(self):
+        # Remove coordinates
+        for item in self._shaft_coordinates_plot:
+            item.remove()
+        self._shaft_coordinates_plot.clear()
+
+        self._canvas.draw()
