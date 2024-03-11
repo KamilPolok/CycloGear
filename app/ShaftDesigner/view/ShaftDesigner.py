@@ -54,6 +54,8 @@ class ShaftDesigner(QMainWindow):
         self.scroll_area.setFixedWidth(220)  # Slightly larger to accommodate scrollbar
 
         self.main_layout.addWidget(self.scroll_area)
+        
+        self.scroll_area.setVisible(False)
 
     def _init_chart(self):
         # Chart section layout

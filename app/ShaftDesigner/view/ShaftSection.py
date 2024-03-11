@@ -89,6 +89,8 @@ class Section(QWidget, metaclass=ABCQWidgetMeta):
 
         self._main_layout.addWidget(self._content)
 
+        self._content.setVisible(False)
+
     def toggle_content(self, event):
         '''
         Toggle the visibility of the content section
@@ -130,7 +132,9 @@ class ShaftSection(Section):
         """)
         
         self._add_subsection_button.clicked.connect(self.add_subsection)
-        self._header_layout.addWidget(self._add_subsection_button)    
+        self._header_layout.addWidget(self._add_subsection_button)
+
+        self._add_subsection_button.setVisible(False)
 
     def add_subsection(self):
         subsection = ShaftSubsection(self._name, self.subsection_count, self)
