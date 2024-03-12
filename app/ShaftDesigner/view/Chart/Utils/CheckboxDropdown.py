@@ -14,7 +14,7 @@ class CheckboxDropdown(QToolButton):
     """
     A custom QToolButton that displays a dropdown menu with checkboxes.
     """
-    stateChanged = pyqtSignal(list)
+    stateChanged = pyqtSignal()
     def __init__(self):
         super().__init__()
         
@@ -112,5 +112,4 @@ class CheckboxDropdown(QToolButton):
         return res
 
     def _emitStateChangedSignal(self):
-        checked_items = self.getCheckedItems()
-        self.stateChanged.emit(checked_items)
+        self.stateChanged.emit()

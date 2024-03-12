@@ -100,9 +100,15 @@ class ShaftDesigner(QMainWindow):
 
         # Set menu with plots to view
         self._plots_menu = CheckboxDropdown()
-        self._plots_menu.stateChanged.connect(self.plotter.set_selected_plots)
-        self._plots_menu.setIcon(resource_path('icons\plots.png'), 'Wyświetl wykresy')
+        self._plots_menu.stateChanged.connect(self._update_plots)
+        self._plots_menu.setIcon(resource_path('icons\plots.png'), 'Wyświetl wykresy momentów')
         self.toolbar.addWidget(self._plots_menu)
+
+        # Set menu with plots to view
+        self._min_diameters_menu = CheckboxDropdown()
+        self._min_diameters_menu.stateChanged.connect(self._update_plots)
+        self._min_diameters_menu.setIcon(resource_path('icons\min_diameter.png'), 'Wyświetl wykresy średnic minimalnych')
+        self.toolbar.addWidget(self._min_diameters_menu)
 
         # Set menu with dimensions to display
         self._dimensions_menu = CheckboxDropdown()
@@ -142,6 +148,10 @@ class ShaftDesigner(QMainWindow):
             self.shaft_viewer.draw_bearings()            
         else:
             self.shaft_viewer.remove_bearings()
+
+    def _update_plots(self):
+        selected_plots = self._plots_menu.getCheckedItems() + self._min_diameters_menu.getCheckedItems()
+        self.plotter.set_selected_plots(selected_plots)
 
     def set_sidebar_sections(self, sections):
         # Set contents of the sidebar

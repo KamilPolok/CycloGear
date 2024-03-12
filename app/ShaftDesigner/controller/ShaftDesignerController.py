@@ -138,18 +138,25 @@ class ShaftDesignerController:
                 self._sections[section_name].set_add_subsection_button_enabled(True)
 
     def _set_functions_plots(self, shaft_functions):
-        for id, function in list(shaft_functions['f(z)'].items()): 
-            if id not in self._shaft_designer._plots_menu.getItems():
-                label = function[0]
-                description = function[1]
-                self._shaft_designer._plots_menu.addItem(id, label, description)
-            if function[3] is None:
-                del shaft_functions['f(z)'][id]
-                self._shaft_designer._plots_menu.enableItem(id, False)
+        def update_plot_menus(id, function_details, key, plot_menu):
+            if id not in plot_menu.getItems():
+                label, description = function_details[:2]
+                plot_menu.addItem(id, label, description)
+            if function_details[3] is None:
+                del shaft_functions[key][id]
+                plot_menu.enableItem(id, False)
             else:
-                self._shaft_designer._plots_menu.enableItem(id, True)
-        
-        self._shaft_designer.plotter.set_functions_plots(shaft_functions['z'], shaft_functions['f(z)'])
+                plot_menu.enableItem(id, True)
+
+        plots = {}
+        for plot_key in ['f(z)', 'dmin(z)']:
+            if plot_key in shaft_functions:
+                for plot_id, function_details in list(shaft_functions[plot_key].items()):
+                    plot_menu = self._shaft_designer._plots_menu if plot_key == 'f(z)' else self._shaft_designer._min_diameters_menu
+                    update_plot_menus(plot_id, function_details, plot_key, plot_menu)
+                    plots.update(shaft_functions[plot_key])
+    
+        self._shaft_designer.plotter.set_functions_plots(shaft_functions['z'], plots)
 
     def _on_finish_draft(self):
         self.shaft_calculator.save_data(self._data)
