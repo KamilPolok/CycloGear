@@ -5,6 +5,7 @@ class FunctionsCalculator():
     def __init__(self):
         self.d_min_by_permissible_deflection_angle = None
         self.d_min_by_permissible_deflection_arrow = None
+        self.deflection_arrow = None
 
         self._min_diameters = {}
         self._initial_min_diameters = {}
@@ -242,7 +243,7 @@ class FunctionsCalculator():
             integral = psi + C
             double_integral = np.array([phi_at_z + C * z * 0.001 + D for z, phi_at_z in zip(self._z_values, phi)])
             self.deflection_angle = integral / EI
-            self.deflection_arrow =  double_integral / EI * 1000
+            self.deflection_arrow = double_integral / EI * 1000 * 1000 # micrometers
             ## Calculate the minimum diameters with respect to the angle θ(z) (theta) and the deflection curve f(z)
             self.d_min_by_permissible_deflection_angle = (64 / (np.pi * E * teta_dop) * np.sqrt(integral**2))**(1 / 4) * 1000
             self.d_min_by_permissible_deflection_angle = np.ceil(self.d_min_by_permissible_deflection_angle * 100) / 100
@@ -260,6 +261,7 @@ class FunctionsCalculator():
         else:
             self.d_min_by_permissible_deflection_angle = None
             self.d_min_by_permissible_deflection_arrow = None
+            self.deflection_arrow = None
         
         self._min_diameters['dkdop'] = self.d_min_by_permissible_deflection_angle
         self._min_diameters['dfdop'] = self.d_min_by_permissible_deflection_arrow
@@ -271,6 +273,7 @@ class FunctionsCalculator():
                     'f(z)':{'Mg': ('Mg(z)', 'Moment gnący [Nm]', '#1ABC9C', self.bending_moment),
                             'Ms': ('Ms(z)', 'Moment skręcający [Nm]', '#196F3D', self.torque),
                             'Mz': ('Mz(z)', 'Moment zastępczy [Nm]', '#1F618D', self.equivalent_moment),
+                            'fdop': ('fdop(z)', 'Strzałka ugięcia [μm]', '#721f8d', self.deflection_arrow),
                             },
                     'dmin(z)':{'dMs': ('d(Ms)', 'Średnica minimalna ze względu na moment skręcający [mm]', '#196F3D', self.d_min_by_torsional_strength),
                                'dMz': ('d(Mz)', 'Średnica minimalna ze względu na moment zastępczy [mm]', '#1F618D', self.d_min_by_equivalent_stress),
