@@ -64,6 +64,10 @@ class ShaftDesigner(QMainWindow):
         # Create chart
         self.chart = Chart()
 
+        # Set the focus policy to accept focus and then set focus to the canvas
+        self.chart.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.chart.setFocus()
+
         # Create confirmation button:
         self.confirmation_button = QPushButton('Zatwierdź Projekt')
         self.confirmation_button.setEnabled(False)
