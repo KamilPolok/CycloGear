@@ -222,6 +222,7 @@ class InputShaftCalculator():
         # Specify the limits for the group of tables
         limits = db_handler.getTableItemsFilters(tables_group_name)
         limits['Dw']['min'] = self.data['Bearings'][bearing_section_id]['dip'][0]
+        limits['Dw']['max'] = self.data['Bearings'][bearing_section_id]['dip'][0] + 10
         limits['C']['min'] = self.data['Bearings'][bearing_section_id]['C'][0]
         # Setup the controller for the subwindow
         view_select_items_ctrl = ViewSelectItemController(db_handler, subwindow, available_tables, limits)
