@@ -48,14 +48,14 @@ database_tables = [
     {
         "name": "wał wejściowy-łożyska-centralne-walcowe",
         "csvName": "wal_wejsciowy-lozyska-centralne-walcowe.csv",
-        "headers": ["Kod", "Dw [mm]", "Dz [mm]", "B [mm]", "E [mm]","C [kN]", "C0 [kN]", "n max [obr/min]", "elementy toczne"],
-        "types": ['TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'REAL', 'REAL', 'REAL', 'INTEGER', 'TEXT']
+        "headers": ["Kod", "Dw [mm]", "Dz [mm]", "B [mm]", "C [kN]", "C0 [kN]", "n max [obr/min]", "elementy toczne"],
+        "types": ['TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'REAL', 'REAL', 'INTEGER', 'TEXT']
     },
     {
         "name": "wał wejściowy-łożyska-centralne-igiełkowe",
         "csvName": "wal_wejsciowy-lozyska-centralne-igielkowe.csv",
-        "headers": ["Kod", "Dw [mm]", "Dz [mm]", "B [mm]", "E [mm]","C [kN]", "C0 [kN]", "n max [obr/min]", "elementy toczne"],
-        "types": ['TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'REAL', 'REAL', 'REAL', 'INTEGER', 'TEXT']
+        "headers": ["Kod", "Dw [mm]", "Dz [mm]", "B [mm]", "C [kN]", "C0 [kN]", "n max [obr/min]", "elementy toczne"],
+        "types": ['TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'REAL', 'REAL', 'INTEGER', 'TEXT']
     },
     {
         "name": "wał wejściowy-materiały",

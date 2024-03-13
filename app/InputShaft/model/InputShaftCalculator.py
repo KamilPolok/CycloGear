@@ -128,7 +128,7 @@ class InputShaftCalculator():
         Calculate bearings attributes.
         """
         for bearing_section_id, attributes in self.data['Bearings'].items():
-            Dz = attributes['data']['E'][0] if bearing_section_id == 'eccentrics' else attributes['data']['Dz'][0]
+            Dz = attributes['data']['Dz'][0]
             Dw = attributes['data']['Dw'][0]
 
             dw = 0.25 * (Dz - Dw)
