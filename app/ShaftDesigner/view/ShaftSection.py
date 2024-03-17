@@ -147,16 +147,6 @@ class ShaftSection(Section):
         self.set_add_subsection_button_enabled(False)
         self.add_subsection_signal.emit()
 
-    def remove_subsections(self, subsections_number):
-        # Find and remove the specific subsection
-        for subsection_number in range(self.subsection_count, subsections_number, -1):
-            subsection_to_remove = next((s for s in self.subsections if s.subsection_number == subsection_number), None)
-            if subsection_to_remove:
-                self._content_layout.removeWidget(subsection_to_remove)
-                subsection_to_remove.deleteLater()
-                self.subsections.pop()
-                self.subsection_count -= 1
-
     def remove_subsection(self, subsection_number):
         # Find and remove the specific subsection
         subsection_to_remove = self.sender()
