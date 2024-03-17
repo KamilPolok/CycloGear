@@ -55,7 +55,8 @@ class PreliminaryDataTabCalculator:
             self._inputs[name][0].setPlaceholderText('')
             self._inputs[name][0].clear()
             self._inputs[name][0].setDisabled(True)
-        self._outputs['L2'][0].clear()
+        for position in self._inputs['Lc'].values():
+                position[0].clear()
 
     def _set_input_limits(self, input_name):
         """
@@ -76,7 +77,7 @@ class PreliminaryDataTabCalculator:
             max_value = self.validated_inputs_values['L']
         elif input_name == 'L1':
             min_value =  self.validated_inputs_values['LA'] + 0.5 * self._component_data['B'][0]
-            max_value = self.validated_inputs_values['LB'] - self._component_data['x'][0] - 1.5 * self._component_data['B'][0]
+            max_value = self.validated_inputs_values['LB'] - 0.5 * self._component_data['B'][0] - (self._component_data['x'][0] + self._component_data['B'][0]) * (self._component_data['n'][0] - 1)
         
         self.validated_inputs_limits[input_name] = (round(min_value, 2), round(max_value, 2))
         self._inputs[input_name][0].setPlaceholderText(f"{min_value:.2f}-{max_value:.2f}")
@@ -116,12 +117,13 @@ class PreliminaryDataTabCalculator:
         of the first eccentric. It calculates and updates the positions
         of the following eccentrics.
         """
-        value = self._inputs['L1'][0].value()
-        if value:
-            L1 = value
-            x = self._component_data['x'][0]
-            B = self._component_data['B'][0]
-            L2 = L1 + x + B
-            self._outputs['L2'][0].setValue(L2)
+        L1 = self._inputs['L1'][0].value()
+        if L1:
+            for idx, position in enumerate(self._inputs['Lc'].values()):
+                x = self._component_data['x'][0]
+                B = self._component_data['B'][0]
+                Lx =  L1 + (idx+1) * (x  + B)
+                position[0].setValue(Lx)
         else:
-            self._outputs['L2'][0].clear()
+            for position in self._inputs['Lc'].values():
+                position[0].clear()

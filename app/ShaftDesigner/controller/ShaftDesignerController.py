@@ -13,7 +13,7 @@ class ShaftDesignerController:
         self._mediator = mediator
 
         # Set shaft sections names
-        self.section_names = ['Wykorbienia', 'Przed Wykorbieniami', 'Pomiędzy Wykorbieniami', 'Za Wykorbieniami']
+        self.section_names = ['Wykorbienia', 'Przed Wykorbieniami', 'Za Wykorbieniami']
         self.is_whole_shaft_designed = False
 
         # Prepare dict storing sidebar sections
@@ -176,6 +176,20 @@ class ShaftDesignerController:
 
         # (Re)set number of eccentrics
         self.eccentrics_number = data['n'][0]
+        if self.eccentrics_number < 2 and 'Pomiędzy Wykorbieniami' in self._sections:
+            self._shaft_designer.remove_section_from_sidebar(self._sections['Pomiędzy Wykorbieniami'])
+            del self._sections['Pomiędzy Wykorbieniami']
+            if 'Pomiędzy Wykorbieniami' in self.shaft_calculator.shaft_sections:
+                del self.shaft_calculator.shaft_sections['Pomiędzy Wykorbieniami']
+        elif self.eccentrics_number >= 2 and 'Pomiędzy Wykorbieniami' not in self._sections:
+            section = ShaftSection('Pomiędzy Wykorbieniami')
+            section.setEnabled(False)
+            self._enable_sections()
+            self._sections['Pomiędzy Wykorbieniami'] = section
+            self._shaft_designer.append_section_to_sidebar(section)
+            section.subsection_data_signal.connect(self._handle_subsection_data)
+            section.remove_subsection_plot_signal.connect(self._remove_shaft_subsection)
+            section.add_subsection_signal.connect(self._set_limits)
         self._sections['Wykorbienia'].set_subsections_number(self.eccentrics_number)
 
         # (Re)set shaft initial attributes 

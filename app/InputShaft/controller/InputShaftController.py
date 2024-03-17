@@ -42,6 +42,7 @@ class InputShaftController:
     def _startup(self):
         """Initialize the input shaft widget with necessary data, set up tabs and initialize the shaft designer"""
         self._mediator = Mediator()
+        self._calculator.set_initial_data()
         self._init_tabs()
         self._init_shaft_designer()
 
@@ -137,7 +138,6 @@ class InputShaftController:
 
         :param data: Data used for calculating input shaft attributes.
         """
-        self._calculator.calculate_preliminary_attributes()
         self._shaft_designer_controller.update_shaft_data(self._calculator.get_data())
 
     def _on_update_bearings_data(self):
@@ -178,6 +178,7 @@ class InputShaftController:
         '''
         # Set the calculators data
         self._calculator.set_data(data[0])
+        self._calculator.set_initial_data()
 
         # Set the shaft designer data
         if data[1]:

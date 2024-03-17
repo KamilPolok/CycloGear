@@ -19,8 +19,8 @@ class ResultsTabController:
         """
         self._component_data = component_data
 
-        outputs_keys = [['nwe'], ['Mwe'], ['L'], ['LA'], ['LB'], ['L1'], ['L2'], ['e'],
-                        ['F1'], ['F2'], ['Ra'], ['Rb'],
+        outputs_keys = [['nwe'], ['Mwe'], ['L'], ['LA'], ['LB'], ['L1'], ['Lc'], ['e'],
+                        ['Fx'], ['Ra'], ['Rb'],
                         ['Bearings', 'support_A', 'N'],
                         ['Bearings', 'support_B', 'N'],
                         ['Bearings', 'eccentrics', 'N']

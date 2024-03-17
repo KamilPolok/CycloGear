@@ -181,6 +181,7 @@ class ShaftSection(Section):
         self.subsection_data_signal.emit(data)
 
 class EccentricsSection(Section):
+    remove_subsection_plot_signal = pyqtSignal(str, int)
     def _init_content(self):
         super()._init_content()
 
@@ -194,7 +195,8 @@ class EccentricsSection(Section):
         self.inputs[attribute] = input
 
     def set_subsections_number(self, sections_number):
-        if self.subsection_count != sections_number:
+        if self.subsection_count < sections_number:
+            # Add subsections
             for _ in range(self.subsection_count, sections_number):
                 subsection = ShaftSubsection(self._name, self.subsection_count, self)
                 subsection.set_attributes([('l', 'L')])
@@ -205,7 +207,28 @@ class EccentricsSection(Section):
                 self.subsections.append(subsection)
                 self._content_layout.addWidget(subsection)
                 self.subsection_count += 1
+        elif self.subsection_count > sections_number:
+            # Remove subsections
+            while self.subsection_count > sections_number:
+                last_subsection_number = self.subsection_count-1
+                self.remove_subsection(last_subsection_number)
+
+    def remove_subsection(self, subsection_number):
+        # Find and remove the specific subsection
+        subsection_to_remove = self.sender()
+        self._content_layout.removeWidget(subsection_to_remove)
+        subsection_to_remove.deleteLater()
+        self.subsections = [s for s in self.subsections if s != subsection_to_remove]
     
+        # Update the numbers and names of the remaining subsections
+        for i, subsection in enumerate(self.subsections):
+            subsection.update_subsection_name(i)
+
+        # Update the subsection count
+        self.subsection_count -= 1
+        
+        self.remove_subsection_plot_signal.emit(self._name, subsection_number)
+
     def set_limits(self, limits):
         for subsection_number, attributes in limits.items():
             self.subsections[subsection_number].set_limits(attributes)

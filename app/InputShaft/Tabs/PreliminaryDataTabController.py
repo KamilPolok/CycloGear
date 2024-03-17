@@ -39,7 +39,7 @@ class PreliminaryDataTabController():
             self._tab_data (dict): The entered user data.
         """
         def get_input(recipient, source, attribute):
-           recipient[attribute][0] = source[attribute][0].value()
+            recipient[attribute][0] = source[attribute][0].value()
         
         def get_item(recipient, source, attribute):
             recipient[attribute] = source[attribute].data()
@@ -58,8 +58,8 @@ class PreliminaryDataTabController():
         """
         self._component_data = component_data       
 
-        inputs_keys = [['L'], ['LA'], ['LB'], ['L1'], ['xz'], ['qdop'], ['tetadop'], ['fdop']]
-        outputs_keys = [['L2'], ['B'], ['x']]
+        inputs_keys = [['L'], ['LA'], ['LB'], ['L1'], ['Lc'], ['xz'], ['qdop'], ['tetadop'], ['fdop']]
+        outputs_keys = [['B'], ['x']]
         items = [['Materiał']]
 
         self._validated_inputs = ['L', 'LA', 'LB', 'L1']
@@ -71,18 +71,24 @@ class PreliminaryDataTabController():
         self._calculator.init_data(self._component_data, self._inputs, self._outputs, self._validated_inputs)
 
         self._tab.init_ui(self._items, self._inputs, self._outputs)
+        self._tab.update_eccentrics_component()
         self._connect_signals_and_slots()
 
     def update_state(self):
         """
         Update the tab with component data.
         """
+        if len(self._tab_data['Lc']) != self._component_data['n'][0]-1:
+            self._tab_data['Lc'] = extract_data(self._component_data, [['Lc']])['Lc']
+            self._inputs['Lc'] = extract_data(self._component_data, [['Lc']])['Lc']
+            self._tab.update_eccentrics_component()
+
         def update_output(recipient, source, attribute):
             new_value = source[attribute][0]
             if new_value is not None:
                 recipient[attribute][0].setValue(new_value)
 
-        update_data_subset(self._tab_data, self._inputs, update_output)
+        update_data_subset(self._tab_data, self._outputs, update_output)
 
         self._calculator.update_eccentrics_position()
         self._calculator.setup_inputs_validation()

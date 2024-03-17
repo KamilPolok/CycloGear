@@ -23,11 +23,12 @@ class ResultsTab(ITrackedTab):
         content_layout.addLayout(create_data_display_row(self, self._outputs['LA'], 'L<sub>A</sub>', 'Współrzędna podpory przesuwnej', decimal_precision=2))
         content_layout.addLayout(create_data_display_row(self, self._outputs['LB'], 'L<sub>B</sub>', 'Współrzędna podpory nieprzesuwnej', decimal_precision=2))
         content_layout.addLayout(create_data_display_row(self, self._outputs['L1'], 'L<sub>1</sub>', 'Współrzędna koła obiegoweego 1', decimal_precision=2))
-        content_layout.addLayout(create_data_display_row(self, self._outputs['L2'], 'L<sub>2</sub>', 'Współrzędna koła obiegoweego 2', decimal_precision=2))
+        for idx, input in enumerate(self._outputs['Lc'].values()):
+            content_layout.addLayout(create_data_display_row(self, input, f'L<sub>{idx+2}</sub>', f'Współrzędne koła obiegowego {idx+2}', decimal_precision=2))
         content_layout.addLayout(create_data_display_row(self, self._outputs['e'], 'e', 'Mimośród', decimal_precision=2))
         content_layout.addWidget(QLabel('Siły i reakcje:'))
-        content_layout.addLayout(create_data_display_row(self, self._outputs['F1'], 'F<sub>1</sub>', 'Siła wywierana przez koło obiegowe 1', decimal_precision=2))
-        content_layout.addLayout(create_data_display_row(self, self._outputs['F2'], 'F<sub>2</sub>', 'Siła wywierana przez koło obiegowe 2', decimal_precision=2))
+        for idx, input in enumerate(self._outputs['Fx'].values()):
+            content_layout.addLayout(create_data_display_row(self, input, f'F<sub>{idx+1}</sub>', f'Siła wywierana przez koło obiegowe {idx+1}', decimal_precision=2))
         content_layout.addLayout(create_data_display_row(self, self._outputs['Ra'], 'R<sub>a</sub>', 'Reakcja podpory przesuwnej A', decimal_precision=2))
         content_layout.addLayout(create_data_display_row(self, self._outputs['Rb'], 'R<sub>b</sub>', 'Reakcja podpory stałej B', decimal_precision=2))
         content_layout.addWidget(QLabel('Straty mocy w łożyskach:'))

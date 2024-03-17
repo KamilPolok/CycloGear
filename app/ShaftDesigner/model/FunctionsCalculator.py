@@ -149,18 +149,10 @@ class FunctionsCalculator():
         self._data = data
         # Extract necessary data
         L, L1 = self._data['L'][0], self._data['L1'][0]
-        x, B = self._data['x'][0], self._data['B'][0]
-        F = self._data['F'][0]
-
-        # Calculate coordinate of second cyclo disc
-        L2 = L1 + B + x
-        self._data['L2'][0] = L2
+        self._eccentrics_positions = [L1] + [value[0] for value in self._data['Lc'].values()]
 
         # Organize data
-        self.active_forces = {'F1': {'z': L1, 'val': F}, 'F2': {'z': L2, 'val': -F}}
-        self._data['F1'][0] = self.active_forces['F1']['val']
-        self._data['F2'][0] = self.active_forces['F2']['val']
-
+        self.active_forces = {force: {'z': position, 'val': value[0]} for position, (force, value) in zip(self._eccentrics_positions, self._data['Fx'].items())}
         # Calculate support reactions
         self._calculate_support_reactions()
 
@@ -289,27 +281,19 @@ class FunctionsCalculator():
     def get_shaft_initial_attributes(self):
         shaft_data = {
             'L': self._data['L'][0],
-            'L1': self._data['L1'][0],
-            'L2': self._data['L2'][0],
             'LA': self._data['LA'][0],
+            'Li': self._eccentrics_positions,
             'LB': self._data['LB'][0],
             'n': self._data['n'][0],
             'ds': self._data['dsc'][0],
             'de': self._data['dec'][0],
             'B': self._data['B'][0],
-            'B1': self._data['B'][0],
-            'B2': self._data['B'][0],
+            'Bx': [self._data['B'][0] for _ in range(self._data['n'][0])],
             'e': self._data['e'][0],
             'x': self._data['x'][0]}
         
         return shaft_data
 
     def get_shaft_coordinates(self):
-        shaft_coordinates = [
-            ('A', self._data['LA'][0]),
-            ('L1', self._data['L1'][0]),
-            ('L2', self._data['L2'][0]),
-            ('B', self._data['LB'][0]),
-            ('L', self._data['L'][0])]
-        
+        shaft_coordinates = [('A', self._data['LA'][0])] + [(f'L{idx+1}', position) for idx, position in enumerate(self._eccentrics_positions)] + [('B', self._data['LB'][0]),  ('L', self._data['L'][0])]
         return shaft_coordinates

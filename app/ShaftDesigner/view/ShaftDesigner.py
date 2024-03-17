@@ -166,6 +166,22 @@ class ShaftDesigner(QMainWindow):
         spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
         self.sidebar_layout.addSpacerItem(spacer)
 
+    def append_section_to_sidebar(self, section):
+        # Add section before spacer
+        self.sidebar_layout.insertWidget(self.sidebar_layout.count()-1, section)
+
+    def remove_section_from_sidebar(self, section):
+        for index in range( self.sidebar_layout.count()):
+            item =  self.sidebar_layout.itemAt(index)
+            if item.widget() == section:
+                # Remove the widget from the layout
+                self.sidebar_layout.takeAt(index)
+                # Hide the widget
+                section.hide()
+                # Optionally delete the widget
+                section.deleteLater()
+                break
+
     def set_draft_finished_title(self, is_finished):
         if is_finished:
             self.setWindowTitle(self._window_title + ' (Projekt Zatwierdzony)')

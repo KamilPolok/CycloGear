@@ -1,6 +1,6 @@
 import math
 import numpy as np
-from functools import partial
+import copy
 
 from DbHandler.controller.DBController import ViewSelectItemController
 from DbHandler.model.DatabaseHandler import DatabaseHandler
@@ -18,15 +18,16 @@ class InputShaftCalculator():
             'Mwe': [26.67, 'Nm'],           # Moment wejściowy - moment skręcający
             # Zadane wymiary wału
             'L': [None, 'mm'],              # Całkowita długość wału wejściowego
-            'LA': [None, 'mm'],             # Wsp. podpory przesuwnej - A
-            'LB': [None, 'mm'],             # Wsp. podpory nieprzesuwnej - B
-            'n': [2, ''],                   # Liczba kół obiegowych
-            'L1': [None, 'mm'],             # Wsp. koła obiegowego 1
-            'L2': [None, 'mm'],             # Wsp. koła obiegowego 2
             'e': [3, 'mm'],                 # Mimośród
             'B': [17, 'mm'],                # Długość koła obiegowego
             'x': [5, 'mm'],                 # Odległość pomiędzy dwoma kołami obiegowymi
             'rw1': [99, 'mm'],              # Promień koła toczengo (koło obiegowe)
+            # Współrzędne podpór i kół obiegowych
+            'LA': [None, 'mm'],             # Wsp. podpory przesuwnej - A
+            'LB': [None, 'mm'],             # Wsp. podpory nieprzesuwnej - B
+            'n': [2, ''],                   # Liczba kół obiegowych
+            'L1': [None, 'mm'],             # Wsp. pierwszego koła obiegowego
+            'Lc': {},                       # Wsp. kolejnych kół obiegowych - domyślnie brak
             # Dobrany materiał i parametry
             'Materiał' : None,              # Materiał wału
             'xz': [None, ''],               # Współczynnik bezpieczeństwa
@@ -41,8 +42,7 @@ class InputShaftCalculator():
             'Ra':[None, 'N'],               # Reakcja w podporze nieruchomej
             'Rb':[None, 'N'],               # Reakcja w podporze ruchomej
             'F': [None, 'N'],               # Siła pochodząca od koła obiegowego
-            'F1': [None, 'N'],              # Siła na kole obiegowym 1
-            'F2': [None, 'N'],              # Siła na kole obiegowym 2
+            'Fx': {},                        # Siła na kole obiegowym 1
             # Obliczone wymiary wału
             'dsc': [None, 'mm'],            # Średnica wału wejściowego - obliczona
             'dec': [None, 'mm'],            # Średnica mimośrodu - obliczona
@@ -116,13 +116,6 @@ class InputShaftCalculator():
         self.data['Bearings']['support_B']['l'] = self.data['LB']
         self.data['Bearings']['eccentrics']['l'] = self.data['L1']
 
-    def calculate_preliminary_attributes(self):
-        fwzx = self.data['Fwzx'][0]
-        fwzy = self.data['Fwzy'][0]
-        fwm = self.data['Fwm'][0]
-
-        self.data['F'][0] = (fwzx**2 + (fwm - fwzy)**2)**0.5
-        
     def calculate_bearings_attributes(self):
         """
         Calculate bearings attributes.
@@ -293,11 +286,30 @@ class InputShaftCalculator():
         """
         return self.data
     
+    def set_initial_data(self):
+        fwzx = self.data['Fwzx'][0]
+        fwzy = self.data['Fwzy'][0]
+        fwm = self.data['Fwm'][0]
+
+        self.data['F'][0] = (fwzx**2 + (fwm - fwzy)**2)**0.5
+
+        if len(self.data['Lc']) != self.data['n'][0]-1:
+            self.data['Lc'] = {}
+
+            for idx in range(self.data['n'][0]-1):
+                self.data['Lc'][f'L{idx+2}'] = copy.deepcopy(self.data['L1'])
+
+            self.data['Fx'] = {}
+
+        for idx in range(self.data['n'][0]):
+            self.data['Fx'][f'F{idx+1}'] = copy.deepcopy(self.data['F'])
+            self.data['Fx'][f'F{idx+1}'][0] = self.data['F'][0] * (-1)**idx
+
     def set_data(self, data):
         """
         Set component data.
         """
-        fetch_data_subset(self.data, data)
+        self.data.update(data)
         self._add_data_reference()
     
     def update_data(self, data):

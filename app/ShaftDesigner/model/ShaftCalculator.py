@@ -28,8 +28,8 @@ class ShaftCalculator:
         for subsection_number, subsection_data in self.shaft_sections[section].items():
             length = subsection_data['l']
             diameter = subsection_data['d']
-            position = self._shaft_attributes[f'L{subsection_number+1}']
-            self._shaft_attributes[F'B{subsection_number+1}'] = length
+            position = self._shaft_attributes['Li'][subsection_number]
+            self._shaft_attributes['Bx'][subsection_number] = length
             offset = self._shaft_attributes['e'] * (-1)**subsection_number
 
             start_z = position - length / 2
@@ -40,7 +40,7 @@ class ShaftCalculator:
     def _calculate_section_between_eccentricities(self):
         # Draw the shaft section between the eccentrics
         section = 'Pomiędzy Wykorbieniami'
-        start_z = self._shaft_attributes['L1'] + self.shaft_sections['Wykorbienia'][0]['l'] / 2
+        start_z = self._shaft_attributes['Li'][0] + self.shaft_sections['Wykorbienia'][0]['l'] / 2
 
         for subsection_number, subsection_data in self.shaft_sections[section].items():
             length = subsection_data['l']
@@ -55,7 +55,7 @@ class ShaftCalculator:
         # Draw the shaft section before the first eccentric
         section = 'Przed Wykorbieniami'
 
-        start_z = self._shaft_attributes['L1'] - self.shaft_sections['Wykorbienia'][0]['l'] / 2
+        start_z = self._shaft_attributes['Li'][0] - self.shaft_sections['Wykorbienia'][0]['l'] / 2
 
         for subsection_number, subsection_data in self.shaft_sections[section].items():
             length = subsection_data['l']
@@ -68,7 +68,7 @@ class ShaftCalculator:
     def _calculate_section_after_eccentricities(self):
         # Draw the shaft section after the second eccentric
         section = 'Za Wykorbieniami'
-        start_z = self._shaft_attributes['L2'] + self.shaft_sections['Wykorbienia'][1]['l'] / 2
+        start_z = self._shaft_attributes['Li'][-1] + self.shaft_sections['Wykorbienia'][list(self.shaft_sections['Wykorbienia'].keys())[-1]]['l'] / 2
 
         for subsection_number, subsection_data in self.shaft_sections[section].items():
             length = subsection_data['l']
@@ -150,19 +150,18 @@ class ShaftCalculator:
         x = self._shaft_attributes['x']
         LA = self._shaft_attributes['LA']
         LB = self._shaft_attributes['LB']
-        L1 = self._shaft_attributes['L1']
-        L2 = self._shaft_attributes['L2']
+        Li = self._shaft_attributes['Li']
         L = self._shaft_attributes['L']
-        B1 = self._shaft_attributes['B1']
-        B2 = self._shaft_attributes['B2']
-        
+        Bx = self._shaft_attributes['Bx']
         # Set initial limits for eccentrics
         self.limits = {
-            'Wykorbienia' : {0: {'d': {'min': de, 'max': 1000},
-                                  'l': {'min': B, 'max': 2 * min(L1 - LA, x - 0.5 * B2 + B)}},
-                             1: {'d': {'min': de, 'max': 1000},
-                                 'l': {'min': B, 'max': 2 * min(LB - L2, x - 0.5 * B1 + B)}}
-            }
+            'Wykorbienia': {
+                idx: {
+                    'd': {'min': de, 'max': 1000},
+                    'l': {'min': B, 'max': 2 * min(position - LA if idx == 0 else x + B - 0.5 * Bx[idx-1], # max distance to left
+                                                   LB - position if idx == len(Li)-1 else x + B - 0.5 * Bx[idx+1])} # max distance to right
+                } for idx, position in enumerate(Li)
+            } 
         }
 
         for section_name, section in current_subsections.items():
@@ -173,11 +172,11 @@ class ShaftCalculator:
                 if subsection_number == 0:
                     self.limits[section_name] = {}
                     if section_name == 'Przed Wykorbieniami':
-                        lmax = max(L1 - 0.5 * B1, 0)
+                        lmax = max(Li[0] - 0.5 * Bx[0], 0)
                     if section_name == 'Pomiędzy Wykorbieniami':
-                        lmax = L2 - L1 - 0.5 * (B1 + B2)
+                        lmax = Li[1] - Li[0] - 0.5 * (Bx[0] + Bx[1])
                     if section_name == 'Za Wykorbieniami':
-                        lmax = max(L - L2 - 0.5 * B2, 0)
+                        lmax = max(L - Li[-1] - 0.5 * Bx[-1], 0)
                 else:
                     previous_subsection = self.limits[section_name][subsection_number - 1]
                     lmax = max(previous_subsection['l']['max'] - self.shaft_sections[section_name][subsection_number - 1]['l'], 0)
@@ -199,7 +198,7 @@ class ShaftCalculator:
             length = B
             diameter = (Dz - Dw) / 2
             if bearing == 'eccentrics':
-                coordinates = [self._shaft_attributes['L1'], self._shaft_attributes['L2']]
+                coordinates = self._shaft_attributes['Li']
                 for idx, l in enumerate(coordinates):
                     offset = e * (-1)**idx
                     start_z = l - 0.5 * B
@@ -250,7 +249,7 @@ class ShaftCalculator:
     def save_data(self, data):
         LA = self._shaft_attributes['LA']
         LB = self._shaft_attributes['LB']
-        L1 = self._shaft_attributes['L1']
+        L1 = self._shaft_attributes['Li'][0]
        
         support_places = [ [LA, None], [LB, None], [L1, None],]
 
