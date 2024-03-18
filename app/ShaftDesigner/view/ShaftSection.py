@@ -215,7 +215,7 @@ class EccentricsSection(Section):
 
     def remove_subsection(self, subsection_number):
         # Find and remove the specific subsection
-        subsection_to_remove = self.sender()
+        subsection_to_remove = self.subsections[subsection_number]
         self._content_layout.removeWidget(subsection_to_remove)
         subsection_to_remove.deleteLater()
         self.subsections = [s for s in self.subsections if s != subsection_to_remove]

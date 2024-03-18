@@ -31,8 +31,9 @@ class ShaftDesignerController:
         self._shaft_designer.confirmation_button.clicked.connect(self._on_finish_draft)
         for section_name, section in self._sections.items():
             section.subsection_data_signal.connect(self._handle_subsection_data)
+            section.remove_subsection_plot_signal.connect(self._remove_shaft_subsection)
+
             if section_name != 'Wykorbienia':
-                section.remove_subsection_plot_signal.connect(self._remove_shaft_subsection)
                 section.add_subsection_signal.connect(self._set_limits)
 
     def _init_ui(self):
