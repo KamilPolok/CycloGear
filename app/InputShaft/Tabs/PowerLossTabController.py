@@ -108,7 +108,7 @@ class PowerLossTabController:
             if new_value is not None:
                 recipient[attribute][0].setValue(new_value)
 
-        update_data_subset(self._component_data, self._inputs, update_input)
+        update_data_subset(data, self._inputs, update_input)
 
         for name, item in self._items['Bearings'].items():
             item['rolling_elements'].setData(data['Bearings'][name]['rolling_elements'])
