@@ -236,8 +236,9 @@ class ShaftCalculator:
                 z = step_dimensions['start'][0]
                 l = step_dimensions['l']
                 d = step_dimensions['d']
+                e = step_dimensions['e'] if 'e' in step_dimensions else 0
 
-                shaft_steps.append({'z': z, 'l': l, 'd': d})
+                shaft_steps.append({'z': z, 'l': l, 'd': d, 'e': e})
         
         shaft_steps.sort(key=lambda x: x['z'])
         

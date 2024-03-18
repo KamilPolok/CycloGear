@@ -195,7 +195,7 @@ class FunctionsCalculator():
             EI = E * I
             # Calculate coefficients k=I/Ij for every shaft step
             for step in self._shaft_steps:
-                Ij = np.pi * (step['d'] * 0.001)**4 / 64
+                Ij = np.pi * (step['d'] * 0.001)**4 / 64 + (np.pi * step['d']**2 * step['e']**2) / 4
                 step['k'] = I /  Ij
             # Calculate equivalent forces acting on equivalent smooth shaft
             self._updated_forces = {}
