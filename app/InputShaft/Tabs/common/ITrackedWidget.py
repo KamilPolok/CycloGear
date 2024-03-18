@@ -74,12 +74,13 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
         self._connect_signals_and_slots()
 
         self._original_state = self._get_state()
+
     def _get_state(self):
         """
         Retrieve the current state of all inputs in the widget.
 
         Returns:
-            list or None: A list of input states if all inputs are filled, otherwise None.
+            list : A list of values that the tracked inputs, outputs and items ale holding.
         """
         inputs_states = [input.value() for input in self._inputs_to_provide]
         inputs_states += [output.value() for output in self._outputs_to_provide]
@@ -89,20 +90,12 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
 
     def _check_state(self):
         """
-        Check the current state of inputs and invoke the callback function with appropriate arguments.
+        Check the current state of subjects and invoke the callback function with appropriate arguments.
 
         This function is called whenever an input is changed. It checks the state of inputs in the
         widget, and calls the callback function.
         """
-        state_changed = False
-        current_state = self._get_state()
-
-        # Check if all inputs were provided
-        all_provided = all(current_state)
-
-        state_changed = current_state != self._original_state
-
-        self._original_state = current_state
+        all_provided, state_changed = self.check_status()
 
         self._on_state_checked(all_provided, state_changed)
 
@@ -123,9 +116,29 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
         Call appropriate methods time when the widget becomes visible.
         """
         self._check_state()
+
+    def check_status(self):
+        """
+        Check status of all tracked subjects.
+
+        Returns:
+            all_provided (bool): Are all inputs provided?
+            state_changed (bool): Were the inputs changed?
+        """
+        state_changed = False
+        current_state = self._get_state()
+
+        # Check if all inputs were provided
+        all_provided = all(current_state)
+
+        state_changed = current_state != self._original_state
+
+        self._original_state = current_state
+        return all_provided, state_changed
     
     def track_state(self, track):
         if track:
+            self._disconnect_signals_and_slots()
             self._connect_signals_and_slots()
             self._original_state = self._get_state()
         else:

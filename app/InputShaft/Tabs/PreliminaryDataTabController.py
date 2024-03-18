@@ -26,7 +26,11 @@ class PreliminaryDataTabController():
             self._inputs[name][0].inputConfirmedSignal.connect(self._calculator.validate_input)
 
     def _update_component_data(self):
-        self._mediator.update_component_data(self._id, self.get_data())
+        self._calculator.setup_inputs_validation()
+        all_filled, _ = self._tab.check_status()
+        if all_filled:
+            self._calculator.update_eccentrics_position()
+            self._mediator.update_component_data(self._id, self.get_data())
 
     def _on_select_materials(self):
         self._mediator.select_material()
