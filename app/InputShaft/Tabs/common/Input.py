@@ -26,7 +26,7 @@ class Input(QLineEdit):
 
         self._inactivity_monitor = InactivityMonitor()
         self._inactivity_monitor.inactivitySignal.connect(self._emit_input_confirmed_signal)
-        self.textEdited.connect(self._inactivity_monitor.reset_timer)
+        self.textChanged.connect(self._inactivity_monitor.reset_timer)
 
         self.setAlignment(Qt.AlignmentFlag.AlignRight)
        
