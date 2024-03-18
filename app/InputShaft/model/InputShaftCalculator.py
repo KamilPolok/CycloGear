@@ -14,7 +14,7 @@ class InputShaftCalculator():
         self.data = {
             # Napęd
             'nwe':[750, 'obr/min'],         # Prędkość obrotowa wejściowa
-            'w0':[78,54, 'rad/s'],          # Prędkość kątowa wejściowa
+            'w0':[78.54, 'rad/s'],          # Prędkość kątowa wejściowa
             'Mwe': [26.67, 'Nm'],           # Moment wejściowy - moment skręcający
             # Zadane wymiary wału
             'L': [None, 'mm'],              # Całkowita długość wału wejściowego

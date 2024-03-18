@@ -92,7 +92,7 @@ class PreliminaryDataTabController():
             if new_value is not None:
                 recipient[attribute][0].setValue(new_value)
 
-        update_data_subset(self._tab_data, self._outputs, update_output)
+        update_data_subset(self._component_data, self._outputs, update_output)
 
         self._calculator.update_eccentrics_position()
         self._calculator.setup_inputs_validation()
