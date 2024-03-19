@@ -68,7 +68,7 @@ class FunctionsCalculator():
                 if key.startswith('F') or key.startswith('Q'):
                     deflection_arrow += 1 / 6 * load['val'] * ((z - load['z']) * 0.001)**3
                 elif key.startswith('M'):
-                    deflection_arrow += load['val'] * ((z - load['z']) * 0.001)**2
+                    deflection_arrow += 1 / 2 * load['val'] * ((z - load['z']) * 0.001)**2
         return deflection_arrow
 
     def _calculate_integration_constants(self):
