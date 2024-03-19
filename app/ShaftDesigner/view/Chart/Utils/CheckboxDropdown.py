@@ -59,6 +59,7 @@ class CheckboxDropdown(QToolButton):
             self.actions[id].setEnabled(enable)
         if enable is False:
             self.actions[id].setChecked(enable)
+            self._emitStateChangedSignal()
 
     def checkItem(self, id, check):
         if id in self.actions:

@@ -133,6 +133,7 @@ class Chart_Plotter():
         """
         self._z = arguments
 
+        self._plots = {}
         for id, function in functions.items():
             self._plots[id] = function
 
