@@ -44,9 +44,9 @@ class PowerLossTab(ITrackedTab):
 
             # Set button for bearing selection
             button_layout = QHBoxLayout()
-            button_label = QLabel('Łożysko:')
+            button_label = QLabel('Element toczny o znormalizowanej średnicy:')
 
-            select_rolling_element_button = DataButton('Wybierz łożysko')
+            select_rolling_element_button = DataButton('Wybierz element toczny')
             self._items['Bearings'][section_name]['rolling_elements'] = select_rolling_element_button
 
             button_layout.addWidget(button_label)
