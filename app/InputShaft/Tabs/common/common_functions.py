@@ -36,7 +36,7 @@ def create_data_input_row(tab: ITrackedTab, data, symbol: str, description: str,
     # Input
     input = Input(tab)
     input.setDecimalPrecision(decimal_precision)
-    input.setFixedWidth(80)
+    input.setFixedWidth(100)
 
     value = data[0]
     if value is not None:
@@ -83,7 +83,7 @@ def create_data_display_row(tab: ITrackedTab, data, symbol: str, description: st
     # Output
     output = Output(tab)
     output.setDecimalPrecision(decimal_precision)
-    output.setFixedWidth(80)
+    output.setFixedWidth(100)
 
     value = data[0]
     if value is not None:
