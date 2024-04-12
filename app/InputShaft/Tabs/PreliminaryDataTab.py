@@ -14,6 +14,7 @@ class PreliminaryDataTab(ITrackedTab):
         component_layout.addWidget(QLabel('Kształtowanie wału czynnego:'))
         component_layout.addLayout(create_data_display_row(self, self._outputs['B'], 'B', 'Długość koła obiegowego', decimal_precision=2))
         component_layout.addLayout(create_data_display_row(self, self._outputs['x'], 'x', 'Odległość pomiędzy kołami obiegowymi', decimal_precision=2))
+        component_layout.addLayout(create_data_display_row(self, self._outputs['e'], 'e', 'Mimośród', decimal_precision=2))
         component_layout.addLayout(create_data_input_row(self, self._inputs['L'], 'L', 'Długość wału czynnego', decimal_precision=2))
         component_layout.addLayout(create_data_input_row(self, self._inputs['LA'], 'L<sub>A</sub>', 'Współrzędna podpory przesuwnej', decimal_precision=2))
         component_layout.addLayout(create_data_input_row(self, self._inputs['LB'], 'L<sub>B</sub>', 'Współrzędna podpory stałej', decimal_precision=2))

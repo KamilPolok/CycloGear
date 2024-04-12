@@ -63,7 +63,7 @@ class PreliminaryDataTabController():
         self._component_data = component_data       
 
         inputs_keys = [['L'], ['LA'], ['LB'], ['L1'], ['Lc'], ['xz'], ['qdop'], ['tetadop'], ['fdop']]
-        outputs_keys = [['B'], ['x']]
+        outputs_keys = [['B'], ['x'], ['e']]
         items = [['Materiał']]
 
         self._validated_inputs = ['L', 'LA', 'LB', 'L1']
