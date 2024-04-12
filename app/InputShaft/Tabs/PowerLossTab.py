@@ -1,3 +1,4 @@
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QComboBox, QVBoxLayout, QHBoxLayout, QLabel, QStackedWidget, QWidget
 
 from .common.DataButton import DataButton
@@ -7,10 +8,25 @@ from .common.common_functions import create_data_display_row, create_data_input_
 
 class PowerLossTab(ITrackedTab):
     def _init_selector(self):
+        selector_layout = QHBoxLayout()
+
+        layout_selector_label = QLabel('Miejsce osadzenia łożyska:')
+
         self.layout_selector = QComboBox()
+        self.layout_selector.setFixedWidth(150)
+        self.layout_selector.setEditable(True)
+        line_edit = self.layout_selector.lineEdit()
+        line_edit.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        line_edit.setReadOnly(True)
+        
         self.layout_selector.addItems(["Podpora przesuwna A", "Podpora stała B", "Wykorbienia"])
         self.layout_selector.currentIndexChanged.connect(self._change_section)
-        self.main_layout.addWidget(self.layout_selector)
+
+        selector_layout.addWidget(layout_selector_label, alignment=Qt.AlignmentFlag.AlignLeft)
+        selector_layout.addWidget(self.layout_selector, alignment=Qt.AlignmentFlag.AlignLeft)
+        selector_layout.addStretch(1)
+
+        self.main_layout.addLayout(selector_layout)
 
     def _init_sections(self):
         containers = self._init_bearings_sections()
