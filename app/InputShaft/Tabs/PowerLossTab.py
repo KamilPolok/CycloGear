@@ -8,7 +8,7 @@ from .common.common_functions import create_data_display_row, create_data_input_
 class PowerLossTab(ITrackedTab):
     def _init_selector(self):
         self.layout_selector = QComboBox()
-        self.layout_selector.addItems(["Podpora przesuwna A", "Podpora przesuwna B", "Wykorbienia"])
+        self.layout_selector.addItems(["Podpora przesuwna A", "Podpora stała B", "Wykorbienia"])
         self.layout_selector.currentIndexChanged.connect(self._change_section)
         self.main_layout.addWidget(self.layout_selector)
 
@@ -37,7 +37,7 @@ class PowerLossTab(ITrackedTab):
             section = Section(self, section_name, self._enable_select_rolling_element_button)
 
             # Set data display and input rows
-            section.addLayout(create_data_input_row(self, self._inputs['Bearings'][section_name]['f'], 'f', 'Współczynnik tarcia tocznego', decimal_precision=2))
+            section.addLayout(create_data_input_row(self, self._inputs['Bearings'][section_name]['f'], 'f', 'Współczynnik tarcia tocznego łożyska', decimal_precision=2))
             section.addLayout(create_data_display_row(self, self._outputs['Bearings'][section_name]['di'], 'd', 'Średnica wewnętrzna łożyska', decimal_precision=2))
             section.addLayout(create_data_display_row(self, self._outputs['Bearings'][section_name]['do'], 'D', 'Średnica zewnętrzna łożyska', decimal_precision=2))
             section.addLayout(create_data_display_row(self, self._outputs['Bearings'][section_name]['drc'], 'd<sub>w</sub>', 'Obliczona średnica elementów tocznych', decimal_precision=2))

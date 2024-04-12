@@ -265,7 +265,7 @@ class FunctionsCalculator():
                     'f(z)':{'Mg': ('Mg(z)', 'Moment gnący [Nm]', '#1ABC9C', self.bending_moment),
                             'Ms': ('Ms(z)', 'Moment skręcający [Nm]', '#196F3D', self.torque),
                             'Mz': ('Mz(z)', 'Moment zastępczy [Nm]', '#1F618D', self.equivalent_moment),
-                            'fdop': ('fdop(z)', 'Strzałka ugięcia [μm]', '#721f8d', self.deflection_arrow),
+                            'f': ('f(z)', 'Strzałka ugięcia [μm]', '#721f8d', self.deflection_arrow),
                             },
                     'dmin(z)':{'dMs': ('d(Ms)', 'Średnica minimalna ze względu na moment skręcający [mm]', '#196F3D', self.d_min_by_torsional_strength),
                                'dMz': ('d(Mz)', 'Średnica minimalna ze względu na moment zastępczy [mm]', '#1F618D', self.d_min_by_equivalent_stress),

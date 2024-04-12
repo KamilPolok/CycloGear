@@ -17,14 +17,14 @@ class InputShaftCalculator():
             'w0':[78.54, 'rad/s'],          # Prędkość kątowa wejściowa
             'Mwe': [26.67, 'Nm'],           # Moment wejściowy - moment skręcający
             # Zadane wymiary wału
-            'L': [None, 'mm'],              # Całkowita długość wału wejściowego
+            'L': [None, 'mm'],              # Całkowita długość wału czynnego
             'e': [3, 'mm'],                 # Mimośród
             'B': [17, 'mm'],                # Długość koła obiegowego
             'x': [5, 'mm'],                 # Odległość pomiędzy dwoma kołami obiegowymi
             'rw1': [99, 'mm'],              # Promień koła toczengo (koło obiegowe)
             # Współrzędne podpór i kół obiegowych
             'LA': [None, 'mm'],             # Wsp. podpory przesuwnej - A
-            'LB': [None, 'mm'],             # Wsp. podpory nieprzesuwnej - B
+            'LB': [None, 'mm'],             # Wsp. podpory stałej - B
             'n': [2, ''],                   # Liczba kół obiegowych
             'L1': [None, 'mm'],             # Wsp. pierwszego koła obiegowego
             'Lc': {},                       # Wsp. kolejnych kół obiegowych - domyślnie brak
@@ -179,7 +179,7 @@ class InputShaftCalculator():
         db_handler = DatabaseHandler()
         subwindow = Window()
         subwindow.setWindowTitle("Dobór materiału")
-        tables_group_name = 'wał wejściowy-materiały'
+        tables_group_name = 'wał czynny-materiały'
         available_tables = db_handler.getAvailableTables(tables_group_name)
         limits = db_handler.getTableItemsFilters(tables_group_name)
         view_select_items_ctrl = ViewSelectItemController(db_handler, subwindow, available_tables, limits)
@@ -201,9 +201,9 @@ class InputShaftCalculator():
         """
         # Specify the name of the tables to open
         if bearing_section_id == 'support_A' or  bearing_section_id == 'support_B':
-            tables_group_name = 'wał wejściowy-łożyska-podporowe'
+            tables_group_name = 'wał czynny-łożyska-podporowe'
         elif bearing_section_id == 'eccentrics':
-            tables_group_name = 'wał wejściowy-łożyska-centralne'
+            tables_group_name = 'wał czynny-łożyska-centralne'
 
         # Get acces to the database
         db_handler = DatabaseHandler()
@@ -241,7 +241,7 @@ class InputShaftCalculator():
         subwindow = Window()
         subwindow.setWindowTitle("Dobór elementu tocznego")
         # Get available tables
-        tables_group_name = f"wał wejściowy-elementy toczne-{self.data['Bearings'][bearing_section_id]['data']['elementy toczne'][0]}"
+        tables_group_name = f"wał czynny-elementy toczne-{self.data['Bearings'][bearing_section_id]['data']['elementy toczne'][0]}"
         available_tables = db_handler.getAvailableTables(tables_group_name)
         # Specify the limits for the group of tables
         limits = db_handler.getTableItemsFilters(tables_group_name)

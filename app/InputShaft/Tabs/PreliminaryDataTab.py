@@ -11,13 +11,13 @@ class PreliminaryDataTab(ITrackedTab):
         """
         component_layout = QVBoxLayout()
 
-        component_layout.addWidget(QLabel('Wymiary:'))
-        component_layout.addLayout(create_data_display_row(self, self._outputs['x'], 'x', 'Odległość pomiędzy tarczami', decimal_precision=2))
-        component_layout.addLayout(create_data_display_row(self, self._outputs['B'], 'B', 'Grubość tarczy', decimal_precision=2))
-        component_layout.addLayout(create_data_input_row(self, self._inputs['L'], 'L', 'Długość wału wejściowego', decimal_precision=2))
-        component_layout.addLayout(create_data_input_row(self, self._inputs['LA'], 'L<sub>A</sub>', 'Współrzędne podpory przesuwnej', decimal_precision=2))
-        component_layout.addLayout(create_data_input_row(self, self._inputs['LB'], 'L<sub>B</sub>', 'Współrzędne podpory nieprzesuwnej', decimal_precision=2))
-        component_layout.addLayout(create_data_input_row(self, self._inputs['L1'], 'L<sub>1</sub>', 'Współrzędne koła obiegowego 1', decimal_precision=2))
+        component_layout.addWidget(QLabel('Kształtowanie wału czynnego:'))
+        component_layout.addLayout(create_data_display_row(self, self._outputs['B'], 'B', 'Długość koła obiegowego', decimal_precision=2))
+        component_layout.addLayout(create_data_display_row(self, self._outputs['x'], 'x', 'Odległość pomiędzy kołami obiegowymi', decimal_precision=2))
+        component_layout.addLayout(create_data_input_row(self, self._inputs['L'], 'L', 'Długość wału czynnego', decimal_precision=2))
+        component_layout.addLayout(create_data_input_row(self, self._inputs['LA'], 'L<sub>A</sub>', 'Współrzędna podpory przesuwnej', decimal_precision=2))
+        component_layout.addLayout(create_data_input_row(self, self._inputs['LB'], 'L<sub>B</sub>', 'Współrzędna podpory stałej', decimal_precision=2))
+        component_layout.addLayout(create_data_input_row(self, self._inputs['L1'], 'L<sub>1</sub>', 'Współrzędna koła obiegowego nr 1', decimal_precision=2))
         
         self.main_layout.addLayout(component_layout)
 
@@ -45,7 +45,7 @@ class PreliminaryDataTab(ITrackedTab):
 
         clear_layout(self.eccentrics_layout)
         for idx, input in enumerate(self._inputs['Lc'].values()):
-            self.eccentrics_layout.addLayout(create_data_display_row(self, input, f'L<sub>{idx+2}</sub>', f'Współrzędne koła obiegowego {idx+2}', decimal_precision=2))
+            self.eccentrics_layout.addLayout(create_data_display_row(self, input, f'L<sub>{idx+2}</sub>', f'Współrzędne koła obiegowego nr {idx+2}', decimal_precision=2))
 
     def _view_material_stength_component(self):
         """
@@ -53,11 +53,11 @@ class PreliminaryDataTab(ITrackedTab):
         """
         component_layout = QVBoxLayout()
 
-        component_layout.addWidget(QLabel('Pozostałe:'))
+        component_layout.addWidget(QLabel('Wytrzymałość wału czynnego:'))
         component_layout.addLayout(create_data_input_row(self, self._inputs['xz'], 'x<sub>z</sub>', 'Współczynnik bezpieczeństwa', decimal_precision=1))
         component_layout.addLayout(create_data_input_row(self, self._inputs['qdop'], 'φ\'<sub>dop</sub>', 'Dopuszczalny jednostkowy kąt skręcenia wału', decimal_precision=5))
-        component_layout.addLayout(create_data_input_row(self, self._inputs['tetadop'], 'θ<sub>dop</sub>', 'Dopuszczalny kąt ugięcia', decimal_precision=5))
-        component_layout.addLayout(create_data_input_row(self, self._inputs['fdop'], 'f<sub>dop</sub>', 'Dopuszczalna strzałka ugięcia', decimal_precision=5))
+        component_layout.addLayout(create_data_input_row(self, self._inputs['tetadop'], 'θ<sub>dop</sub>', 'Dopuszczalny kąt ugięcia wału', decimal_precision=5))
+        component_layout.addLayout(create_data_input_row(self, self._inputs['fdop'], 'f<sub>dop</sub>', 'Dopuszczalna strzałka ugięcia wału', decimal_precision=5))
         self.main_layout.addLayout(component_layout)
 
     def _view_material_component(self):
@@ -65,7 +65,7 @@ class PreliminaryDataTab(ITrackedTab):
         Create and layout a material selection component.
         """
         component_layout = QHBoxLayout()
-        component_label = QLabel('Materiał:')
+        component_label = QLabel('Materiał wału czynnego:')
 
         self.select_material_button = DataButton('Wybierz Materiał')
         self._items['Materiał'] = self.select_material_button

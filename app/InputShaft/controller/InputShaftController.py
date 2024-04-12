@@ -67,7 +67,7 @@ class InputShaftController:
 
         self.tabs = [tab1, tab2, tab3, tab4]
         self.tab_controllers = [tab1_controller, tab2_controller, tab3_controller, tab4_controller]
-        tab_titles = ['Założenia wstępne', 'Dobór łożysk', 'Straty Mocy', 'Wyniki obliczeń']
+        tab_titles = ['Wał Czynny', 'Łożyska', 'Straty Mocy', 'Rezultaty']
 
         for tab in self.tab_controllers:
             data = self._calculator.get_data()
@@ -77,7 +77,7 @@ class InputShaftController:
 
     def _init_shaft_designer(self):
         # Set an instance of shaft designer
-        window_title = 'wał wejściowy'
+        window_title = 'Wał Czynny'
         self._shaft_designer = ShaftDesigner(window_title)
 
         # Set an instance of shaft designer controller

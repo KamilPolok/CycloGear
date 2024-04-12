@@ -34,50 +34,50 @@ from config import DATA_PATH, resource_path
 
 database_tables = [
     {   
-        "name": "wał wejściowy-łożyska-podporowe-kulkowe",
-        "csvName": "wal_wejsciowy-lozyska-podporowe-kulkowe.csv",
+        "name": "wał czynny-łożyska-podporowe-kulkowe",
+        "csvName": "wal_czynny-lozyska-podporowe-kulkowe.csv",
         "headers": ["Kod", "Dw [mm]", "Dz [mm]", "B [mm]", "C [kN]", "C0 [kN]", "n max [obr/min]", "elementy toczne"],
         "types": ['TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'REAL', 'REAL', 'INTEGER', 'TEXT']
     },
     {
-        "name": "wał wejściowy-łożyska-podporowe-walcowe",
-        "csvName": "wal_wejsciowy-lozyska-podporowe-walcowe.csv",
+        "name": "wał czynny-łożyska-podporowe-walcowe",
+        "csvName": "wal_czynny-lozyska-podporowe-walcowe.csv",
         "headers": ["Kod", "Dw [mm]", "Dz [mm]", "B [mm]", "C [kN]", "C0 [kN]", "n max [obr/min]", "elementy toczne"],
         "types": ['TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'REAL', 'REAL', 'INTEGER', 'TEXT']
     },
     {
-        "name": "wał wejściowy-łożyska-centralne-walcowe",
-        "csvName": "wal_wejsciowy-lozyska-centralne-walcowe.csv",
+        "name": "wał czynny-łożyska-centralne-walcowe",
+        "csvName": "wal_czynny-lozyska-centralne-walcowe.csv",
         "headers": ["Kod", "Dw [mm]", "Dz [mm]", "B [mm]", "C [kN]", "C0 [kN]", "n max [obr/min]", "elementy toczne"],
         "types": ['TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'REAL', 'REAL', 'INTEGER', 'TEXT']
     },
     {
-        "name": "wał wejściowy-łożyska-centralne-igiełkowe",
-        "csvName": "wal_wejsciowy-lozyska-centralne-igielkowe.csv",
+        "name": "wał czynny-łożyska-centralne-igiełkowe",
+        "csvName": "wal_czynny-lozyska-centralne-igielkowe.csv",
         "headers": ["Kod", "Dw [mm]", "Dz [mm]", "B [mm]", "C [kN]", "C0 [kN]", "n max [obr/min]", "elementy toczne"],
         "types": ['TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'REAL', 'REAL', 'INTEGER', 'TEXT']
     },
     {
-        "name": "wał wejściowy-materiały",
-        "csvName": "wal_wejsciowy-materialy.csv",
+        "name": "wał czynny-materiały",
+        "csvName": "wal_czynny-materialy.csv",
         "headers": [ "Oznaczenie", "Obróbka", "Rm [MPa]", "Re [MPa]", "Zgj [MPa]", "Zgo [MPa]", "Zsj [MPa]", "Zso [MPa]", "E [MPa]", "G [MPa]", "g [kg/m3]" ],
         "types": [ 'TEXT', 'TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER' ]
     },
     {
-        "name": "wał wejściowy-elementy toczne-kulki",
-        "csvName": "wal_wejsciowy-elementy_toczne-kulki.csv",
+        "name": "wał czynny-elementy toczne-kulki",
+        "csvName": "wal_czynny-elementy_toczne-kulki.csv",
         "headers": [ "Kod", "D" ],
         "types": [ 'STRING', 'INTEGER']
     },
     {
-        "name": "wał wejściowy-elementy toczne-wałeczki",
-        "csvName": "wal_wejsciowy-elementy_toczne-waleczki.csv",
+        "name": "wał czynny-elementy toczne-wałeczki",
+        "csvName": "wal_czynny-elementy_toczne-waleczki.csv",
         "headers": [ "Kod", "D" ],
         "types": [ 'STRING', 'INTEGER']
     },
     {
-        "name": "wał wejściowy-elementy toczne-igiełki",
-        "csvName": "wal_wejsciowy-elementy_toczne-igielki.csv",
+        "name": "wał czynny-elementy toczne-igiełki",
+        "csvName": "wal_czynny-elementy_toczne-igielki.csv",
         "headers": [ "Kod", "D" ],
         "types": [ 'STRING', 'INTEGER']
     }
