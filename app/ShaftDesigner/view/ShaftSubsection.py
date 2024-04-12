@@ -31,9 +31,9 @@ class ShaftSubsection(QWidget):
     subsection_data_signal = pyqtSignal(dict)
     remove_subsection_signal = pyqtSignal(int)
 
-    def __init__(self, section_name, subsection_number, parent=None):
+    def __init__(self, subsection_name, subsection_number, parent=None):
         super().__init__(parent)
-        self.section_name = section_name
+        self.subsection_name = subsection_name
         self.subsection_number = subsection_number
         self.expanded = False
         self.inputs = {}
@@ -125,7 +125,7 @@ class ShaftSubsection(QWidget):
 
     
     def _set_name(self):
-        self._toggle_section_button.setText(f'Stopień {self.subsection_number + 1}')
+        self._toggle_section_button.setText(f'{self.subsection_name} {self.subsection_number + 1}')
     
     def _check_if_all_inputs_provided(self):
         self._confirm_button.setEnabled(all(input.text() != '' for input in self.inputs.values()) and all(literal_eval(input.text()) != 0 for input in self.inputs.values()))

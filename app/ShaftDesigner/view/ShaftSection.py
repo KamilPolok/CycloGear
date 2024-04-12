@@ -104,6 +104,10 @@ class Section(QWidget, metaclass=ABCQWidgetMeta):
 class ShaftSection(Section):
     add_subsection_signal = pyqtSignal()
     remove_subsection_plot_signal = pyqtSignal(str, int)
+
+    def __init__(self, name, parent=None):
+        super().__init__(name, parent)
+        self._subsection_name = 'Stopień'
     
     def _init_header(self):
         super()._init_header()
@@ -137,7 +141,7 @@ class ShaftSection(Section):
         self._add_subsection_button.setVisible(False)
 
     def add_subsection(self):
-        subsection = ShaftSubsection(self._name, self.subsection_count, self)
+        subsection = ShaftSubsection(self._subsection_name, self.subsection_count, self)
         subsection.set_attributes([('d', 'Ø'), ('l', 'L')])
         subsection.subsection_data_signal.connect(self.handle_subsection_data)
         subsection.remove_subsection_signal.connect(self.remove_subsection)
@@ -182,6 +186,11 @@ class ShaftSection(Section):
 
 class EccentricsSection(Section):
     remove_subsection_plot_signal = pyqtSignal(str, int)
+
+    def __init__(self, name, parent=None):
+        super().__init__(name, parent)
+        self.subsection_name = 'Wykorbienie'
+
     def _init_content(self):
         super()._init_content()
 
@@ -198,7 +207,7 @@ class EccentricsSection(Section):
         if self.subsection_count < sections_number:
             # Add subsections
             for _ in range(self.subsection_count, sections_number):
-                subsection = ShaftSubsection(self._name, self.subsection_count, self)
+                subsection = ShaftSubsection(self.subsection_name, self.subsection_count, self)
                 subsection.set_attributes([('l', 'L')])
                 for attribute, input in self.inputs.items():
                     subsection.add_input(attribute, input)
