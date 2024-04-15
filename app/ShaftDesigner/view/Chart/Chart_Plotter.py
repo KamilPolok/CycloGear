@@ -40,7 +40,7 @@ class Chart_Plotter():
         for plot_name in self._selected_plots:
             if plot_name not in self._active_plots:
                 y = self._plots[plot_name][len(self._plots[plot_name]) - 1]
-                color = self._plots[plot_name][3]
+                color = self._plots[plot_name][4]
                 if  plot_name.lower().startswith('d'):
                     d_half_above_axis = y / 2
                     d_half_below_axis = [-d for d in d_half_above_axis]
@@ -90,7 +90,8 @@ class Chart_Plotter():
         for key, lines in self._active_plots.items():
             if sel.artist in lines:
                 plot_label = rf'$\mathbf{{{self._plots[key][1]}}}$'
-                plot_color = self._plots[key][3]
+                plot_unit = self._plots[key][3]
+                plot_color = self._plots[key][4]
                 if key.startswith('d'):
                     is_diameter_plot = True
                 break
@@ -98,10 +99,10 @@ class Chart_Plotter():
         # Set the annotation text based on the plot type
         if is_diameter_plot:
             # For diameter plots, use absolute value for y-coordinate
-            text = f'z: {sel.target[0]:.2f}, {plot_label}/2: {abs(sel.target[1]):.2f}'
+            text = f'z: {sel.target[0]:.2f} mm, {plot_label}/2: {abs(sel.target[1]):.2f} {plot_unit}'
         else:
             # For other types of plots, use the original y-coordinate
-            text = f'z: {sel.target[0]:.2f}, {plot_label}: {sel.target[1]:.2f}'
+            text = f'z: {sel.target[0]:.2f} mm, {plot_label}: {sel.target[1]:.2f} {plot_unit}'
 
         # Set annotation properties
         sel.annotation.set(
