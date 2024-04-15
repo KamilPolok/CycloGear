@@ -1,14 +1,51 @@
-from PyQt6.QtWidgets import QToolButton, QMenu
-from PyQt6.QtGui import QIcon, QAction
+from PyQt6.QtWidgets import QToolButton, QMenu, QWidgetAction, QCheckBox, QWidget, QHBoxLayout, QLabel 
+from PyQt6.QtGui import QIcon, QMouseEvent
 from PyQt6.QtCore import pyqtSignal
 
-class StayOpenMenu(QMenu):
-    def mouseReleaseEvent(self, event):
-        action = self.activeAction()
-        if action and action.isCheckable():
-            action.trigger()
-            return
-        super().mouseReleaseEvent(event)
+class ClickableLabel(QLabel):
+    """
+    A QLabel subclass that emits a clicked signal when it is clicked.
+    """
+    clicked = pyqtSignal()
+
+    def mousePressEvent(self, event):
+        self.clicked.emit()
+        event.ignore()
+
+class RichTextCheckbox(QWidget):
+    '''
+    Custom checkbox implementing default checkbox and
+    a clickable label, that allows rich text formatting.
+    It purpose is to display subscripts properly.
+    '''
+    stateChanged = pyqtSignal(int)
+
+    def __init__(self, text, parent=None):
+        super().__init__(parent)
+        self.layout = QHBoxLayout(self)
+        self.checkBox = QCheckBox()
+        self.label = QLabel(text)
+
+        self.layout.addWidget(self.checkBox)
+        self.layout.addWidget(self.label)
+        self.layout.addStretch()
+        self.layout.setContentsMargins(2, 1, 1, 1)
+
+        self.checkBox.stateChanged.connect(self.stateChanged.emit)
+
+    def isChecked(self):
+        return self.checkBox.isChecked()
+
+    def setChecked(self, checked):
+        self.checkBox.setChecked(checked)
+
+    def setEnabled(self, enable):
+        self.checkBox.setEnabled(enable)
+        self.label.setEnabled(enable)
+
+    def mousePressEvent(self, event):
+        self.checkBox.setChecked(not self.checkBox.isChecked())
+        super().mousePressEvent(event)
 
 class CheckboxDropdown(QToolButton):
     """
@@ -18,7 +55,7 @@ class CheckboxDropdown(QToolButton):
     def __init__(self):
         super().__init__()
         
-        self.actions = {}
+        self._checkboxes = {}
 
         self.setStyleSheet("""
             * { padding-right: 3px }
@@ -27,7 +64,7 @@ class CheckboxDropdown(QToolButton):
 
         self.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
 
-        self._menu = StayOpenMenu(self)
+        self._menu = QMenu(self)
         self._menu.setToolTipsVisible(True)
         self.setMenu(self._menu)
 
@@ -35,16 +72,22 @@ class CheckboxDropdown(QToolButton):
         """
         Add a checkable action to the dropdown menu.
         """
-        if id not in self.actions:
-            action = QAction(label, self)
-            action.setCheckable(True)
-            action.setToolTip(description)
+        if id not in self._checkboxes:
+            checkbox = RichTextCheckbox(label)
+            checkbox.setToolTip(description)
+
             if callback is None:
-                action.triggered.connect(self._emitStateChangedSignal)
+                checkbox.stateChanged.connect(self._emitStateChangedSignal)
             else:
-                action.triggered.connect(callback)
-            self._menu.addAction(action)
-            self.actions[id] = action
+                checkbox.stateChanged.connect(callback)
+
+            # Create a QWidgetAction and set the checkbox as its widget
+            widget_action = QWidgetAction(self)
+            widget_action.setDefaultWidget(checkbox)
+
+            # Add the QWidgetAction to the menu
+            self._menu.addAction(widget_action)
+            self._checkboxes[id] = checkbox
     
     def enableItem(self, id, enable=True):
         '''
@@ -55,16 +98,16 @@ class CheckboxDropdown(QToolButton):
             id (str): id of checkbox.
             enabled (bool): if enable checkbox.
         '''
-        if id in self.actions:
-            self.actions[id].setEnabled(enable)
+        if id in self._checkboxes:
+            self._checkboxes[id].setEnabled(enable)
         if enable is False:
-            self.actions[id].setChecked(enable)
+            self._checkboxes[id].setChecked(enable)
             self._emitStateChangedSignal()
 
     def checkItem(self, id, check):
-        if id in self.actions:
+        if id in self._checkboxes:
             if check != self.isChecked(id):
-                self.actions[id].trigger()
+                self._checkboxes[id].setChecked(check)
 
     def isChecked(self, id):
         '''
@@ -76,8 +119,8 @@ class CheckboxDropdown(QToolButton):
         Returns:
             res (bool): If checkobox of given id is checked.
         '''
-        if id in self.actions:
-            return self.actions[id].isChecked()
+        if id in self._checkboxes:
+            return self._checkboxes[id].isChecked()
         return False
     
     def setIcon(self, icon, tootltip):
@@ -95,7 +138,7 @@ class CheckboxDropdown(QToolButton):
             res (list): List of tuples (id, text) for of every checked checkbox.
         """
         res = []
-        for id in self.actions.keys():
+        for id in self._checkboxes.keys():
                 res.append(id)
         return res
 
@@ -107,7 +150,7 @@ class CheckboxDropdown(QToolButton):
             res (list): List of tuples (id, text) for of every checked checkbox.
         """
         res = []
-        for id, action in self.actions.items():
+        for id, action in self._checkboxes.items():
             if action.isChecked():
                 res.append(id)
         return res
