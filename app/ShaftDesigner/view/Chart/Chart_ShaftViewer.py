@@ -329,11 +329,12 @@ class Chart_ShaftViewer():
 
         # Draw new coordinates
         self._get_dimension_offset()
+        coordinates_dimension_offset = 5
         for i in range(len(self.points) - 1):
-            start, end = self.points[i], self.points[i + 1]
+            start, end = 0, self.points[i + 1]
             mid_point = (start + end) / 2
             text = "{:.1f}".format(end - start)
-            y_position = -self._dimension_offset
+            y_position = -self._dimension_offset - coordinates_dimension_offset * i
             item_y_position = y_position + self._dimension_offset*0.1
 
             dimension = self._draw_horizontal_dimension(text, start, end, mid_point, y_position, item_y_position)
