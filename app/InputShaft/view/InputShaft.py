@@ -26,7 +26,22 @@ class InputShaft(QWidget):
         self.main_layout.addLayout(self.tabs_section_layout)
         self.main_layout.addLayout(self.buttons_section_layout)
 
-        # Init buttons
+        self._init_tab_widget()
+        self._init_function_buttons()
+
+    def _init_tab_widget(self):
+        '''
+        Init widget holding and managing tabs.
+        '''
+        self._tab_widget = QTabWidget(self)
+        self._tab_widget.currentChanged.connect(self._on_tab_change)
+
+        self.tabs_section_layout.addWidget(self._tab_widget)
+
+    def _init_function_buttons(self):
+        '''
+        Init next tab button and preview button.
+        '''
         # Add button for opening next tab 
         self._next_tab_button = QPushButton('Dalej', self)
         self._next_tab_button.clicked.connect(self.next_tab)
@@ -36,14 +51,18 @@ class InputShaft(QWidget):
 
         self.buttons_section_layout.addWidget(self._next_tab_button)
         self.buttons_section_layout.addWidget(self.preview_button)
-    
+
+    def _on_tab_change(self, tab_index):
+        """
+        Perform actions after a change of tabs.
+        """
+        if tab_index == self._tab_widget.count() - 1:
+            self._next_tab_button.setDisabled(True)
+
     def init_tabs(self, tabs, tabs_titles):
         """
         Initialize tabs in the main window.
         """
-        # Append tabs to tab widget
-        self._tab_widget = QTabWidget(self)
-
         for tab, title in zip(tabs, tabs_titles):
             self._tab_widget.addTab(tab, title)
             tab.set_callback(self.update_access_to_next_tabs)
@@ -51,8 +70,6 @@ class InputShaft(QWidget):
         # Disable all tabs except the first one
         for i in range(1, self._tab_widget.count()):
             self._tab_widget.setTabEnabled(i, False)
-
-        self.tabs_section_layout.addWidget(self._tab_widget)
 
     def next_tab(self):
         """
