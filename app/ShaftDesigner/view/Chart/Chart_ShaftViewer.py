@@ -78,8 +78,12 @@ class Chart_ShaftViewer():
         self._shaft_markers.append(markers)
         
         # Draw labels for the markers
-        for marker, label in zip(self.points, self.labels):
-            annotation_label = self._ax.annotate(label, (marker, 0), 
+        for marker_coordinate, label in zip(self.points, self.labels):
+            if len(label) > 1:
+                label = label[0] + '_{' + ''.join(label[1:]) + '}'
+            label = r'$\mathbf{' + label + '}$'
+    
+            annotation_label = self._ax.annotate(label, (marker_coordinate, 0), 
                                                   textcoords="offset points",
                                                   xytext=(10, -15),
                                                   ha='center',
@@ -267,9 +271,9 @@ class Chart_ShaftViewer():
             self.draw_shaft_dimensions()
 
     def init_shaft(self, coordinates):
-        shaft_points = [(0,0)] + coordinates
-        self.labels = [coord[0] for coord in shaft_points]
-        self.points = [coord[1] for coord in shaft_points]
+        shaft_points = [('0',0)] + coordinates
+        self.labels = [point[0] for point in shaft_points]
+        self.points = [point[1] for point in shaft_points]
 
         self._set_axes_limits()
         self._draw_shaft_markers()
