@@ -269,7 +269,7 @@ class FunctionsCalculator():
                             },
                     'dmin(z)':{'dMs': ('d(M<sub>s</sub>)', r'd(M_s)', 'Średnica minimalna ze względu na moment skręcający', 'mm', '#196F3D', self.d_min_by_torsional_strength),
                                'dMz': ('d(M<sub>z</sub>)', r'd(M_z)', 'Średnica minimalna ze względu na moment zastępczy', 'mm', '#1F618D', self.d_min_by_equivalent_stress),
-                               'dqdop': ('d(φ\'<sub>dop</sub>)', r'd(\varphi^{\prime}_{dop})', 'Średnica minimalna ze względu na dopuszczalny kąt skręcenia', 'mm', '#F1C40F', self.d_min_by_permissible_angle_of_twist),
+                               'dqdop': ('d(φ\'<sub>dop</sub>)', r'd(\varphi^{\prime}_{dop})', 'Średnica minimalna ze względu na dopuszczalny kąt skręcenia', 'mm', '#E69138', self.d_min_by_permissible_angle_of_twist),
                                'dkdop': ('d(θ<sub>dop</sub>)', r'd(\theta_{dop})', 'Średnica minimalna ze względu na dopuszczalny kąt ugięcia', 'mm', '#6C3483', self.d_min_by_permissible_deflection_angle), 
                                'dfdop': ('d(f<sub>dop</sub>)', r'd(f_{dop})', 'Średnica minimalna ze względu na dopuszczalną strzałkę ugięcia', 'mm', '#D35400', self.d_min_by_permissible_deflection_arrow),
                                'dmin': ('d<sub>min</sub>', r'd_{min}', 'Średnica minimalna', 'mm', '#C0392B', self.d_min)

@@ -115,7 +115,7 @@ class Chart_ShaftViewer():
                                             linestyle='-',
                                             linewidth=0.5,
                                             color=self._chart.dimensions_color,
-                                            zorder=self._chart.dimensions_layer - 2
+                                            zorder=self._chart.reference_lines_layer
                                             )
             lines.append(reference_line[0])
 
@@ -164,7 +164,7 @@ class Chart_ShaftViewer():
                                                 linestyle='-',
                                                 linewidth=0.5,
                                                 color=self._chart.dimensions_color,
-                                                zorder=self._chart.dimensions_layer - 2
+                                                zorder=self._chart.reference_lines_layer
                                                 )
                 lines.append(reference_line[0])
 
@@ -256,9 +256,10 @@ class Chart_ShaftViewer():
             diameter = step_dimensions['d']
 
             step_plot = Rectangle(start, length, diameter,
-                                        linewidth=2,
-                                        fill=False,
-                                        color=self._chart.shaft_color,
+                                        linewidth=1,
+                                        fill=True,
+                                        edgecolor=self._chart.shaft_edge_color,
+                                        facecolor=self._chart.shaft_face_color,
                                         zorder=self._chart.shaft_layer
                                         )
             self._shaft_plot.append(step_plot)
@@ -339,7 +340,7 @@ class Chart_ShaftViewer():
             mid_point = (start + end) / 2
             text = "{:.1f}".format(end - start)
             y_position = -self._dimension_offset - coordinates_dimension_offset * i
-            item_y_position = y_position + self._dimension_offset*0.1
+            item_y_position = 0
 
             dimension = self._draw_horizontal_dimension(text, start, end, mid_point, y_position, item_y_position)
 
@@ -366,22 +367,24 @@ class Chart_ShaftViewer():
                 diameter = bearing_part['d']
 
                 rim = Rectangle(start, length, diameter,
-                                            linewidth=2,
-                                            fill=False,
-                                            color=self._chart.bearings_color,
+                                            linewidth=1,
+                                            fill=True,
+                                            edgecolor=self._chart.bearing_edge_color,
+                                            facecolor=self._chart.bearing_face_color,
                                             zorder=self._chart.shaft_layer
                                             )
                 self._ax.add_patch(rim)
+
                 diagonal1 = self._ax.plot([start[0], start[0] + length], [start[1], start[1] + diameter], 
                                             linestyle='-',
-                                            linewidth=2,
-                                            color=self._chart.bearings_color,
+                                            linewidth=1,
+                                            color=self._chart.bearing_edge_color,
                                             zorder=self._chart.shaft_layer
                                             )
                 diagonal2 = self._ax.plot([start[0] , start[0] + length], [start[1] + diameter, start[1] ], 
                                             linestyle='-',
-                                            linewidth=2,
-                                            color=self._chart.bearings_color,
+                                            linewidth=1,
+                                            color=self._chart.bearing_edge_color,
                                             zorder=self._chart.shaft_layer
                                             )
 

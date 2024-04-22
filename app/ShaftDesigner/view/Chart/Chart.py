@@ -16,8 +16,6 @@ class Chart(FigureCanvas):
         super(Chart, self).__init__(self.figure)
         self.setParent(parent)
 
-        self._axes_arrows = []  # List to keep track of figure axes
-
         # Adjust subplot parameters to make the plot fill the figure canvas
         self.figure.subplots_adjust(left=0, right=1, bottom=0, top=1, wspace=0, hspace=0)
 
@@ -27,61 +25,63 @@ class Chart(FigureCanvas):
         # Remove axes spines, ticks and grid lines
         self._strip_canvas()
 
+        # Draw axes lines
+        self._draw_axes_lines()
+
     def _set_colors(self):
         # Set background color
-        self.background_color = '#212830'   # dark gray
-        self.figure.set_facecolor( self.background_color)
-        self.axes.set_facecolor( self.background_color)
+        self.face_color = '#eeeeee'
+        self.background_color = '#e5f2ff'
+
+        self.figure.set_facecolor(self.face_color)
+        self.axes.set_facecolor(self.background_color)
+
+        # Set grid lines color
+        self.axes.grid(True, color='white')
 
         # Set other items colors
-        self.shaft_color = '#89a0b0'        # bluey grey
-        self.bearings_color = '#4d5ea8'     # bluey grey
-        self.axes_color = '#ff073a'         # nenon red
-        self.dimensions_color = '#1bfc06'   # neon green
-        self.markers_color = '#ffffe4'      # off white
+        self.shaft_edge_color = '#66beb2'
+        self.shaft_face_color = (138/255, 214/255, 204/255, 0.5)
+        self.bearing_edge_color = '#6497b1'
+        self.bearing_face_color = (151/255, 185/255, 203/255, 0.5)
+        self.axes_color = '#f74040'
+        self.dimensions_color = '#3B645B'
+        self.markers_color = '#f97171'
 
         # Set zorder - order of layers
-        self.axes_layer = 1
-        self.plots_layer = 2
-        self.markers_layer = 3
-        self.shaft_layer = 4
-        self.dimensions_layer = 5
+        self.reference_lines_layer = 2
+        self.axes_layer = 2
+        self.shaft_layer = 3
+        self.plots_layer = 4
+        self.markers_layer = 5
+        self.dimensions_layer = 6
 
     def _strip_canvas(self):
         # Remove spines
         self.axes.spines[['right', 'top', 'bottom', 'left']].set_visible(False)
 
         # Remove x and y tick labels
-        self.axes.set_xticks([])
-        self.axes.set_yticks([])
+        self.axes.set_xticklabels([])
+        self.axes.set_yticklabels([])
 
-        # Remove the ticks if desired
-        self.axes.xaxis.set_ticks_position('none') 
-        self.axes.yaxis.set_ticks_position('none')
-
-        # Remove grid lines
-        self.axes.grid(False)
+        # Remove tick marks
+        self.axes.tick_params(axis='both',
+                              which='both',
+                              length=0,
+                              labelbottom=False,
+                              labelleft=False
+                              )
 
         # Add zoom and pan functionality
         zoom_factory(self.axes)
         pan_factory(self.axes)
 
-    def _draw_axes_arrows(self):
+    def _draw_axes_lines(self):
         '''
         Draw axes on the canvas.
         '''
-        for item in self._axes_arrows:
-            item.remove()
-        self._axes_arrows.clear()
-
-        xlim = self.axes.get_xlim()
-        z_axis = self.axes.annotate('', xy=(xlim[1], 0), xytext=(xlim[0], 0),
-                           arrowprops=dict(arrowstyle="->", color=self.axes_color, lw=1),
-                           zorder=self.axes_layer,
-                           annotation_clip=False)
-        
-        self._axes_arrows.append(z_axis)
-
+        # Draw x line
+        self.axes.axhline(y=0, color=self.axes_color, linewidth=1)
         self.figure.canvas.draw_idle()
 
     def set_initial_axes_limits(self, xlim, ylim):
@@ -94,8 +94,6 @@ class Chart(FigureCanvas):
         '''
         self.initial_xlim = xlim
         self.initial_ylim = ylim
-
-        self._draw_axes_arrows()
 
     def reset_initial_view(self):
         '''
