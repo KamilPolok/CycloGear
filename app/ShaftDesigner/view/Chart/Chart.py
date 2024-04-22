@@ -107,7 +107,7 @@ class Chart(FigureCanvas):
     def get_controls(self):
         return (self.axes, self.figure.canvas)
 
-def zoom_factory(axis, base_scale=1.5, min_zoom_range=0.1):
+def zoom_factory(axis, base_scale=1.5, min_zoom_range=0.1, max_xlim=(0, 1000), max_ylim=(-500, 500)):
     """
     Returns zooming functionality to axis.
     """
@@ -118,7 +118,7 @@ def zoom_factory(axis, base_scale=1.5, min_zoom_range=0.1):
             cur_ylim = axis.get_ylim()
             xdata, ydata = event.xdata, event.ydata
 
-            direction = np.sign(event.step)
+            direction = -np.sign(event.step)
             scale_factor = np.power(base_scale, direction)
 
             # Calculate proposed new limits
@@ -130,6 +130,12 @@ def zoom_factory(axis, base_scale=1.5, min_zoom_range=0.1):
             # Enforce zoom-in limit
             if (new_xlim[1] - new_xlim[0]) < min_zoom_range or (new_ylim[1] - new_ylim[0]) < min_zoom_range:
                 return  # Prevent zooming in beyond the limit
+            
+            # Enforce zoom-out limit
+            if max_xlim and (new_xlim[1] - new_xlim[0]) > (max_xlim[1] - max_xlim[0]):
+                new_xlim = max_xlim
+            if max_ylim and (new_ylim[1] - new_ylim[0]) > (max_ylim[1] - max_ylim[0]):
+                new_ylim = max_ylim
 
             # Apply the new limits
             axis.set_xlim(new_xlim)
@@ -146,7 +152,7 @@ def pan_factory(axis):
     """
     def on_press(event):
         """Callback for mouse button press."""
-        if event.button == 3:  # Right mouse button
+        if event.button == 2:  # Middle mouse button
             axis._pan_start = (event.xdata, event.ydata)
 
     def on_release(event):
@@ -155,7 +161,7 @@ def pan_factory(axis):
 
     def on_motion(event):
         """Callback for mouse motion."""
-        if event.button == 3 and axis._pan_start is not None:  # Right mouse button
+        if event.button == 2 and axis._pan_start is not None:  # Middle mouse button
             if event.xdata is not None and event.ydata is not None:
                 xdata_start, ydata_start = axis._pan_start
                 dx = event.xdata - xdata_start
