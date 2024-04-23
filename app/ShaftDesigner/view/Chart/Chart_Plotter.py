@@ -39,8 +39,8 @@ class Chart_Plotter():
         # Add new selected plots
         for plot_name in self._selected_plots:
             if plot_name not in self._active_plots:
-                y = self._plots[plot_name][len(self._plots[plot_name]) - 1]
-                color = self._plots[plot_name][4]
+                y = self._plots[plot_name]['function']
+                color = self._plots[plot_name]['color']
                 if  plot_name.lower().startswith('d'):
                     d_half_above_axis = y / 2
                     d_half_below_axis = [-d for d in d_half_above_axis]
@@ -89,9 +89,9 @@ class Chart_Plotter():
         # and key the plot label 
         for key, lines in self._active_plots.items():
             if sel.artist in lines:
-                plot_label = rf'$\mathbf{{{self._plots[key][1]}}}$'
-                plot_unit = self._plots[key][3]
-                plot_color = self._plots[key][4]
+                plot_label = rf'$\mathbf{{{self._plots[key]["label"][1]}}}$'
+                plot_unit = self._plots[key]['unit']
+                plot_color = self._plots[key]['color']
                 if key.startswith('d'):
                     is_diameter_plot = True
                 break

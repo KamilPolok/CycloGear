@@ -141,10 +141,10 @@ class ShaftDesignerController:
     def _set_functions_plots(self, shaft_functions):
         def update_plot_menus(id, function_details, key, plot_menu):
             if id not in plot_menu.getItems():
-                label = function_details[0]
-                description = function_details[2] + f' [{function_details[3]}]'
+                label = function_details['label'][0]
+                description = function_details['description'] + f' [{function_details["unit"]}]'
                 plot_menu.addItem(id, label, description)
-            if function_details[5] is None:
+            if function_details['function'] is None:
                 del shaft_functions[key][id]
                 plot_menu.enableItem(id, False)
             else:
