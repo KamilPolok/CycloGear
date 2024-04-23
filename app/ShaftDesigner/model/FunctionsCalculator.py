@@ -263,17 +263,17 @@ class FunctionsCalculator():
         
     def get_shaft_functions(self):
         functions = {'z': self._z_values,
-                    'f(z)':{'Mg': MappingProxyType({'label': ('M<sub>g</sub>(z)', r'M_g(z)'), 'description': 'Moment gnący', 'unit': 'Nm', 'color': '#1ABC9C', 'function': self.bending_moment}),
-                            'Ms': MappingProxyType({'label': ('M<sub>s</sub>(z)', r'M_s(z)'), 'description': 'Moment skręcający', 'unit': 'Nm', 'color': '#196F3D', 'function': self.torque}),
-                            'Mz': MappingProxyType({'label': ('M<sub>z</sub>(z)', r'M_z(z)'), 'description': 'Moment zastępczy', 'unit': 'Nm', 'color': '#1F618D', 'function': self.equivalent_moment}),
-                            'f': MappingProxyType({'label': ('f(z)', r'f(z)'), 'description': 'Strzałka ugięcia', 'unit': 'mm', 'color': '#721f8d', 'function': self.deflection_arrow}),
+                    'f(z)':{'Mg': MappingProxyType({'label': ('M<sub>g</sub>(z)', r'M_g(z)'), 'description': 'Moment gnący', 'unit': 'Nm', 'color': '#1ABC9C', 'multiplier': 1, 'decimals': 2, 'function': self.bending_moment}),
+                            'Ms': MappingProxyType({'label': ('M<sub>s</sub>(z)', r'M_s(z)'), 'description': 'Moment skręcający', 'unit': 'Nm', 'color': '#196F3D', 'multiplier': 1, 'decimals': 2, 'function': self.torque}),
+                            'Mz': MappingProxyType({'label': ('M<sub>z</sub>(z)', r'M_z(z)'), 'description': 'Moment zastępczy', 'unit': 'Nm', 'color': '#1F618D', 'multiplier': 1, 'decimals': 2, 'function': self.equivalent_moment}),
+                            'f': MappingProxyType({'label': ('f(z)', r'f(z)'), 'description': 'Strzałka ugięcia', 'unit': 'mm', 'color': '#721f8d', 'multiplier': 5000, 'decimals': 6, 'function': self.deflection_arrow}),
                             },
-                    'dmin(z)':{'dMs': MappingProxyType({'label': ('d(M<sub>s</sub>)', r'd(M_s)'), 'description': 'Średnica minimalna ze względu na moment skręcający', 'unit': 'mm', 'color': '#196F3D', 'function': self.d_min_by_torsional_strength}),
-                               'dMz': MappingProxyType({'label': ('d(M<sub>z</sub>)', r'd(M_z)'), 'description': 'Średnica minimalna ze względu na moment zastępczy', 'unit': 'mm', 'color': '#1F618D', 'function': self.d_min_by_equivalent_stress}),
-                               'dqdop': MappingProxyType({'label': ('d(φ\'<sub>dop</sub>)', r'd(\varphi^{\prime}_{dop})'), 'description': 'Średnica minimalna ze względu na dopuszczalny kąt skręcenia', 'unit': 'mm', 'color': '#E69138', 'function': self.d_min_by_permissible_angle_of_twist}),
-                               'dkdop': MappingProxyType({'label': ('d(θ<sub>dop</sub>)', r'd(\theta_{dop})'), 'description': 'Średnica minimalna ze względu na dopuszczalny kąt ugięcia', 'unit': 'mm', 'color': '#6C3483', 'function': self.d_min_by_permissible_deflection_angle}), 
-                               'dfdop': MappingProxyType({'label': ('d(f<sub>dop</sub>)', r'd(f_{dop})'), 'description': 'Średnica minimalna ze względu na dopuszczalną strzałkę ugięcia', 'unit': 'mm', 'color': '#D35400', 'function': self.d_min_by_permissible_deflection_arrow}),
-                               'dmin': MappingProxyType({'label': ('d<sub>min</sub>', r'd_{min}'), 'description': 'Średnica minimalna', 'unit': 'mm', 'color': '#C0392B', 'function': self.d_min})
+                    'dmin(z)':{'dMs': MappingProxyType({'label': ('d(M<sub>s</sub>)', r'd(M_s)'), 'description': 'Średnica minimalna ze względu na moment skręcający', 'unit': 'mm', 'color': '#196F3D', 'multiplier': 1, 'decimals': 2, 'function': self.d_min_by_torsional_strength}),
+                               'dMz': MappingProxyType({'label': ('d(M<sub>z</sub>)', r'd(M_z)'), 'description': 'Średnica minimalna ze względu na moment zastępczy', 'unit': 'mm', 'color': '#1F618D', 'multiplier': 1, 'decimals': 2, 'function': self.d_min_by_equivalent_stress}),
+                               'dqdop': MappingProxyType({'label': ('d(φ\'<sub>dop</sub>)', r'd(\varphi^{\prime}_{dop})'), 'description': 'Średnica minimalna ze względu na dopuszczalny kąt skręcenia', 'unit': 'mm', 'color': '#E69138', 'multiplier': 1, 'decimals': 2, 'function': self.d_min_by_permissible_angle_of_twist}),
+                               'dkdop': MappingProxyType({'label': ('d(θ<sub>dop</sub>)', r'd(\theta_{dop})'), 'description': 'Średnica minimalna ze względu na dopuszczalny kąt ugięcia', 'unit': 'mm', 'color': '#6C3483', 'multiplier': 1, 'decimals': 2, 'function': self.d_min_by_permissible_deflection_angle}), 
+                               'dfdop': MappingProxyType({'label': ('d(f<sub>dop</sub>)', r'd(f_{dop})'), 'description': 'Średnica minimalna ze względu na dopuszczalną strzałkę ugięcia', 'unit': 'mm', 'color': '#D35400', 'multiplier': 1, 'decimals': 2, 'function': self.d_min_by_permissible_deflection_arrow}),
+                               'dmin': MappingProxyType({'label': ('d<sub>min</sub>', r'd_{min}'), 'description': 'Średnica minimalna', 'unit': 'mm', 'color': '#C0392B', 'multiplier': 1, 'decimals': 2, 'function': self.d_min})
                                }
                     }
            

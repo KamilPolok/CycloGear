@@ -39,7 +39,7 @@ class Chart_Plotter():
         # Add new selected plots
         for plot_name in self._selected_plots:
             if plot_name not in self._active_plots:
-                y = self._plots[plot_name]['function']
+                y = self._plots[plot_name]['function'] * self._plots[plot_name]['multiplier']
                 color = self._plots[plot_name]['color']
                 if  plot_name.lower().startswith('d'):
                     d_half_above_axis = y / 2
@@ -92,6 +92,10 @@ class Chart_Plotter():
                 plot_label = rf'$\mathbf{{{self._plots[key]["label"][1]}}}$'
                 plot_unit = self._plots[key]['unit']
                 plot_color = self._plots[key]['color']
+                coordinate = round(sel.target[0], 2)
+                multiplier =  self._plots[key]['multiplier']
+                decimals = self._plots[key]['decimals']
+                value = sel.target[1] / multiplier
                 if key.startswith('d'):
                     is_diameter_plot = True
                 break
@@ -99,10 +103,10 @@ class Chart_Plotter():
         # Set the annotation text based on the plot type
         if is_diameter_plot:
             # For diameter plots, use absolute value for y-coordinate
-            text = f'z: {sel.target[0]:.2f} mm, {plot_label}/2: {abs(sel.target[1]):.2f} {plot_unit}'
+            text = f'z: {coordinate} mm, {plot_label}/2: {abs(value):.{decimals}f} {plot_unit}'
         else:
             # For other types of plots, use the original y-coordinate
-            text = f'z: {sel.target[0]:.2f} mm, {plot_label}: {sel.target[1]:.2f} {plot_unit}'
+            text = f'z: {coordinate} mm, {plot_label}: {value:.{decimals}f} {plot_unit}'
 
         # Set annotation properties
         sel.annotation.set(
