@@ -229,6 +229,9 @@ class ShaftCalculator:
                 total_length += length
         
         return total_length == self._shaft_attributes['L']
+    
+    def get_sections_dimensions(self):
+        return self.shaft_sections
 
     def get_shaft_attributes(self):
         shaft_steps = []

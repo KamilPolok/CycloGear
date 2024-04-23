@@ -171,7 +171,11 @@ class ShaftSection(Section):
     def set_limits(self, limits):
         for subsection_number, attributes in limits.items():
             self.subsections[subsection_number].set_limits(attributes)
-    
+
+    def set_values(self, values):
+        for subsection_number, attributes in values.items():
+                self.subsections[subsection_number].set_values(attributes)
+
     def set_add_subsection_button_enabled(self, enabled):
         self._add_subsection_button.setEnabled(enabled)
     
@@ -242,6 +246,10 @@ class EccentricsSection(Section):
     def set_limits(self, limits):
         for subsection_number, attributes in limits.items():
             self.subsections[subsection_number].set_limits(attributes)
+        
+    def set_values(self, values):
+        for subsection_number, attributes in values.items():
+                self.subsections[subsection_number].set_values(attributes)
 
     def handle_subsection_data(self, subsection_data):
         subsection = self.sender()

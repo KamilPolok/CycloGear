@@ -85,9 +85,13 @@ class ShaftDesignerController:
             if section_name != 'Wykorbienia':
                 current_subsections[section_name] = [None] * section.subsection_count
         limits = self.shaft_calculator.calculate_limits(current_subsections)
+        sections_dimensions = self.shaft_calculator.get_sections_dimensions()
 
         for section_name, section in limits.items():
             self._sections[section_name].set_limits(section)
+
+        for section_name, section in sections_dimensions.items():
+            self._sections[section_name].set_values(section)
 
     def _remove_shaft_subsection(self, section_name, subsection_number):
         # Remove plot attributes in calculators shaft sections

@@ -156,8 +156,8 @@ class ShaftSubsection(QWidget):
     def _check_if_all_inputs_provided(self):
         self._confirm_button.setEnabled(all(input.text() != '' for input in self.inputs.values()) and all(literal_eval(input.text()) != 0 for input in self.inputs.values()))
     
-    def _check_if_meets_limits(self, input=None):
-        input = self.sender() if input == None else input
+    def _check_if_meets_limits(self):
+        input = self.sender()
         attribute = next((key for key, value in self.inputs.items() if value == input), None)
 
         if attribute:
@@ -165,9 +165,13 @@ class ShaftSubsection(QWidget):
             max = self.limits[attribute]['max']
             value = float(input.text()) if input.text() else None
 
-            input.setPlaceholderText(f'{format_input(min)}-{format_input(max)}')
-            if value is not None and min <= value <= max:
-                input.setText(f'{format_input(value)}')
+            if value is not None and value != 0:
+                if min <= value <= max:
+                    input.setText(f'{format_input(value)}')
+                elif min > value:
+                    input.setText(f'{format_input(min)}')
+                elif max < value:
+                    input.setText(f'{format_input(max)}')
             else:
                 input.clear()
 
@@ -198,9 +202,19 @@ class ShaftSubsection(QWidget):
         for attribute, attribute_limits in limits.items():
             if attribute in self.inputs.keys():
                 self.limits[attribute] = {}
-                for limit, value in attribute_limits.items():
-                    self.limits[attribute][limit] = value
-                self._check_if_meets_limits(self.inputs[attribute])
+                min = attribute_limits['min']
+                max = attribute_limits['max']
+                self.limits[attribute]['min'] = min
+                self.limits[attribute]['max'] = max
+                self.inputs[attribute].setPlaceholderText(f'{format_input(min)}-{format_input(max)}')
+    
+    def set_values(self, values):
+        for attribute, value in values.items():
+            if attribute in self.inputs.keys():
+                if value is not None and value !=0:
+                    self.inputs[attribute].setText(f'{format_input(value)}')
+                else:
+                     self.inputs[attribute].clear()
 
     def toggle_content(self, event):
         self._content.setVisible(not self._content.isVisible())
