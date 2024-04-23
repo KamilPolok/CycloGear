@@ -15,8 +15,8 @@ class CustomFrame(QFrame):
     def __init__(self):
         super().__init__()
 
-        self._default_style = "QFrame { background-color: #c1c9c9;}"
-        self._on_hover_style = "QFrame { background-color: #9aa1a1;}"
+        self._default_style = "QFrame { background-color: #8ad6cc; border-radius: 5px;}"
+        self._on_hover_style = "QFrame { background-color: #66beb2; border-radius: 5px;}"
         self.setStyleSheet(self._default_style)
 
 class HoverButton(QPushButton):
@@ -118,6 +118,7 @@ class ShaftSection(Section):
         self._add_subsection_button.setFixedSize(button_size, button_size)
         self._add_subsection_button.setIconSize(QSize(icon_size, icon_size))
         self._add_subsection_button.setIcon(QIcon(resource_path('icons//add_btn.png')))
+        self._add_subsection_button.setToolTip('Dodaj')
         self._add_subsection_button.setStyleSheet("""                         
             QPushButton {
                 background-color: transparent;
@@ -126,12 +127,12 @@ class ShaftSection(Section):
                 border-radius: 5px;
             }
             QPushButton:hover {
-                background-color: #9aa1a1;
-                border: 1px solid #9aa1a1;
+                background-color: #66beb2;
+                border: 1px solid #66beb2;
             }
             QPushButton:pressed {
-                background-color: #5a6161;
-                border: 1px solid #5a6161;
+                background-color: #51988e;
+                border: 1px solid #51988e;
             }
         """)
         
@@ -142,7 +143,7 @@ class ShaftSection(Section):
 
     def add_subsection(self):
         subsection = ShaftSubsection(self._subsection_name, self.subsection_count, self)
-        subsection.set_attributes([('d', 'Ø'), ('l', 'L')])
+        subsection.set_attributes([('d', 'Ø'), ('l', 'l')])
         subsection.subsection_data_signal.connect(self.handle_subsection_data)
         subsection.remove_subsection_signal.connect(self.remove_subsection)
         self.subsections.append(subsection)
@@ -208,7 +209,7 @@ class EccentricsSection(Section):
             # Add subsections
             for _ in range(self.subsection_count, sections_number):
                 subsection = ShaftSubsection(self.subsection_name, self.subsection_count, self)
-                subsection.set_attributes([('l', 'L')])
+                subsection.set_attributes([('l', 'l')])
                 for attribute, input in self.inputs.items():
                     subsection.add_input(attribute, input)
                 subsection.remove_button.hide()

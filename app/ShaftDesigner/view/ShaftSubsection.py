@@ -11,8 +11,8 @@ from .CommonFunctions import create_data_input_row, format_input
 class CustomFrame(QFrame):
     def __init__(self):
         super().__init__()
-        self._default_style = "QFrame { background-color: #c1c9c9; }"
-        self._on_hover_style = "QFrame { background-color: #9aa1a1; }"
+        self._default_style = "QFrame { background-color: #8ad6cc; border-radius: 5px;}"
+        self._on_hover_style = "QFrame { background-color: #66beb2; border-radius: 5px;}"
         self.setStyleSheet(self._default_style)
 
 class HoverButton(QPushButton):
@@ -49,6 +49,11 @@ class ShaftSubsection(QWidget):
         self._init_header()
         self._init_content()
 
+        # Set initial view
+        self._content.setVisible(False)
+        self._confirm_button.setEnabled(False)
+        self._confirm_button.setVisible(False)
+
     def _init_header(self):
         # Set header layout
         header = CustomFrame()
@@ -79,6 +84,33 @@ class ShaftSubsection(QWidget):
         self._toggle_section_button.clicked.connect(self.toggle_content)
         self._header_layout.addWidget(self._toggle_section_button)
 
+        # Set confirmation button
+        self._confirm_button = QPushButton()
+        button_size = self.header_height
+        icon_size = self.header_height * 0.9
+        self._confirm_button.setFixedSize(button_size, button_size)
+        self._confirm_button.setIconSize(QSize(icon_size, icon_size))
+        self._confirm_button.setIcon(QIcon(resource_path('icons//confirm.png')))
+        self._confirm_button.setToolTip('Zatwierdź')
+        self._confirm_button.setStyleSheet("""                         
+            QPushButton {
+                background-color: transparent;
+                color: black;
+                border: 1px solid transparent;
+                border-radius: 5px;
+            }
+            QPushButton:hover {
+                background-color: #66beb2;
+                border: 1px solid #66beb2;
+            }
+            QPushButton:pressed {
+                background-color: #51988e;
+                border: 1px solid #51988e;
+            }
+        """)
+        self._confirm_button.clicked.connect(self.emit_data_signal)
+        self._header_layout.addWidget(self._confirm_button)
+
         # Set removal button
         self.remove_button = QPushButton()
         button_size = self.header_height
@@ -86,6 +118,7 @@ class ShaftSubsection(QWidget):
         self.remove_button.setFixedSize(button_size, button_size)
         self.remove_button.setIconSize(QSize(icon_size, icon_size))
         self.remove_button.setIcon(QIcon(resource_path('icons//remove_btn.png')))
+        self.remove_button.setToolTip('Usuń')
         self.remove_button.setStyleSheet("""                         
             QPushButton {
                 background-color: transparent;
@@ -94,12 +127,12 @@ class ShaftSubsection(QWidget):
                 border-radius: 5px;
             }
             QPushButton:hover {
-                background-color: #9aa1a1;
-                border: 1px solid #9aa1a1;
+                background-color: #66beb2;
+                border: 1px solid #66beb2;
             }
             QPushButton:pressed {
-                background-color: #5a6161;
-                border: 1px solid #5a6161;
+                background-color: #51988e;
+                border: 1px solid #51988e;
             }
         """)
         self.remove_button.clicked.connect(self.emit_remove_signal)
@@ -116,13 +149,6 @@ class ShaftSubsection(QWidget):
         # Inputs layout
         self._inputs_layout = QVBoxLayout()
         self._content_layout.addLayout(self._inputs_layout)
-
-        # Set OK button
-        self._confirm_button = QPushButton("OK", self)
-        self._confirm_button.clicked.connect(self.emit_data_signal)
-        self._confirm_button.setEnabled(False)
-        self._content_layout.addWidget(self._confirm_button)
-
     
     def _set_name(self):
         self._toggle_section_button.setText(f'{self.subsection_name} {self.subsection_number + 1}')
@@ -178,6 +204,7 @@ class ShaftSubsection(QWidget):
 
     def toggle_content(self, event):
         self._content.setVisible(not self._content.isVisible())
+        self._confirm_button.setVisible(not self._confirm_button.isVisible())
 
         self.adjustSize()
         self.updateGeometry()

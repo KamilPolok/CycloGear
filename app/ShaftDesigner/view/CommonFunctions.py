@@ -1,21 +1,21 @@
 import math
 
 from PyQt6.QtCore import Qt, QRegularExpression
-from PyQt6.QtGui import QRegularExpressionValidator
+from PyQt6.QtGui import QRegularExpressionValidator, QFont
 from PyQt6.QtWidgets import QHBoxLayout, QLabel, QLineEdit
 
 
 def create_data_input_row(symbol):
     layout = QHBoxLayout()
-    layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
-    # layout.setSpacing(0)
+    layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
     
     # Symbol label
     symbol_label = QLabel(f'{symbol}')
     symbol_label.setFixedWidth(10)
-
-    equals_sign = QLabel('=')
-    equals_sign.setFixedWidth(10)
+    font = QFont()
+    font.setBold(True)
+    font.setItalic(True)
+    symbol_label.setFont(font)
 
     # Line edit for input
     line_edit = QLineEdit()
@@ -33,7 +33,6 @@ def create_data_input_row(symbol):
 
     # Assemble the layout
     layout.addWidget(symbol_label)
-    layout.addWidget(equals_sign)
     layout.addWidget(line_edit)
     layout.addWidget(units_label)
 

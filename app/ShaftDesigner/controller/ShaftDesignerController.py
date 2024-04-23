@@ -28,7 +28,7 @@ class ShaftDesignerController:
         self.functions_calculator = FunctionsCalculator()
     
     def _connect_signals_and_slots(self):
-        self._shaft_designer.confirmation_button.clicked.connect(self._on_finish_draft)
+        self._shaft_designer.confirm_draft_button.clicked.connect(self._on_finish_draft)
         for section_name, section in self._sections.items():
             section.subsection_data_signal.connect(self._handle_subsection_data)
             section.remove_subsection_plot_signal.connect(self._remove_shaft_subsection)
@@ -113,7 +113,7 @@ class ShaftDesignerController:
         
         if self.is_whole_shaft_designed or is_whole_shaft_designed_state_changed:
             self._toogle_remaining_plots_visibility()
-            self._shaft_designer.confirmation_button.setEnabled(self.is_whole_shaft_designed)
+            self._shaft_designer.confirm_draft_button.setEnabled(self.is_whole_shaft_designed)
             if not self.is_whole_shaft_designed:
                 self._shaft_designer.set_draft_finished_title(False)
             
