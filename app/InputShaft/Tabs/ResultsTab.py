@@ -34,7 +34,7 @@ class ResultsTab(ITrackedTab):
         content_layout.addWidget(QLabel('Straty mocy w łożyskach:'))
         content_layout.addLayout(create_data_display_row(self, self._outputs['Bearings']['support_A']['N'], 'N<sub>A</sub>', 'Podpora przesuwna A', decimal_precision=2))
         content_layout.addLayout(create_data_display_row(self, self._outputs['Bearings']['support_B']['N'], 'N<sub>B</sub>', 'Podpora stała B', decimal_precision=2))
-        content_layout.addLayout(create_data_display_row(self, self._outputs['Bearings']['eccentrics']['N'], 'N<sub>c</sub>', 'Koła obiegowe', decimal_precision=2))
+        content_layout.addLayout(create_data_display_row(self, self._outputs['Bearings']['eccentrics']['N'], 'N<sub>c</sub>', 'Wykorbienia', decimal_precision=2))
         super().init_ui()
 
     def init_ui(self, outputs):

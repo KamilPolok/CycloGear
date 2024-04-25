@@ -42,7 +42,7 @@ class InputShaftCalculator():
             'Ra':[None, 'N'],               # Reakcja w podporze nieruchomej
             'Rb':[None, 'N'],               # Reakcja w podporze ruchomej
             'F': [None, 'N'],               # Siła pochodząca od koła obiegowego
-            'Fx': {},                        # Siła na kole obiegowym 1
+            'Fx': {},                       # Siła na kole obiegowym 1
             # Obliczone wymiary wału
             'dsc': [None, 'mm'],            # Średnica wału wejściowego - obliczona
             'dec': [None, 'mm'],            # Średnica mimośrodu - obliczona
@@ -62,7 +62,7 @@ class InputShaftCalculator():
                 'C': [None, 'kN'],          # Nośność
                 'fd': [None, ''],           # Współczynnik zależny od zmiennych obciążeń dynamicznych
                 'ft': [None, ''],           # Współczynnik zależny od temperatury pracy łożyska
-                'f': [None, 'mm'],          # Współczynnik tarcia tocznego
+                'f': [None, ''],            # Współczynnik tarcia tocznego
                 'S': [None, 'mm'],          # Grubość pierścienia
                 'N': [None, 'W'],           # Starty mocy           
               },
@@ -80,7 +80,7 @@ class InputShaftCalculator():
                 'C': [None, 'kN'],          # Nośność
                 'fd': [None, ''],           # Współczynnik zależny od zmiennych obciążeń dynamicznych
                 'ft': [None, ''],           # Współczynnik zależny od temperatury pracy łożyska
-                'f': [None, 'mm'],          # Współczynnik tarcia tocznego
+                'f': [None, ''],            # Współczynnik tarcia tocznego
                 'S': [None, 'mm'],          # Grubość pierścienia
                 'N': [None, 'W'],           # Starty mocy           
               },
@@ -99,7 +99,7 @@ class InputShaftCalculator():
                 'C': [None, 'kN'],          # Nośność
                 'fd': [None, ''],           # Współczynnik zależny od zmiennych obciążeń dynamicznych
                 'ft': [None, ''],           # Współczynnik zależny od temperatury pracy łożyska
-                'f': [None, 'mm'],          # Współczynnik tarcia tocznego
+                'f': [None, ''],            # Współczynnik tarcia tocznego
                 'S': [None, 'mm'],          # Grubość pierścienia
                 'N': [None, 'W'],           # Starty mocy           
               }
