@@ -8,6 +8,7 @@ from InputShaft.Tabs.PreliminaryDataTabCalculator import PreliminaryDataTabCalcu
 
 from InputShaft.Tabs.BearingsTab import BearingsTab
 from InputShaft.Tabs.BearingsTabController import BearingsTabController
+from InputShaft.Tabs.BearingsTabCalculator import BearingsTabCalculator
 
 from InputShaft.Tabs.PowerLossTab import PowerLossTab
 from InputShaft.Tabs.PowerLossTabController import PowerLossTabController
@@ -55,7 +56,8 @@ class InputShaftController:
 
         tab_id +=1
         tab2 = BearingsTab(self._input_shaft)
-        tab2_controller = BearingsTabController(tab_id, tab2, self._mediator)
+        tab2_calculator = BearingsTabCalculator()
+        tab2_controller = BearingsTabController(tab_id, tab2, tab2_calculator, self._mediator)
 
         tab_id +=1
         tab3 = PowerLossTab(self._input_shaft)
@@ -121,7 +123,6 @@ class InputShaftController:
 
     def _on_select_bearing(self, bearing_section_id, data):
         self._calculator.update_data(data)
-        self._calculator.calculate_bearing_load_capacity(bearing_section_id)
         result = self._calculator.open_bearing_selection(bearing_section_id)
         if result:
             self.tabs[1].update_selected_bearing(bearing_section_id, result)

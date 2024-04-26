@@ -1,4 +1,4 @@
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import pyqtSignal, Qt
 from PyQt6.QtWidgets import QComboBox, QVBoxLayout, QHBoxLayout, QLabel, QStackedWidget, QWidget
 
 from .common.DataButton import DataButton
@@ -7,6 +7,8 @@ from .common.ITrackedTab import ITrackedTab
 from .common.common_functions import create_data_display_row, create_data_input_row
 
 class BearingsTab(ITrackedTab):
+    sectionInputsProvided = pyqtSignal(str, bool, bool)
+
     def _init_selector(self):
         selector_layout = QHBoxLayout()
 
@@ -50,7 +52,7 @@ class BearingsTab(ITrackedTab):
             container.setLayout(section_layout)
 
             # Set section for displaying outputs and inputs
-            section = Section(self, section_name, self._enable_select_bearing_button)
+            section = Section(self, section_name, self.sectionInputsProvided.emit)
 
             # Set data display and input rows
             section.addLayout(create_data_display_row(self, self._outputs['Bearings'][section_name]['dip'], 'd<sub>min</sub>', 'Minimalna średnica wewnętrzna łożyska', decimal_precision=2))
@@ -69,6 +71,7 @@ class BearingsTab(ITrackedTab):
             button_layout.addWidget(select_bearing_button)
 
             section_layout.addWidget(section)
+            section_layout.addLayout(create_data_display_row(self, self._inputs['Bearings'][section_name]['C'], 'C', 'Wymagana nośność łożyska', decimal_precision=2))
             section_layout.addLayout(button_layout)
 
             containers.append(container)
@@ -78,7 +81,7 @@ class BearingsTab(ITrackedTab):
     def _change_section(self, index):
         self.stacked_sections.setCurrentIndex(index)
     
-    def _enable_select_bearing_button(self, section_name, enable_button, delete_choice):
+    def enable_select_bearing_button(self, section_name, enable_button, delete_choice):
         """
         Enable or disable the selection button based on whether all inputs are filled.
 

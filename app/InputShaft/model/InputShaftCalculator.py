@@ -129,25 +129,6 @@ class InputShaftCalculator():
             attributes['drc'][0] = dw
             attributes['di'][0] = Dw
             attributes['do'][0] = Dz
-    
-    def calculate_bearing_load_capacity(self, bearing_section_id):
-        """
-        Calculate bearing load capacity.
-        """
-        p = 3.0
-        nwe = self.data['nwe'][0]
-        attributes = self.data['Bearings'][bearing_section_id]
-    
-        lh = attributes['Lh'][0]
-        fd = attributes['fd'][0]
-        ft = attributes['ft'][0]
-        F = attributes['F'][0]
-
-        l = 60 * lh * nwe / np.power(10, 6)
-        c = np.abs(F) * np.power(l, 1 / p) * ft / fd / 1000 # [kN]
-
-        attributes['Lr'][0] = l
-        attributes['C'][0] = c
 
     def calculate_bearings_power_loss(self):
         """
