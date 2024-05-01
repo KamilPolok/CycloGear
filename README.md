@@ -1,48 +1,31 @@
-# DATABASE SAMPLE
+# CycloGear
 
-## SETUP
-- Download this repository
-- Create your own virtual environment (use venv that is already included with Python 3.3):
-    - Go to repository base directory and run:
+This application is intended to support the design of the input mechanism for cycloidal drive. It helps with strength calculations, structural optimization and modeling of the input shaft and also enables the selection of appropriate bearings mounted on it. Furthermore, it helps identify power loss occurring in the designed mechanism.
 
-        ```shell
-        python -m venv <your_virtual_environment_name>
-        ```
-    - Activate your virtul environment:
-        - using bash:
+## Caveats
 
-            ```shell
-            source my_venv/Scripts/activate
-            ```
-        - using PowerShell:
-            ```shell
-            my_venv\Scripts\activate
-            ```
-- Install required tools:
+- The application focuses solely on providing design support only for the input mechanism. In the process of determining its mathematical model and calculating the power loss, data and insights from the design phases of other mechanisms of the cycloidal gear were used. However, the details regarding how this data was derived are not included in this project.
 
-    ```shell
-    pip install -r requirements.txt
-    ```
-## RUN
-- You can run the sample with python:
+- The application has been tested and verified to work on Windows 10 and 11. Its compatibility with other Windows versions or operating systems is currently unknown. The software is still in a gamma stage, meaning it is stable but lacks full functionality. It was primarily developed for demonstration purposes, with the main goal of integrating the code into a larger project that is still in its early development stages.
 
-    ```shell
-    python app/main.py
-    ```
-  or using flet - that enables also Hot Reload
+- Currently, the only available language for the app is Polish.
 
-    ```shell
-    flet app/main.py
-    ```
-## BUILD EXECUTABLE
+## Setup copy of this repository 
+Download/Clone this repository and install dependencies from [requirements.txt](requirements.txt) (preferably use a virtual environment). If you use ```pip```, you can use:
 
-### FOR WINDOWS
-- From repository root run:
+```ps1
+pip install -r requirements.txt
+```
+## Run the code
+To run the code, type in the comand prompt:
 
-   ```shell
-    pyinstaller --name 'CycloGear2024' --noconsole --distpath .\build\dist --specpath .\build\spec .\app\main.py ; Copy-Item -Path ".\data" -Destination ".\build\dist\CycloGear2024\data" -Recurse
-   ```
-- Copy 'data' folder to build 
+```ps1
+python app/main.py
+```
 
-## EXECUTABLE
-Executable can be also found in compressed form: ```dbsample.zip```. Just unzip it and find ```dbsample.exe```
+## Build the app
+From repository root run:
+
+```ps1
+pyinstaller --name 'CycloGear2024' --noconsole --distpath .\build\dist --specpath .\build\spec .\app\main.py ; Copy-Item -Path ".\data" -Destination ".\build\dist\CycloGear2024\data" -Recurse
+```
