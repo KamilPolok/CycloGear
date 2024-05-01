@@ -1,5 +1,4 @@
 mplcursors==0.5.3
 pandas==2.0.3
-pip-chill==1.0.3
-pyqt5==5.15.10
+pyinstaller==6.3.0
 pyqt6==6.6.1
