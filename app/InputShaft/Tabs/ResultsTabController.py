@@ -21,9 +21,9 @@ class ResultsTabController:
 
         outputs_keys = [['nwe'], ['Mwe'], ['L'], ['LA'], ['LB'], ['L1'], ['Lc'], ['e'],
                         ['Fx'], ['Ra'], ['Rb'],
-                        ['Bearings', 'support_A', 'N'],
-                        ['Bearings', 'support_B', 'N'],
-                        ['Bearings', 'eccentrics', 'N']
+                        ['Bearings', 'support_A', 'P'],
+                        ['Bearings', 'support_B', 'P'],
+                        ['Bearings', 'eccentrics', 'P']
                         ]
 
         self._outputs = extract_data(self._component_data, outputs_keys)

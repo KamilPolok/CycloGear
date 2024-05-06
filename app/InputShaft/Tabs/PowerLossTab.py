@@ -53,7 +53,7 @@ class PowerLossTab(ITrackedTab):
             section = Section(self, section_name, self._enable_select_rolling_element_button)
 
             # Set data display and input rows
-            section_layout.addLayout(create_data_input_row(self, self._inputs['Bearings'][section_name]['f'], 'f', 'Współczynnik tarcia tocznego łożyska', decimal_precision=2))
+            section_layout.addLayout(create_data_input_row(self, self._inputs['Bearings'][section_name]['f'], 'f', 'Współczynnik tarcia tocznego łożyska', decimal_precision=5))
             section_layout.addLayout(create_data_display_row(self, self._outputs['Bearings'][section_name]['di'], 'd', 'Średnica wewnętrzna łożyska', decimal_precision=2))
             section_layout.addLayout(create_data_display_row(self, self._outputs['Bearings'][section_name]['do'], 'D', 'Średnica zewnętrzna łożyska', decimal_precision=2))
             section.addLayout(create_data_display_row(self, self._outputs['Bearings'][section_name]['drc'], 'd<sub>w</sub>', 'Obliczona średnica elementów tocznych', decimal_precision=2))
