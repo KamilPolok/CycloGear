@@ -1,7 +1,7 @@
 from typing import Optional
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QLineEdit
+from PyQt6.QtWidgets import QLineEdit, QWidget
 
 class Output(QLineEdit):
     """
@@ -9,7 +9,7 @@ class Output(QLineEdit):
     allows for setting the text only programtically.
     """
 
-    def __init__(self, parent, decimal_precision = 2):
+    def __init__(self, parent: QWidget=None, decimal_precision: int=2):
         super().__init__(parent)
         self.setReadOnly(True)
         self._max_decimal_digits = decimal_precision

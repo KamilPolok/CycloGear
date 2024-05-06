@@ -9,7 +9,7 @@ class Input(QLineEdit):
 
     inputConfirmedSignal = pyqtSignal(object)
 
-    def __init__(self, parent: QWidget, decimal_precision: int=2):
+    def __init__(self, parent: QWidget=None, decimal_precision: int=2):
         """
         Initialize the custom line edit with validation and inactivity monitoring.
 

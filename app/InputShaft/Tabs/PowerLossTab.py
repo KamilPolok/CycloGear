@@ -1,16 +1,16 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QComboBox, QVBoxLayout, QHBoxLayout, QLabel, QStackedWidget, QWidget
+from PyQt6.QtWidgets import QComboBox, QVBoxLayout, QHBoxLayout, QStackedWidget, QWidget
 
 from .common.DataButton import DataButton
 from .common.Section import Section
 from .common.ITrackedTab import ITrackedTab
-from .common.common_functions import create_data_display_row, create_data_input_row
+from .common.common_functions import create_data_display_row, create_data_input_row, create_header
 
 class PowerLossTab(ITrackedTab):
     def _init_selector(self):
         selector_layout = QHBoxLayout()
 
-        layout_selector_label = QLabel('Miejsce osadzenia łożyska:')
+        layout_selector_label = create_header('Miejsce osadzenia łożyska:', bold=True)
 
         self.layout_selector = QComboBox()
         self.layout_selector.setFixedWidth(150)
@@ -53,14 +53,14 @@ class PowerLossTab(ITrackedTab):
             section = Section(self, section_name, self._enable_select_rolling_element_button)
 
             # Set data display and input rows
-            section_layout.addLayout(create_data_input_row(self, self._inputs['Bearings'][section_name]['f'], 'f', 'Współczynnik tarcia tocznego łożyska', decimal_precision=5))
-            section_layout.addLayout(create_data_display_row(self, self._outputs['Bearings'][section_name]['di'], 'd', 'Średnica wewnętrzna łożyska', decimal_precision=2))
-            section_layout.addLayout(create_data_display_row(self, self._outputs['Bearings'][section_name]['do'], 'D', 'Średnica zewnętrzna łożyska', decimal_precision=2))
-            section.addLayout(create_data_display_row(self, self._outputs['Bearings'][section_name]['drc'], 'd<sub>w</sub>', 'Obliczona średnica elementów tocznych', decimal_precision=2))
+            section_layout.addWidget(create_data_input_row(self._inputs['Bearings'][section_name]['f'], 'f', 'Współczynnik tarcia tocznego łożyska', decimal_precision=5))
+            section_layout.addWidget(create_data_display_row(self._outputs['Bearings'][section_name]['di'], 'd', 'Średnica wewnętrzna łożyska', decimal_precision=2))
+            section_layout.addWidget(create_data_display_row(self._outputs['Bearings'][section_name]['do'], 'D', 'Średnica zewnętrzna łożyska', decimal_precision=2))
+            section.addWidget(create_data_display_row(self._outputs['Bearings'][section_name]['drc'], 'd<sub>w</sub>', 'Obliczona średnica elementów tocznych', decimal_precision=2))
 
             # Set button for bearing selection
             button_layout = QHBoxLayout()
-            button_label = QLabel('Element toczny o znormalizowanej średnicy:')
+            button_label = create_header('Element toczny o znormalizowanej średnicy:', bold=True)
 
             select_rolling_element_button = DataButton('Wybierz element toczny')
             self._items['Bearings'][section_name]['rolling_elements'] = select_rolling_element_button

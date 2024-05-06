@@ -25,14 +25,25 @@ class Section(ITrackedWidget):
         Init the user interface.
         """
         self.main_layout = QVBoxLayout()
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self.main_layout)
+
+    def addWidget(self, widget: QWidget):
+        """
+        Add widget.
+
+        Args:
+            widget (QWidget): widget to add.
+        """
+        self.main_layout.addWidget(widget)
+        self._setup_state_tracking()
 
     def addLayout(self, layout: QLayout):
         """
         Add layout.
 
         Args:
-            layout (QLayout): layout to add.
+            layout (QWidget): layout to add.
         """
         self.main_layout.addLayout(layout)
         self._setup_state_tracking()

@@ -1,10 +1,10 @@
 from PyQt6.QtCore import pyqtSignal, Qt
-from PyQt6.QtWidgets import QComboBox, QVBoxLayout, QHBoxLayout, QLabel, QStackedWidget, QWidget
+from PyQt6.QtWidgets import QComboBox, QVBoxLayout, QHBoxLayout, QStackedWidget, QWidget
 
 from .common.DataButton import DataButton
 from .common.Section import Section
 from .common.ITrackedTab import ITrackedTab
-from .common.common_functions import create_data_display_row, create_data_input_row
+from .common.common_functions import create_data_display_row, create_data_input_row, create_header
 
 class BearingsTab(ITrackedTab):
     sectionInputsProvided = pyqtSignal(str, bool, bool)
@@ -12,7 +12,7 @@ class BearingsTab(ITrackedTab):
     def _init_selector(self):
         selector_layout = QHBoxLayout()
 
-        layout_selector_label = QLabel('Miejsce osadzenia łożyska:')
+        layout_selector_label = create_header('Miejsce osadzenia łożyska:', bold=True)
 
         self.layout_selector = QComboBox()
         self.layout_selector.setFixedWidth(150)
@@ -55,14 +55,14 @@ class BearingsTab(ITrackedTab):
             section = Section(self, section_name, self.sectionInputsProvided.emit)
 
             # Set data display and input rows
-            section.addLayout(create_data_display_row(self, self._outputs['Bearings'][section_name]['dip'], 'd<sub>min</sub>', 'Minimalna średnica wewnętrzna łożyska', decimal_precision=2))
-            section.addLayout(create_data_input_row(self, self._inputs['Bearings'][section_name]['Lh'], 'L<sub>h</sub>', 'Trwałość godzinowa łożyska', decimal_precision=0))
-            section.addLayout(create_data_input_row(self, self._inputs['Bearings'][section_name]['fd'], 'f<sub>d</sub>', 'Współczynnik zależny od zmiennych obciążeń dynamicznych łożyska', decimal_precision=2))
-            section.addLayout(create_data_input_row(self, self._inputs['Bearings'][section_name]['ft'], 'f<sub>t</sub>', 'Współczynnik zależny od temperatury pracy łożyska', decimal_precision=2))
+            section.addWidget(create_data_display_row(self._outputs['Bearings'][section_name]['dip'], 'd<sub>min</sub>', 'Minimalna średnica wewnętrzna łożyska', decimal_precision=2))
+            section.addWidget(create_data_input_row(self._inputs['Bearings'][section_name]['Lh'], 'L<sub>h</sub>', 'Trwałość godzinowa łożyska', decimal_precision=0))
+            section.addWidget(create_data_input_row(self._inputs['Bearings'][section_name]['fd'], 'f<sub>d</sub>', 'Współczynnik zależny od zmiennych obciążeń dynamicznych łożyska', decimal_precision=2))
+            section.addWidget(create_data_input_row(self._inputs['Bearings'][section_name]['ft'], 'f<sub>t</sub>', 'Współczynnik zależny od temperatury pracy łożyska', decimal_precision=2))
 
             # Set button for bearing selection
             button_layout = QHBoxLayout()
-            button_label = QLabel('Łożysko:')
+            button_label = create_header('Łożysko:', bold=True)
 
             select_bearing_button = DataButton('Wybierz Łożysko')
             self._items['Bearings'][section_name]['data'] = select_bearing_button
@@ -71,7 +71,7 @@ class BearingsTab(ITrackedTab):
             button_layout.addWidget(select_bearing_button)
 
             section_layout.addWidget(section)
-            section_layout.addLayout(create_data_display_row(self, self._inputs['Bearings'][section_name]['C'], 'C', 'Wymagana nośność łożyska', decimal_precision=2))
+            section_layout.addWidget(create_data_display_row(self._inputs['Bearings'][section_name]['C'], 'C', 'Wymagana nośność łożyska', decimal_precision=2))
             section_layout.addLayout(button_layout)
 
             containers.append(container)
