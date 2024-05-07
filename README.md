@@ -29,3 +29,6 @@ From repository root run:
 ```ps1
 pyinstaller --name 'CycloGear2024' --noconsole --distpath .\build\dist --specpath .\build\spec .\app\main.py ; Copy-Item -Path ".\data" -Destination ".\build\dist\CycloGear2024\data" -Recurse
 ```
+
+## COPYING
+[GNU GPL License](COPYING)
