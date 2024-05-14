@@ -1,4 +1,4 @@
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import pyqtSignal, Qt
 from PyQt6.QtWidgets import QComboBox, QVBoxLayout, QHBoxLayout, QStackedWidget, QWidget
 
 from .common.DataButton import DataButton
@@ -7,6 +7,8 @@ from .common.ITrackedTab import ITrackedTab
 from .common.common_functions import create_data_display_row, create_data_input_row, create_header
 
 class PowerLossTab(ITrackedTab):
+    sectionInputsProvided = pyqtSignal(str, bool, bool)
+
     def _init_selector(self):
         selector_layout = QHBoxLayout()
 
@@ -50,7 +52,7 @@ class PowerLossTab(ITrackedTab):
             container.setLayout(section_layout)
 
             # Set section for displaying outputs and inputs
-            section = Section(self, section_name, self._enable_select_rolling_element_button)
+            section = Section(self, section_name, self.sectionInputsProvided.emit)
 
             # Set data display and input rows
             section_layout.addWidget(create_data_input_row(self._inputs['Bearings'][section_name]['f'], 'f', 'Współczynnik tarcia tocznego łożyska', decimal_precision=5))
@@ -70,6 +72,7 @@ class PowerLossTab(ITrackedTab):
 
             section_layout.addWidget(section)
             section_layout.addLayout(button_layout)
+            section_layout.addWidget(create_data_display_row(self._inputs['Bearings'][section_name]['P'], 'P', 'Straty mocy', decimal_precision=2))
 
             containers.append(container)
 
@@ -78,7 +81,7 @@ class PowerLossTab(ITrackedTab):
     def _change_section(self, index):
         self.stacked_sections.setCurrentIndex(index)
     
-    def _enable_select_rolling_element_button(self, section_name, enable_button, delete_choice):
+    def enable_select_rolling_element_button(self, section_name, enable_button, delete_choice):
         """
         Enable or disable the selection button based on whether all inputs are filled.
 

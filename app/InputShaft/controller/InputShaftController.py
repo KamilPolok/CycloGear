@@ -12,6 +12,7 @@ from InputShaft.Tabs.BearingsTabCalculator import BearingsTabCalculator
 
 from InputShaft.Tabs.PowerLossTab import PowerLossTab
 from InputShaft.Tabs.PowerLossTabController import PowerLossTabController
+from InputShaft.Tabs.PowerLossTabCalculator import PowerLossTabCalculator
 
 from InputShaft.Tabs.ResultsTab import ResultsTab
 from InputShaft.Tabs.ResultsTabController import ResultsTabController
@@ -61,7 +62,8 @@ class InputShaftController:
 
         tab_id +=1
         tab3 = PowerLossTab(self._input_shaft)
-        tab3_controller = PowerLossTabController(tab_id, tab3, self._mediator)
+        tab3_calculator = PowerLossTabCalculator()
+        tab3_controller = PowerLossTabController(tab_id, tab3, tab3_calculator, self._mediator)
 
         tab_id +=1
         tab4 = ResultsTab(self._input_shaft)
@@ -131,7 +133,7 @@ class InputShaftController:
         self._calculator.update_data(data)
         result = self._calculator.open_rolling_element_selection(bearing_section_id)
         if result:
-            self.tabs[2].update_selected_rolling_element(bearing_section_id, result)
+            self.tab_controllers[2].on_rolling_element_selected(bearing_section_id, result)
 
     def _on_update_preliminary_data(self):
         """
@@ -145,7 +147,7 @@ class InputShaftController:
         self._calculator.calculate_bearings_attributes()
 
     def _on_update_power_loss_data(self):
-        self._calculator.calculate_bearings_power_loss()
+        pass
 
     def _on_bearing_changed(self, bearing_section_id, bearing_data):
         bearing_data = self._calculator.get_bearing_attributes(bearing_section_id, bearing_data)

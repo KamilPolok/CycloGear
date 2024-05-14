@@ -1,5 +1,4 @@
 import math
-import numpy as np
 import copy
 
 from DbHandler.controller.DBController import ViewSelectItemController
@@ -63,7 +62,6 @@ class InputShaftCalculator():
                 'fd': [None, ''],           # Współczynnik zależny od zmiennych obciążeń dynamicznych
                 'ft': [None, ''],           # Współczynnik zależny od temperatury pracy łożyska
                 'f': [None, 'm'],           # Współczynnik tarcia tocznego
-                'S': [None, 'mm'],          # Grubość pierścienia
                 'P': [None, 'W'],           # Starty mocy           
               },
                # Podpora B
@@ -81,7 +79,6 @@ class InputShaftCalculator():
                 'fd': [None, ''],           # Współczynnik zależny od zmiennych obciążeń dynamicznych
                 'ft': [None, ''],           # Współczynnik zależny od temperatury pracy łożyska
                 'f': [None, 'm'],           # Współczynnik tarcia tocznego
-                'S': [None, 'mm'],          # Grubość pierścienia
                 'P': [None, 'W'],           # Starty mocy           
               },
                # Wykorbienia pod koła cykloidalne
@@ -100,7 +97,6 @@ class InputShaftCalculator():
                 'fd': [None, ''],           # Współczynnik zależny od zmiennych obciążeń dynamicznych
                 'ft': [None, ''],           # Współczynnik zależny od temperatury pracy łożyska
                 'f': [None, 'm'],           # Współczynnik tarcia tocznego
-                'S': [None, 'mm'],          # Grubość pierścienia
                 'P': [None, 'W'],           # Starty mocy           
               }
             }
@@ -129,26 +125,6 @@ class InputShaftCalculator():
             attributes['drc'][0] = dw
             attributes['di'][0] = Dw
             attributes['do'][0] = Dz
-
-    def calculate_bearings_power_loss(self):
-        """
-        Calculate bearings power loss.
-        """
-        w0 = self.data['w0'][0]
-        e = self.data['e'][0] * 0.001
-        rw1 = self.data['rw1'][0] * 0.001
-        for bearing_section_id, attributes in self.data['Bearings'].items():
-            dw = attributes['rolling_elements']['D'][0] * 0.001
-            Dw = attributes['data']['Dw'][0] * 0.001
-            Dz = attributes['data']['Dz'][0] * 0.001
-            f = attributes['f'][0]
-            F = attributes['F'][0]
-            
-            S = 0.15 * (Dz - Dw) if bearing_section_id == 'eccentrics' else dw / 2
-            P = f * w0 * (1 + (Dw + 2 * S) / dw) * (1 + e / rw1) * 4 * np.abs(F) / np.pi
-
-            attributes['S'][0] = S
-            attributes['P'][0] = P
 
     def open_shaft_material_selection(self):
         """
