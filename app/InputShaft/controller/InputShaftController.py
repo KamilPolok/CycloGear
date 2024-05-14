@@ -71,7 +71,7 @@ class InputShaftController:
 
         self.tabs = [tab1, tab2, tab3, tab4]
         self.tab_controllers = [tab1_controller, tab2_controller, tab3_controller, tab4_controller]
-        tab_titles = ['Wał Czynny', 'Łożyska', 'Straty Mocy', 'Rezultaty']
+        tab_titles = ['Wał Czynny', 'Łożyska', 'Straty Mocy', 'Wyniki']
 
         for tab_controller in self.tab_controllers:
             data = self._calculator.get_data()
