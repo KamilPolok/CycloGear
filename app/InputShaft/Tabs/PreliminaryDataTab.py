@@ -1,9 +1,12 @@
-from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout
+from PyQt6.QtWidgets import QDialog, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QStyle
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPixmap, QCursor
 
 from .common.DataButton import DataButton
 from .common.ITrackedTab import ITrackedTab
 from .common.common_functions import create_data_input_row, create_data_display_row, create_header
+
+from config import resource_path
 
 class PreliminaryDataTab(ITrackedTab):
     def _view_dimensions_component(self):
@@ -12,7 +15,29 @@ class PreliminaryDataTab(ITrackedTab):
         """
         component_layout = QVBoxLayout()
 
-        component_layout.addWidget(create_header('Kształtowanie wału czynnego:', bold=True))
+        # Create header_layout
+        header_layout = QHBoxLayout()
+        header_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+
+        # Create header
+        header = create_header('Kształtowanie wału czynnego:', bold=True)
+
+        # Create a help button
+        self.help_button = QPushButton()
+        help_icon = self.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxQuestion)
+        self.help_button.setIcon(help_icon)
+        self.help_button.setIconSize(help_icon.availableSizes()[0])  # Set the icon size to the available icon size
+        self.help_button.setFixedSize(self.help_button.iconSize())  # Fit the button size to the icon size
+        self.help_button.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))  # Change cursor on hover
+        self.help_button.setStyleSheet("border: none; background-color: transparent;")
+
+        self.help_button.clicked.connect(self._show_help_image)  # Connect button click to the dialog opener
+
+        header_layout.addWidget(header)
+        header_layout.addWidget(self.help_button)
+
+        component_layout.addLayout(header_layout)
+
         component_layout.addWidget(create_data_display_row(self._outputs['B'], 'B', 'Grubość koła obiegowego', decimal_precision=2))
         component_layout.addWidget(create_data_display_row(self._outputs['x'], 'x', 'Odległość pomiędzy kołami obiegowymi', decimal_precision=2))
         component_layout.addWidget(create_data_display_row(self._outputs['e'], 'e', 'Mimośród', decimal_precision=2))
@@ -20,8 +45,24 @@ class PreliminaryDataTab(ITrackedTab):
         component_layout.addWidget(create_data_input_row(self._inputs['LA'], 'L<sub>A</sub>', 'Współrzędna podpory przesuwnej', decimal_precision=2))
         component_layout.addWidget(create_data_input_row(self._inputs['LB'], 'L<sub>B</sub>', 'Współrzędna podpory stałej', decimal_precision=2))
         component_layout.addWidget(create_data_input_row(self._inputs['L1'], 'L<sub>1</sub>', 'Współrzędna koła obiegowego nr 1', decimal_precision=2))
-        
+
         self.main_layout.addLayout(component_layout)
+    
+    def _show_help_image(self):
+        '''
+        Show help image after clicking the help button.
+        '''
+        self.dialog = QDialog(self)
+        label = QLabel(self.dialog)
+        pixmap = QPixmap(resource_path('icons//input_shaft_preview.png'))  # Ensure the path is correct
+        label.setPixmap(pixmap)
+        label.setScaledContents(True)  # Scale image to fit the dialog
+        
+        self.dialog.setWindowTitle("Kształtowanie wału czynnego")
+        self.dialog.setLayout(QVBoxLayout())
+        self.dialog.layout().addWidget(label)
+        self.dialog.setFixedSize(450, 300)
+        self.dialog.show()  # Show the dialog modally
 
     def _view_eccentrics_component(self):
         self.eccentrics_layout = QVBoxLayout()
