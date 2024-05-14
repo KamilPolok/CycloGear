@@ -64,6 +64,7 @@ class ShaftDesignerController:
 
         # Enable the confirmation of current shaft design
         self._enable_shaft_design_confirmation()
+        self._shaft_designer.set_draft_finished_title(False)
                 
     def _draw_shaft(self, shaft_subsection_attributes = None):
         # Calculate shaft subsections plot attributes and draw them on the chart
@@ -103,6 +104,7 @@ class ShaftDesignerController:
         
         self._enable_add_subsection_button(section_name)
         self._enable_shaft_design_confirmation()
+        self._shaft_designer.set_draft_finished_title(False)
     
     def _enable_sections(self):
         if self.all_sections_enabled == False:
@@ -118,8 +120,6 @@ class ShaftDesignerController:
         if self.is_whole_shaft_designed or is_whole_shaft_designed_state_changed:
             self._toogle_remaining_plots_visibility()
             self._shaft_designer.confirm_draft_button.setEnabled(self.is_whole_shaft_designed)
-            if not self.is_whole_shaft_designed:
-                self._shaft_designer.set_draft_finished_title(False)
             
     def _is_whole_shaft_designed_state_changed(self):
         is_whole_shaft_designed_new = self.shaft_calculator.is_whole_shaft_designed()
@@ -207,6 +207,7 @@ class ShaftDesignerController:
         if self.shaft_calculator.shaft_sections:
             self._draw_shaft()
             self._enable_shaft_design_confirmation()
+            self._shaft_designer.set_draft_finished_title(False)
             self.update_bearing_data()
 
         # (Re)draw shaft plots
@@ -239,3 +240,4 @@ class ShaftDesignerController:
                 self._enable_sections()
 
         self._enable_shaft_design_confirmation()
+        self._shaft_designer.set_draft_finished_title(False)
