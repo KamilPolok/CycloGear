@@ -214,6 +214,7 @@ class ShaftDesigner(QMainWindow):
         self._toggle_bearings_plot_button.setIcon(QIcon(resource_path('icons//bearing.png')))
         self._toggle_bearings_plot_button.setToolTip("Wyświetl łożyska")
         self._toggle_bearings_plot_button.setCheckable(True)
+        self._toggle_bearings_plot_button.setEnabled(False)
         self._toggle_bearings_plot_button.clicked.connect(self._toggle_bearings)
         self.toolbar_layout.addWidget(self._toggle_bearings_plot_button)
 

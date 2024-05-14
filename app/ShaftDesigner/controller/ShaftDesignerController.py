@@ -221,6 +221,10 @@ class ShaftDesignerController:
         """
         bearings_plot_attributes = self.shaft_calculator.calculate_bearings(bearing_attributes)
         self._shaft_designer.shaft_viewer.set_bearings(bearings_plot_attributes)
+        if bearings_plot_attributes:
+            self._shaft_designer._toggle_bearings_plot_button.setEnabled(True)
+        else:
+            self._shaft_designer._toggle_bearings_plot_button.setEnabled(False)
 
     def get_shaft_data(self):
         return self.shaft_calculator.shaft_sections
