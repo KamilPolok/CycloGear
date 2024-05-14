@@ -20,7 +20,7 @@ class ResultsTabController:
         self._component_data = component_data
 
         outputs_keys = [['nwe'], ['Mwe'], ['L'], ['LA'], ['LB'], ['L1'], ['Lc'], ['e'],
-                        ['Fx'], ['Ra'], ['Rb'],
+                        ['Fx'], ['Ra'], ['Rb'], ['P'],
                         ['Bearings', 'support_A', 'P'],
                         ['Bearings', 'support_B', 'P'],
                         ['Bearings', 'eccentrics', 'P']

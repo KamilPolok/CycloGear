@@ -45,6 +45,8 @@ class InputShaftCalculator():
             # Obliczone wymiary wału
             'dsc': [None, 'mm'],            # Średnica wału wejściowego - obliczona
             'dec': [None, 'mm'],            # Średnica mimośrodu - obliczona
+            # Straty mocy w mechanizmie
+            'P': [None, 'W'],
             # Łożyska
             'Bearings': {
               # Podpora A
@@ -116,7 +118,7 @@ class InputShaftCalculator():
         """
         Calculate bearings attributes.
         """
-        for bearing_section_id, attributes in self.data['Bearings'].items():
+        for attributes in self.data['Bearings'].values():
             Dz = attributes['data']['Dz'][0]
             Dw = attributes['data']['Dw'][0]
 
@@ -125,6 +127,21 @@ class InputShaftCalculator():
             attributes['drc'][0] = dw
             attributes['di'][0] = Dw
             attributes['do'][0] = Dz
+    
+    def calculate_absolute_power_loss(self):
+        """
+        Calculate absolute power loss in current mechanism.
+        """
+        absolute_power_loss = 0
+        for bearing_section_id, attributes in self.data['Bearings'].items():
+            if bearing_section_id == 'eccentrics':
+                power_loss = attributes['P'][0] * self.data['n'][0]
+            else:
+                power_loss = attributes['P'][0]
+
+            absolute_power_loss += power_loss
+        
+        self.data['P'][0] = absolute_power_loss
 
     def open_shaft_material_selection(self):
         """

@@ -147,7 +147,7 @@ class InputShaftController:
         self._calculator.calculate_bearings_attributes()
 
     def _on_update_power_loss_data(self):
-        pass
+        self._calculator.calculate_absolute_power_loss()
 
     def _on_bearing_changed(self, bearing_section_id, bearing_data):
         bearing_data = self._calculator.get_bearing_attributes(bearing_section_id, bearing_data)
