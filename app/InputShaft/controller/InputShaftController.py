@@ -73,9 +73,9 @@ class InputShaftController:
         self.tab_controllers = [tab1_controller, tab2_controller, tab3_controller, tab4_controller]
         tab_titles = ['Wał Czynny', 'Łożyska', 'Straty Mocy', 'Rezultaty']
 
-        for tab in self.tab_controllers:
+        for tab_controller in self.tab_controllers:
             data = self._calculator.get_data()
-            tab.init_state(data)
+            tab_controller.init_state(data)
 
         self._input_shaft.init_tabs(self.tabs, tab_titles)
 
@@ -121,13 +121,13 @@ class InputShaftController:
     def _on_select_materials(self):
         result = self._calculator.open_shaft_material_selection()
         if result:
-            self.tabs[0].update_selected_material(result)
+            self.tab_controllers[0].on_materials_selected(result)
 
     def _on_select_bearing(self, bearing_section_id, data):
         self._calculator.update_data(data)
         result = self._calculator.open_bearing_selection(bearing_section_id)
         if result:
-            self.tabs[1].update_selected_bearing(bearing_section_id, result)
+            self.tab_controllers[1].on_bearing_selected(bearing_section_id, result)
 
     def _on_select_rolling_element(self, bearing_section_id, data):
         self._calculator.update_data(data)
@@ -168,8 +168,8 @@ class InputShaftController:
         data.append(self._shaft_designer_controller.get_shaft_data())
 
         # Get every tab data
-        for tab in self.tab_controllers[:-1]:
-            data.append(tab.get_data())
+        for tab_controller in self.tab_controllers[:-1]:
+            data.append(tab_controller.get_data())
 
         # Get is_shaft_designed flag
         data.append(self._input_shaft.is_shaft_designed)
@@ -189,8 +189,8 @@ class InputShaftController:
             self._shaft_designer_controller.set_shaft_data(data[1])
 
         # Set every tab data
-        for idx, tab in enumerate(self.tab_controllers[:-1]):
-            tab.set_state(data[idx+2])
+        for idx, tab_controller in enumerate(self.tab_controllers[:-1]):
+            tab_controller.set_state(data[idx+2])
         
         # Set is_shaft_designed_flag
         self._input_shaft.is_shaft_designed = data[-1]

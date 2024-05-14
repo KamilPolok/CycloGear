@@ -34,6 +34,9 @@ class PreliminaryDataTabController():
 
     def _on_select_materials(self):
         self._mediator.select_material()
+
+    def on_materials_selected(self, data):
+        self._tab.update_selected_material(data)
     
     def get_data(self):
         """

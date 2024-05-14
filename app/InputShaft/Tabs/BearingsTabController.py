@@ -56,6 +56,9 @@ class BearingsTabController:
     def _update_component_data(self):
         self._mediator.update_component_data(self._id, self.get_data())
     
+    def on_bearing_selected(self, section_name, item_data):
+        self._tab.update_selected_bearing(section_name, item_data)
+    
     def get_data(self):
         """
         Retrieve data from the tab.
