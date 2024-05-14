@@ -13,7 +13,7 @@ class PreliminaryDataTab(ITrackedTab):
         component_layout = QVBoxLayout()
 
         component_layout.addWidget(create_header('Kształtowanie wału czynnego:', bold=True))
-        component_layout.addWidget(create_data_display_row(self._outputs['B'], 'B', 'Długość koła obiegowego', decimal_precision=2))
+        component_layout.addWidget(create_data_display_row(self._outputs['B'], 'B', 'Grubość koła obiegowego', decimal_precision=2))
         component_layout.addWidget(create_data_display_row(self._outputs['x'], 'x', 'Odległość pomiędzy kołami obiegowymi', decimal_precision=2))
         component_layout.addWidget(create_data_display_row(self._outputs['e'], 'e', 'Mimośród', decimal_precision=2))
         component_layout.addWidget(create_data_input_row(self._inputs['L'], 'L', 'Długość wału czynnego', decimal_precision=2))
