@@ -26,4 +26,5 @@ def resource_path(relative_path):
 
 # Set application title and initial project name
 APP_NAME = 'CycloGear2024'
+APP_ICON = resource_path('icons//window_icon.png')
 INITIAL_PROJECT_NAME = 'Projekt1'

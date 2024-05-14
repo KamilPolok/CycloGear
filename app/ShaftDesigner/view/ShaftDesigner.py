@@ -9,7 +9,7 @@ from ShaftDesigner.view.Chart.Chart_ShaftViewer import Chart_ShaftViewer
 
 from ShaftDesigner.view.Chart.Utils.CheckboxDropdown import CheckboxDropdown
 
-from config import APP_NAME
+from config import APP_NAME, APP_ICON
 
 from config import resource_path
 
@@ -29,6 +29,8 @@ class ShaftDesigner(QMainWindow):
         # Set window parameters
         self._window_title = APP_NAME + ' - ' + designed_part_name
         self.setWindowTitle(self._window_title)
+        self.setWindowIcon(QIcon(APP_ICON))
+
         self.resize(800,500)
 
         # Set main layout

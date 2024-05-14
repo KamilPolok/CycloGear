@@ -1,8 +1,9 @@
 from PyQt6.QtWidgets import QDialog, QDialogButtonBox, QMainWindow, QVBoxLayout, QWidget, QLabel
 from PyQt6.QtCore import pyqtSignal, Qt
-from PyQt6.QtGui import QAction
+from PyQt6.QtGui import QAction, QIcon
 
-from config import APP_NAME
+from config import APP_NAME, APP_ICON
+
 
 class AppWindow(QMainWindow):
     '''
@@ -20,6 +21,8 @@ class AppWindow(QMainWindow):
         '''
         Set user interface.
         '''
+        # Set window icon
+        self.setWindowIcon(QIcon(APP_ICON))
         # Set window size
         self.resize(800,500)
 
