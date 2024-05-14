@@ -95,7 +95,7 @@ class FunctionsCalculator():
         self.torque = np.around(self.torque, decimals=2)
 
     def _calculate_equivalent_moment_function(self):
-        reductionFactor = 2 * np.sqrt(3)
+        reductionFactor = np.sqrt(3)
         self.equivalent_moment = np.sqrt(np.power(self.bending_moment, 2) + np.power(reductionFactor / 2 * self.torque, 2))
         self.equivalent_moment = np.around(self.equivalent_moment, decimals=2)
         
@@ -103,18 +103,18 @@ class FunctionsCalculator():
         # Calculate minimal shaft diameter based on equivalent stress condition
         Zgo = self._data['Materiał']['Zgo'][0] * 10**6
         xz = self._data['xz'][0]  
-        kgo = Zgo / xz                                                                                          
-        self.d_min_by_equivalent_stress = np.power(32 * self.equivalent_moment / (np.pi * kgo), 1/3) * 1000
+        kgo = Zgo / xz
+        self.d_min_by_equivalent_stress = np.power(32 * self.equivalent_moment / (np.pi * kgo), 1 / 3) * 1000
         self.d_min_by_equivalent_stress = np.ceil(self.d_min_by_equivalent_stress * 100) / 100
         self._min_diameters['dMz'] = self.d_min_by_equivalent_stress
         self._initial_min_diameters['dMz'] = self.d_min_by_equivalent_stress
     
     def _calculate_dmin_function_by_torsional_strength(self):
         # Calculate minimal shaft diameter based on torsional strength condition
-        Zsj = self._data['Materiał']['Zsj'][0] * 10**6
+        Zso = self._data['Materiał']['Zso'][0] * 10**6
         xz = self._data['xz'][0]
-        ksj = Zsj / xz
-        self.d_min_by_torsional_strength = np.sqrt(16 * self.torque / (np.pi * ksj)) * 1000
+        kso = Zso / xz
+        self.d_min_by_torsional_strength = np.power(16 * self.torque / (np.pi * kso), 1 / 3) * 1000
         self.d_min_by_torsional_strength = np.ceil(self.d_min_by_torsional_strength * 100) / 100
         self._min_diameters['dMs'] = self.d_min_by_torsional_strength
         self._initial_min_diameters['dMs'] = self.d_min_by_torsional_strength
