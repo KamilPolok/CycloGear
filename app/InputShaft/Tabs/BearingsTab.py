@@ -21,7 +21,7 @@ class BearingsTab(ITrackedTab):
         line_edit.setAlignment(Qt.AlignmentFlag.AlignCenter)
         line_edit.setReadOnly(True)
  
-        self.layout_selector.addItems(["Podpora przesuwna A", "Podpora stała B", "Wykorbienia"])
+        self.layout_selector.addItems(["Podpora przesuwna A", "Podpora stała B", "Mimośrody"])
         self.layout_selector.currentIndexChanged.connect(self._change_section)
 
         selector_layout.addWidget(layout_selector_label, alignment=Qt.AlignmentFlag.AlignLeft)

@@ -83,7 +83,7 @@ class InputShaftCalculator():
                 'f': [None, 'm'],           # Współczynnik tarcia tocznego
                 'P': [None, 'W'],           # Starty mocy           
               },
-               # Wykorbienia pod koła cykloidalne
+               # Miośrody pod koła cykloidalne
               'eccentrics': {                         
                 'data': None,               # Parametry łożyska
                 'rolling_elements': None,   # Elementy toczne

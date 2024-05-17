@@ -194,7 +194,7 @@ class EccentricsSection(Section):
 
     def __init__(self, name, parent=None):
         super().__init__(name, parent)
-        self.subsection_name = 'Wykorbienie'
+        self.subsection_name = 'Mimośród'
 
     def _init_content(self):
         super()._init_content()

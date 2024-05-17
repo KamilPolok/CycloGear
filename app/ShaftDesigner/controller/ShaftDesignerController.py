@@ -13,7 +13,7 @@ class ShaftDesignerController:
         self._mediator = mediator
 
         # Set shaft sections names
-        self.section_names = ['Wykorbienia', 'Przed Wykorbieniami', 'Za Wykorbieniami']
+        self.section_names = ['Mimośrody', 'Przed Mimośrodami', 'Za Mimośrodami']
         self.is_whole_shaft_designed = False
 
         # Prepare dict storing sidebar sections
@@ -33,7 +33,7 @@ class ShaftDesignerController:
             section.subsection_data_signal.connect(self._handle_subsection_data)
             section.remove_subsection_plot_signal.connect(self._remove_shaft_subsection)
 
-            if section_name != 'Wykorbienia':
+            if section_name != 'Mimośrody':
                 section.add_subsection_signal.connect(self._set_limits)
 
     def _init_ui(self):
@@ -42,7 +42,7 @@ class ShaftDesignerController:
     def _init_shaft_sections(self):
         # Set instances of sidebar sections
         for name in self.section_names:
-            if name == 'Wykorbienia':
+            if name == 'Mimośrody':
                 section = EccentricsSection(name)
             else:
                 section = ShaftSection(name)
@@ -83,7 +83,7 @@ class ShaftDesignerController:
     def _set_limits(self):
         current_subsections = {}
         for section_name, section in self._sections.items():
-            if section_name != 'Wykorbienia':
+            if section_name != 'Mimośrody':
                 current_subsections[section_name] = [None] * section.subsection_count
         limits = self.shaft_calculator.calculate_limits(current_subsections)
         sections_dimensions = self.shaft_calculator.get_sections_dimensions()
@@ -108,7 +108,7 @@ class ShaftDesignerController:
     
     def _enable_sections(self):
         if self.all_sections_enabled == False:
-            if 'Wykorbienia' in self.shaft_calculator.shaft_sections and len(self.shaft_calculator.shaft_sections['Wykorbienia']) == self.eccentrics_number:
+            if 'Mimośrody' in self.shaft_calculator.shaft_sections and len(self.shaft_calculator.shaft_sections['Mimośrody']) == self.eccentrics_number:
                 for section in self._sections.values():
                     if not section.isEnabled():
                         section.setEnabled(True)
@@ -136,7 +136,7 @@ class ShaftDesignerController:
     
     def _enable_add_subsection_button(self, section_name):
         # Enable add button if the last subsection in the sidebar was plotted - do not allow to add multiple subsections at once
-        if section_name != 'Wykorbienia':
+        if section_name != 'Mimośrody':
             last_subsection_number = self._sections[section_name].subsection_count - 1
             if self._sections[section_name].subsection_count == 0 or (section_name in self.shaft_calculator.shaft_sections and
             last_subsection_number in self.shaft_calculator.shaft_sections[section_name]):
@@ -182,21 +182,21 @@ class ShaftDesignerController:
 
         # (Re)set number of eccentrics
         self.eccentrics_number = data['n'][0]
-        if self.eccentrics_number < 2 and 'Pomiędzy Wykorbieniami' in self._sections:
-            self._shaft_designer.remove_section_from_sidebar(self._sections['Pomiędzy Wykorbieniami'])
-            del self._sections['Pomiędzy Wykorbieniami']
-            if 'Pomiędzy Wykorbieniami' in self.shaft_calculator.shaft_sections:
-                del self.shaft_calculator.shaft_sections['Pomiędzy Wykorbieniami']
-        elif self.eccentrics_number >= 2 and 'Pomiędzy Wykorbieniami' not in self._sections:
-            section = ShaftSection('Pomiędzy Wykorbieniami')
+        if self.eccentrics_number < 2 and 'Pomiędzy Mimośrodami' in self._sections:
+            self._shaft_designer.remove_section_from_sidebar(self._sections['Pomiędzy Mimośrodami'])
+            del self._sections['Pomiędzy Mimośrodami']
+            if 'Pomiędzy Mimośrodami' in self.shaft_calculator.shaft_sections:
+                del self.shaft_calculator.shaft_sections['Pomiędzy Mimośrodami']
+        elif self.eccentrics_number >= 2 and 'Pomiędzy Mimośrodami' not in self._sections:
+            section = ShaftSection('Pomiędzy Mimośrodami')
             section.setEnabled(False)
             self._enable_sections()
-            self._sections['Pomiędzy Wykorbieniami'] = section
+            self._sections['Pomiędzy Mimośrodami'] = section
             self._shaft_designer.append_section_to_sidebar(section)
             section.subsection_data_signal.connect(self._handle_subsection_data)
             section.remove_subsection_plot_signal.connect(self._remove_shaft_subsection)
             section.add_subsection_signal.connect(self._set_limits)
-        self._sections['Wykorbienia'].set_subsections_number(self.eccentrics_number)
+        self._sections['Mimośrody'].set_subsections_number(self.eccentrics_number)
 
         # (Re)set shaft initial attributes 
         self.shaft_calculator.set_data(self.functions_calculator.get_shaft_initial_attributes())
@@ -233,7 +233,7 @@ class ShaftDesignerController:
     def set_shaft_data(self, data):
         for section_name, section in data.items():
             for subsection_number, subsection in section.items():
-                if section_name != 'Wykorbienia':
+                if section_name != 'Mimośrody':
                     self._sections[section_name].add_subsection()
                 data = (section_name, int(subsection_number), subsection, None)
                 self._draw_shaft(data)

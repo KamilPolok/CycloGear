@@ -12,19 +12,19 @@ class ShaftCalculator:
         self._shaft_dimensions = []
 
         # Calculate shaft sections plots attributes
-        if 'Wykorbienia' in self.shaft_sections:
+        if 'Mimośrody' in self.shaft_sections:
             self._calculate_eccentricities_section()
-        if 'Przed Wykorbieniami' in self.shaft_sections:
+        if 'Przed Mimośrodami' in self.shaft_sections:
             self._calculate_section_before_eccentricities()
-        if 'Pomiędzy Wykorbieniami' in self.shaft_sections:
+        if 'Pomiędzy Mimośrodami' in self.shaft_sections:
             self._calculate_section_between_eccentricities()
-        if 'Za Wykorbieniami' in self.shaft_sections:
+        if 'Za Mimośrodami' in self.shaft_sections:
             self._calculate_section_after_eccentricities()
         
         return self._shaft_dimensions
     
     def _calculate_eccentricities_section(self):
-        section = 'Wykorbienia'
+        section = 'Mimośrody'
         for subsection_number, subsection_data in self.shaft_sections[section].items():
             length = subsection_data['l']
             diameter = subsection_data['d']
@@ -39,8 +39,8 @@ class ShaftCalculator:
 
     def _calculate_section_between_eccentricities(self):
         # Draw the shaft section between the eccentrics
-        section = 'Pomiędzy Wykorbieniami'
-        start_z = self._shaft_attributes['Li'][0] + self.shaft_sections['Wykorbienia'][0]['l'] / 2
+        section = 'Pomiędzy Mimośrodami'
+        start_z = self._shaft_attributes['Li'][0] + self.shaft_sections['Mimośrody'][0]['l'] / 2
 
         for subsection_number, subsection_data in self.shaft_sections[section].items():
             length = subsection_data['l']
@@ -53,9 +53,9 @@ class ShaftCalculator:
 
     def _calculate_section_before_eccentricities(self):
         # Draw the shaft section before the first eccentric
-        section = 'Przed Wykorbieniami'
+        section = 'Przed Mimośrodami'
 
-        start_z = self._shaft_attributes['Li'][0] - self.shaft_sections['Wykorbienia'][0]['l'] / 2
+        start_z = self._shaft_attributes['Li'][0] - self.shaft_sections['Mimośrody'][0]['l'] / 2
 
         for subsection_number, subsection_data in self.shaft_sections[section].items():
             length = subsection_data['l']
@@ -67,8 +67,8 @@ class ShaftCalculator:
         
     def _calculate_section_after_eccentricities(self):
         # Draw the shaft section after the second eccentric
-        section = 'Za Wykorbieniami'
-        start_z = self._shaft_attributes['Li'][-1] + self.shaft_sections['Wykorbienia'][list(self.shaft_sections['Wykorbienia'].keys())[-1]]['l'] / 2
+        section = 'Za Mimośrodami'
+        start_z = self._shaft_attributes['Li'][-1] + self.shaft_sections['Mimośrody'][list(self.shaft_sections['Mimośrody'].keys())[-1]]['l'] / 2
 
         for subsection_number, subsection_data in self.shaft_sections[section].items():
             length = subsection_data['l']
@@ -155,7 +155,7 @@ class ShaftCalculator:
         Bx = self._shaft_attributes['Bx']
         # Set initial limits for eccentrics
         self.limits = {
-            'Wykorbienia': {
+            'Mimośrody': {
                 idx: {
                     'd': {'min': de, 'max': 1000},
                     'l': {'min': B, 'max': 2 * min(position - LA if idx == 0 else x + B - 0.5 * Bx[idx-1], # max distance to left
@@ -171,11 +171,11 @@ class ShaftCalculator:
                 dmax = 1000
                 if subsection_number == 0:
                     self.limits[section_name] = {}
-                    if section_name == 'Przed Wykorbieniami':
+                    if section_name == 'Przed Mimośrodami':
                         lmax = max(Li[0] - 0.5 * Bx[0], 0)
-                    if section_name == 'Pomiędzy Wykorbieniami':
+                    if section_name == 'Pomiędzy Mimośrodami':
                         lmax = Li[1] - Li[0] - 0.5 * (Bx[0] + Bx[1])
-                    if section_name == 'Za Wykorbieniami':
+                    if section_name == 'Za Mimośrodami':
                         lmax = max(L - Li[-1] - 0.5 * Bx[-1], 0)
                 else:
                     previous_subsection = self.limits[section_name][subsection_number - 1]
