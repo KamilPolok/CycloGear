@@ -134,12 +134,7 @@ class InputShaftCalculator():
         """
         absolute_power_loss = 0
         for bearing_section_id, attributes in self.data['Bearings'].items():
-            if bearing_section_id == 'eccentrics':
-                power_loss = attributes['P'][0] * self.data['n'][0]
-            else:
-                power_loss = attributes['P'][0]
-
-            absolute_power_loss += power_loss
+            absolute_power_loss += attributes['P'][0]
         
         self.data['P'][0] = absolute_power_loss
 
