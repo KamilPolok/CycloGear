@@ -237,13 +237,14 @@ class InputShaftCalculator():
         """
         if bearing_data:
             Dw = bearing_data['Dw'][0]
-            Dz = bearing_data['Dz'][0]
             B = bearing_data['B'][0]
 
             if bearing_section_id == 'eccentrics':
                 e = self.data['e'][0]
+                Dz = bearing_data['E'][0]
             else:
                 e = 0
+                Dz = bearing_data['Dz'][0]
 
             bearing_data = {'Dw': Dw, 'Dz': Dz, 'B': B, 'e': e}
 
