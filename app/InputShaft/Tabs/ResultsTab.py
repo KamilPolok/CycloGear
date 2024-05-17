@@ -35,7 +35,7 @@ class ResultsTab(ITrackedTab):
         content_layout.addWidget(create_data_display_row(self._outputs['Bearings']['support_A']['P'], 'P<sub>A</sub>', 'Podpora przesuwna A', decimal_precision=2))
         content_layout.addWidget(create_data_display_row(self._outputs['Bearings']['support_B']['P'], 'P<sub>B</sub>', 'Podpora stała B', decimal_precision=2))
         content_layout.addWidget(create_data_display_row(self._outputs['Bearings']['eccentrics']['P'], 'P<sub>e</sub>', 'Mimośrody', decimal_precision=2))
-        content_layout.addWidget(create_data_display_row(self._outputs['P'], 'P<sub>c</sub>', 'Całkowite starty mocy', decimal_precision=2))
+        content_layout.addWidget(create_data_display_row(self._outputs['P'], 'P<sub>c</sub>', 'Całkowite straty mocy', decimal_precision=2))
 
         super().init_ui()
 

@@ -64,7 +64,7 @@ class InputShaftCalculator():
                 'fd': [None, ''],           # Współczynnik zależny od zmiennych obciążeń dynamicznych
                 'ft': [None, ''],           # Współczynnik zależny od temperatury pracy łożyska
                 'f': [None, 'm'],           # Współczynnik tarcia tocznego
-                'P': [None, 'W'],           # Starty mocy           
+                'P': [None, 'W'],           # Straty mocy           
               },
                # Podpora B
               'support_B': {                         
@@ -81,7 +81,7 @@ class InputShaftCalculator():
                 'fd': [None, ''],           # Współczynnik zależny od zmiennych obciążeń dynamicznych
                 'ft': [None, ''],           # Współczynnik zależny od temperatury pracy łożyska
                 'f': [None, 'm'],           # Współczynnik tarcia tocznego
-                'P': [None, 'W'],           # Starty mocy           
+                'P': [None, 'W'],           # Straty mocy           
               },
                # Miośrody pod koła cykloidalne
               'eccentrics': {                         
@@ -99,7 +99,7 @@ class InputShaftCalculator():
                 'fd': [None, ''],           # Współczynnik zależny od zmiennych obciążeń dynamicznych
                 'ft': [None, ''],           # Współczynnik zależny od temperatury pracy łożyska
                 'f': [None, 'm'],           # Współczynnik tarcia tocznego
-                'P': [None, 'W'],           # Starty mocy           
+                'P': [None, 'W'],           # Straty mocy           
               }
             }
         }
