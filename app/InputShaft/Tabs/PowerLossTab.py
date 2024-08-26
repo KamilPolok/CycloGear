@@ -7,7 +7,8 @@ from .common.ITrackedTab import ITrackedTab
 from .common.common_functions import create_data_display_row, create_data_input_row, create_header
 
 class PowerLossTab(ITrackedTab):
-    sectionInputsProvided = pyqtSignal(str, bool, bool)
+    rollingElementDiameterProvided = pyqtSignal(str, bool, bool)
+    sectionDataProvided = pyqtSignal(str, bool, bool)
 
     def _init_selector(self):
         selector_layout = QHBoxLayout()
@@ -49,27 +50,29 @@ class PowerLossTab(ITrackedTab):
         container = QWidget()
         container.setLayout(section_layout)
 
-        # Set section for displaying outputs and inputs
-        section = Section(self, section_name, self.sectionInputsProvided.emit)
-
-        # Set data display and input rows
-        section.addWidget(create_data_input_row(self._inputs['Bearings'][section_name]['f'], 'f', 'Współczynnik tarcia tocznego łożyska', decimal_precision=5))
-        section.addWidget(create_data_display_row(self._outputs['Bearings'][section_name]['di'], 'd', 'Średnica wewnętrzna łożyska', decimal_precision=2))
-        section.addWidget(create_data_display_row(self._outputs['Bearings'][section_name]['do'], 'D', 'Średnica zewnętrzna łożyska', decimal_precision=2))
-        section.addWidget(create_data_display_row(self._outputs['Bearings'][section_name]['drc'], 'd<sub>w</sub>', 'Obliczona średnica elementów tocznych', decimal_precision=2))
-
         # Set button for bearing selection
         button_layout = QHBoxLayout()
         button_label = create_header('Element toczny o znormalizowanej średnicy:', bold=True)
 
         select_rolling_element_button = DataButton('Wybierz element toczny')
         self._items['Bearings'][section_name]['rolling_elements'] = select_rolling_element_button
-
         button_layout.addWidget(button_label)
         button_layout.addWidget(select_rolling_element_button)
 
-        section_layout.addWidget(section)
-        section_layout.addLayout(button_layout)
+        # Set bearing diameter subsection
+        diameter_subsection = Section(self, section_name, self.rollingElementDiameterProvided.emit)
+        diameter_subsection.addWidget(create_data_display_row(self._outputs['Bearings'][section_name]['di'], 'd', 'Średnica wewnętrzna łożyska', decimal_precision=2))
+        diameter_subsection.addWidget(create_data_display_row(self._outputs['Bearings'][section_name]['do'], 'D', 'Średnica zewnętrzna łożyska', decimal_precision=2))
+        diameter_subsection.addWidget(create_data_display_row(self._outputs['Bearings'][section_name]['drc'], 'd<sub>w</sub>', 'Obliczona średnica elementów tocznych', decimal_precision=2))
+
+        # Set data subsection
+        data_subsection = Section(self, section_name, self.sectionDataProvided.emit)
+        data_subsection.addLayout(button_layout)
+        data_subsection.addWidget(create_data_input_row(self._inputs['Bearings'][section_name]['f'], 'f', 'Współczynnik tarcia tocznego łożyska', decimal_precision=5))
+
+        # Add widgets to section layout
+        section_layout.addWidget(diameter_subsection)
+        section_layout.addWidget(data_subsection)
         section_layout.addWidget(create_data_display_row(self._inputs['Bearings'][section_name]['P'], 'P', 'Straty mocy', decimal_precision=2))
 
         return container

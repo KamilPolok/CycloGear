@@ -23,9 +23,10 @@ class PowerLossTabController:
             data_changed (bool): Specifies whether the data regarding the bearing was changed 
         """
         if all_data_provided and data_changed:
+            data = self._calculator.calculate_bearing_power_loss(section_name, self.get_data())
+            self._inputs['Bearings'][section_name]['P'][0].setValue(data)
+        elif not all_data_provided:
             self._inputs['Bearings'][section_name]['P'][0].clear()
-
-        self._tab.enable_select_rolling_element_button(section_name, all_data_provided, data_changed)
 
     def _select_rolling_element(self, bearing_section_id):
         """
@@ -40,7 +41,8 @@ class PowerLossTabController:
         """
         Connect signals and slots for interactivity in the tab.
         """
-        self._tab.sectionInputsProvided.connect(self._on_rolling_element_data_provided)
+        self._tab.rollingElementDiameterProvided.connect(self._tab.enable_select_rolling_element_button)
+        self._tab.sectionDataProvided.connect(self._on_rolling_element_data_provided)
         self._tab.allInputsProvided.connect(self._update_component_data)
         self._tab.updateStateSignal.connect(self.update_state)
 
@@ -52,8 +54,6 @@ class PowerLossTabController:
 
     def on_rolling_element_selected(self, section_name, item_data):
         self._tab.update_selected_rolling_element(section_name, item_data)
-        data = self._calculator.calculate_bearing_power_loss(section_name, self.get_data())
-        self._inputs['Bearings'][section_name]['P'][0].setValue(data)
     
     def get_data(self):
         """
