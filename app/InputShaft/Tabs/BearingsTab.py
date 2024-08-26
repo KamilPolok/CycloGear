@@ -31,52 +31,48 @@ class BearingsTab(ITrackedTab):
         self.main_layout.addLayout(selector_layout)
 
     def _init_sections(self):
-        containers = self._init_bearings_sections()
-        
         self.stacked_sections = QStackedWidget()
-        for container in containers:
+
+        for section_name in self._items['Bearings']:
+            container = self._init_bearings_section(section_name)
             self.stacked_sections.addWidget(container)
 
         self.main_layout.addWidget(self.stacked_sections)
 
-    def _init_bearings_sections(self):
+    def _init_bearings_section(self, section_name):
         """
-        Create and layout the UI components for bearings sections.
+        Create and layout the UI components for single bearings section.
         """
-        containers = []
-        for section_name in self._items['Bearings']:
-            section_layout = QVBoxLayout()
+        section_layout = QVBoxLayout()
 
-            # Set content container
-            container = QWidget()
-            container.setLayout(section_layout)
+        # Set content container
+        container = QWidget()
+        container.setLayout(section_layout)
 
-            # Set section for displaying outputs and inputs
-            section = Section(self, section_name, self.sectionInputsProvided.emit)
+        # Set section for displaying outputs and inputs
+        section = Section(self, section_name, self.sectionInputsProvided.emit)
 
-            # Set data display and input rows
-            section.addWidget(create_data_display_row(self._outputs['Bearings'][section_name]['dip'], 'd<sub>min</sub>', 'Minimalna średnica wewnętrzna łożyska', decimal_precision=2))
-            section.addWidget(create_data_input_row(self._inputs['Bearings'][section_name]['Lh'], 'L<sub>h</sub>', 'Trwałość godzinowa łożyska', decimal_precision=0))
-            section.addWidget(create_data_input_row(self._inputs['Bearings'][section_name]['fd'], 'f<sub>d</sub>', 'Współczynnik zależny od zmiennych obciążeń dynamicznych łożyska', decimal_precision=2))
-            section.addWidget(create_data_input_row(self._inputs['Bearings'][section_name]['ft'], 'f<sub>t</sub>', 'Współczynnik zależny od temperatury pracy łożyska', decimal_precision=2))
+        # Set data display and input rows
+        section.addWidget(create_data_display_row(self._outputs['Bearings'][section_name]['dip'], 'd<sub>min</sub>', 'Minimalna średnica wewnętrzna łożyska', decimal_precision=2))
+        section.addWidget(create_data_input_row(self._inputs['Bearings'][section_name]['Lh'], 'L<sub>h</sub>', 'Trwałość godzinowa łożyska', decimal_precision=0))
+        section.addWidget(create_data_input_row(self._inputs['Bearings'][section_name]['fd'], 'f<sub>d</sub>', 'Współczynnik zależny od zmiennych obciążeń dynamicznych łożyska', decimal_precision=2))
+        section.addWidget(create_data_input_row(self._inputs['Bearings'][section_name]['ft'], 'f<sub>t</sub>', 'Współczynnik zależny od temperatury pracy łożyska', decimal_precision=2))
 
-            # Set button for bearing selection
-            button_layout = QHBoxLayout()
-            button_label = create_header('Łożysko:', bold=True)
+        # Set button for bearing selection
+        button_layout = QHBoxLayout()
+        button_label = create_header('Łożysko:', bold=True)
 
-            select_bearing_button = DataButton('Wybierz Łożysko')
-            self._items['Bearings'][section_name]['data'] = select_bearing_button
+        select_bearing_button = DataButton('Wybierz Łożysko')
+        self._items['Bearings'][section_name]['data'] = select_bearing_button
 
-            button_layout.addWidget(button_label)
-            button_layout.addWidget(select_bearing_button)
+        button_layout.addWidget(button_label)
+        button_layout.addWidget(select_bearing_button)
 
-            section_layout.addWidget(section)
-            section_layout.addWidget(create_data_display_row(self._inputs['Bearings'][section_name]['C'], 'C', 'Wymagana nośność łożyska', decimal_precision=2))
-            section_layout.addLayout(button_layout)
+        section_layout.addWidget(section)
+        section_layout.addWidget(create_data_display_row(self._inputs['Bearings'][section_name]['C'], 'C', 'Wymagana nośność łożyska', decimal_precision=2))
+        section_layout.addLayout(button_layout)
 
-            containers.append(container)
-
-        return containers
+        return container
 
     def _change_section(self, index):
         self.stacked_sections.setCurrentIndex(index)
