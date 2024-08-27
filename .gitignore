@@ -1,12 +1,12 @@
-#PROJECT SPECIFFICS
+# Project specifics
 workspace/
-docs/
-#databases
+
+# databases
 *.db
-#vscode
+
+# vscode
 .vscode/
 
-my_venv/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
