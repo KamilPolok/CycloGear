@@ -26,10 +26,10 @@ python app/main.py
 ```
 
 ## Build the app
-From repository root run:
+From repository root run [build_app.py](build_app.py):
 
-```ps1
-pyinstaller --name 'CycloGear2024' --icon ..\..\resources\icons\app\app_icon.ico --noconsole --distpath .\build\dist --specpath .\build\spec .\app\main.py ; Copy-Item -Path ".\data" -Destination ".\build\dist\CycloGear2024\data" -Recurse Copy-Item -Path ".\resources" -Destination ".\build\dist\CycloGear2024\resources" -Recurse
+```python
+python build_app.py
 ```
 
 ## COPYING
