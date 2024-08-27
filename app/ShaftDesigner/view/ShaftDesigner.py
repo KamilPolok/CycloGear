@@ -11,7 +11,7 @@ from ShaftDesigner.view.Chart.Utils.CheckboxDropdown import CheckboxDropdown
 
 from config import APP_NAME, APP_ICON
 
-from config import resource_path
+from config import RESOURCES_DIR_NAME, dependencies_path
 
 class ShaftDesigner(QMainWindow):
     """
@@ -166,7 +166,7 @@ class ShaftDesigner(QMainWindow):
         toggle_sidebar_button.setStyleSheet(self.toolbar_buttons_style)
         toggle_sidebar_button.setFixedSize(QSize(30, 30))
         toggle_sidebar_button.setIconSize(QSize(24, 24))
-        toggle_sidebar_button.setIcon(QIcon(resource_path('icons//menu.png')))
+        toggle_sidebar_button.setIcon(QIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//show_menu_icon.png')))
         toggle_sidebar_button.setToolTip('Otwórz/zamknij pasek boczny')
         toggle_sidebar_button.clicked.connect(self.toggle_sidebar)
         self.toolbar_layout.addWidget(toggle_sidebar_button)
@@ -176,7 +176,7 @@ class ShaftDesigner(QMainWindow):
         fit_to_window_button.setStyleSheet(self.toolbar_buttons_style)
         fit_to_window_button.setFixedSize(QSize(30, 30))
         fit_to_window_button.setIconSize(QSize(24, 24))
-        fit_to_window_button.setIcon(QIcon(resource_path('icons//fit_to_window.png')))
+        fit_to_window_button.setIcon(QIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//fit_to_window_icon.png')))
         fit_to_window_button.setToolTip("Dopasuj widok")
         fit_to_window_button.clicked.connect(self.chart.reset_initial_view)
         self.toolbar_layout.addWidget(fit_to_window_button)
@@ -186,7 +186,7 @@ class ShaftDesigner(QMainWindow):
         self._plots_menu.setFixedSize(QSize(30, 30))
         self._plots_menu.setIconSize(QSize(24, 24))
         self._plots_menu.stateChanged.connect(self._update_plots)
-        self._plots_menu.setIcon(resource_path('icons\plots.png'), 'Wyświetl wykresy momentów')
+        self._plots_menu.setIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//show_plots_icon.png'), 'Wyświetl wykresy momentów')
         self.toolbar_layout.addWidget(self._plots_menu)
 
         # Set menu with plots to view
@@ -194,14 +194,14 @@ class ShaftDesigner(QMainWindow):
         self._min_diameters_menu.setFixedSize(QSize(30, 30))
         self._min_diameters_menu.setIconSize(QSize(24, 24))
         self._min_diameters_menu.stateChanged.connect(self._update_plots)
-        self._min_diameters_menu.setIcon(resource_path('icons\min_diameter.png'), 'Wyświetl wykresy średnic minimalnych')
+        self._min_diameters_menu.setIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//show_min_diameters_icon.png'), 'Wyświetl wykresy średnic minimalnych')
         self.toolbar_layout.addWidget(self._min_diameters_menu)
 
         # Set menu with dimensions to display
         self._dimensions_menu = CheckboxDropdown()
         self._dimensions_menu.setFixedSize(QSize(30, 30))
         self._dimensions_menu.setIconSize(QSize(24, 24))
-        self._dimensions_menu.setIcon(resource_path('icons\dimensions.png'), 'Wyświetl wymiary')
+        self._dimensions_menu.setIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//show_dimensions_icon.png'), 'Wyświetl wymiary')
         self._dimensions_menu.addItem('dimensions', 'Wymiary wału', 'Wyświetl wymiary wału', self._toggle_dimensions)
         self._dimensions_menu.addItem('coordinates', 'Współrzędne wału', 'Wyświetl współrzędne wału', self._toggle_coordinates)
         self.toolbar_layout.addWidget(self._dimensions_menu)
@@ -211,7 +211,7 @@ class ShaftDesigner(QMainWindow):
         self._toggle_bearings_plot_button.setStyleSheet(self.toolbar_buttons_style)
         self._toggle_bearings_plot_button.setFixedSize(QSize(30, 30))
         self._toggle_bearings_plot_button.setIconSize(QSize(24, 24))
-        self._toggle_bearings_plot_button.setIcon(QIcon(resource_path('icons//bearing.png')))
+        self._toggle_bearings_plot_button.setIcon(QIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//show_bearings_icon.png')))
         self._toggle_bearings_plot_button.setToolTip("Wyświetl łożyska")
         self._toggle_bearings_plot_button.setCheckable(True)
         self._toggle_bearings_plot_button.setEnabled(False)
@@ -240,7 +240,7 @@ class ShaftDesigner(QMainWindow):
         self.confirm_draft_button.setFont(font)
         self.confirm_draft_button.setFixedSize(QSize(140, 30))
         self.confirm_draft_button.setIconSize(QSize(24, 24))
-        self.confirm_draft_button.setIcon(QIcon(resource_path('icons//approve.png')))
+        self.confirm_draft_button.setIcon(QIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//approve_icon.png')))
         self.confirm_draft_button.setToolTip("Zatwierdź projekt wału")
         self.confirm_draft_button.setText("Zatwierdź Projekt")
         self.confirm_draft_button.setEnabled(False)

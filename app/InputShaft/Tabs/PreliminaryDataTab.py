@@ -6,7 +6,7 @@ from .common.DataButton import DataButton
 from .common.ITrackedTab import ITrackedTab
 from .common.common_functions import create_data_input_row, create_data_display_row, create_header
 
-from config import resource_path
+from config import RESOURCES_PATH, dependencies_path
 
 class PreliminaryDataTab(ITrackedTab):
     def _view_dimensions_component(self):
@@ -54,7 +54,7 @@ class PreliminaryDataTab(ITrackedTab):
         '''
         self.dialog = QDialog(self)
         label = QLabel(self.dialog)
-        pixmap = QPixmap(resource_path('icons//input_shaft_preview.png'))  # Ensure the path is correct
+        pixmap = QPixmap(dependencies_path(f'{RESOURCES_PATH}//images//input_shaft_preview.png'))
         label.setPixmap(pixmap)
         label.setScaledContents(True)  # Scale image to fit the dialog
         

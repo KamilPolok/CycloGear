@@ -4,7 +4,7 @@ from PyQt6.QtCore import pyqtSignal, Qt, QSize
 from PyQt6.QtWidgets import QFrame, QHBoxLayout, QPushButton, QSizePolicy, QVBoxLayout, QWidget
 from PyQt6.QtGui import QIcon
 
-from config import resource_path
+from config import RESOURCES_DIR_NAME, dependencies_path
 
 from .CommonFunctions import create_data_input_row, format_input
 
@@ -90,7 +90,7 @@ class ShaftSubsection(QWidget):
         icon_size = self.header_height * 0.9
         self._confirm_button.setFixedSize(button_size, button_size)
         self._confirm_button.setIconSize(QSize(icon_size, icon_size))
-        self._confirm_button.setIcon(QIcon(resource_path('icons//confirm.png')))
+        self._confirm_button.setIcon(QIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//confirm_icon.png')))
         self._confirm_button.setToolTip('Zatwierdź')
         self._confirm_button.setStyleSheet("""                         
             QPushButton {
@@ -117,7 +117,7 @@ class ShaftSubsection(QWidget):
         icon_size = self.header_height * 0.9
         self.remove_button.setFixedSize(button_size, button_size)
         self.remove_button.setIconSize(QSize(icon_size, icon_size))
-        self.remove_button.setIcon(QIcon(resource_path('icons//remove_btn.png')))
+        self.remove_button.setIcon(QIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//remove_icon.png')))
         self.remove_button.setToolTip('Usuń')
         self.remove_button.setStyleSheet("""                         
             QPushButton {

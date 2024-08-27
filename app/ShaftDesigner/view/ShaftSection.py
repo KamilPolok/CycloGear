@@ -9,7 +9,7 @@ from PyQt6.QtGui import QIcon
 from .CommonFunctions import create_data_input_row
 from .ShaftSubsection import ShaftSubsection
 
-from config import resource_path
+from config import RESOURCES_DIR_NAME, dependencies_path
 
 class CustomFrame(QFrame):
     def __init__(self):
@@ -117,7 +117,7 @@ class ShaftSection(Section):
         icon_size = self._header_height * 0.9
         self._add_subsection_button.setFixedSize(button_size, button_size)
         self._add_subsection_button.setIconSize(QSize(icon_size, icon_size))
-        self._add_subsection_button.setIcon(QIcon(resource_path('icons//add_btn.png')))
+        self._add_subsection_button.setIcon(QIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//add_icon.png')))
         self._add_subsection_button.setToolTip('Dodaj')
         self._add_subsection_button.setStyleSheet("""                         
             QPushButton {

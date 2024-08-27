@@ -2,7 +2,7 @@ from PyQt6.QtCore import pyqtSignal, QSize
 from PyQt6.QtGui import QIcon, QFont
 from PyQt6.QtWidgets import QTabWidget, QWidget, QHBoxLayout, QVBoxLayout, QPushButton
 
-from config import resource_path
+from config import RESOURCES_DIR_NAME, dependencies_path
 
 class InputShaft(QWidget):
     show_preview_signal = pyqtSignal()
@@ -52,7 +52,7 @@ class InputShaft(QWidget):
         # Create button for moving to previous tab 
         self._previous_tab_button = QPushButton(self)
         self._previous_tab_button.setFixedSize(QSize(30, 30))
-        self._previous_tab_button.setIcon(QIcon(resource_path('icons//previous.png')))
+        self._previous_tab_button.setIcon(QIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//previous_icon.png')))
         self._previous_tab_button.setToolTip('Poprzednia zakładka')
         self._previous_tab_button.setIconSize(QSize(25, 18))
         self._previous_tab_button.clicked.connect(self._open_previous_tab)
@@ -60,7 +60,7 @@ class InputShaft(QWidget):
         # Create button for moving to next tab 
         self._next_tab_button = QPushButton(self)
         self._next_tab_button.setFixedSize(QSize(30, 30))
-        self._next_tab_button.setIcon(QIcon(resource_path('icons//next.png')))
+        self._next_tab_button.setIcon(QIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//next_icon.png')))
         self._next_tab_button.setToolTip('Następna zakładka')
         self._next_tab_button.setIconSize(QSize(25, 18))
         self._next_tab_button.clicked.connect(self._open_next_tab)
