@@ -38,7 +38,7 @@ class StartupHandler():
                     data = json.load(read_file)
                 MessageHandler.information(self._startup_window, 'Dane Wczytane', 'Dane zostały wczytane.')
             except Exception as e:
-                MessageHandler.critical(self._startup_window, 'Błąd', f'Wystąpił błąd podczas wczytywania pliku: {str(e)}')
+                MessageHandler.critical(self._startup_window, 'Błąd wczytywania', f'Wystąpił błąd podczas wczytywania pliku: {str(e)}')
         
         return data
 
@@ -49,7 +49,7 @@ class StartupHandler():
             self._try_to_load_data_to_components(data)
             return True
         except Exception as e:
-            MessageHandler.critical(self._startup_window, 'Błąd', f'Wczytane dane są niepoprawne.')
+            MessageHandler.critical(self._startup_window, 'Nieprawidłowe dane', f'Wczytane dane są niepoprawne.')
             return False
 
     def _get_project_title(self, file_path):

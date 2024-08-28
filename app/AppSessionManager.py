@@ -26,7 +26,7 @@ class AppSessionManager:
             with open(file_path, "w") as write_file:
                 json.dump(data, write_file, indent=4)
         except Exception as e:
-            MessageHandler.critical(self._app_window, 'Błąd', f'Wystąpił błąd zapisywania pliku: {e}')
+            MessageHandler.critical(self._app_window, 'Błąd zapisu', f'Wystąpił błąd zapisywania pliku: {e}')
             return None
 
         self.current_file = file_path

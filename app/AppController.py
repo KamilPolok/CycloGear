@@ -1,6 +1,7 @@
 from PyQt6.QtCore import QTimer, QCoreApplication
 
-from AppWindow import AppWindow, QuitDialog
+from AppWindow import AppWindow
+from Utility.QuitDialog import QuitDialog
 
 from StartupHandler import StartupHandler
 from StartupWindow import StartupWindow

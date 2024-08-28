@@ -1,9 +1,8 @@
-from PyQt6.QtWidgets import QDialog, QDialogButtonBox, QMainWindow, QVBoxLayout, QWidget, QLabel
-from PyQt6.QtCore import pyqtSignal, Qt
+from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QWidget
+from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtGui import QAction, QIcon
 
-from config import APP_NAME, APP_ICON
-
+from config import APP_ICON
 
 class AppWindow(QMainWindow):
     '''
@@ -70,39 +69,3 @@ class AppWindow(QMainWindow):
         Add component to the window.
         '''
         self.main_layout.addWidget(component)
-
-class QuitDialog(QDialog):
-    '''
-    Dialog Window opened on closing the app window.
-    '''
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setWindowTitle(APP_NAME)
-        # Disable close, minimize, window buttons
-        self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.WindowTitleHint | Qt.WindowType.CustomizeWindowHint)
-
-        self.layout = QVBoxLayout(self)
-
-        self.label = QLabel("Zapisać zmiany w projekcie?", self)
-        self.layout.addWidget(self.label)
-
-        # Create the QDialogButtonBox with Yes and No buttons
-        self.button_box = QDialogButtonBox()
-        self.button_box.addButton(QDialogButtonBox.StandardButton.Yes)
-        self.button_box.addButton(QDialogButtonBox.StandardButton.No)
-
-        # Add a custom "Ignore" button
-        self.ignore_button = self.button_box.addButton("Anuluj", QDialogButtonBox.ButtonRole.RejectRole)
-
-        # Customize button texts
-        self.button_box.button(QDialogButtonBox.StandardButton.Yes).setText("Zapisz zmiany")
-        self.button_box.button(QDialogButtonBox.StandardButton.No).setText("Odrzuć zmiany")
-
-        self.button_box.accepted.connect(self.accept)
-        self.button_box.rejected.connect(self.reject)
-        self.ignore_button.clicked.connect(self.ignore)
-
-        self.layout.addWidget(self.button_box)
-
-    def ignore(self):
-        self.done(2)  # Custom return code for "Ignore" button

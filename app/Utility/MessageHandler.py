@@ -1,4 +1,6 @@
-from PyQt6.QtWidgets import QMessageBox, QWidget
+from PyQt6.QtWidgets import QWidget
+
+from .MessageDialog import MessageDialog
 
 from config import APP_NAME
 
@@ -21,7 +23,10 @@ class MessageHandler:
         Args:
             subtitle (str): additional window description
         """
-        return f"{cls._base_title} - {subtitle}"
+        if subtitle:
+            return f"{cls._base_title} - {subtitle}"
+        else:
+            return cls._base_title
 
     @classmethod
     def critical(cls, parent: QWidget, title: str, message: str):
@@ -33,7 +38,19 @@ class MessageHandler:
             title (str): Description added to window title.
             message (str): Message to display.
         """
-        QMessageBox.critical(parent, cls._title(title), message)
+        MessageDialog.critical(parent, cls._title(title), message)
+
+    @classmethod
+    def warning(cls, parent: QWidget, title: str, message: str):
+        """
+        Show warning message.
+
+        Args:
+            parent (QWidget): Parent (UI) of the message box.
+            title (str): Description added to window title.
+            message (str): Message to display.
+        """
+        MessageDialog.warning(parent, cls._title(title), message)
 
     @classmethod
     def information(cls, parent: QWidget, title: str, message: str):
@@ -45,7 +62,7 @@ class MessageHandler:
             title (str): Description added to window title.
             message (str): Message to display.
         """
-        QMessageBox.information(parent, cls._title(title), message)
+        MessageDialog.information(parent, cls._title(title), message)
 
     @classmethod
     def question(cls, parent: QWidget, title: str, message: str) -> bool:
@@ -57,7 +74,8 @@ class MessageHandler:
             title (str): Description added to window title.
             message (str): Message to display.
         Returns:
-            (bool): response of the user (yes = True, no = False)
+            (bool): response of the user (tak = True, nie = False)
         """
-        response = QMessageBox.question(parent, cls._title(title), message)
-        return response == QMessageBox.StandardButton.Yes
+        res = MessageDialog.question(parent, cls._title(title), message)
+
+        return res == MessageDialog.DialogCode.Accepted
