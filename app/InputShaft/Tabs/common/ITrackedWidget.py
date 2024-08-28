@@ -111,12 +111,6 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
         """
         self._callback(all_provided, state_changed)
 
-    def _on_activated(self):
-        """
-        Call appropriate methods time when the widget becomes visible.
-        """
-        self._check_state()
-
     def check_status(self):
         """
         Check status of all tracked subjects.
@@ -148,18 +142,6 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
         for tracked_child in tracked_children:
             tracked_child.track_state(track)
 
-    def showEvent(self, event):
-        """
-        Override the showEvent method of the QWidget to implement custom logic
-        (call _on_tab_activated() method) to execute when the widget becomes visible.
-
-        Args:
-            event: (QEvent)
-        """
-        if event.type() == QEvent.Type.Show:
-            self._on_activated()
-        super().showEvent(event)
-    
     def set_callback(self, callback):
         """
         Set callback
@@ -168,9 +150,16 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
             callback (callable): Function that should be called after state checking.
         """
         self._callback = callback
+
     @abstractmethod
     def init_ui(self):
         """
         Initialize the user interface for the widget. Must be overridden in subclasses.
         """
         self._setup_state_tracking()
+
+    def on_activated(self):
+        """
+        Call appropriate methods time when the widget becomes visible.
+        """
+        self._check_state()

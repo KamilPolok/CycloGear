@@ -22,7 +22,7 @@ class BearingsTab(ITrackedTab):
         line_edit.setReadOnly(True)
  
         self.layout_selector.addItems(["Podpora przesuwna A", "Podpora stała B", "Mimośrody"])
-        self.layout_selector.currentIndexChanged.connect(self._change_section)
+        self.layout_selector.currentIndexChanged.connect(self._on_change_section)
 
         selector_layout.addWidget(layout_selector_label, alignment=Qt.AlignmentFlag.AlignLeft)
         selector_layout.addWidget(self.layout_selector, alignment=Qt.AlignmentFlag.AlignLeft)
@@ -74,8 +74,14 @@ class BearingsTab(ITrackedTab):
 
         return container
 
-    def _change_section(self, index):
+    def _on_change_section(self, index):
+        """
+        Perform actions on section change.
+        """
         self.stacked_sections.setCurrentIndex(index)
+        
+        # Call method on_activated for every subsection in activated section
+        [section.on_activated() for section in self.stacked_sections.currentWidget().findChildren(Section)]
     
     def enable_select_bearing_button(self, section_name, enable_button, delete_choice):
         """

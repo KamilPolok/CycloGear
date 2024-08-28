@@ -41,7 +41,6 @@ class InputShaft(QWidget):
         Init widget holding and managing tabs.
         '''
         self._tab_widget = QTabWidget(self)
-        self._tab_widget.currentChanged.connect(self._on_tab_change)
 
         self.tabs_section_layout.addWidget(self._tab_widget)
 
@@ -105,6 +104,9 @@ class InputShaft(QWidget):
         """
         Perform actions after a change of tabs.
         """
+        # Perform actions uppon the tab activation
+        self._tab_widget.currentWidget().on_activated()
+
         # Disable the next tab button if the current tab is the last one
         if tab_index == self._tab_widget.count() - 1:
             self._next_tab_button.setEnabled(False)
@@ -127,6 +129,12 @@ class InputShaft(QWidget):
         for i in range(1, self._tab_widget.count()):
             self._tab_widget.setTabEnabled(i, False)
         
+        # Connect change of the tabs in the tab_widget to the _on_tab_change method
+        self._tab_widget.currentChanged.connect(self._on_tab_change)
+
+        # Check first tab after app initialization
+        self._on_tab_change()
+
     def update_access_to_next_tabs(self, enable_next_tab_button, disable_next_tabs):
         """
         Check and update the state of the next tab button.
