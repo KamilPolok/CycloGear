@@ -2,9 +2,9 @@ from functools import partial
 
 from .BearingsTab import BearingsTab
 from .BearingsTabCalculator import BearingsTabCalculator
-from ..Mediator import Mediator
+from ...Mediator import Mediator
 
-from ..common.common_functions import extract_data, fetch_data_subset, update_data_subset
+from ...common.common_functions import extract_data, fetch_data_subset, update_data_subset
 
 class BearingsTabController:
     def __init__(self, id: int, tab: BearingsTab, calculator: BearingsTabCalculator, mediator: Mediator):

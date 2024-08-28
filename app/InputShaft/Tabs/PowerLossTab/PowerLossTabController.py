@@ -2,9 +2,9 @@ from functools import partial
 
 from .PowerLossTab import PowerLossTab
 from .PowerLossTabCalculator import PowerLossTabCalculator
-from ..Mediator import Mediator
+from ...Mediator import Mediator
 
-from ..common.common_functions import extract_data, fetch_data_subset, update_data_subset
+from ...common.common_functions import extract_data, fetch_data_subset, update_data_subset
 
 class PowerLossTabController:
     def __init__(self, id: int, tab: PowerLossTab, calculator: PowerLossTabCalculator, mediator: Mediator):

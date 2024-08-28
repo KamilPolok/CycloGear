@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QVBoxLayout, QScrollArea, QWidget
 
-from .common.ITrackedTab import ITrackedTab
-from .common.common_functions import create_data_display_row, create_header
+from ..common.ITrackedTab import ITrackedTab
+from ..common.common_functions import create_data_display_row, create_header
 
 class ResultsTab(ITrackedTab):
     def _view_results_section(self):

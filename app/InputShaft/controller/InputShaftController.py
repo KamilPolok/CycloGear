@@ -1,21 +1,21 @@
-from InputShaft.Mediator import Mediator
-from InputShaft.view.InputShaft import InputShaft
-from InputShaft.model.InputShaftCalculator import InputShaftCalculator
+from ..Mediator import Mediator
+from ..view.InputShaft import InputShaft
+from ..model.InputShaftCalculator import InputShaftCalculator
 
-from InputShaft.Tabs.PreliminaryDataTab import PreliminaryDataTab
-from InputShaft.Tabs.PreliminaryDataTabController import PreliminaryDataTabController
-from InputShaft.Tabs.PreliminaryDataTabCalculator import PreliminaryDataTabCalculator
+from ..Tabs.PreliminaryDataTab.PreliminaryDataTab import PreliminaryDataTab
+from ..Tabs.PreliminaryDataTab.PreliminaryDataTabController import PreliminaryDataTabController
+from ..Tabs.PreliminaryDataTab.PreliminaryDataTabCalculator import PreliminaryDataTabCalculator
 
-from InputShaft.Tabs.BearingsTab import BearingsTab
-from InputShaft.Tabs.BearingsTabController import BearingsTabController
-from InputShaft.Tabs.BearingsTabCalculator import BearingsTabCalculator
+from ..Tabs.BearingsTab.BearingsTab import BearingsTab
+from ..Tabs.BearingsTab.BearingsTabController import BearingsTabController
+from ..Tabs.BearingsTab.BearingsTabCalculator import BearingsTabCalculator
 
-from InputShaft.Tabs.PowerLossTab import PowerLossTab
-from InputShaft.Tabs.PowerLossTabController import PowerLossTabController
-from InputShaft.Tabs.PowerLossTabCalculator import PowerLossTabCalculator
+from ..Tabs.PowerLossTab.PowerLossTab import PowerLossTab
+from ..Tabs.PowerLossTab.PowerLossTabController import PowerLossTabController
+from ..Tabs.PowerLossTab.PowerLossTabCalculator import PowerLossTabCalculator
 
-from InputShaft.Tabs.ResultsTab import ResultsTab
-from InputShaft.Tabs.ResultsTabController import ResultsTabController
+from ..Tabs.ResultsTab.ResultsTab import ResultsTab
+from ..Tabs.ResultsTab.ResultsTabController import ResultsTabController
 
 from ShaftDesigner.controller.ShaftDesignerController import ShaftDesignerController
 from ShaftDesigner.view.ShaftDesigner import ShaftDesigner

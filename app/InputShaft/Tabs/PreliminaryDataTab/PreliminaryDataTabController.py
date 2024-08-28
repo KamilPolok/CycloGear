@@ -1,8 +1,8 @@
 from .PreliminaryDataTab import PreliminaryDataTab
 from .PreliminaryDataTabCalculator import PreliminaryDataTabCalculator
-from ..Mediator import Mediator
+from ...Mediator import Mediator
 
-from ..common.common_functions import extract_data, fetch_data_subset, update_data_subset
+from ...common.common_functions import extract_data, fetch_data_subset, update_data_subset
 
 class PreliminaryDataTabController():
     def __init__(self, id: int, tab: PreliminaryDataTab, calculator: PreliminaryDataTabCalculator, mediator: Mediator):

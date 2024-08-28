@@ -2,9 +2,9 @@ from PyQt6.QtWidgets import QDialog, QHBoxLayout, QLabel, QPushButton, QVBoxLayo
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPixmap, QCursor
 
-from .common.DataButton import DataButton
-from .common.ITrackedTab import ITrackedTab
-from .common.common_functions import create_data_input_row, create_data_display_row, create_header
+from ..common.DataButton import DataButton
+from ..common.ITrackedTab import ITrackedTab
+from ..common.common_functions import create_data_input_row, create_data_display_row, create_header
 
 from config import RESOURCES_PATH, dependencies_path
 

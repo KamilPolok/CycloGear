@@ -1,6 +1,7 @@
 from .ResultsTab import ResultsTab
 
-from ..common.common_functions import extract_data, update_data_subset
+from ...common.common_functions import extract_data, update_data_subset
+
 class ResultsTabController:
     def __init__(self, id: int, tab: ResultsTab, mediator):
         self._id = id

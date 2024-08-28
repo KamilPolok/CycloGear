@@ -1,10 +1,10 @@
 from PyQt6.QtCore import pyqtSignal, Qt
 from PyQt6.QtWidgets import QComboBox, QVBoxLayout, QHBoxLayout, QStackedWidget, QWidget
 
-from .common.DataButton import DataButton
-from .common.Section import Section
-from .common.ITrackedTab import ITrackedTab
-from .common.common_functions import create_data_display_row, create_data_input_row, create_header
+from ..common.DataButton import DataButton
+from ..common.Section import Section
+from ..common.ITrackedTab import ITrackedTab
+from ..common.common_functions import create_data_display_row, create_data_input_row, create_header
 
 class PowerLossTab(ITrackedTab):
     rollingElementDiameterProvided = pyqtSignal(str, bool, bool)
