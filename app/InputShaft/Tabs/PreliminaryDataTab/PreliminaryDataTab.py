@@ -1,12 +1,12 @@
-from PyQt6.QtWidgets import QDialog, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QStyle
+from PyQt6.QtWidgets import QHBoxLayout, QPushButton, QVBoxLayout, QStyle
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QPixmap, QCursor
+from PyQt6.QtGui import QCursor
 
 from ..common.DataButton import DataButton
 from ..common.ITrackedTab import ITrackedTab
 from ..common.common_functions import create_data_input_row, create_data_display_row, create_header
 
-from config import RESOURCES_PATH, dependencies_path
+from .HelpWindow import HelpWindow
 
 class PreliminaryDataTab(ITrackedTab):
     def _view_dimensions_component(self):
@@ -31,7 +31,7 @@ class PreliminaryDataTab(ITrackedTab):
         self.help_button.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))  # Change cursor on hover
         self.help_button.setStyleSheet("border: none; background-color: transparent;")
 
-        self.help_button.clicked.connect(self._show_help_image)  # Connect button click to the dialog opener
+        self.help_button.clicked.connect(self.help_window.show)
 
         header_layout.addWidget(header)
         header_layout.addWidget(self.help_button)
@@ -47,22 +47,6 @@ class PreliminaryDataTab(ITrackedTab):
         component_layout.addWidget(create_data_input_row(self._inputs['L1'], 'L<sub>1</sub>', 'Współrzędna koła obiegowego nr 1', decimal_precision=2))
 
         self.main_layout.addLayout(component_layout)
-    
-    def _show_help_image(self):
-        '''
-        Show help image after clicking the help button.
-        '''
-        self.dialog = QDialog(self)
-        label = QLabel(self.dialog)
-        pixmap = QPixmap(dependencies_path(f'{RESOURCES_PATH}//images//input_shaft_preview.png'))
-        label.setPixmap(pixmap)
-        label.setScaledContents(True)  # Scale image to fit the dialog
-        
-        self.dialog.setWindowTitle("Kształtowanie wału czynnego")
-        self.dialog.setLayout(QVBoxLayout())
-        self.dialog.layout().addWidget(label)
-        self.dialog.setFixedSize(450, 300)
-        self.dialog.show()  # Show the dialog modally
 
     def _view_eccentrics_component(self):
         self.eccentrics_layout = QVBoxLayout()
@@ -113,6 +97,9 @@ class PreliminaryDataTab(ITrackedTab):
         component_layout.addWidget(self.select_material_button)
 
         self.main_layout.addLayout(component_layout)
+    
+    def _init_help_dialog(self):
+        self.help_window = HelpWindow(self)
 
     def update_selected_material(self, item_data):
         """
@@ -139,6 +126,7 @@ class PreliminaryDataTab(ITrackedTab):
         self.main_layout = QVBoxLayout()
         self.setLayout(self.main_layout)
 
+        self._init_help_dialog()
         self._view_dimensions_component()
         self._view_eccentrics_component()
         self._view_material_stength_component()
