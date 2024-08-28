@@ -13,8 +13,8 @@ from .TablesTreeView import TablesTreeView
 class Window(QDialog):
     # Create a custom signal for passing the selected item attributes
     # It is needed for sending the selected item attributes outside the Window
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent):
+        super().__init__(parent)
         self.generalLayout = QVBoxLayout()
         self.setLayout(self.generalLayout)
 

@@ -1,10 +1,6 @@
 import math
 import copy
 
-from DbHandler.controller.DBController import ViewSelectItemController
-from DbHandler.model.DatabaseHandler import DatabaseHandler
-from DbHandler.view.Window import Window
-
 from ..common.common_functions import fetch_data_subset
 
 class InputShaftCalculator():
@@ -138,91 +134,39 @@ class InputShaftCalculator():
         
         self.data['P'][0] = absolute_power_loss
 
-    def open_shaft_material_selection(self):
+    def set_bearings_attributes_limits(self, limits, bearing_section_id):
         """
-        Open the window for selection of the shaft material
-
-        Returns:
-            (None or dict): selected item data.
-        """
-        db_handler = DatabaseHandler()
-        subwindow = Window()
-        subwindow.setWindowTitle("Dobór materiału")
-        tables_group_name = 'wał czynny-materiały'
-        available_tables = db_handler.getAvailableTables(tables_group_name)
-        limits = db_handler.getTableItemsFilters(tables_group_name)
-        view_select_items_ctrl = ViewSelectItemController(db_handler, subwindow, available_tables, limits)
-        result = view_select_items_ctrl.startup()
-        if result:
-            return view_select_items_ctrl.selectedItemAttributes
-        else:
-            return None
-
-    def open_bearing_selection(self, bearing_section_id):
-        """
-        Open the window for bearing selection the.
+        Set attributes limits of given bearing.
 
         Args:
+            limits (Dict[str, Dict[str, float]]): dict of available limits for given item
             bearing_section_id (str): Id of section that specifies the bearing location.
-
-        Returns:
-            (None or dict): selected item data.
         """
-        # Specify the name of the tables to open
-        if bearing_section_id == 'support_A' or  bearing_section_id == 'support_B':
-            tables_group_name = 'wał czynny-łożyska-podporowe'
-        elif bearing_section_id == 'eccentrics':
-            tables_group_name = 'wał czynny-łożyska-centralne'
-
-        # Get acces to the database
-        db_handler = DatabaseHandler()
-        # Create a subwindow that views GUI for the DatabaseHandler
-        subwindow = Window()
-        subwindow.setWindowTitle("Dobór łożyska")
-        # Get available tables
-        available_tables = db_handler.getAvailableTables(tables_group_name)
-        # Specify the limits for the group of tables
-        limits = db_handler.getTableItemsFilters(tables_group_name)
         limits['Dw']['min'] = self.data['Bearings'][bearing_section_id]['dip'][0]
         limits['Dw']['max'] = self.data['Bearings'][bearing_section_id]['dip'][0] + 10
         limits['C']['min'] = self.data['Bearings'][bearing_section_id]['C'][0]
-        # Setup the controller for the subwindow
-        view_select_items_ctrl = ViewSelectItemController(db_handler, subwindow, available_tables, limits)
-        result = view_select_items_ctrl.startup()
-        if result:
-            return view_select_items_ctrl.selectedItemAttributes
-        else:
-            return None
 
-    def open_rolling_element_selection(self, bearing_section_id):
+    def set_rollings_element_limits(self, limits, bearing_section_id):
         """
-        Open the window for rolling element selection.
+        Set attributes limits of given bearing rolling elements.
 
         Args:
-            bearing_section_id (str): Id of section that specifies the bearing location for which the rollin 
-                                      elements are being selected.
-        Returns:
-            (None or dict): selected item data.
+            limits (Dict[str, Dict[str, float]]): dict of available limits for given item
+            bearing_section_id (str): Id of section that specifies the bearing location.
         """
-        # Get acces to the database
-        db_handler = DatabaseHandler()
-        # Create a subwindow that views GUI for the DatabaseHandler
-        subwindow = Window()
-        subwindow.setWindowTitle("Dobór elementu tocznego")
-        # Get available tables
-        tables_group_name = f"wał czynny-elementy toczne-{self.data['Bearings'][bearing_section_id]['data']['elementy toczne'][0]}"
-        available_tables = db_handler.getAvailableTables(tables_group_name)
-        # Specify the limits for the group of tables
-        limits = db_handler.getTableItemsFilters(tables_group_name)
         limits['D']['min'] = math.floor(self.data['Bearings'][bearing_section_id]['drc'][0]) - 1
         limits['D']['max'] = math.ceil(self.data['Bearings'][bearing_section_id]['drc'][0]) + 1
-        # Setup the controller for the subwindow
-        view_select_items_ctrl = ViewSelectItemController(db_handler, subwindow, available_tables, limits)
-        result = view_select_items_ctrl.startup()
-        if result:
-            return view_select_items_ctrl.selectedItemAttributes
-        else:
-            return None
+
+    def get_bearing_rolling_element_type(self, bearing_section_id):
+        """
+        Get type of rolling emenet for given bearing
+
+        Args:
+            bearing_section_id (str): Id of section that specifies the bearing location.
+        Returns:
+            (str): type of rolling element
+        """
+        return self.data['Bearings'][bearing_section_id]['data']['elementy toczne'][0]
         
     def get_bearing_attributes(self, bearing_section_id, bearing_data):
         """
