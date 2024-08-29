@@ -1,4 +1,6 @@
-from PyQt6.QtWidgets import QVBoxLayout, QScrollArea, QWidget
+from PyQt6.QtWidgets import QVBoxLayout, QScrollArea, QWidget, QFrame
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPalette
 
 from ..common.ITrackedTab import ITrackedTab
 from ..common.common_functions import create_data_display_row, create_header
@@ -10,8 +12,46 @@ class ResultsTab(ITrackedTab):
         content_widget.setLayout(content_layout)
 
         scroll_area = QScrollArea()
+        scroll_area.setContentsMargins(0, 0, 0, 0)
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll_area.verticalScrollBar().setStyleSheet("""
+        QScrollBar:vertical {
+            border: none;
+            background: white;
+            width: 13px;
+            margin: 10px 0 10px 0;
+        }
+        QScrollBar::handle:vertical {
+            background: #b5b5b5;
+            min-height: 20px;
+            max-height: 80px;
+            border-radius: 4px;
+            width: 8px;
+            margin-right: 5px
+        }
+        QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+            border: none;
+            background: none;
+            height: 0px;  /* Removes the buttons */
+        }
+        QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+            background: none;
+        }
+        """)
+
         scroll_area.setWidgetResizable(True)
         scroll_area.setWidget(content_widget)
+
+        # Remove the border from QScrollArea
+        scroll_area.setFrameShape(QFrame.Shape.NoFrame)
+        scroll_area.setFrameShadow(QFrame.Shadow.Plain)
+
+        # Match the background color of the QScrollArea to the QTabWidget
+        palette = scroll_area.palette()
+        palette.setColor(QPalette.ColorRole.Window, self.palette().color(QPalette.ColorRole.Base))
+        scroll_area.setPalette(palette)
+        scroll_area.setAutoFillBackground(True)
 
         self.main_layout.addWidget(scroll_area)
 
@@ -46,9 +86,12 @@ class ResultsTab(ITrackedTab):
             outputs (dict): Outputs
         """
         self._outputs = outputs
-        
+
         self.main_layout = QVBoxLayout()
         self.setLayout(self.main_layout)
+
+        self.main_layout.setContentsMargins(0, 0, 0, 0)  # Remove margins from tab2_layout
+        self.main_layout.setSpacing(0)
 
         self._view_results_section()
         super().init_ui()
