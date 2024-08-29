@@ -71,6 +71,7 @@ class BearingsTab(ITrackedTab):
         section_layout.addWidget(section)
         section_layout.addWidget(create_data_display_row(self._inputs['Bearings'][section_name]['C'], 'C', 'Wymagana nośność łożyska', decimal_precision=2))
         section_layout.addLayout(button_layout)
+        section_layout.addStretch()
 
         return container
 
@@ -126,4 +127,5 @@ class BearingsTab(ITrackedTab):
 
         self._init_selector()
         self._init_sections()
+        self.main_layout.addStretch()
         super().init_ui()

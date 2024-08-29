@@ -9,8 +9,8 @@ class InputShaft(QWidget):
     """
     GUI class for the Input Shaft component.
     """
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent):
+        super().__init__(parent)
         self._init_ui()
 
         self.is_shaft_designed = False

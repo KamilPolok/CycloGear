@@ -74,6 +74,7 @@ class PowerLossTab(ITrackedTab):
         section_layout.addWidget(diameter_subsection)
         section_layout.addWidget(data_subsection)
         section_layout.addWidget(create_data_display_row(self._inputs['Bearings'][section_name]['P'], 'P', 'Straty mocy', decimal_precision=2))
+        section_layout.addStretch()
 
         return container
     
@@ -128,4 +129,6 @@ class PowerLossTab(ITrackedTab):
 
         self._init_selector()
         self._init_sections()
+        self.main_layout.addStretch()
+
         super().init_ui()

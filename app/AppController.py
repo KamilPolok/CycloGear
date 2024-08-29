@@ -66,7 +66,7 @@ class AppController():
             component[1].load_data(data)
 
     def _init_input_shaft_component(self):
-        self._input_shaft = InputShaft()
+        self._input_shaft = InputShaft(self._app_window)
         self._input_shaft_calculator = InputShaftCalculator()
         self._input_shaft_controller = InputShaftController(self._input_shaft_calculator, self._input_shaft)
         self._components.append((self._input_shaft, self._input_shaft_controller))        

@@ -13,8 +13,6 @@ class PreliminaryDataTab(ITrackedTab):
         """
         Create and layout a dimensions component.
         """
-        component_layout = QVBoxLayout()
-
         # Create header_layout
         header_layout = QHBoxLayout()
         header_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
@@ -36,17 +34,15 @@ class PreliminaryDataTab(ITrackedTab):
         header_layout.addWidget(header)
         header_layout.addWidget(self.help_button)
 
-        component_layout.addLayout(header_layout)
+        self.main_layout.addLayout(header_layout)
 
-        component_layout.addWidget(create_data_display_row(self._outputs['B'], 'B', 'Grubość koła obiegowego', decimal_precision=2))
-        component_layout.addWidget(create_data_display_row(self._outputs['x'], 'x', 'Odległość pomiędzy kołami obiegowymi', decimal_precision=2))
-        component_layout.addWidget(create_data_display_row(self._outputs['e'], 'e', 'Mimośród', decimal_precision=2))
-        component_layout.addWidget(create_data_input_row(self._inputs['L'], 'L', 'Długość wału czynnego', decimal_precision=2))
-        component_layout.addWidget(create_data_input_row(self._inputs['LA'], 'L<sub>A</sub>', 'Współrzędna podpory przesuwnej', decimal_precision=2))
-        component_layout.addWidget(create_data_input_row(self._inputs['LB'], 'L<sub>B</sub>', 'Współrzędna podpory stałej', decimal_precision=2))
-        component_layout.addWidget(create_data_input_row(self._inputs['L1'], 'L<sub>1</sub>', 'Współrzędna koła obiegowego nr 1', decimal_precision=2))
-
-        self.main_layout.addLayout(component_layout)
+        self.main_layout.addWidget(create_data_display_row(self._outputs['B'], 'B', 'Grubość koła obiegowego', decimal_precision=2))
+        self.main_layout.addWidget(create_data_display_row(self._outputs['x'], 'x', 'Odległość pomiędzy kołami obiegowymi', decimal_precision=2))
+        self.main_layout.addWidget(create_data_display_row(self._outputs['e'], 'e', 'Mimośród', decimal_precision=2))
+        self.main_layout.addWidget(create_data_input_row(self._inputs['L'], 'L', 'Długość wału czynnego', decimal_precision=2))
+        self.main_layout.addWidget(create_data_input_row(self._inputs['LA'], 'L<sub>A</sub>', 'Współrzędna podpory przesuwnej', decimal_precision=2))
+        self.main_layout.addWidget(create_data_input_row(self._inputs['LB'], 'L<sub>B</sub>', 'Współrzędna podpory stałej', decimal_precision=2))
+        self.main_layout.addWidget(create_data_input_row(self._inputs['L1'], 'L<sub>1</sub>', 'Współrzędna koła obiegowego nr 1', decimal_precision=2))
 
     def _view_eccentrics_component(self):
         self.eccentrics_layout = QVBoxLayout()
@@ -68,20 +64,17 @@ class PreliminaryDataTab(ITrackedTab):
 
         clear_layout(self.eccentrics_layout)
         for idx, input in enumerate(self._inputs['Lc'].values()):
-            self.eccentrics_layout.addWidget(create_data_display_row(input, f'L<sub>{idx+2}</sub>', f'Współrzędne koła obiegowego nr {idx+2}', decimal_precision=2), alignment=Qt.AlignmentFlag.AlignTop)
+            self.eccentrics_layout.addWidget(create_data_display_row(input, f'L<sub>{idx+2}</sub>', f'Współrzędne koła obiegowego nr {idx+2}', decimal_precision=2))
 
     def _view_material_stength_component(self):
         """
         Create and layout a material strength component.
         """
-        component_layout = QVBoxLayout()
-
-        component_layout.addWidget(create_header('Wytrzymałość wału czynnego:', bold=True))
-        component_layout.addWidget(create_data_input_row(self._inputs['xz'], 'x<sub>z</sub>', 'Współczynnik bezpieczeństwa', decimal_precision=1))
-        component_layout.addWidget(create_data_input_row(self._inputs['qdop'], 'φ\'<sub>dop</sub>', 'Dopuszczalny jednostkowy kąt skręcenia wału', decimal_precision=5))
-        component_layout.addWidget(create_data_input_row(self._inputs['tetadop'], 'θ<sub>dop</sub>', 'Dopuszczalny kąt ugięcia wału', decimal_precision=5))
-        component_layout.addWidget(create_data_input_row(self._inputs['fdop'], 'f<sub>dop</sub>', 'Dopuszczalna strzałka ugięcia wału', decimal_precision=5))
-        self.main_layout.addLayout(component_layout)
+        self.main_layout.addWidget(create_header('Wytrzymałość wału czynnego:', bold=True))
+        self.main_layout.addWidget(create_data_input_row(self._inputs['xz'], 'x<sub>z</sub>', 'Współczynnik bezpieczeństwa', decimal_precision=1))
+        self.main_layout.addWidget(create_data_input_row(self._inputs['qdop'], 'φ\'<sub>dop</sub>', 'Dopuszczalny jednostkowy kąt skręcenia wału', decimal_precision=5))
+        self.main_layout.addWidget(create_data_input_row(self._inputs['tetadop'], 'θ<sub>dop</sub>', 'Dopuszczalny kąt ugięcia wału', decimal_precision=5))
+        self.main_layout.addWidget(create_data_input_row(self._inputs['fdop'], 'f<sub>dop</sub>', 'Dopuszczalna strzałka ugięcia wału', decimal_precision=5))
 
     def _view_material_component(self):
         """
@@ -131,5 +124,6 @@ class PreliminaryDataTab(ITrackedTab):
         self._view_eccentrics_component()
         self._view_material_stength_component()
         self._view_material_component()
+        self.main_layout.addStretch()
 
         super().init_ui()

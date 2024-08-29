@@ -36,8 +36,7 @@ class ResultsTab(ITrackedTab):
         content_layout.addWidget(create_data_display_row(self._outputs['Bearings']['support_B']['P'], 'P<sub>B</sub>', 'Podpora stała B', decimal_precision=2))
         content_layout.addWidget(create_data_display_row(self._outputs['Bearings']['eccentrics']['P'], 'P<sub>e</sub>', 'Mimośrody', decimal_precision=2))
         content_layout.addWidget(create_data_display_row(self._outputs['P'], 'P<sub>c</sub>', 'Całkowite straty mocy', decimal_precision=2))
-
-        super().init_ui()
+        content_layout.addStretch()
 
     def init_ui(self, outputs):
         """

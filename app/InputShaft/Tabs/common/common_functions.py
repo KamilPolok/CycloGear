@@ -2,7 +2,7 @@
     This file collects all functions that are common for each ITrackedTab class.
 """
 
-from PyQt6.QtWidgets import QHBoxLayout, QLabel, QWidget, QSizePolicy, QLineEdit
+from PyQt6.QtWidgets import QHBoxLayout, QLabel, QFrame, QSizePolicy, QLineEdit
 from PyQt6.QtGui import QFont
 from PyQt6.QtCore import Qt
 
@@ -21,11 +21,11 @@ def _create_entrypoint_row(entrypoint: QLineEdit, data: list, symbol: str, descr
     Returns:
         (QHBoxLayout): Layout containing the created widgets.
     """
-    row = QWidget()
-    row.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
+    row = QFrame()
+    row.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
 
     layout = QHBoxLayout()
-    layout.setContentsMargins(0, 2, 2, 2)
+    layout.setContentsMargins(5, 5, 5, 5)
 
     layout.setSpacing(5)
     row.setLayout(layout)
@@ -71,11 +71,11 @@ def _create_entrypoint_row(entrypoint: QLineEdit, data: list, symbol: str, descr
 
     return row
 
-def create_data_input_row(data: list, symbol: str, description: str, decimal_precision: int=2) -> QWidget:
+def create_data_input_row(data: list, symbol: str, description: str, decimal_precision: int=2) -> QFrame:
     input = Input()
     return _create_entrypoint_row(input, data, symbol, description, decimal_precision)
 
-def create_data_display_row(data: list, symbol: str, description: str='', decimal_precision: int=2) -> QWidget:
+def create_data_display_row(data: list, symbol: str, description: str='', decimal_precision: int=2) -> QFrame:
     output = Output()
     return _create_entrypoint_row(output, data, symbol, description, decimal_precision)
 
