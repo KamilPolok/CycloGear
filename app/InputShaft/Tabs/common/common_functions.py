@@ -9,7 +9,7 @@ from PyQt6.QtCore import Qt
 from .Input import Input
 from .Output import Output
 
-def _create_entrypoint_row(entrypoint: QLineEdit, data: list, symbol: str, description: str, decimal_precision: int):
+def _create_entrypoint_row(entrypoint: QLineEdit, data: list, symbol: str, description: str, decimal_precision: int) -> QFrame:
     """
     Create a row for data entrypoint with description, symbol, and input field.
 
@@ -19,7 +19,7 @@ def _create_entrypoint_row(entrypoint: QLineEdit, data: list, symbol: str, descr
         description (str): The description of the attribute.
         symbol (str): The symbol representing the attribute.
     Returns:
-        (QHBoxLayout): Layout containing the created widgets.
+        row (QFrame): row containing the created widgets.
     """
     row = QFrame()
     row.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
