@@ -1,13 +1,12 @@
-import sys
+import path_config
 
-import Utility.path_config
+import sys
 
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtCore import QCoreApplication
 
-from AppWindow import AppWindow
-
-from AppController import AppController
+from main_interface.view.MainWindow import MainWindow
+from main_interface.controller.main_controller import MainController
 
 def on_about_to_quit():
     # Perform necessary checks or operations
@@ -17,9 +16,9 @@ def main():
     cyclo_app = QApplication([])
     cyclo_app.aboutToQuit.connect(on_about_to_quit)
 
-    app_window = AppWindow()
+    main_window = MainWindow()
 
-    app_controller = AppController(app_window)
+    main_controller = MainController(main_window)
 
     sys.exit(cyclo_app.exec())
 
