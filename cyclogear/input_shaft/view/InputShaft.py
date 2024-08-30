@@ -1,11 +1,10 @@
-from PyQt6.QtCore import pyqtSignal, QSize
+from PyQt6.QtCore import QSize
 from PyQt6.QtGui import QIcon, QFont
 from PyQt6.QtWidgets import QTabWidget, QWidget, QHBoxLayout, QVBoxLayout, QPushButton
 
 from config import RESOURCES_DIR_NAME, dependencies_path
 
 class InputShaft(QWidget):
-    showPreviewSignal = pyqtSignal()
     """
     GUI class for the Input Shaft component.
     """
