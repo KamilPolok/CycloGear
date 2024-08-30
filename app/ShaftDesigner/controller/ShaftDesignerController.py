@@ -28,13 +28,13 @@ class ShaftDesignerController:
         self.functions_calculator = FunctionsCalculator()
     
     def _connect_signals_and_slots(self):
-        self._shaft_designer.confirm_draft_button.clicked.connect(self._on_finish_draft)
+        self._shaft_designer.confirmDraftButton.clicked.connect(self._on_finish_draft)
         for section_name, section in self._sections.items():
-            section.subsection_data_signal.connect(self._handle_subsection_data)
-            section.remove_subsection_plot_signal.connect(self._remove_shaft_subsection)
+            section.subsectionDataSignal.connect(self._handle_subsection_data)
+            section.removeSubsectionPlotSignal.connect(self._remove_shaft_subsection)
 
             if section_name != 'Mimośrody':
-                section.add_subsection_signal.connect(self._set_limits)
+                section.addSubsectionSignal.connect(self._set_limits)
 
     def _init_ui(self):
         self._init_shaft_sections()
@@ -51,7 +51,7 @@ class ShaftDesignerController:
 
         self.all_sections_enabled = False
 
-        self._shaft_designer.set_sidebar_sections(self._sections)
+        self._shaft_designer.setSidebarSections(self._sections)
     
     def _handle_subsection_data(self, shaft_subsection_attributes):
         # Update the shaft drawing
@@ -64,12 +64,12 @@ class ShaftDesignerController:
 
         # Enable the confirmation of current shaft design
         self._enable_shaft_design_confirmation()
-        self._shaft_designer.set_draft_finished_title(False)
+        self._shaft_designer.setDraftFinishedTitle(False)
                 
     def _draw_shaft(self, shaft_subsection_attributes = None):
         # Calculate shaft subsections plot attributes and draw them on the chart
         shaft_plot_attributes = self.shaft_calculator.calculate_shaft_sections(shaft_subsection_attributes)
-        self._shaft_designer.shaft_viewer.draw_shaft(shaft_plot_attributes)
+        self._shaft_designer.shaftViewer.draw_shaft(shaft_plot_attributes)
 
         # Update limits
         self._set_limits()
@@ -84,15 +84,15 @@ class ShaftDesignerController:
         current_subsections = {}
         for section_name, section in self._sections.items():
             if section_name != 'Mimośrody':
-                current_subsections[section_name] = [None] * section.subsection_count
+                current_subsections[section_name] = [None] * section.subsectionCount
         limits = self.shaft_calculator.calculate_limits(current_subsections)
         sections_dimensions = self.shaft_calculator.get_sections_dimensions()
 
         for section_name, section in limits.items():
-            self._sections[section_name].set_limits(section)
+            self._sections[section_name].setLimits(section)
 
         for section_name, section in sections_dimensions.items():
-            self._sections[section_name].set_values(section)
+            self._sections[section_name].setValues(section)
 
     def _remove_shaft_subsection(self, section_name, subsection_number):
         # Remove plot attributes in calculators shaft sections
@@ -100,11 +100,11 @@ class ShaftDesignerController:
 
         # Recalculate and redraw shaft sections
         shaft_plot_attributes = self.shaft_calculator.calculate_shaft_sections()
-        self._shaft_designer.shaft_viewer.draw_shaft(shaft_plot_attributes)
+        self._shaft_designer.shaftViewer.draw_shaft(shaft_plot_attributes)
         
         self._enable_add_subsection_button(section_name)
         self._enable_shaft_design_confirmation()
-        self._shaft_designer.set_draft_finished_title(False)
+        self._shaft_designer.setDraftFinishedTitle(False)
     
     def _enable_sections(self):
         if self.all_sections_enabled == False:
@@ -119,7 +119,7 @@ class ShaftDesignerController:
         
         if self.is_whole_shaft_designed or is_whole_shaft_designed_state_changed:
             self._toogle_remaining_plots_visibility()
-            self._shaft_designer.confirm_draft_button.setEnabled(self.is_whole_shaft_designed)
+            self._shaft_designer.confirmDraftButton.setEnabled(self.is_whole_shaft_designed)
             
     def _is_whole_shaft_designed_state_changed(self):
         is_whole_shaft_designed_new = self.shaft_calculator.is_whole_shaft_designed()
@@ -137,10 +137,10 @@ class ShaftDesignerController:
     def _enable_add_subsection_button(self, section_name):
         # Enable add button if the last subsection in the sidebar was plotted - do not allow to add multiple subsections at once
         if section_name != 'Mimośrody':
-            last_subsection_number = self._sections[section_name].subsection_count - 1
-            if self._sections[section_name].subsection_count == 0 or (section_name in self.shaft_calculator.shaft_sections and
+            last_subsection_number = self._sections[section_name].subsectionCount - 1
+            if self._sections[section_name].subsectionCount == 0 or (section_name in self.shaft_calculator.shaft_sections and
             last_subsection_number in self.shaft_calculator.shaft_sections[section_name]):
-                self._sections[section_name].set_add_subsection_button_enabled(True)
+                self._sections[section_name].setAddSubsectionButtonEnabled(True)
 
     def _set_functions_plots(self, shaft_functions):
         def update_plot_menus(id, function_details, key, plot_menu):
@@ -158,7 +158,7 @@ class ShaftDesignerController:
         for plot_key in ['f(z)', 'dmin(z)']:
             if plot_key in shaft_functions:
                 for plot_id, function_details in list(shaft_functions[plot_key].items()):
-                    plot_menu = self._shaft_designer._plots_menu if plot_key == 'f(z)' else self._shaft_designer._min_diameters_menu
+                    plot_menu = self._shaft_designer._plotsMenu if plot_key == 'f(z)' else self._shaft_designer._minDiametersMenu
                     update_plot_menus(plot_id, function_details, plot_key, plot_menu)
                     plots.update(shaft_functions[plot_key])
     
@@ -166,7 +166,7 @@ class ShaftDesignerController:
 
     def _on_finish_draft(self):
         self.shaft_calculator.save_data(self._data)
-        self._shaft_designer.set_draft_finished_title(True)
+        self._shaft_designer.setDraftFinishedTitle(True)
         MessageHandler.information(self._shaft_designer,'', 'Projekt został zatwierdzony')
         self._mediator.emit_shaft_designing_finished()
 
@@ -178,12 +178,12 @@ class ShaftDesignerController:
         self.functions_calculator.calculate_initial_functions_and_attributes(data)
 
         # (Re)set shaft initial coordinates
-        self._shaft_designer.shaft_viewer.init_shaft(self.functions_calculator.get_shaft_coordinates())
+        self._shaft_designer.shaftViewer.init_shaft(self.functions_calculator.get_shaft_coordinates())
 
         # (Re)set number of eccentrics
         self.eccentrics_number = data['n'][0]
         if self.eccentrics_number < 2 and 'Pomiędzy Mimośrodami' in self._sections:
-            self._shaft_designer.remove_section_from_sidebar(self._sections['Pomiędzy Mimośrodami'])
+            self._shaft_designer.removeSectionFromSidebar(self._sections['Pomiędzy Mimośrodami'])
             del self._sections['Pomiędzy Mimośrodami']
             if 'Pomiędzy Mimośrodami' in self.shaft_calculator.shaft_sections:
                 del self.shaft_calculator.shaft_sections['Pomiędzy Mimośrodami']
@@ -192,11 +192,11 @@ class ShaftDesignerController:
             section.setEnabled(False)
             self._enable_sections()
             self._sections['Pomiędzy Mimośrodami'] = section
-            self._shaft_designer.append_section_to_sidebar(section)
-            section.subsection_data_signal.connect(self._handle_subsection_data)
-            section.remove_subsection_plot_signal.connect(self._remove_shaft_subsection)
-            section.add_subsection_signal.connect(self._set_limits)
-        self._sections['Mimośrody'].set_subsections_number(self.eccentrics_number)
+            self._shaft_designer.appendSectionToSidebar(section)
+            section.subsectionDataSignal.connect(self._handle_subsection_data)
+            section.removeSubsectionPlotSignal.connect(self._remove_shaft_subsection)
+            section.addSubsectionSignal.connect(self._set_limits)
+        self._sections['Mimośrody'].setSubsectionsNumber(self.eccentrics_number)
 
         # (Re)set shaft initial attributes 
         self.shaft_calculator.set_data(self.functions_calculator.get_shaft_initial_attributes())
@@ -207,7 +207,7 @@ class ShaftDesignerController:
         if self.shaft_calculator.shaft_sections:
             self._draw_shaft()
             self._enable_shaft_design_confirmation()
-            self._shaft_designer.set_draft_finished_title(False)
+            self._shaft_designer.setDraftFinishedTitle(False)
             self.update_bearing_data()
 
         # (Re)draw shaft plots
@@ -221,11 +221,11 @@ class ShaftDesignerController:
             bearing_attributes (dict): single bearing attributes.
         """
         bearings_plot_attributes = self.shaft_calculator.calculate_bearings(bearing_attributes)
-        self._shaft_designer.shaft_viewer.set_bearings(bearings_plot_attributes)
+        self._shaft_designer.shaftViewer.set_bearings(bearings_plot_attributes)
         if bearings_plot_attributes:
-            self._shaft_designer._toggle_bearings_plot_button.setEnabled(True)
+            self._shaft_designer._toggleBearingsPlotButton.setEnabled(True)
         else:
-            self._shaft_designer._toggle_bearings_plot_button.setEnabled(False)
+            self._shaft_designer._toggleBearingsPlotButton.setEnabled(False)
 
     def get_shaft_data(self):
         return self.shaft_calculator.shaft_sections
@@ -234,10 +234,10 @@ class ShaftDesignerController:
         for section_name, section in data.items():
             for subsection_number, subsection in section.items():
                 if section_name != 'Mimośrody':
-                    self._sections[section_name].add_subsection()
+                    self._sections[section_name].addSubsection()
                 data = (section_name, int(subsection_number), subsection, None)
                 self._draw_shaft(data)
                 self._enable_sections()
 
         self._enable_shaft_design_confirmation()
-        self._shaft_designer.set_draft_finished_title(False)
+        self._shaft_designer.setDraftFinishedTitle(False)

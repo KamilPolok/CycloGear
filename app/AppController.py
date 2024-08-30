@@ -28,9 +28,9 @@ class AppController():
         QTimer.singleShot(0, self._startup)
 
     def _connect_signals_and_slots(self):
-        self._app_window.save_action.triggered.connect(self._save_data)
-        self._app_window.save_as_action.triggered.connect(self._save_data_as)
-        self._app_window.quit_app_signal.connect(self._quit_app)
+        self._app_window.saveAction.triggered.connect(self._save_data)
+        self._app_window.saveAsAction.triggered.connect(self._save_data_as)
+        self._app_window.quitAppSignal.connect(self._quit_app)
 
     def _startup(self):
         self._set_app_window_title()
@@ -59,7 +59,7 @@ class AppController():
 
     def _add_components(self):
         for component in self._components:
-            self._app_window.add_component(component[0])
+            self._app_window.addComponent(component[0])
 
     def _load_data(self, data):
         for component in self._components:

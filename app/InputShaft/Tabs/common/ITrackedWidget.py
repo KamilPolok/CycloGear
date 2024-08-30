@@ -24,21 +24,21 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
         if callback:
             self._callback = callback
 
-    def _connect_signals_and_slots(self):
+    def _connectSignalsAndSlots(self):
         """
         Connect signals from every tracket input, output and item
         to method that checks the state.
         """
-        for input in self._inputs_to_provide:
-            input.inputConfirmedSignal.connect(self._check_state)
+        for input in self._inputsToProvide:
+            input.inputConfirmedSignal.connect(self._checkState)
 
-        for output in self._outputs_to_provide:
-            output.textChanged.connect(self._check_state)
+        for output in self._outputsToProvide:
+            output.textChanged.connect(self._checkState)
 
-        for item in self._items_to_select:
-            item.dataChangedSignal.connect(self._check_state)
+        for item in self._itemsToSelect:
+            item.dataChangedSignal.connect(self._checkState)
     
-    def _disconnect_signals_and_slots(self):
+    def _disconnectSignalsAndSlots(self):
         """
         Disconnect signals from every tracket input, output and item
         from method that checks the state.
@@ -47,59 +47,59 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
         do nothing, else disconnect the signals.
         """
         try:
-            for input in self._inputs_to_provide:
-                input.inputConfirmedSignal.disconnect(self._check_state)
+            for input in self._inputsToProvide:
+                input.inputConfirmedSignal.disconnect(self._checkState)
 
-            for output in self._outputs_to_provide:
-                output.textChanged.disconnect(self._check_state)
+            for output in self._outputsToProvide:
+                output.textChanged.disconnect(self._checkState)
 
-            for item in self._items_to_select:
-                item.dataChangedSignal.disconnect(self._check_state)
+            for item in self._itemsToSelect:
+                item.dataChangedSignal.disconnect(self._checkState)
         except (TypeError, AttributeError):
             pass
 
-    def _setup_state_tracking(self):
+    def _setupStateTracking(self):
         """
         Set up inputs tracking.
 
         Connect inputConfirmedSignal and dataChangedSignal signals of custom Input and DataButton 
-        widgets to the _check_state method.
+        widgets to the _checkState method.
         """
-        self._disconnect_signals_and_slots()
+        self._disconnectSignalsAndSlots()
 
-        self._inputs_to_provide = self.findChildren(Input)
-        self._outputs_to_provide = self.findChildren(Output)
-        self._items_to_select = self.findChildren(DataButton)
+        self._inputsToProvide = self.findChildren(Input)
+        self._outputsToProvide = self.findChildren(Output)
+        self._itemsToSelect = self.findChildren(DataButton)
 
-        self._connect_signals_and_slots()
+        self._connectSignalsAndSlots()
 
-        self._original_state = self._get_state()
+        self._original_state = self._getState()
 
-    def _get_state(self):
+    def _getState(self):
         """
         Retrieve the current state of all inputs in the widget.
 
         Returns:
             list : A list of values that the tracked inputs, outputs and items ale holding.
         """
-        inputs_states = [input.value() for input in self._inputs_to_provide]
-        inputs_states += [output.value() for output in self._outputs_to_provide]
-        inputs_states += [item.id() for item in self._items_to_select]
+        inputs_states = [input.value() for input in self._inputsToProvide]
+        inputs_states += [output.value() for output in self._outputsToProvide]
+        inputs_states += [item.id() for item in self._itemsToSelect]
 
         return inputs_states
 
-    def _check_state(self):
+    def _checkState(self):
         """
         Check the current state of subjects and invoke the callback function with appropriate arguments.
 
         This function is called whenever an input is changed. It checks the state of inputs in the
         widget, and calls the callback function.
         """
-        all_provided, state_changed = self.check_status()
+        all_provided, state_changed = self.checkStatus()
 
-        self._on_state_checked(all_provided, state_changed)
+        self._onStateChecked(all_provided, state_changed)
 
-    def _on_state_checked(self, all_provided, state_changed):
+    def _onStateChecked(self, all_provided, state_changed):
         """
         Perform tasks after state checking.
 
@@ -111,7 +111,7 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
         """
         self._callback(all_provided, state_changed)
 
-    def check_status(self):
+    def checkStatus(self):
         """
         Check status of all tracked subjects.
 
@@ -120,7 +120,7 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
             state_changed (bool): Were the inputs changed?
         """
         state_changed = False
-        current_state = self._get_state()
+        current_state = self._getState()
 
         # Check if all inputs were provided
         all_provided = all(current_state)
@@ -130,19 +130,19 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
         self._original_state = current_state
         return all_provided, state_changed
     
-    def track_state(self, track):
+    def trackState(self, track):
         if track:
-            self._disconnect_signals_and_slots()
-            self._connect_signals_and_slots()
-            self._original_state = self._get_state()
+            self._disconnectSignalsAndSlots()
+            self._connectSignalsAndSlots()
+            self._original_state = self._getState()
         else:
-            self._disconnect_signals_and_slots()
+            self._disconnectSignalsAndSlots()
         
         tracked_children = self.findChildren(ITrackedWidget)
         for tracked_child in tracked_children:
-            tracked_child.track_state(track)
+            tracked_child.trackState(track)
 
-    def set_callback(self, callback):
+    def setCallback(self, callback):
         """
         Set callback
 
@@ -152,14 +152,14 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
         self._callback = callback
 
     @abstractmethod
-    def init_ui(self):
+    def initUI(self):
         """
         Initialize the user interface for the widget. Must be overridden in subclasses.
         """
-        self._setup_state_tracking()
+        self._setupStateTracking()
 
-    def on_activated(self):
+    def onActivated(self):
         """
         Call appropriate methods time when the widget becomes visible.
         """
-        self._check_state()
+        self._checkState()

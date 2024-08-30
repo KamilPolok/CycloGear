@@ -1,9 +1,9 @@
 class PreliminaryDataTabCalculator:
     def init_data(self, component_data, inputs, outputs, validated_inputs):
-            self._component_data = component_data
-            self._inputs = inputs
-            self._outputs = outputs   
-            self._validated_inputs = validated_inputs
+        self._component_data = component_data
+        self._inputs = inputs
+        self._outputs = outputs   
+        self._validated_inputs = validated_inputs
     
     def _is_input_valid(self, input_name):
         """

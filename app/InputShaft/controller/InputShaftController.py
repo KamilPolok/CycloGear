@@ -49,10 +49,10 @@ class InputShaftController:
         """Initialize the input shaft widget with necessary data, set up tabs and initialize the shaft designer"""
         self._mediator = Mediator()
         self._calculator.set_initial_data()
-        self._init_tabs()
+        self._initTabs()
         self._init_shaft_designer()
 
-    def _init_tabs(self):
+    def _initTabs(self):
         tab_id = 1
 
         tab1 = PreliminaryDataTab(self._input_shaft)
@@ -81,7 +81,7 @@ class InputShaftController:
             data = self._calculator.get_data()
             tab_controller.init_state(data)
 
-        self._input_shaft.init_tabs(self.tabs, tab_titles)
+        self._input_shaft.initTabs(self.tabs, tab_titles)
 
     def _init_shaft_designer(self):
         # Set an instance of shaft designer
@@ -98,7 +98,7 @@ class InputShaftController:
         This method sets up connections between UI elements and their corresponding
         actions or handlers.
         """
-        self._input_shaft.preview_button.clicked.connect(self._open_shaft_designer_window)
+        self._input_shaft.previewButton.clicked.connect(self._open_shaft_designer_window)
         self._mediator.shaftDesigningFinished.connect(self._on_shaft_designing_finished)
 
         self._mediator.selectMaterial.connect(self._on_select_materials)
@@ -158,7 +158,7 @@ class InputShaftController:
         self._shaft_designer_controller.update_bearing_data(bearing_data)
 
     def _on_shaft_designing_finished(self):
-        self._input_shaft.handle_shaft_designing_finished()
+        self._input_shaft.handleShaftDesigningFinished()
 
     def _open_shaft_material_selection(self):
         """
@@ -172,13 +172,12 @@ class InputShaftController:
         db_window.setWindowTitle("Dobór materiału")
         tables_group_name = 'wał czynny-materiały'
 
-        available_tables = db_handler.getAvailableTables(tables_group_name)
-        limits = db_handler.getTableItemsFilters(tables_group_name)
-        
+        available_tables = db_handler.get_available_tables(tables_group_name)
+        limits = db_handler.get_table_items_filters(tables_group_name)
         view_select_items_ctrl = ViewSelectItemController(db_handler, db_window, available_tables, limits)
         result = view_select_items_ctrl.startup()
         if result:
-            return view_select_items_ctrl.selectedItemAttributes
+            return view_select_items_ctrl.selected_item_attributes
         else:
             return None
         
@@ -202,15 +201,15 @@ class InputShaftController:
         db_window = Window(self._input_shaft)
         db_window.setWindowTitle("Dobór łożyska")
         # Get available tables
-        available_tables = db_handler.getAvailableTables(tables_group_name)
+        available_tables = db_handler.get_available_tables(tables_group_name)
         # Specify the limits for the group of tables
-        limits = db_handler.getTableItemsFilters(tables_group_name)
+        limits = db_handler.get_table_items_filters(tables_group_name)
         self._calculator.set_bearings_attributes_limits(limits, bearing_section_id)
         # Setup the controller for the subwindow
         view_select_items_ctrl = ViewSelectItemController(db_handler, db_window, available_tables, limits)
         result = view_select_items_ctrl.startup()
         if result:
-            return view_select_items_ctrl.selectedItemAttributes
+            return view_select_items_ctrl.selected_item_attributes
         else:
             return None
         
@@ -229,16 +228,16 @@ class InputShaftController:
         db_window.setWindowTitle("Dobór elementu tocznego")
         # Get available tables
         tables_group_name = f"wał czynny-elementy toczne-{self._calculator.get_bearing_rolling_element_type(bearing_section_id)}"
-        available_tables = db_handler.getAvailableTables(tables_group_name)
+        available_tables = db_handler.get_available_tables(tables_group_name)
         # Specify the limits for the group of tables
-        limits = db_handler.getTableItemsFilters(tables_group_name)
+        limits = db_handler.get_table_items_filters(tables_group_name)
         self._calculator.set_rollings_element_limits(limits, bearing_section_id)
         
         # Setup the controller for the subwindow
         view_select_items_ctrl = ViewSelectItemController(db_handler, db_window, available_tables, limits)
         result = view_select_items_ctrl.startup()
         if result:
-            return view_select_items_ctrl.selectedItemAttributes
+            return view_select_items_ctrl.selected_item_attributes
         else:
             return None
 
@@ -257,8 +256,8 @@ class InputShaftController:
         for tab_controller in self.tab_controllers[:-1]:
             data.append(tab_controller.get_data())
 
-        # Get is_shaft_designed flag
-        data.append(self._input_shaft.is_shaft_designed)
+        # Get isShaftDesigned flag
+        data.append(self._input_shaft.isShaftDesigned)
         return data
 
     def load_data(self, data):
@@ -278,7 +277,7 @@ class InputShaftController:
         for idx, tab_controller in enumerate(self.tab_controllers[:-1]):
             tab_controller.set_state(data[idx+2])
         
-        # Set is_shaft_designed_flag
-        self._input_shaft.is_shaft_designed = data[-1]
-        if self._input_shaft.is_shaft_designed:
+        # Set isShaftDesigned flag
+        self._input_shaft.isShaftDesigned = data[-1]
+        if self._input_shaft.isShaftDesigned:
             self._on_shaft_designing_finished()

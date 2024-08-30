@@ -15,9 +15,9 @@ class StartupHandler():
         self._connect_signals_and_slots()
     
     def _connect_signals_and_slots(self):
-        self._startup_window.quit_app_signal.connect(self._startup_window.reject)
-        self._startup_window.new_project_signal.connect(self._startup_window.accept)       
-        self._startup_window.open_project_signal.connect(self._load_data)
+        self._startup_window.quitAppSignal.connect(self._startup_window.reject)
+        self._startup_window.newProjectSignal.connect(self._startup_window.accept)       
+        self._startup_window.openProjectSignal.connect(self._load_data)
 
     def _load_data(self):
         data = self._load_json_data()

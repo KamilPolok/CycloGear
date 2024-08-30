@@ -20,26 +20,16 @@ class ItemsFiltersView(QWidget):
 
     def _initView(self):
         # Init layout wiith empty sublayout and button
-        self.filtersViewLayout = QVBoxLayout()
-        self.filtersViewLayout.setContentsMargins(0,0,0,0)
-        self.setLayout(self.filtersViewLayout)
+        filtersViewLayout = QVBoxLayout()
+        filtersViewLayout.setContentsMargins(0,0,0,0)
+        self.setLayout(filtersViewLayout)
 
         self.filtersLayout = QVBoxLayout()
         self.filterResultsButton = QPushButton("FILTRUJ")
 
-        self.filtersViewLayout.addLayout(self.filtersLayout)
-        self.filtersViewLayout.addWidget(self.filterResultsButton)
+        filtersViewLayout.addLayout(self.filtersLayout)
+        filtersViewLayout.addWidget(self.filterResultsButton)
 
-    def updateFiltersView(self, ItemsAttributes):
-        # Clear Container of LineEdits and remove Widgets from sublayout
-        self.filtersLineEdits = {}
-        for i in reversed(range(self.filtersLayout.count())): 
-            self.filtersLayout.itemAt(i).widget().setParent(None)
-
-        # Refill sublayout with new Widgets
-        for attribute in ItemsAttributes:
-            self._viewFilter(attribute)
-            
     def _viewFilter(self, attribute):
         filterWidget = QWidget()
 
@@ -63,9 +53,9 @@ class ItemsFiltersView(QWidget):
             limitLineEdit.setFixedWidth(60)
             limitLineEdit.setMaxLength(8)
             # Set input validation for LineEdit
-            reg_ex = QRegularExpression("[0-9]+\.?[0-9]+")
-            input_validator = QRegularExpressionValidator(reg_ex, limitLineEdit)
-            limitLineEdit.setValidator(input_validator)
+            regex = QRegularExpression("[0-9]+\.?[0-9]+")
+            inputValidator = QRegularExpressionValidator(regex, limitLineEdit)
+            limitLineEdit.setValidator(inputValidator)
 
             limitLabel = QLabel(limit)
             limitLabel.setFixedWidth(30)
@@ -83,3 +73,13 @@ class ItemsFiltersView(QWidget):
         self.filtersLineEdits[attribute[0]] = filterLineEdits
 
         self.filtersLayout.addWidget(filterWidget)
+
+    def updateFiltersView(self, itemsAttributes):
+        # Clear Container of LineEdits and remove Widgets from sublayout
+        self.filtersLineEdits = {}
+        for i in reversed(range(self.filtersLayout.count())): 
+            self.filtersLayout.itemAt(i).widget().setParent(None)
+
+        # Refill sublayout with new Widgets
+        for attribute in itemsAttributes:
+            self._viewFilter(attribute)

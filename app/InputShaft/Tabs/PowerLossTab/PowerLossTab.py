@@ -4,119 +4,119 @@ from PyQt6.QtWidgets import QComboBox, QVBoxLayout, QHBoxLayout, QStackedWidget,
 from ..common.DataButton import DataButton
 from ..common.Section import Section
 from ..common.ITrackedTab import ITrackedTab
-from ..common.common_functions import create_data_display_row, create_data_input_row, create_header
+from ..common.common_functions import createDataDisplayRow, createDataInputRow, createHeader
 
 class PowerLossTab(ITrackedTab):
     rollingElementDiameterProvided = pyqtSignal(str, bool, bool)
     sectionDataProvided = pyqtSignal(str, bool, bool)
 
-    def _init_selector(self):
-        selector_layout = QHBoxLayout()
+    def _initSelector(self):
+        selectorLayout = QHBoxLayout()
 
-        layout_selector_label = create_header('Miejsce osadzenia łożyska:', bold=True)
+        layoutSelectorLabel = createHeader('Miejsce osadzenia łożyska:', bold=True)
 
-        self.layout_selector = QComboBox()
-        self.layout_selector.setFixedWidth(150)
-        self.layout_selector.setEditable(True)
-        line_edit = self.layout_selector.lineEdit()
-        line_edit.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        line_edit.setReadOnly(True)
+        self.layoutSelector = QComboBox()
+        self.layoutSelector.setFixedWidth(150)
+        self.layoutSelector.setEditable(True)
+        lineEdit = self.layoutSelector.lineEdit()
+        lineEdit.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        lineEdit.setReadOnly(True)
         
-        self.layout_selector.addItems(["Podpora przesuwna A", "Podpora stała B", "Mimośrody"])
-        self.layout_selector.currentIndexChanged.connect(self._on_change_section)
+        self.layoutSelector.addItems(["Podpora przesuwna A", "Podpora stała B", "Mimośrody"])
+        self.layoutSelector.currentIndexChanged.connect(self._onChangeSection)
 
-        selector_layout.addWidget(layout_selector_label, alignment=Qt.AlignmentFlag.AlignLeft)
-        selector_layout.addWidget(self.layout_selector, alignment=Qt.AlignmentFlag.AlignLeft)
-        selector_layout.addStretch(1)
+        selectorLayout.addWidget(layoutSelectorLabel, alignment=Qt.AlignmentFlag.AlignLeft)
+        selectorLayout.addWidget(self.layoutSelector, alignment=Qt.AlignmentFlag.AlignLeft)
+        selectorLayout.addStretch(1)
 
-        self.main_layout.addLayout(selector_layout)
+        self.mainLayout.addLayout(selectorLayout)
 
-    def _init_sections(self):
-        self.stacked_sections = QStackedWidget()
+    def _initSections(self):
+        self.stackedSections = QStackedWidget()
 
-        for section_name in self._items['Bearings']:
-            container = self._init_bearings_section(section_name)
-            self.stacked_sections.addWidget(container)
+        for sectionName in self._items['Bearings']:
+            container = self._initBearingsSection(sectionName)
+            self.stackedSections.addWidget(container)
 
-        self.main_layout.addWidget(self.stacked_sections)
+        self.mainLayout.addWidget(self.stackedSections)
 
-    def _init_bearings_section(self, section_name):
+    def _initBearingsSection(self, sectionName):
         """
         Create and layout the UI components for single bearing section.
         """
-        section_layout = QVBoxLayout()
+        sectionLayout = QVBoxLayout()
 
         # Set content container
         container = QWidget()
-        container.setLayout(section_layout)
+        container.setLayout(sectionLayout)
 
         # Set button for bearing selection
-        button_layout = QHBoxLayout()
-        button_label = create_header('Element toczny o znormalizowanej średnicy:', bold=True)
+        buttonLayout = QHBoxLayout()
+        buttonLabel = createHeader('Element toczny o znormalizowanej średnicy:', bold=True)
 
-        select_rolling_element_button = DataButton('Wybierz element toczny')
-        self._items['Bearings'][section_name]['rolling_elements'] = select_rolling_element_button
-        button_layout.addWidget(button_label)
-        button_layout.addWidget(select_rolling_element_button)
+        selectRollingElementButton = DataButton('Wybierz element toczny')
+        self._items['Bearings'][sectionName]['rolling_elements'] = selectRollingElementButton
+        buttonLayout.addWidget(buttonLabel)
+        buttonLayout.addWidget(selectRollingElementButton)
 
         # Set bearing diameter subsection
-        diameter_subsection = Section(self, section_name, self.rollingElementDiameterProvided.emit)
-        diameter_subsection.addWidget(create_data_display_row(self._outputs['Bearings'][section_name]['di'], 'd', 'Średnica wewnętrzna łożyska', decimal_precision=2))
-        diameter_subsection.addWidget(create_data_display_row(self._outputs['Bearings'][section_name]['do'], 'D', 'Średnica zewnętrzna łożyska', decimal_precision=2))
-        diameter_subsection.addWidget(create_data_display_row(self._outputs['Bearings'][section_name]['drc'], 'd<sub>w</sub>', 'Obliczona średnica elementów tocznych', decimal_precision=2))
+        diameterSubsection = Section(self, sectionName, self.rollingElementDiameterProvided.emit)
+        diameterSubsection.addWidget(createDataDisplayRow(self._outputs['Bearings'][sectionName]['di'], 'd', 'Średnica wewnętrzna łożyska', decimalPrecision=2))
+        diameterSubsection.addWidget(createDataDisplayRow(self._outputs['Bearings'][sectionName]['do'], 'D', 'Średnica zewnętrzna łożyska', decimalPrecision=2))
+        diameterSubsection.addWidget(createDataDisplayRow(self._outputs['Bearings'][sectionName]['drc'], 'd<sub>w</sub>', 'Obliczona średnica elementów tocznych', decimalPrecision=2))
 
         # Set data subsection
-        data_subsection = Section(self, section_name, self.sectionDataProvided.emit)
-        data_subsection.addLayout(button_layout)
-        data_subsection.addWidget(create_data_input_row(self._inputs['Bearings'][section_name]['f'], 'f', 'Współczynnik tarcia tocznego łożyska', decimal_precision=5))
+        dataSubsection = Section(self, sectionName, self.sectionDataProvided.emit)
+        dataSubsection.addLayout(buttonLayout)
+        dataSubsection.addWidget(createDataInputRow(self._inputs['Bearings'][sectionName]['f'], 'f', 'Współczynnik tarcia tocznego łożyska', decimalPrecision=5))
 
         # Add widgets to section layout
-        section_layout.addWidget(diameter_subsection)
-        section_layout.addWidget(data_subsection)
-        section_layout.addWidget(create_data_display_row(self._inputs['Bearings'][section_name]['P'], 'P', 'Straty mocy', decimal_precision=2))
-        section_layout.addStretch()
+        sectionLayout.addWidget(diameterSubsection)
+        sectionLayout.addWidget(dataSubsection)
+        sectionLayout.addWidget(createDataDisplayRow(self._inputs['Bearings'][sectionName]['P'], 'P', 'Straty mocy', decimalPrecision=2))
+        sectionLayout.addStretch()
 
         return container
     
-    def _on_change_section(self, index):
+    def _onChangeSection(self, index):
         """
         Perform actions on section change.
         """
-        self.stacked_sections.setCurrentIndex(index)
+        self.stackedSections.setCurrentIndex(index)
 
-        # Call method on_activated for every subsection in activated section
-        [section.on_activated() for section in self.stacked_sections.currentWidget().findChildren(Section)]
+        # Call method onActivated for every subsection in activated section
+        [section.onActivated() for section in self.stackedSections.currentWidget().findChildren(Section)]
     
-    def enable_select_rolling_element_button(self, section_name, enable_button, delete_choice):
+    def enableSelectRollingElementButton(self, sectionName, enableButton, deleteChoice):
         """
         Enable or disable the selection button based on whether all inputs are filled.
 
         Args:
-            section_name (str): Specifies the bearing location.
-            enable_button (bool): Specifies whether the button should be enabled or disabled.
-            delete_choice (bool): Specifies whether the button should be reseted (clearing its id and data).
+            sectionName (str): Specifies the bearing location.
+            enableButton (bool): Specifies whether the button should be enabled or disabled.
+            deleteChoice (bool): Specifies whether the button should be reset (clearing its id and data).
         """
-        self._items['Bearings'][section_name]['rolling_elements'].setEnabled(enable_button)
+        self._items['Bearings'][sectionName]['rolling_elements'].setEnabled(enableButton)
 
-        if delete_choice:
-            self._items['Bearings'][section_name]['rolling_elements'].clear()
+        if deleteChoice:
+            self._items['Bearings'][sectionName]['rolling_elements'].clear()
     
-    def update_selected_rolling_element(self, section_name, item_data):
+    def updateSelectedRollingElement(self, sectionName, itemData):
         """
         Update selected rolling element.
 
         Args:
-            section_name (str): Specifies the bearing location.
-            item_data (dict): Data of the selected item.
+            sectionName (str): Specifies the bearing location.
+            itemData (dict): Data of the selected item.
         """
-        self._items['Bearings'][section_name]['rolling_elements'].setData(item_data)
+        self._items['Bearings'][sectionName]['rolling_elements'].setData(itemData)
     
-    def init_ui(self, items, inputs, outputs):
+    def initUI(self, items, inputs, outputs):
         """
         Initialize the user interface for this tab.
         
         Args:
-            items (dict): DattaButtons providing storage for selected items.
+            items (dict): DataButtons providing storage for selected items.
             inputs (dict): Inputs.
             outputs (dict): Outputs.
         """
@@ -124,11 +124,11 @@ class PowerLossTab(ITrackedTab):
         self._inputs = inputs
         self._outputs = outputs
 
-        self.main_layout = QVBoxLayout()
-        self.setLayout(self.main_layout)
+        self.mainLayout = QVBoxLayout()
+        self.setLayout(self.mainLayout)
 
-        self._init_selector()
-        self._init_sections()
-        self.main_layout.addStretch()
+        self._initSelector()
+        self._initSections()
+        self.mainLayout.addStretch()
 
-        super().init_ui()
+        super().initUI()

@@ -8,12 +8,12 @@ class MessageDialog(QDialog):
     This custom dialog is particularly useful because it prevents the truncation of lengthy titles, 
     ensuring they are fully displayed.
     ''' 
-    def __init__(self, parent, title, message, icon_type):
+    def __init__(self, parent, title, message, iconType):
         super().__init__(parent)
 
         self.title = title
         self.message = message
-        self.icon_type = icon_type
+        self.iconType = iconType
 
         # Set window flags to keep only the title bar
         self.setWindowFlags(Qt.WindowType.Dialog | Qt.WindowType.WindowTitleHint)
@@ -22,17 +22,17 @@ class MessageDialog(QDialog):
 
         self.layout = QVBoxLayout(self)
 
-        self._init_message()
-        self._init_buttons()
+        self._initMessage()
+        self._initButtons()
 
         titleFont = QApplication.font()
         fontMetrics = QFontMetrics(titleFont)
-        title_width = fontMetrics.horizontalAdvance(self.title) + 150  # Add some padding
-        message_width = 200 + 32 + 20  # Text width + icon width + padding
-        width = max(title_width, message_width)
+        titleWidth = fontMetrics.horizontalAdvance(self.title) + 150  # Add some padding
+        messageWidth = 200 + 32 + 20  # Text width + icon width + padding
+        width = max(titleWidth, messageWidth)
         self.setMinimumWidth(width)
 
-    def _init_message(self):
+    def _initMessage(self):
         # Message layout
         messageLayout = QHBoxLayout()
         self.layout.addLayout(messageLayout)
@@ -41,7 +41,7 @@ class MessageDialog(QDialog):
         self.iconLabel = QLabel()
         self.iconLabel.setFixedWidth(50)
         self.iconLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        icon = self.style().standardIcon(self.icon_type)
+        icon = self.style().standardIcon(self.iconType)
         self.iconLabel.setPixmap(icon.pixmap(QSize(32, 32)))
         messageLayout.addWidget(self.iconLabel)
 
@@ -53,13 +53,13 @@ class MessageDialog(QDialog):
         self.messageLabel.setFont(messageFont)
         messageLayout.addWidget(self.messageLabel)
 
-    def _init_buttons(self):
+    def _initButtons(self):
         # Buttons layout
         buttonLayout = QHBoxLayout()
         buttonLayout.setSpacing(20)
         self.layout.addLayout(buttonLayout)
 
-        if self.icon_type == QStyle.StandardPixmap.SP_MessageBoxQuestion:
+        if self.iconType == QStyle.StandardPixmap.SP_MessageBoxQuestion:
             buttonLayout.addItem(QSpacerItem(20, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
 
             # Yes Button

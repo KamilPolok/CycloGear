@@ -16,17 +16,16 @@ class Section(ITrackedWidget):
         callback (Callable): method to be called 
         """
         super().__init__(parent, callback)
-        self.init_ui()
-
+        self.initUI()
         self._name = name
 
-    def init_ui(self):
+    def initUI(self):
         """
         Init the user interface.
         """
-        self.main_layout = QVBoxLayout()
-        self.main_layout.setContentsMargins(0, 0, 0, 0)
-        self.setLayout(self.main_layout)
+        self.mainLayout = QVBoxLayout()
+        self.mainLayout.setContentsMargins(0, 0, 0, 0)
+        self.setLayout(self.mainLayout)
 
     def addWidget(self, widget: QWidget):
         """
@@ -35,8 +34,8 @@ class Section(ITrackedWidget):
         Args:
             widget (QWidget): widget to add.
         """
-        self.main_layout.addWidget(widget)
-        self._setup_state_tracking()
+        self.mainLayout.addWidget(widget)
+        self._setupStateTracking()
 
     def addLayout(self, layout: QLayout):
         """
@@ -45,17 +44,17 @@ class Section(ITrackedWidget):
         Args:
             layout (QWidget): layout to add.
         """
-        self.main_layout.addLayout(layout)
-        self._setup_state_tracking()
+        self.mainLayout.addLayout(layout)
+        self._setupStateTracking()
 
-    def _on_state_checked(self, all_provided: bool, state_changed: bool):
+    def _onStateChecked(self, allProvided: bool, stateChanged: bool):
         """
         Override the parent class method called after state checking.
 
         Add name to the callback attributes.
 
         Args:
-            all_provided (bool): Speciefies whether all inputs are provided.
-            state_changed (bool): Speciefies whether the inputs has been changed.
+            allProvided (bool): Speciefies whether all inputs are provided.
+            stateChanged (bool): Speciefies whether the inputs has been changed.
         """
-        self._callback(self._name, all_provided, state_changed)
+        self._callback(self._name, allProvided, stateChanged)

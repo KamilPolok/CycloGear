@@ -1,4 +1,3 @@
-
 from abc import ABC, ABCMeta, abstractmethod
 from ast import literal_eval
 
@@ -6,7 +5,7 @@ from PyQt6.QtCore import pyqtSignal, Qt, QSize
 from PyQt6.QtWidgets import QFrame, QHBoxLayout, QPushButton, QVBoxLayout, QWidget, QSizePolicy 
 from PyQt6.QtGui import QIcon
 
-from .CommonFunctions import create_data_input_row
+from .CommonFunctions import createDataInputRow
 from .ShaftSubsection import ShaftSubsection
 
 from config import RESOURCES_DIR_NAME, dependencies_path
@@ -15,59 +14,60 @@ class CustomFrame(QFrame):
     def __init__(self):
         super().__init__()
 
-        self._default_style = "QFrame { background-color: #8ad6cc; border-radius: 5px;}"
-        self._on_hover_style = "QFrame { background-color: #66beb2; border-radius: 5px;}"
-        self.setStyleSheet(self._default_style)
+        self._defaultStyle = "QFrame { background-color: #8ad6cc; border-radius: 5px;}"
+        self._onHoverStyle = "QFrame { background-color: #66beb2; border-radius: 5px;}"
+        self.setStyleSheet(self._defaultStyle)
 
 class HoverButton(QPushButton):
     def __init__(self, parent: QFrame):
         super().__init__(parent)
 
     def enterEvent(self, event):
-        self.parent().setStyleSheet(self.parent()._on_hover_style)
+        self.parent().setStyleSheet(self.parent()._onHoverStyle)
         super().enterEvent(event)
 
     def leaveEvent(self, event):
-        self.parent().setStyleSheet(self.parent()._default_style)
+        self.parent().setStyleSheet(self.parent()._defaultStyle)
         super().leaveEvent(event)
 
 class ABCQWidgetMeta(ABCMeta, type(QWidget)):
     pass
+
 class Section(QWidget, metaclass=ABCQWidgetMeta):
-    subsection_data_signal = pyqtSignal(tuple)
+    subsectionDataSignal = pyqtSignal(tuple)
 
     def __init__(self, name, parent=None):
         super().__init__(parent)
         self._name = name
         self.subsections = []
-        self.subsection_count = 0
+        self.subsectionCount = 0
 
-        self._init_ui()
+        self._initUI()
 
-    def _init_ui(self):
-        self._main_layout = QVBoxLayout(self)
-        self._main_layout.setContentsMargins(0, 0, 0, 0)
+    def _initUI(self):
+        self._mainLayout = QVBoxLayout(self)
+        self._mainLayout.setContentsMargins(0, 0, 0, 0)
         
-        self._init_header()
-        self._init_content()
+        self._initHeader()
+        self._initContent()
     
-    def _init_header(self):
+    def _initHeader(self):
         # Set header layout
         header = CustomFrame()
-        self._header_height = 25
-        header.setFixedHeight(self._header_height)  # Set the height to 30 pixels
-        self._main_layout.addWidget(header)
+        self._headerHeight = 25
+        header.setFixedHeight(self._headerHeight)  # Set the height to 30 pixels
+        self._mainLayout.addWidget(header)
 
-        self._header_layout = QHBoxLayout()
-        self._header_layout.setContentsMargins(0, 0, 0, 0)
-        self._header_layout.setSpacing(0)
-        self._header_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        header.setLayout(self._header_layout)
+        self._headerLayout = QHBoxLayout()
+        self._headerLayout.setContentsMargins(0, 0, 0, 0)
+        self._headerLayout.setSpacing(0)
+        self._headerLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        header.setLayout(self._headerLayout)
 
         # Set toggle section button
-        self.toggle_section_button = HoverButton(header)
-        self.toggle_section_button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        self.toggle_section_button.setStyleSheet("""                                                  
+        self.toggleSectionButton = HoverButton(header)
+        self.toggleSectionButton.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self.toggleSectionButton.setStyleSheet("""                                                  
             QPushButton {
                 background-color: transparent;
                 text-align: left;
@@ -76,50 +76,50 @@ class Section(QWidget, metaclass=ABCQWidgetMeta):
                 padding-left: 10px
             }
         """)
-        self.toggle_section_button.setText(self._name)
-        self.toggle_section_button.clicked.connect(self.toggle_content)
-        self._header_layout.addWidget(self.toggle_section_button)
+        self.toggleSectionButton.setText(self._name)
+        self.toggleSectionButton.clicked.connect(self.toggleContent)
+        self._headerLayout.addWidget(self.toggleSectionButton)
     
-    def _init_content(self):
+    def _initContent(self):
         # Set content layout
         self._content = QFrame()
-        self._content_layout = QVBoxLayout()
-        self._content_layout.setContentsMargins(5, 0, 0, 0)
-        self._content.setLayout(self._content_layout)
+        self._contentLayout = QVBoxLayout()
+        self._contentLayout.setContentsMargins(5, 0, 0, 0)
+        self._content.setLayout(self._contentLayout)
 
-        self._main_layout.addWidget(self._content)
+        self._mainLayout.addWidget(self._content)
 
         self._content.setVisible(False)
 
-    def toggle_content(self, event):
+    def toggleContent(self, event):
         '''
         Toggle the visibility of the content section
         '''
         self._content.setVisible(not self._content.isVisible())
 
     @abstractmethod
-    def handle_subsection_data(self, data):
+    def handleSubsectionData(self, data):
         pass
 
 class ShaftSection(Section):
-    add_subsection_signal = pyqtSignal()
-    remove_subsection_plot_signal = pyqtSignal(str, int)
+    addSubsectionSignal = pyqtSignal()
+    removeSubsectionPlotSignal = pyqtSignal(str, int)
 
     def __init__(self, name, parent=None):
         super().__init__(name, parent)
-        self._subsection_name = 'Stopień'
+        self._subsectionName = 'Stopień'
     
-    def _init_header(self):
-        super()._init_header()
+    def _initHeader(self):
+        super()._initHeader()
         # Set add subsection button
-        self._add_subsection_button = QPushButton()
-        button_size = self._header_height
-        icon_size = self._header_height * 0.9
-        self._add_subsection_button.setFixedSize(button_size, button_size)
-        self._add_subsection_button.setIconSize(QSize(icon_size, icon_size))
-        self._add_subsection_button.setIcon(QIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//add_icon.png')))
-        self._add_subsection_button.setToolTip('Dodaj')
-        self._add_subsection_button.setStyleSheet("""                         
+        self._addSubsectionButton = QPushButton()
+        buttonSize = self._headerHeight
+        iconSize = self._headerHeight * 0.9
+        self._addSubsectionButton.setFixedSize(buttonSize, buttonSize)
+        self._addSubsectionButton.setIconSize(QSize(iconSize, iconSize))
+        self._addSubsectionButton.setIcon(QIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//add_icon.png')))
+        self._addSubsectionButton.setToolTip('Dodaj')
+        self._addSubsectionButton.setStyleSheet("""                         
             QPushButton {
                 background-color: transparent;
                 color: black;
@@ -136,123 +136,123 @@ class ShaftSection(Section):
             }
         """)
         
-        self._add_subsection_button.clicked.connect(self.add_subsection)
-        self._header_layout.addWidget(self._add_subsection_button)
+        self._addSubsectionButton.clicked.connect(self.addSubsection)
+        self._headerLayout.addWidget(self._addSubsectionButton)
 
-        self._add_subsection_button.setVisible(False)
+        self._addSubsectionButton.setVisible(False)
 
-    def add_subsection(self):
-        subsection = ShaftSubsection(self._subsection_name, self.subsection_count, self)
-        subsection.set_attributes([('d', 'Ø'), ('l', 'l')])
-        subsection.subsection_data_signal.connect(self.handle_subsection_data)
-        subsection.remove_subsection_signal.connect(self.remove_subsection)
+    def addSubsection(self):
+        subsection = ShaftSubsection(self._subsectionName, self.subsectionCount, self)
+        subsection.setAttributes([('d', 'Ø'), ('l', 'l')])
+        subsection.subsectionDataSignal.connect(self.handleSubsectionData)
+        subsection.removeSubsectionSignal.connect(self.removeSubsection)
         self.subsections.append(subsection)
-        self._content_layout.addWidget(subsection)
-        self.subsection_count += 1
-        self.set_add_subsection_button_enabled(False)
-        self.add_subsection_signal.emit()
+        self._contentLayout.addWidget(subsection)
+        self.subsectionCount += 1
+        self.setAddSubsectionButtonEnabled(False)
+        self.addSubsectionSignal.emit()
 
-    def remove_subsection(self, subsection_number):
+    def removeSubsection(self, subsectionNumber):
         # Find and remove the specific subsection
-        subsection_to_remove = self.sender()
-        self._content_layout.removeWidget(subsection_to_remove)
-        subsection_to_remove.deleteLater()
-        self.subsections = [s for s in self.subsections if s != subsection_to_remove]
+        subsectionToRemove = self.sender()
+        self._contentLayout.removeWidget(subsectionToRemove)
+        subsectionToRemove.deleteLater()
+        self.subsections = [s for s in self.subsections if s != subsectionToRemove]
     
         # Update the numbers and names of the remaining subsections
         for i, subsection in enumerate(self.subsections):
-            subsection.update_subsection_name(i)
+            subsection.updateSubsectionName(i)
 
         # Update the subsection count
-        self.subsection_count -= 1
+        self.subsectionCount -= 1
         
-        self.remove_subsection_plot_signal.emit(self._name, subsection_number)
+        self.removeSubsectionPlotSignal.emit(self._name, subsectionNumber)
 
-    def set_limits(self, limits):
-        for subsection_number, attributes in limits.items():
-            self.subsections[subsection_number].set_limits(attributes)
+    def setLimits(self, limits):
+        for subsectionNumber, attributes in limits.items():
+            self.subsections[subsectionNumber].setLimits(attributes)
 
-    def set_values(self, values):
-        for subsection_number, attributes in values.items():
-                self.subsections[subsection_number].set_values(attributes)
+    def setValues(self, values):
+        for subsectionNumber, attributes in values.items():
+                self.subsections[subsectionNumber].setValues(attributes)
 
-    def set_add_subsection_button_enabled(self, enabled):
-        self._add_subsection_button.setEnabled(enabled)
+    def setAddSubsectionButtonEnabled(self, enabled):
+        self._addSubsectionButton.setEnabled(enabled)
     
-    def toggle_content(self, event):
-        super().toggle_content(event)
-        self._add_subsection_button.setVisible(not self._add_subsection_button.isVisible())
+    def toggleContent(self, event):
+        super().toggleContent(event)
+        self._addSubsectionButton.setVisible(not self._addSubsectionButton.isVisible())
 
-    def handle_subsection_data(self, subsection_data):
+    def handleSubsectionData(self, subsectionData):
         subsection = self.sender()
-        common_section_data = None
-        data = (self._name, subsection.subsection_number, subsection_data, common_section_data)
-        self.subsection_data_signal.emit(data)
+        commonSectionData = None
+        data = (self._name, subsection.subsectionNumber, subsectionData, commonSectionData)
+        self.subsectionDataSignal.emit(data)
 
 class EccentricsSection(Section):
-    remove_subsection_plot_signal = pyqtSignal(str, int)
+    removeSubsectionPlotSignal = pyqtSignal(str, int)
 
     def __init__(self, name, parent=None):
         super().__init__(name, parent)
-        self.subsection_name = 'Mimośród'
+        self.subsectionName = 'Mimośród'
 
-    def _init_content(self):
-        super()._init_content()
+    def _initContent(self):
+        super()._initContent()
 
         # Set data entries
         self.inputs = {}
         
         attribute, symbol = ('d', 'Ø')
-        attribute_row, input = create_data_input_row(symbol)
-        self._content_layout.addLayout(attribute_row)
+        attributeRow, input = createDataInputRow(symbol)
+        self._contentLayout.addLayout(attributeRow)
         
         self.inputs[attribute] = input
 
-    def set_subsections_number(self, sections_number):
-        if self.subsection_count < sections_number:
+    def setSubsectionsNumber(self, sectionsNumber):
+        if self.subsectionCount < sectionsNumber:
             # Add subsections
-            for _ in range(self.subsection_count, sections_number):
-                subsection = ShaftSubsection(self.subsection_name, self.subsection_count, self)
-                subsection.set_attributes([('l', 'l')])
+            for _ in range(self.subsectionCount, sectionsNumber):
+                subsection = ShaftSubsection(self.subsectionName, self.subsectionCount, self)
+                subsection.setAttributes([('l', 'l')])
                 for attribute, input in self.inputs.items():
-                    subsection.add_input(attribute, input)
-                subsection.remove_button.hide()
-                subsection.subsection_data_signal.connect(self.handle_subsection_data)
+                    subsection.addInput(attribute, input)
+                subsection.removeButton.hide()
+                subsection.subsectionDataSignal.connect(self.handleSubsectionData)
                 self.subsections.append(subsection)
-                self._content_layout.addWidget(subsection)
-                self.subsection_count += 1
-        elif self.subsection_count > sections_number:
+                self._contentLayout.addWidget(subsection)
+                self.subsectionCount += 1
+        elif self.subsectionCount > sectionsNumber:
             # Remove subsections
-            while self.subsection_count > sections_number:
-                last_subsection_number = self.subsection_count-1
-                self.remove_subsection(last_subsection_number)
+            while self.subsectionCount > sectionsNumber:
+                lastSubsectionNumber = self.subsectionCount - 1
+                self.removeSubsection(lastSubsectionNumber)
 
-    def remove_subsection(self, subsection_number):
+    def removeSubsection(self, subsectionNumber):
         # Find and remove the specific subsection
-        subsection_to_remove = self.subsections[subsection_number]
-        self._content_layout.removeWidget(subsection_to_remove)
-        subsection_to_remove.deleteLater()
-        self.subsections = [s for s in self.subsections if s != subsection_to_remove]
+        subsectionToRemove = self.subsections[subsectionNumber]
+        self._contentLayout.removeWidget(subsectionToRemove)
+        subsectionToRemove.deleteLater()
+        self.subsections = [s for s in self.subsections if s != subsectionToRemove]
     
         # Update the numbers and names of the remaining subsections
         for i, subsection in enumerate(self.subsections):
-            subsection.update_subsection_name(i)
+            subsection.updateSubsectionName(i)
 
         # Update the subsection count
-        self.subsection_count -= 1
+        self.subsectionCount -= 1
         
-        self.remove_subsection_plot_signal.emit(self._name, subsection_number)
+        self.removeSubsectionPlotSignal.emit(self._name, subsectionNumber)
 
-    def set_limits(self, limits):
-        for subsection_number, attributes in limits.items():
-            self.subsections[subsection_number].set_limits(attributes)
+    def setLimits(self, limits):
+        for subsectionNumber, attributes in limits.items():
+            self.subsections[subsectionNumber].setLimits(attributes)
         
-    def set_values(self, values):
-        for subsection_number, attributes in values.items():
-                self.subsections[subsection_number].set_values(attributes)
+    def setValues(self, values):
+        for subsectionNumber, attributes in values.items():
+                self.subsections[subsectionNumber].setValues(attributes)
 
-    def handle_subsection_data(self, subsection_data):
+    def handleSubsectionData(self, subsectionData):
         subsection = self.sender()
-        common_section_data = {key: literal_eval(input.text()) for key, input in self.inputs.items()}
-        data = (self._name, subsection.subsection_number, subsection_data, common_section_data)
-        self.subsection_data_signal.emit(data)
+        commonSectionData = {key: literal_eval(input.text()) for key, input in self.inputs.items()}
+        data = (self._name, subsection.subsectionNumber, subsectionData, commonSectionData)
+        self.subsectionDataSignal.emit(data)

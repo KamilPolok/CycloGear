@@ -6,22 +6,22 @@ from PyQt6.QtWidgets import QLineEdit, QWidget
 class Output(QLineEdit):
     """
     Custom QLineEdit that serves as output - it is readonly and 
-    allows for setting the text only programtically.
+    allows for setting the text only programmatically.
     """
 
-    def __init__(self, parent: QWidget=None, decimal_precision: int=2):
+    def __init__(self, parent: QWidget = None, decimalPrecision: int = 2):
         super().__init__(parent)
         self.setReadOnly(True)
-        self._max_decimal_digits = decimal_precision
+        self._maxDecimalDigits = decimalPrecision
 
-    def setDecimalPrecision(self, decimal_precision):
+    def setDecimalPrecision(self, decimalPrecision):
         """
         Update the maximum decimal precision of the validator.
 
         Args:
-            decimal_precision (int): New maximum number of decimal digits.
+            decimalPrecision (int): New maximum number of decimal digits.
         """
-        self._max_decimal_digits = decimal_precision
+        self._maxDecimalDigits = decimalPrecision
         self.setText(self.text())
     
     def setText(self, text: str):
@@ -32,9 +32,9 @@ class Output(QLineEdit):
             text (str): The text to set.
         """
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        validated_text = text
+        validatedText = text
 
-        super().setText(validated_text)
+        super().setText(validatedText)
 
     def setValue(self, value: float):
         """
@@ -43,15 +43,15 @@ class Output(QLineEdit):
         Args:
             value (float): The value to set.
         """
-        rounded_value = round(value, self._max_decimal_digits)
-        validated_text = f'{rounded_value:.{self._max_decimal_digits}f}'
+        roundedValue = round(value, self._maxDecimalDigits)
+        validatedText = f'{roundedValue:.{self._maxDecimalDigits}f}'
         self.setAlignment(Qt.AlignmentFlag.AlignRight)
 
-        super().setText(validated_text)
+        super().setText(validatedText)
 
     def value(self) -> Optional[float]:
         """
-        Retutn value.
+        Return value.
 
         Returns:
             (float | None): The value the input is holding

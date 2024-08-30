@@ -41,7 +41,7 @@ class PowerLossTabController:
         """
         Connect signals and slots for interactivity in the tab.
         """
-        self._tab.rollingElementDiameterProvided.connect(self._tab.enable_select_rolling_element_button)
+        self._tab.rollingElementDiameterProvided.connect(self._tab.enableSelectRollingElementButton)
         self._tab.sectionDataProvided.connect(self._on_rolling_element_data_provided)
         self._tab.allInputsProvided.connect(self._update_component_data)
         self._tab.updateStateSignal.connect(self.update_state)
@@ -53,7 +53,7 @@ class PowerLossTabController:
         self._mediator.update_component_data(self._id, self.get_data())
 
     def on_rolling_element_selected(self, section_name, item_data):
-        self._tab.update_selected_rolling_element(section_name, item_data)
+        self._tab.updateSelectedRollingElement(section_name, item_data)
     
     def get_data(self):
         """
@@ -103,7 +103,7 @@ class PowerLossTabController:
         self._items = extract_data(self._component_data, items)
         self._calculator.init_data(self._component_data, self._inputs, self._outputs)
 
-        self._tab.init_ui(self._items, self._inputs, self._outputs)
+        self._tab.initUI(self._items, self._inputs, self._outputs)
         self._connect_signals_and_slots()
 
     def update_state(self):
@@ -124,7 +124,7 @@ class PowerLossTabController:
         Args:
             data (dict): Data to set the state of the tab with.
         """
-        self._tab.track_state(False)
+        self._tab.trackState(False)
 
         def update_input(recipient, source, attribute):
             new_value = source[attribute][0]
@@ -137,4 +137,4 @@ class PowerLossTabController:
             item['rolling_elements'].setData(data['Bearings'][name]['rolling_elements'])
 
         self.update_state()
-        self._tab.track_state(True)
+        self._tab.trackState(True)

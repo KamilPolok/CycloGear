@@ -6,71 +6,71 @@ from PyQt6.QtGui import QIcon
 
 from config import RESOURCES_DIR_NAME, dependencies_path
 
-from .CommonFunctions import create_data_input_row, format_input
+from .CommonFunctions import createDataInputRow, formatInput
 
 class CustomFrame(QFrame):
     def __init__(self):
         super().__init__()
-        self._default_style = "QFrame { background-color: #8ad6cc; border-radius: 5px;}"
-        self._on_hover_style = "QFrame { background-color: #66beb2; border-radius: 5px;}"
-        self.setStyleSheet(self._default_style)
+        self._defaultStyle = "QFrame { background-color: #8ad6cc; border-radius: 5px;}"
+        self._onHoverStyle = "QFrame { background-color: #66beb2; border-radius: 5px;}"
+        self.setStyleSheet(self._defaultStyle)
 
 class HoverButton(QPushButton):
     def __init__(self, parent: QFrame):
         super().__init__(parent)
 
     def enterEvent(self, event):
-        self.parent().setStyleSheet(self.parent()._on_hover_style)
+        self.parent().setStyleSheet(self.parent()._onHoverStyle)
         super().enterEvent(event)
 
     def leaveEvent(self, event):
-        self.parent().setStyleSheet(self.parent()._default_style)
+        self.parent().setStyleSheet(self.parent()._defaultStyle)
         super().leaveEvent(event)
 
 class ShaftSubsection(QWidget):
-    subsection_data_signal = pyqtSignal(dict)
-    remove_subsection_signal = pyqtSignal(int)
+    subsectionDataSignal = pyqtSignal(dict)
+    removeSubsectionSignal = pyqtSignal(int)
 
-    def __init__(self, subsection_name, subsection_number, parent=None):
+    def __init__(self, subsectionName, subsectionNumber, parent=None):
         super().__init__(parent)
-        self.subsection_name = subsection_name
-        self.subsection_number = subsection_number
+        self.subsectionName = subsectionName
+        self.subsectionNumber = subsectionNumber
         self.expanded = False
         self.inputs = {}
         self.limits = {}
 
-        self._init_ui()
+        self._initUI()
 
-    def _init_ui(self):
+    def _initUI(self):
         # Main layout
-        self._main_layout = QVBoxLayout(self)
-        self._main_layout.setContentsMargins(0, 0, 0, 0)
+        self._mainLayout = QVBoxLayout(self)
+        self._mainLayout.setContentsMargins(0, 0, 0, 0)
 
-        self._init_header()
-        self._init_content()
+        self._initHeader()
+        self._initContent()
 
         # Set initial view
         self._content.setVisible(False)
-        self._confirm_button.setEnabled(False)
-        self._confirm_button.setVisible(False)
+        self._confirmButton.setEnabled(False)
+        self._confirmButton.setVisible(False)
 
-    def _init_header(self):
+    def _initHeader(self):
         # Set header layout
         header = CustomFrame()
-        self.header_height = 25
-        header.setFixedHeight(self.header_height)  # Set the height to 30 pixels
-        self._main_layout.addWidget(header)
+        self.headerHeight = 25
+        header.setFixedHeight(self.headerHeight)  # Set the height to 30 pixels
+        self._mainLayout.addWidget(header)
 
-        self._header_layout = QHBoxLayout()
-        self._header_layout.setContentsMargins(0, 0, 0, 0)
-        self._header_layout.setSpacing(0)
-        self._header_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        header.setLayout(self._header_layout)
+        self._headerLayout = QHBoxLayout()
+        self._headerLayout.setContentsMargins(0, 0, 0, 0)
+        self._headerLayout.setSpacing(0)
+        self._headerLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        header.setLayout(self._headerLayout)
 
         # Set toggle section button
-        self._toggle_section_button = HoverButton(header)
-        self._toggle_section_button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        self._toggle_section_button.setStyleSheet("""                                                  
+        self._toggleSectionButton = HoverButton(header)
+        self._toggleSectionButton.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self._toggleSectionButton.setStyleSheet("""                                                  
             QPushButton {
                 background-color: transparent;
                 text-align: left;
@@ -80,19 +80,19 @@ class ShaftSubsection(QWidget):
             }
         """)
 
-        self._set_name()
-        self._toggle_section_button.clicked.connect(self.toggle_content)
-        self._header_layout.addWidget(self._toggle_section_button)
+        self._setName()
+        self._toggleSectionButton.clicked.connect(self.toggleContent)
+        self._headerLayout.addWidget(self._toggleSectionButton)
 
         # Set confirmation button
-        self._confirm_button = QPushButton()
-        button_size = self.header_height
-        icon_size = self.header_height * 0.9
-        self._confirm_button.setFixedSize(button_size, button_size)
-        self._confirm_button.setIconSize(QSize(icon_size, icon_size))
-        self._confirm_button.setIcon(QIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//confirm_icon.png')))
-        self._confirm_button.setToolTip('Zatwierdź')
-        self._confirm_button.setStyleSheet("""                         
+        self._confirmButton = QPushButton()
+        buttonSize = self.headerHeight
+        iconSize = self.headerHeight * 0.9
+        self._confirmButton.setFixedSize(buttonSize, buttonSize)
+        self._confirmButton.setIconSize(QSize(iconSize, iconSize))
+        self._confirmButton.setIcon(QIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//confirm_icon.png')))
+        self._confirmButton.setToolTip('Zatwierdź')
+        self._confirmButton.setStyleSheet("""                         
             QPushButton {
                 background-color: transparent;
                 color: black;
@@ -108,18 +108,18 @@ class ShaftSubsection(QWidget):
                 border: 1px solid #51988e;
             }
         """)
-        self._confirm_button.clicked.connect(self.emit_data_signal)
-        self._header_layout.addWidget(self._confirm_button)
+        self._confirmButton.clicked.connect(self.emitDataSignal)
+        self._headerLayout.addWidget(self._confirmButton)
 
         # Set removal button
-        self.remove_button = QPushButton()
-        button_size = self.header_height
-        icon_size = self.header_height * 0.9
-        self.remove_button.setFixedSize(button_size, button_size)
-        self.remove_button.setIconSize(QSize(icon_size, icon_size))
-        self.remove_button.setIcon(QIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//remove_icon.png')))
-        self.remove_button.setToolTip('Usuń')
-        self.remove_button.setStyleSheet("""                         
+        self.removeButton = QPushButton()
+        buttonSize = self.headerHeight
+        iconSize = self.headerHeight * 0.9
+        self.removeButton.setFixedSize(buttonSize, buttonSize)
+        self.removeButton.setIconSize(QSize(iconSize, iconSize))
+        self.removeButton.setIcon(QIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//remove_icon.png')))
+        self.removeButton.setToolTip('Usuń')
+        self.removeButton.setStyleSheet("""                         
             QPushButton {
                 background-color: transparent;
                 color: black;
@@ -135,28 +135,28 @@ class ShaftSubsection(QWidget):
                 border: 1px solid #51988e;
             }
         """)
-        self.remove_button.clicked.connect(self.emit_remove_signal)
-        self._header_layout.addWidget(self.remove_button)
+        self.removeButton.clicked.connect(self.emitRemoveSignal)
+        self._headerLayout.addWidget(self.removeButton)
 
-    def _init_content(self):
+    def _initContent(self):
         # _content layout
         self._content = QFrame()
-        self._content_layout = QVBoxLayout()
-        self._content.setLayout(self._content_layout)
-        self._content_layout.setContentsMargins(5, 0, 0, 0)
-        self._main_layout.addWidget(self._content)
+        self._contentLayout = QVBoxLayout()
+        self._content.setLayout(self._contentLayout)
+        self._contentLayout.setContentsMargins(5, 0, 0, 0)
+        self._mainLayout.addWidget(self._content)
         
         # Inputs layout
-        self._inputs_layout = QVBoxLayout()
-        self._content_layout.addLayout(self._inputs_layout)
+        self._inputsLayout = QVBoxLayout()
+        self._contentLayout.addLayout(self._inputsLayout)
     
-    def _set_name(self):
-        self._toggle_section_button.setText(f'{self.subsection_name} {self.subsection_number + 1}')
+    def _setName(self):
+        self._toggleSectionButton.setText(f'{self.subsectionName} {self.subsectionNumber + 1}')
     
-    def _check_if_all_inputs_provided(self):
-        self._confirm_button.setEnabled(all(input.text() != '' for input in self.inputs.values()) and all(literal_eval(input.text()) != 0 for input in self.inputs.values()))
+    def _checkIfAllInputsProvided(self):
+        self._confirmButton.setEnabled(all(input.text() != '' for input in self.inputs.values()) and all(literal_eval(input.text()) != 0 for input in self.inputs.values()))
     
-    def _check_if_meets_limits(self):
+    def _checkIfMeetsLimits(self):
         input = self.sender()
         attribute = next((key for key, value in self.inputs.items() if value == input), None)
 
@@ -167,64 +167,64 @@ class ShaftSubsection(QWidget):
 
             if value is not None and value != 0:
                 if min <= value <= max:
-                    input.setText(f'{format_input(value)}')
+                    input.setText(f'{formatInput(value)}')
                 elif min > value:
-                    input.setText(f'{format_input(min)}')
+                    input.setText(f'{formatInput(min)}')
                 elif max < value:
-                    input.setText(f'{format_input(max)}')
+                    input.setText(f'{formatInput(max)}')
             else:
                 input.clear()
 
-    def set_attributes(self, attributes):
+    def setAttributes(self, attributes):
         # Set data entries
         for attribute in attributes:
             id = attribute[0]
             symbol = attribute[1]
 
-            attribute_row, input = create_data_input_row(symbol)
-            self._inputs_layout.addLayout(attribute_row)
+            attributeRow, input = createDataInputRow(symbol)
+            self._inputsLayout.addLayout(attributeRow)
 
-            self.add_input(id, input)
+            self.addInput(id, input)
     
-    def add_input(self, id, input):
-        input.textChanged.connect(self._check_if_all_inputs_provided)
-        input.editingFinished.connect(self._check_if_meets_limits)
+    def addInput(self, id, input):
+        input.textChanged.connect(self._checkIfAllInputsProvided)
+        input.editingFinished.connect(self._checkIfMeetsLimits)
         self.inputs[id] = input
 
-    def get_attributes(self):
+    def getAttributes(self):
         return {key: literal_eval(input.text()) for key, input in self.inputs.items()}
     
-    def update_subsection_name(self, new_number):
-        self.subsection_number = new_number
-        self._set_name()
+    def updateSubsectionName(self, newNumber):
+        self.subsectionNumber = newNumber
+        self._setName()
     
-    def set_limits(self, limits):
-        for attribute, attribute_limits in limits.items():
+    def setLimits(self, limits):
+        for attribute, attributeLimits in limits.items():
             if attribute in self.inputs.keys():
                 self.limits[attribute] = {}
-                min = attribute_limits['min']
-                max = attribute_limits['max']
+                min = attributeLimits['min']
+                max = attributeLimits['max']
                 self.limits[attribute]['min'] = min
                 self.limits[attribute]['max'] = max
-                self.inputs[attribute].setPlaceholderText(f'{format_input(min)}-{format_input(max)}')
+                self.inputs[attribute].setPlaceholderText(f'{formatInput(min)}-{formatInput(max)}')
     
-    def set_values(self, values):
+    def setValues(self, values):
         for attribute, value in values.items():
             if attribute in self.inputs.keys():
-                if value is not None and value !=0:
-                    self.inputs[attribute].setText(f'{format_input(value)}')
+                if value is not None and value != 0:
+                    self.inputs[attribute].setText(f'{formatInput(value)}')
                 else:
                      self.inputs[attribute].clear()
 
-    def toggle_content(self, event):
+    def toggleContent(self, event):
         self._content.setVisible(not self._content.isVisible())
-        self._confirm_button.setVisible(not self._confirm_button.isVisible())
+        self._confirmButton.setVisible(not self._confirmButton.isVisible())
 
         self.adjustSize()
         self.updateGeometry()
 
-    def emit_data_signal(self):
-        self.subsection_data_signal.emit(self.get_attributes())
+    def emitDataSignal(self):
+        self.subsectionDataSignal.emit(self.getAttributes())
     
-    def emit_remove_signal(self):
-        self.remove_subsection_signal.emit(self.subsection_number)
+    def emitRemoveSignal(self):
+        self.removeSubsectionSignal.emit(self.subsectionNumber)

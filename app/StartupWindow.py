@@ -7,38 +7,38 @@ from config import APP_NAME
 
 class StartupWindow(QDialog):
     '''
-    Views widnow on startup of the application,
-    where user can select actions to perfrom -
+    Views window on startup of the application,
+    where user can select actions to perform -
     create new project, open existing project
     or quit.
     '''
-    new_project_signal = pyqtSignal()
-    open_project_signal = pyqtSignal()
-    quit_app_signal = pyqtSignal()
+    newProjectSignal = pyqtSignal()
+    openProjectSignal = pyqtSignal()
+    quitAppSignal = pyqtSignal()
     
     def __init__(self, parent: AppWindow):
         super().__init__(parent)
         self.setWindowTitle(APP_NAME)
         self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.WindowTitleHint | Qt.WindowType.CustomizeWindowHint)
 
-        self._init_ui()
+        self._initUI()
     
-    def _init_ui(self):
+    def _initUI(self):
         self.setFixedSize(200, 100)
 
         layout = QVBoxLayout(self)
         
-        new_button = QPushButton("Nowy Projekt", self)
-        new_button.clicked.connect(self.new_project_signal.emit)
+        newButton = QPushButton("Nowy Projekt", self)
+        newButton.clicked.connect(self.newProjectSignal.emit)
         
-        open_button = QPushButton("Otwórz Projekt", self)
-        open_button.clicked.connect(self.open_project_signal.emit)
+        openButton = QPushButton("Otwórz Projekt", self)
+        openButton.clicked.connect(self.openProjectSignal.emit)
 
         exitButton = QPushButton("Wyjdź", self)
-        exitButton.clicked.connect(self.quit_app_signal.emit)
+        exitButton.clicked.connect(self.quitAppSignal.emit)
         
-        layout.addWidget(new_button)
-        layout.addWidget(open_button)
+        layout.addWidget(newButton)
+        layout.addWidget(openButton)
         layout.addWidget(exitButton)
 
     def keyPressEvent(self, event):

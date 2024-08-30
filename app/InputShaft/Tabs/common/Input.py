@@ -9,35 +9,35 @@ class Input(QLineEdit):
 
     inputConfirmedSignal = pyqtSignal(object)
 
-    def __init__(self, parent: QWidget=None, decimal_precision: int=2):
+    def __init__(self, parent: QWidget=None, decimalPrecision: int=2):
         """
         Initialize the custom line edit with validation and inactivity monitoring.
 
         Args:
             parent (QWidget, optional): Parent widget. Defaults to None.
             text (str): The text to set. Defaults to empty string.
-            decimal_precision (int): Maximum number of decimal digits for validation.
+            decimalPrecision (int): Maximum number of decimal digits for validation.
         """
         super().__init__(parent)
-        self._last_text = ''
+        self._lastText = ''
 
-        self._validation_handler = ValidationHandler(decimal_precision)
-        self.setValidator(self._validation_handler.get_validator())
+        self._validationHandler = ValidationHandler(decimalPrecision)
+        self.setValidator(self._validationHandler.get_validator())
 
-        self._inactivity_monitor = InactivityMonitor()
-        self._inactivity_monitor.inactivitySignal.connect(self._emit_input_confirmed_signal)
-        self.textChanged.connect(self._inactivity_monitor.reset_timer)
+        self._inactivityMonitor = InactivityMonitor()
+        self._inactivityMonitor.inactivitySignal.connect(self._emitInputConfirmedSignal)
+        self.textChanged.connect(self._inactivityMonitor.resetTimer)
 
         self.setAlignment(Qt.AlignmentFlag.AlignRight)
        
-    def _emit_input_confirmed_signal(self):
+    def _emitInputConfirmedSignal(self):
         """
         Validate the current text and emit a signal if the text has changed.
         """
-        validated_text = self._validation_handler.validate(self.text())
+        validated_text = self._validationHandler.validate(self.text())
         super().setText(validated_text)
-        if validated_text != self._last_text:
-            self._last_text = validated_text
+        if validated_text != self._lastText:
+            self._lastText = validated_text
             self.inputConfirmedSignal.emit(self)
 
     def setDecimalPrecision(self, max_decimal_digits: int):
@@ -47,8 +47,8 @@ class Input(QLineEdit):
         Args:
             max_decimal_digits (int): New maximum number of decimal digits.
         """
-        self._validation_handler.update_validator(max_decimal_digits)
-        self.setValidator(self._validation_handler.get_validator())
+        self._validationHandler.update_validator(max_decimal_digits)
+        self.setValidator(self._validationHandler.get_validator())
         self.setText(self.text())
 
     def setText(self, text: str):
@@ -58,8 +58,8 @@ class Input(QLineEdit):
         Args:
             text (str): The text to set.
         """
-        validated_text = self._validation_handler.validate(text)
-        self._last_text = validated_text
+        validated_text = self._validationHandler.validate(text)
+        self._lastText = validated_text
         super().setText(validated_text)
 
     def setValue(self, value: float):
@@ -69,8 +69,8 @@ class Input(QLineEdit):
         Args:
             value (float): The value to set.
         """
-        validated_text = self._validation_handler.validate_value(value)
-        self._last_text = validated_text
+        validated_text = self._validationHandler.validate_value(value)
+        self._lastText = validated_text
         super().setText(validated_text)
     
     def value(self) -> Optional[float]:
@@ -87,7 +87,7 @@ class Input(QLineEdit):
         """
         Clear the current text and reset the last text record.
         """
-        self._last_text = ''
+        self._lastText = ''
         super().clear()
 
     def keyPressEvent(self, event: QKeyEvent):
@@ -99,8 +99,8 @@ class Input(QLineEdit):
         """
         super().keyPressEvent(event)
         if event.key() in [Qt.Key.Key_Return, Qt.Key.Key_Enter]:
-            self._inactivity_monitor.stop_timer()
-            self._emit_input_confirmed_signal()
+            self._inactivityMonitor.stopTimer()
+            self._emitInputConfirmedSignal()
 
     def focusOutEvent(self, event: QFocusEvent):
         """
@@ -110,8 +110,8 @@ class Input(QLineEdit):
             event (QFocusEvent): The focus event.
         """
         super().focusOutEvent(event)
-        self._inactivity_monitor.stop_timer()
-        self._emit_input_confirmed_signal()
+        self._inactivityMonitor.stopTimer()
+        self._emitInputConfirmedSignal()
 
 class InactivityMonitor(QObject):
     """
@@ -128,30 +128,30 @@ class InactivityMonitor(QObject):
             timeout_interval (int): The inactivity timeout interval in milliseconds.
         """
         super().__init__()
-        self._timeout_interval = timeout_interval
+        self._timeoutInterval = timeout_interval
         self._timer = QTimer()
-        self._timer.setInterval(self._timeout_interval)
+        self._timer.setInterval(self._timeoutInterval)
         self._timer.setSingleShot(True)
         self._timer.timeout.connect(self.inactivitySignal.emit)
         # Ensure that every timer is stopped before closing the app
         QApplication.instance().aboutToQuit.connect(self.handleAboutToQuit)
     
-    def stop_timer(self):
+    def stopTimer(self):
         """
         Stop the inactivity timer if it is active.
         """
         if self._timer.isActive():
             self._timer.stop()
 
-    def reset_timer(self):
+    def resetTimer(self):
         """
         Reset the inactivity timer, restarting it from the beginning.
         """
-        self.stop_timer()
+        self.stopTimer()
         self._timer.start()
     
     def handleAboutToQuit(self):
-        self.stop_timer()
+        self.stopTimer()
 
 class ValidationHandler:
     """

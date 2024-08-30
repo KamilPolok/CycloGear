@@ -36,28 +36,28 @@ class Window(QDialog):
 
     def viewFilters(self, tableAttributes):
         # View filters for given table
-        self.ItemsFiltersView = ItemsFiltersView()
-        self.ItemsFiltersView.updateFiltersView(tableAttributes)
+        self.itemsFiltersView = ItemsFiltersView()
+        self.itemsFiltersView.updateFiltersView(tableAttributes)
 
-        self.generalLayout.addWidget(self.ItemsFiltersView)
+        self.generalLayout.addWidget(self.itemsFiltersView)
 
     def viewTableItems(self, tableItemsDf):
         # View items from given table
-        self.TableItemsView = TableItemsView()
-        self.TableItemsView.updateItemsView(tableItemsDf)
+        self.tableItemsView = TableItemsView()
+        self.tableItemsView.updateItemsView(tableItemsDf)
 
-        self.generalLayout.addWidget(self.TableItemsView)
+        self.generalLayout.addWidget(self.tableItemsView)
 
     def viewFunctionButtons(self):
         # View OK and Cancel buttons
-        FunctionBtnsLayout = QHBoxLayout()
+        functionBtnsLayout = QHBoxLayout()
     
         self.okBtn = QPushButton("OK", self)
         self.okBtn.setEnabled(False)
         
         self.cancelBtn = QPushButton("Anuluj", self)
 
-        FunctionBtnsLayout.addWidget(self.okBtn)
-        FunctionBtnsLayout.addWidget(self.cancelBtn)
+        functionBtnsLayout.addWidget(self.okBtn)
+        functionBtnsLayout.addWidget(self.cancelBtn)
 
-        self.generalLayout.addLayout(FunctionBtnsLayout)
+        self.generalLayout.addLayout(functionBtnsLayout)

@@ -4,14 +4,14 @@ from PyQt6.QtCore import pyqtSignal
 class DataButton(QPushButton):
     dataChangedSignal = pyqtSignal(object)
 
-    def __init__(self, default_text='', parent=None):
-        super().__init__(default_text, parent)
+    def __init__(self, defaultText='', parent=None):
+        super().__init__(defaultText, parent)
         self._data = None
         self._id = None
-        self._defalult_text = default_text
+        self._defalultText = defaultText
 
-        if default_text:
-            self.setText(default_text)
+        if defaultText:
+            self.setText(defaultText)
 
     def _setID(self):
         self._id = str(next(iter(self._data.values()))[0])
@@ -26,7 +26,7 @@ class DataButton(QPushButton):
     def clear(self):
         self._data = None
         self._id = None
-        self.setText(self._defalult_text)
+        self.setText(self._defalultText)
         self.dataChangedSignal.emit(self._data)
 
     def id(self):

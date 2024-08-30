@@ -3,19 +3,19 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPalette
 
 from ..common.ITrackedTab import ITrackedTab
-from ..common.common_functions import create_data_display_row, create_header
+from ..common.common_functions import createDataDisplayRow, createHeader
 
 class ResultsTab(ITrackedTab):
-    def _view_results_section(self):
-        content_widget = QWidget()
-        content_layout = QVBoxLayout()
-        content_widget.setLayout(content_layout)
+    def _viewResultsSection(self):
+        contentWidget = QWidget()
+        contentLayout = QVBoxLayout()
+        contentWidget.setLayout(contentLayout)
 
-        scroll_area = QScrollArea()
-        scroll_area.setContentsMargins(0, 0, 0, 0)
-        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        scroll_area.verticalScrollBar().setStyleSheet("""
+        scrollArea = QScrollArea()
+        scrollArea.setContentsMargins(0, 0, 0, 0)
+        scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scrollArea.verticalScrollBar().setStyleSheet("""
         QScrollBar:vertical {
             border: none;
             background: white;
@@ -40,45 +40,45 @@ class ResultsTab(ITrackedTab):
         }
         """)
 
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setWidget(content_widget)
+        scrollArea.setWidgetResizable(True)
+        scrollArea.setWidget(contentWidget)
 
         # Remove the border from QScrollArea
-        scroll_area.setFrameShape(QFrame.Shape.NoFrame)
-        scroll_area.setFrameShadow(QFrame.Shadow.Plain)
+        scrollArea.setFrameShape(QFrame.Shape.NoFrame)
+        scrollArea.setFrameShadow(QFrame.Shadow.Plain)
 
         # Match the background color of the QScrollArea to the QTabWidget
-        palette = scroll_area.palette()
+        palette = scrollArea.palette()
         palette.setColor(QPalette.ColorRole.Window, self.palette().color(QPalette.ColorRole.Base))
-        scroll_area.setPalette(palette)
-        scroll_area.setAutoFillBackground(True)
+        scrollArea.setPalette(palette)
+        scrollArea.setAutoFillBackground(True)
 
-        self.main_layout.addWidget(scroll_area)
+        self.mainLayout.addWidget(scrollArea)
 
-        content_layout.addWidget(create_header('Ogólne:', bold=True))
-        content_layout.addWidget(create_data_display_row(self._outputs['nwe'], 'n<sub>we</sub>', 'Wejściowa prędkość obrotowa', decimal_precision=2))
-        content_layout.addWidget(create_data_display_row(self._outputs['Mwe'], 'M<sub>we</sub>', 'Wejściowy moment obrotowy', decimal_precision=2))
-        content_layout.addWidget(create_header('Wymiary wału:', bold=True))
-        content_layout.addWidget(create_data_display_row(self._outputs['L'], 'L', 'Długość wału czynnego', decimal_precision=2))
-        content_layout.addWidget(create_data_display_row(self._outputs['LA'], 'L<sub>A</sub>', 'Współrzędna podpory przesuwnej', decimal_precision=2))
-        content_layout.addWidget(create_data_display_row(self._outputs['LB'], 'L<sub>B</sub>', 'Współrzędna podpory stałej', decimal_precision=2))
-        content_layout.addWidget(create_data_display_row(self._outputs['L1'], 'L<sub>1</sub>', 'Współrzędna koła obiegowego nr 1', decimal_precision=2))
+        contentLayout.addWidget(createHeader('Ogólne:', bold=True))
+        contentLayout.addWidget(createDataDisplayRow(self._outputs['nwe'], 'n<sub>we</sub>', 'Wejściowa prędkość obrotowa', decimalPrecision=2))
+        contentLayout.addWidget(createDataDisplayRow(self._outputs['Mwe'], 'M<sub>we</sub>', 'Wejściowy moment obrotowy', decimalPrecision=2))
+        contentLayout.addWidget(createHeader('Wymiary wału:', bold=True))
+        contentLayout.addWidget(createDataDisplayRow(self._outputs['L'], 'L', 'Długość wału czynnego', decimalPrecision=2))
+        contentLayout.addWidget(createDataDisplayRow(self._outputs['LA'], 'L<sub>A</sub>', 'Współrzędna podpory przesuwnej', decimalPrecision=2))
+        contentLayout.addWidget(createDataDisplayRow(self._outputs['LB'], 'L<sub>B</sub>', 'Współrzędna podpory stałej', decimalPrecision=2))
+        contentLayout.addWidget(createDataDisplayRow(self._outputs['L1'], 'L<sub>1</sub>', 'Współrzędna koła obiegowego nr 1', decimalPrecision=2))
         for idx, input in enumerate(self._outputs['Lc'].values()):
-            content_layout.addWidget(create_data_display_row(input, f'L<sub>{idx+2}</sub>', f'Współrzędna koła obiegowego nr {idx+2}', decimal_precision=2))
-        content_layout.addWidget(create_data_display_row(self._outputs['e'], 'e', 'Mimośród', decimal_precision=2))
-        content_layout.addWidget(create_header('Siły i reakcje:', bold=True))
+            contentLayout.addWidget(createDataDisplayRow(input, f'L<sub>{idx+2}</sub>', f'Współrzędna koła obiegowego nr {idx+2}', decimalPrecision=2))
+        contentLayout.addWidget(createDataDisplayRow(self._outputs['e'], 'e', 'Mimośród', decimalPrecision=2))
+        contentLayout.addWidget(createHeader('Siły i reakcje:', bold=True))
         for idx, input in enumerate(self._outputs['Fx'].values()):
-            content_layout.addWidget(create_data_display_row(input, f'R<sub>{idx+1}</sub>', f'Siła wywierana ze strony koła obiegowego nr {idx+1}', decimal_precision=2))
-        content_layout.addWidget(create_data_display_row(self._outputs['Ra'], 'R<sub>A</sub>', 'Reakcja podpory przesuwnej A', decimal_precision=2))
-        content_layout.addWidget(create_data_display_row(self._outputs['Rb'], 'R<sub>B</sub>', 'Reakcja podpory stałej B', decimal_precision=2))
-        content_layout.addWidget(create_header('Straty mocy w łożyskach:', bold=True))
-        content_layout.addWidget(create_data_display_row(self._outputs['Bearings']['support_A']['P'], 'P<sub>A</sub>', 'Podpora przesuwna A', decimal_precision=2))
-        content_layout.addWidget(create_data_display_row(self._outputs['Bearings']['support_B']['P'], 'P<sub>B</sub>', 'Podpora stała B', decimal_precision=2))
-        content_layout.addWidget(create_data_display_row(self._outputs['Bearings']['eccentrics']['P'], 'P<sub>e</sub>', 'Mimośrody', decimal_precision=2))
-        content_layout.addWidget(create_data_display_row(self._outputs['P'], 'P<sub>c</sub>', 'Całkowite straty mocy', decimal_precision=2))
-        content_layout.addStretch()
+            contentLayout.addWidget(createDataDisplayRow(input, f'R<sub>{idx+1}</sub>', f'Siła wywierana ze strony koła obiegowego nr {idx+1}', decimalPrecision=2))
+        contentLayout.addWidget(createDataDisplayRow(self._outputs['Ra'], 'R<sub>A</sub>', 'Reakcja podpory przesuwnej A', decimalPrecision=2))
+        contentLayout.addWidget(createDataDisplayRow(self._outputs['Rb'], 'R<sub>B</sub>', 'Reakcja podpory stałej B', decimalPrecision=2))
+        contentLayout.addWidget(createHeader('Straty mocy w łożyskach:', bold=True))
+        contentLayout.addWidget(createDataDisplayRow(self._outputs['Bearings']['support_A']['P'], 'P<sub>A</sub>', 'Podpora przesuwna A', decimalPrecision=2))
+        contentLayout.addWidget(createDataDisplayRow(self._outputs['Bearings']['support_B']['P'], 'P<sub>B</sub>', 'Podpora stała B', decimalPrecision=2))
+        contentLayout.addWidget(createDataDisplayRow(self._outputs['Bearings']['eccentrics']['P'], 'P<sub>e</sub>', 'Mimośrody', decimalPrecision=2))
+        contentLayout.addWidget(createDataDisplayRow(self._outputs['P'], 'P<sub>c</sub>', 'Całkowite straty mocy', decimalPrecision=2))
+        contentLayout.addStretch()
 
-    def init_ui(self, outputs):
+    def initUI(self, outputs):
         """
         Initialize the user interface for ResultsTab.
 
@@ -87,11 +87,11 @@ class ResultsTab(ITrackedTab):
         """
         self._outputs = outputs
 
-        self.main_layout = QVBoxLayout()
-        self.setLayout(self.main_layout)
+        self.mainLayout = QVBoxLayout()
+        self.setLayout(self.mainLayout)
 
-        self.main_layout.setContentsMargins(0, 0, 0, 0)  # Remove margins from tab2_layout
-        self.main_layout.setSpacing(0)
+        self.mainLayout.setContentsMargins(0, 0, 0, 0)  # Remove margins from tab2_layout
+        self.mainLayout.setSpacing(0)
 
-        self._view_results_section()
-        super().init_ui()
+        self._viewResultsSection()
+        super().initUI()

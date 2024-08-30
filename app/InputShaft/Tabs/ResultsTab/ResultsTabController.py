@@ -29,7 +29,7 @@ class ResultsTabController:
 
         self._outputs = extract_data(self._component_data, outputs_keys)
 
-        self._tab.init_ui(self._outputs)
+        self._tab.initUI(self._outputs)
         self._connect_signals_and_slots()
     
     def update_state(self):

@@ -18,7 +18,7 @@ class PreliminaryDataTabController():
         self._tab.allInputsProvided.connect(self._update_component_data)
         self._tab.updateStateSignal.connect(self.update_state)
         
-        self._tab.select_material_button.clicked.connect(self._on_select_materials)
+        self._tab.selectMaterialButton.clicked.connect(self._on_select_materials)
 
         self._inputs['L1'][0].inputConfirmedSignal.connect(self._calculator.update_eccentrics_position)
 
@@ -27,7 +27,7 @@ class PreliminaryDataTabController():
 
     def _update_component_data(self):
         self._calculator.setup_inputs_validation()
-        all_filled, _ = self._tab.check_status()
+        all_filled, _ = self._tab.checkStatus()
         if all_filled:
             self._calculator.update_eccentrics_position()
             self._mediator.update_component_data(self._id, self.get_data())
@@ -36,7 +36,7 @@ class PreliminaryDataTabController():
         self._mediator.select_material()
 
     def on_materials_selected(self, data):
-        self._tab.update_selected_material(data)
+        self._tab.updateSelectedMaterial(data)
     
     def get_data(self):
         """
@@ -77,8 +77,8 @@ class PreliminaryDataTabController():
         self._items = extract_data(self._component_data, items)
         self._calculator.init_data(self._component_data, self._inputs, self._outputs, self._validated_inputs)
 
-        self._tab.init_ui(self._items, self._inputs, self._outputs)
-        self._tab.update_eccentrics_component()
+        self._tab.initUI(self._items, self._inputs, self._outputs)
+        self._tab.updateEccentricsComponent()
         self._connect_signals_and_slots()
 
     def update_state(self):
@@ -88,7 +88,7 @@ class PreliminaryDataTabController():
         if len(self._tab_data['Lc']) != self._component_data['n'][0]-1:
             self._tab_data['Lc'] = extract_data(self._component_data, [['Lc']])['Lc']
             self._inputs['Lc'] = extract_data(self._component_data, [['Lc']])['Lc']
-            self._tab.update_eccentrics_component()
+            self._tab.updateEccentricsComponent()
 
         def update_output(recipient, source, attribute):
             new_value = source[attribute][0]
@@ -107,7 +107,7 @@ class PreliminaryDataTabController():
         Args:
             data (dict): Data to set the state of the tab with.
         """
-        self._tab.track_state(False)
+        self._tab.trackState(False)
 
         def update_input(recipient, source, attribute):
             new_value = source[attribute][0]
@@ -117,7 +117,7 @@ class PreliminaryDataTabController():
         update_data_subset(data, self._inputs, update_input)
 
         self._calculator.update_eccentrics_position()
-        self._tab.update_selected_material(data['Materiał'])
+        self._tab.updateSelectedMaterial(data['Materiał'])
 
         self.update_state()
-        self._tab.track_state(True)
+        self._tab.trackState(True)

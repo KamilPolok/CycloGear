@@ -17,55 +17,55 @@ class ShaftDesigner(QMainWindow):
     """
     A class representing chart and interface to design the shaft
 
-    This class is responsible for comunication between chart and
+    This class is responsible for communication between chart and
     other components of the application and also for implementing
     the GUI for interactive shaft design
     """
-    def __init__(self, window_title):
+    def __init__(self, windowTitle):
         super().__init__()
-        self._init_ui(window_title)
+        self._initUI(windowTitle)
     
-    def _init_ui(self, designed_part_name):
+    def _initUI(self, designedPartName):
         # Set window parameters
-        self._window_title = APP_NAME + ' - ' + designed_part_name
-        self.setWindowTitle(self._window_title)
+        self._windowTitle = APP_NAME + ' - ' + designedPartName
+        self.setWindowTitle(self._windowTitle)
         self.setWindowIcon(QIcon(APP_ICON))
 
-        self.resize(800,500)
+        self.resize(800, 500)
 
         # Set main layout
-        self.main_widget = QWidget(self)
-        self.main_widget.setContentsMargins(0, 0, 0, 0)
-        self.main_widget.setStyleSheet("""
+        self.mainWidget = QWidget(self)
+        self.mainWidget.setContentsMargins(0, 0, 0, 0)
+        self.mainWidget.setStyleSheet("""
         QWidget {
             background-color: #ffffff;
         }
         """)
-        self.main_layout = QVBoxLayout(self.main_widget)
-        self.main_layout.setSpacing(0)
-        self.setCentralWidget(self.main_widget)
+        self.mainLayout = QVBoxLayout(self.mainWidget)
+        self.mainLayout.setSpacing(0)
+        self.setCentralWidget(self.mainWidget)
 
-        self._init_toolbar()
+        self._initToolbar()
 
         # Set content layout
-        self.content_layout = QHBoxLayout()
-        self.content_layout.setSpacing(0)
-        self.main_layout.addLayout(self.content_layout)
+        self.contentLayout = QHBoxLayout()
+        self.contentLayout.setSpacing(0)
+        self.mainLayout.addLayout(self.contentLayout)
 
         # Init content widgets
-        self._init_sidebar()
-        self._init_chart()
+        self._initSidebar()
+        self._initChart()
 
         # Add buttons to the toolbar
-        self._set_toolbar_buttons()
+        self._setToolbarButtons()
 
         # Set initial view
         self.sidebar.setVisible(False)
     
-    def _init_toolbar(self):
+    def _initToolbar(self):
         # Create custom toolbar
         self.toolbar = QWidget(self)
-        self.toolbar_layout = QHBoxLayout(self.toolbar)
+        self.toolbarLayout = QHBoxLayout(self.toolbar)
         self.toolbar.setObjectName('toolbarWidget')
         self.toolbar.setStyleSheet("""
         QWidget#toolbarWidget {
@@ -73,12 +73,12 @@ class ShaftDesigner(QMainWindow):
         }
         """)
         self.toolbar.setFixedHeight(40)
-        self.toolbar_layout.setContentsMargins(0, 0, 0, 0)
-        self.toolbar_layout.setSpacing(5)
-        self.main_layout.addWidget(self.toolbar)
+        self.toolbarLayout.setContentsMargins(0, 0, 0, 0)
+        self.toolbarLayout.setSpacing(5)
+        self.mainLayout.addWidget(self.toolbar)
 
         # Create default style of toolbar buttons 
-        self.toolbar_buttons_style = """                         
+        self.toolbarButtonsStyle = """                         
             QPushButton {
                 background-color: transparent;
                 color: black;
@@ -99,7 +99,7 @@ class ShaftDesigner(QMainWindow):
             }
         """
 
-    def _init_sidebar(self):
+    def _initSidebar(self):
         # Set container for sidebar content
         self.container = QWidget()
         self.container.setObjectName("containerWidget")
@@ -108,7 +108,7 @@ class ShaftDesigner(QMainWindow):
             background-color: #ffffff;
         }
         """)
-        self.sidebar_layout = QVBoxLayout(self.container)
+        self.sidebarLayout = QVBoxLayout(self.container)
 
         # Set a scroll area for the sidebar
         self.sidebar = QScrollArea()
@@ -145,82 +145,82 @@ class ShaftDesigner(QMainWindow):
         self.sidebar.setAlignment(Qt.AlignmentFlag.AlignLeft)
         self.sidebar.setFixedWidth(230)
 
-        self.content_layout.addWidget(self.sidebar)
+        self.contentLayout.addWidget(self.sidebar)
 
-    def _init_chart(self):
+    def _initChart(self):
         # Create chart
         self.chart = Chart()
         self.plotter = Chart_Plotter(self.chart)
-        self.shaft_viewer = Chart_ShaftViewer(self.chart)
+        self.shaftViewer = Chart_ShaftViewer(self.chart)
 
         # Set the focus policy to accept focus and then set focus to the canvas
         self.chart.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.chart.setFocus()
 
-        self.content_layout.addWidget(self.chart)
+        self.contentLayout.addWidget(self.chart)
     
-    def _set_toolbar_buttons(self):
+    def _setToolbarButtons(self):
         # Set sidebar toggle button
-        toggle_sidebar_button = QPushButton(self)
-        toggle_sidebar_button.setCheckable(True)
-        toggle_sidebar_button.setStyleSheet(self.toolbar_buttons_style)
-        toggle_sidebar_button.setFixedSize(QSize(30, 30))
-        toggle_sidebar_button.setIconSize(QSize(24, 24))
-        toggle_sidebar_button.setIcon(QIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//show_menu_icon.png')))
-        toggle_sidebar_button.setToolTip('Otwórz/zamknij pasek boczny')
-        toggle_sidebar_button.clicked.connect(self.toggle_sidebar)
-        self.toolbar_layout.addWidget(toggle_sidebar_button)
+        toggleSidebarButton = QPushButton(self)
+        toggleSidebarButton.setCheckable(True)
+        toggleSidebarButton.setStyleSheet(self.toolbarButtonsStyle)
+        toggleSidebarButton.setFixedSize(QSize(30, 30))
+        toggleSidebarButton.setIconSize(QSize(24, 24))
+        toggleSidebarButton.setIcon(QIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//show_menu_icon.png')))
+        toggleSidebarButton.setToolTip('Otwórz/zamknij pasek boczny')
+        toggleSidebarButton.clicked.connect(self.toggleSidebar)
+        self.toolbarLayout.addWidget(toggleSidebarButton)
 
         # Set adjust view action
-        fit_to_window_button = QPushButton(self)
-        fit_to_window_button.setStyleSheet(self.toolbar_buttons_style)
-        fit_to_window_button.setFixedSize(QSize(30, 30))
-        fit_to_window_button.setIconSize(QSize(24, 24))
-        fit_to_window_button.setIcon(QIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//fit_to_window_icon.png')))
-        fit_to_window_button.setToolTip("Dopasuj widok")
-        fit_to_window_button.clicked.connect(self.chart.reset_initial_view)
-        self.toolbar_layout.addWidget(fit_to_window_button)
+        fitToWindowButton = QPushButton(self)
+        fitToWindowButton.setStyleSheet(self.toolbarButtonsStyle)
+        fitToWindowButton.setFixedSize(QSize(30, 30))
+        fitToWindowButton.setIconSize(QSize(24, 24))
+        fitToWindowButton.setIcon(QIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//fit_to_window_icon.png')))
+        fitToWindowButton.setToolTip("Dopasuj widok")
+        fitToWindowButton.clicked.connect(self.chart.reset_initial_view)
+        self.toolbarLayout.addWidget(fitToWindowButton)
 
         # Set menu with plots to view
-        self._plots_menu = CheckboxDropdown()
-        self._plots_menu.setFixedSize(QSize(30, 30))
-        self._plots_menu.setIconSize(QSize(24, 24))
-        self._plots_menu.stateChanged.connect(self._update_plots)
-        self._plots_menu.setIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//show_plots_icon.png'), 'Wyświetl wykresy momentów')
-        self.toolbar_layout.addWidget(self._plots_menu)
+        self._plotsMenu = CheckboxDropdown()
+        self._plotsMenu.setFixedSize(QSize(30, 30))
+        self._plotsMenu.setIconSize(QSize(24, 24))
+        self._plotsMenu.stateChanged.connect(self._updatePlots)
+        self._plotsMenu.setIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//show_plots_icon.png'), 'Wyświetl wykresy momentów')
+        self.toolbarLayout.addWidget(self._plotsMenu)
 
         # Set menu with plots to view
-        self._min_diameters_menu = CheckboxDropdown()
-        self._min_diameters_menu.setFixedSize(QSize(30, 30))
-        self._min_diameters_menu.setIconSize(QSize(24, 24))
-        self._min_diameters_menu.stateChanged.connect(self._update_plots)
-        self._min_diameters_menu.setIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//show_min_diameters_icon.png'), 'Wyświetl wykresy średnic minimalnych')
-        self.toolbar_layout.addWidget(self._min_diameters_menu)
+        self._minDiametersMenu = CheckboxDropdown()
+        self._minDiametersMenu.setFixedSize(QSize(30, 30))
+        self._minDiametersMenu.setIconSize(QSize(24, 24))
+        self._minDiametersMenu.stateChanged.connect(self._updatePlots)
+        self._minDiametersMenu.setIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//show_min_diameters_icon.png'), 'Wyświetl wykresy średnic minimalnych')
+        self.toolbarLayout.addWidget(self._minDiametersMenu)
 
         # Set menu with dimensions to display
-        self._dimensions_menu = CheckboxDropdown()
-        self._dimensions_menu.setFixedSize(QSize(30, 30))
-        self._dimensions_menu.setIconSize(QSize(24, 24))
-        self._dimensions_menu.setIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//show_dimensions_icon.png'), 'Wyświetl wymiary')
-        self._dimensions_menu.addItem('dimensions', 'Wymiary wału', 'Wyświetl wymiary wału', self._toggle_dimensions)
-        self._dimensions_menu.addItem('coordinates', 'Współrzędne wału', 'Wyświetl współrzędne wału', self._toggle_coordinates)
-        self.toolbar_layout.addWidget(self._dimensions_menu)
+        self._dimensionsMenu = CheckboxDropdown()
+        self._dimensionsMenu.setFixedSize(QSize(30, 30))
+        self._dimensionsMenu.setIconSize(QSize(24, 24))
+        self._dimensionsMenu.setIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//show_dimensions_icon.png'), 'Wyświetl wymiary')
+        self._dimensionsMenu.addItem('dimensions', 'Wymiary wału', 'Wyświetl wymiary wału', self._toggleDimensions)
+        self._dimensionsMenu.addItem('coordinates', 'Współrzędne wału', 'Wyświetl współrzędne wału', self._toggleCoordinates)
+        self.toolbarLayout.addWidget(self._dimensionsMenu)
         
         # Set button for displaying bearings
-        self._toggle_bearings_plot_button = QPushButton(self)
-        self._toggle_bearings_plot_button.setStyleSheet(self.toolbar_buttons_style)
-        self._toggle_bearings_plot_button.setFixedSize(QSize(30, 30))
-        self._toggle_bearings_plot_button.setIconSize(QSize(24, 24))
-        self._toggle_bearings_plot_button.setIcon(QIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//show_bearings_icon.png')))
-        self._toggle_bearings_plot_button.setToolTip("Wyświetl łożyska")
-        self._toggle_bearings_plot_button.setCheckable(True)
-        self._toggle_bearings_plot_button.setEnabled(False)
-        self._toggle_bearings_plot_button.clicked.connect(self._toggle_bearings)
-        self.toolbar_layout.addWidget(self._toggle_bearings_plot_button)
+        self._toggleBearingsPlotButton = QPushButton(self)
+        self._toggleBearingsPlotButton.setStyleSheet(self.toolbarButtonsStyle)
+        self._toggleBearingsPlotButton.setFixedSize(QSize(30, 30))
+        self._toggleBearingsPlotButton.setIconSize(QSize(24, 24))
+        self._toggleBearingsPlotButton.setIcon(QIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//show_bearings_icon.png')))
+        self._toggleBearingsPlotButton.setToolTip("Wyświetl łożyska")
+        self._toggleBearingsPlotButton.setCheckable(True)
+        self._toggleBearingsPlotButton.setEnabled(False)
+        self._toggleBearingsPlotButton.clicked.connect(self._toggleBearings)
+        self.toolbarLayout.addWidget(self._toggleBearingsPlotButton)
 
         # Set button for confirming shaft project:
-        self.confirm_draft_button = QPushButton(self)
-        self.confirm_draft_button.setStyleSheet("""                         
+        self.confirmDraftButton = QPushButton(self)
+        self.confirmDraftButton.setStyleSheet("""                         
             QPushButton {
                 background-color: #fba9a9;
                 border: 1px solid #fba9a9;
@@ -237,85 +237,85 @@ class ShaftDesigner(QMainWindow):
         """)
         font = QFont()
         font.setBold(True)
-        self.confirm_draft_button.setFont(font)
-        self.confirm_draft_button.setFixedSize(QSize(140, 30))
-        self.confirm_draft_button.setIconSize(QSize(24, 24))
-        self.confirm_draft_button.setIcon(QIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//approve_icon.png')))
-        self.confirm_draft_button.setToolTip("Zatwierdź projekt wału")
-        self.confirm_draft_button.setText("Zatwierdź Projekt")
-        self.confirm_draft_button.setEnabled(False)
-        self.toolbar_layout.addWidget(self.confirm_draft_button)
+        self.confirmDraftButton.setFont(font)
+        self.confirmDraftButton.setFixedSize(QSize(140, 30))
+        self.confirmDraftButton.setIconSize(QSize(24, 24))
+        self.confirmDraftButton.setIcon(QIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//approve_icon.png')))
+        self.confirmDraftButton.setToolTip("Zatwierdź projekt wału")
+        self.confirmDraftButton.setText("Zatwierdź Projekt")
+        self.confirmDraftButton.setEnabled(False)
+        self.toolbarLayout.addWidget(self.confirmDraftButton)
 
         spacer = QSpacerItem(10, 10, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-        self.toolbar_layout.addSpacerItem(spacer)
+        self.toolbarLayout.addSpacerItem(spacer)
 
-    def _toggle_dimensions(self, is_checked):
-        if is_checked:
-            if self._toggle_bearings_plot_button.isChecked():
-                self._toggle_bearings_plot_button.click()
-            self.shaft_viewer.draw_shaft_dimensions()
+    def _toggleDimensions(self, isChecked):
+        if isChecked:
+            if self._toggleBearingsPlotButton.isChecked():
+                self._toggleBearingsPlotButton.click()
+            self.shaftViewer.draw_shaft_dimensions()
         else:
-            self.shaft_viewer.remove_shaft_dimensions()
+            self.shaftViewer.remove_shaft_dimensions()
 
-    def _toggle_coordinates(self, is_checked):
-        if is_checked:
-            if self._toggle_bearings_plot_button.isChecked():
-                self._toggle_bearings_plot_button.click()
-            self.shaft_viewer.draw_shaft_coordinates()
+    def _toggleCoordinates(self, isChecked):
+        if isChecked:
+            if self._toggleBearingsPlotButton.isChecked():
+                self._toggleBearingsPlotButton.click()
+            self.shaftViewer.draw_shaft_coordinates()
         else:
-            self.shaft_viewer.remove_shaft_coordinates()
+            self.shaftViewer.remove_shaft_coordinates()
 
-    def _toggle_bearings(self, is_checked):
-        if is_checked:
-            for id in self._dimensions_menu.getCheckedItems():
-                self._dimensions_menu.checkItem(id, False)
-            self.shaft_viewer.draw_bearings()            
+    def _toggleBearings(self, isChecked):
+        if isChecked:
+            for id in self._dimensionsMenu.getCheckedItems():
+                self._dimensionsMenu.checkItem(id, False)
+            self.shaftViewer.draw_bearings()            
         else:
-            self.shaft_viewer.remove_bearings()
+            self.shaftViewer.remove_bearings()
 
-    def _update_plots(self):
-        selected_plots = self._plots_menu.getCheckedItems() + self._min_diameters_menu.getCheckedItems()
-        self.plotter.set_selected_plots(selected_plots)
+    def _updatePlots(self):
+        selectedPlots = self._plotsMenu.getCheckedItems() + self._minDiametersMenu.getCheckedItems()
+        self.plotter.set_selected_plots(selectedPlots)
 
-    def set_sidebar_sections(self, sections):
+    def setSidebarSections(self, sections):
         # Set contents of the sidebar
         for section in sections.values():
-            self.sidebar_layout.addWidget(section)
+            self.sidebarLayout.addWidget(section)
 
         # Add a spacer item at the end of the sidebar layout - keeps the contents aligned to the top
         spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
-        self.sidebar_layout.addSpacerItem(spacer)
+        self.sidebarLayout.addSpacerItem(spacer)
 
-    def append_section_to_sidebar(self, section):
+    def appendSectionToSidebar(self, section):
         # Add section before spacer
-        self.sidebar_layout.insertWidget(self.sidebar_layout.count()-1, section)
+        self.sidebarLayout.insertWidget(self.sidebarLayout.count() - 1, section)
 
-    def remove_section_from_sidebar(self, section):
-        for index in range( self.sidebar_layout.count()):
-            item =  self.sidebar_layout.itemAt(index)
+    def removeSectionFromSidebar(self, section):
+        for index in range(self.sidebarLayout.count()):
+            item = self.sidebarLayout.itemAt(index)
             if item.widget() == section:
                 # Remove the widget from the layout
-                self.sidebar_layout.takeAt(index)
+                self.sidebarLayout.takeAt(index)
                 # Hide the widget
                 section.hide()
                 # Optionally delete the widget
                 section.deleteLater()
                 break
 
-    def set_draft_finished_title(self, is_finished):
-        if is_finished:
-            self.setWindowTitle(self._window_title + ' (Projekt Zatwierdzony)')
+    def setDraftFinishedTitle(self, isFinished):
+        if isFinished:
+            self.setWindowTitle(self._windowTitle + ' (Projekt Zatwierdzony)')
         else:
-            self.setWindowTitle(self._window_title)
+            self.setWindowTitle(self._windowTitle)
 
-    def toggle_sidebar(self):
+    def toggleSidebar(self):
         self.sidebar.setVisible(not self.sidebar.isVisible())
 
     def show(self):
         if self.isHidden():
             super().show()
         else:
-             # Restore the window if it's minimized or in the back
+            # Restore the window if it's minimized or in the back
             self.setWindowState(self.windowState() & ~Qt.WindowState.WindowMinimized)
             self.activateWindow()
             self.raise_()

@@ -107,7 +107,7 @@ class BearingsTabController:
         self._items = extract_data(self._component_data, items)
         self._calculator.init_data(self._component_data, self._inputs, self._outputs)
 
-        self._tab.init_ui(self._items, self._inputs, self._outputs)
+        self._tab.initUI(self._items, self._inputs, self._outputs)
         self._connect_signals_and_slots()
 
     def update_state(self):
@@ -128,7 +128,7 @@ class BearingsTabController:
         Args:
             data (dict): Data to set the state of the tab with.
         """
-        self._tab.track_state(False)
+        self._tab.trackState(False)
 
         def update_input(recipient, source, attribute):
             new_value = source[attribute][0]
@@ -141,4 +141,4 @@ class BearingsTabController:
             item['data'].setData(data['Bearings'][name]['data'])
 
         self.update_state()
-        self._tab.track_state(True)
+        self._tab.trackState(True)

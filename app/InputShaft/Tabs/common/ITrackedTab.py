@@ -14,7 +14,7 @@ class ITrackedTab(ITrackedWidget):
     def __init__(self, parent):
         super().__init__(parent)
 
-    def _on_state_checked(self, all_filled, state_changed):
+    def _onStateChecked(self, all_filled, state_changed):
         """
         Override parent class method to perform additional tasks after state checking.
 
@@ -23,12 +23,12 @@ class ITrackedTab(ITrackedWidget):
         if all_filled:
             self.allInputsProvided.emit()
 
-        super()._on_state_checked(all_filled, state_changed)
+        super()._onStateChecked(all_filled, state_changed)
     
-    def on_activated(self):
+    def onActivated(self):
         """
         Override parent class method to call additional methods uppon activation.
         """
-        super().on_activated()
+        super().onActivated()
 
         self.updateStateSignal.emit()

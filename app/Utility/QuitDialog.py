@@ -17,20 +17,20 @@ class QuitDialog(QDialog):
 
         self.layout = QVBoxLayout(self)
 
-        self._set_message()
-        self._set_buttons()
+        self._setMessage()
+        self._setButtons()
 
-    def _set_message(self):
+    def _setMessage(self):
         self.label = QLabel("Zapisać zmiany w projekcie?", self)
         self.layout.addWidget(self.label)
 
-    def _set_buttons(self):
+    def _setButtons(self):
         # Buttons layout
         buttonLayout = QHBoxLayout()
         buttonLayout.setSpacing(10)
         self.layout.addLayout(buttonLayout)
 
-        # Yes Button
+        # Yes button
         self.yesButton = QPushButton("Tak")
         buttonLayout.addWidget(self.yesButton)
         self.yesButton.setFixedWidth(80)
@@ -42,7 +42,7 @@ class QuitDialog(QDialog):
         self.noButton.clicked.connect(self.reject)
         buttonLayout.addWidget(self.noButton)
 
-        # Ignore Button
+        # Ignore button
         self.ignoreButton = QPushButton("Anuluj")
         buttonLayout.addWidget(self.ignoreButton)
         self.ignoreButton.setFixedWidth(80)

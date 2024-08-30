@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import QComboBox, QVBoxLayout, QHBoxLayout, QStackedWidget,
 from ..common.DataButton import DataButton
 from ..common.Section import Section
 from ..common.ITrackedTab import ITrackedTab
-from ..common.common_functions import create_data_display_row, create_data_input_row, create_header
+from ..common.common_functions import createDataDisplayRow, createDataInputRow, createHeader
 
 class BearingsTab(ITrackedTab):
     sectionInputsProvided = pyqtSignal(str, bool, bool)
@@ -12,7 +12,7 @@ class BearingsTab(ITrackedTab):
     def _init_selector(self):
         selector_layout = QHBoxLayout()
 
-        layout_selector_label = create_header('Miejsce osadzenia łożyska:', bold=True)
+        layout_selector_label = createHeader('Miejsce osadzenia łożyska:', bold=True)
 
         self.layout_selector = QComboBox()
         self.layout_selector.setFixedWidth(150)
@@ -53,14 +53,14 @@ class BearingsTab(ITrackedTab):
         section = Section(self, section_name, self.sectionInputsProvided.emit)
 
         # Set data display and input rows
-        section.addWidget(create_data_display_row(self._outputs['Bearings'][section_name]['dip'], 'd<sub>min</sub>', 'Minimalna średnica wewnętrzna łożyska', decimal_precision=2))
-        section.addWidget(create_data_input_row(self._inputs['Bearings'][section_name]['Lh'], 'L<sub>h</sub>', 'Trwałość godzinowa łożyska', decimal_precision=0))
-        section.addWidget(create_data_input_row(self._inputs['Bearings'][section_name]['fd'], 'f<sub>d</sub>', 'Współczynnik zależny od zmiennych obciążeń dynamicznych łożyska', decimal_precision=2))
-        section.addWidget(create_data_input_row(self._inputs['Bearings'][section_name]['ft'], 'f<sub>t</sub>', 'Współczynnik zależny od temperatury pracy łożyska', decimal_precision=2))
+        section.addWidget(createDataDisplayRow(self._outputs['Bearings'][section_name]['dip'], 'd<sub>min</sub>', 'Minimalna średnica wewnętrzna łożyska', decimalPrecision=2))
+        section.addWidget(createDataInputRow(self._inputs['Bearings'][section_name]['Lh'], 'L<sub>h</sub>', 'Trwałość godzinowa łożyska', decimalPrecision=0))
+        section.addWidget(createDataInputRow(self._inputs['Bearings'][section_name]['fd'], 'f<sub>d</sub>', 'Współczynnik zależny od zmiennych obciążeń dynamicznych łożyska', decimalPrecision=2))
+        section.addWidget(createDataInputRow(self._inputs['Bearings'][section_name]['ft'], 'f<sub>t</sub>', 'Współczynnik zależny od temperatury pracy łożyska', decimalPrecision=2))
 
         # Set button for bearing selection
         button_layout = QHBoxLayout()
-        button_label = create_header('Łożysko:', bold=True)
+        button_label = createHeader('Łożysko:', bold=True)
 
         select_bearing_button = DataButton('Wybierz Łożysko')
         self._items['Bearings'][section_name]['data'] = select_bearing_button
@@ -69,7 +69,7 @@ class BearingsTab(ITrackedTab):
         button_layout.addWidget(select_bearing_button)
 
         section_layout.addWidget(section)
-        section_layout.addWidget(create_data_display_row(self._inputs['Bearings'][section_name]['C'], 'C', 'Wymagana nośność łożyska', decimal_precision=2))
+        section_layout.addWidget(createDataDisplayRow(self._inputs['Bearings'][section_name]['C'], 'C', 'Wymagana nośność łożyska', decimalPrecision=2))
         section_layout.addLayout(button_layout)
         section_layout.addStretch()
 
@@ -81,8 +81,8 @@ class BearingsTab(ITrackedTab):
         """
         self.stacked_sections.setCurrentIndex(index)
         
-        # Call method on_activated for every subsection in activated section
-        [section.on_activated() for section in self.stacked_sections.currentWidget().findChildren(Section)]
+        # Call method onActivated for every subsection in activated section
+        [section.onActivated() for section in self.stacked_sections.currentWidget().findChildren(Section)]
     
     def enable_select_bearing_button(self, section_name, enable_button, delete_choice):
         """
@@ -108,7 +108,7 @@ class BearingsTab(ITrackedTab):
         """
         self._items['Bearings'][section_name]['data'].setData(item_data)
     
-    def init_ui(self, items, inputs, outputs):
+    def initUI(self, items, inputs, outputs):
         """
         Initialize the user interface.
 
@@ -128,4 +128,4 @@ class BearingsTab(ITrackedTab):
         self._init_selector()
         self._init_sections()
         self.main_layout.addStretch()
-        super().init_ui()
+        super().initUI()
