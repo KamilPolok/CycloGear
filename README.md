@@ -1,10 +1,10 @@
-# ![image info](.github\assets\app_logo.png)
+# ![image info](.github/assets/app_logo.png)
 
 ## About
 
 This application is developed in cooperation and with the substantive support of the Mechanical Department of Wrocław University of Science and Technology. Its purpose is to assist in the design of the input mechanism for cycloidal drives. It facilitates strength calculations, structural optimization and modeling of the input shaft, and also enables the selection of appropriate bearings mounted on it. Additionally, it helps identify power losses occurring in the designed mechanism.
 
-![Example GIF](.github\assets\app_demo.gif)
+![Example GIF](.github/assets/app_demo.gif)
 
 ## Caveats
 
