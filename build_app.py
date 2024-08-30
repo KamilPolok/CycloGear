@@ -3,7 +3,7 @@ import shutil
 import subprocess
 import sys
 
-from app.config import APP_NAME, APP_ICON, DATA_PATH, RESOURCES_PATH, RESOURCES_DIR_NAME, DATA_DIR_NAME
+from cyclogear.config import APP_NAME, APP_ICON, DATA_PATH, RESOURCES_PATH, RESOURCES_DIR_NAME, DATA_DIR_NAME
 
 def run_pyinstaller(app_name, icon_path, dist_path, spec_path, source_path):
     try:
@@ -35,7 +35,7 @@ def main():
     icon_path = APP_ICON
     dist_path = os.path.abspath("./build/dist")
     spec_path = os.path.abspath("./build/spec")
-    source_path = os.path.abspath("./app/main.py")
+    source_path = os.path.abspath("./cyclogear/main.py")
     
     # Run PyInstaller
     run_pyinstaller(app_name, icon_path, dist_path, spec_path, source_path)
