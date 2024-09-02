@@ -21,7 +21,7 @@ class HelpWindow(QDialog):
 
         # Set image
         label = QLabel(self)
-        pixmap = QPixmap(dependencies_path(f'{RESOURCES_PATH}//images//input_shaft_preview.png'))
+        pixmap = QPixmap(dependencies_path(f'{RESOURCES_PATH}//images//input_mechanism_preview.png'))
         label.setPixmap(pixmap)
         label.setScaledContents(True)
         

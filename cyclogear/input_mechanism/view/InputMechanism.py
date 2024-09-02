@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import QTabWidget, QWidget, QHBoxLayout, QVBoxLayout, QPush
 
 from config import RESOURCES_DIR_NAME, dependencies_path
 
-class InputShaft(QWidget):
+class InputMechanism(QWidget):
     """
     GUI class for the Input Shaft component.
     """

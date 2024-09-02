@@ -3,7 +3,7 @@ import copy
 
 from ..utils.dict_utils import fetch_data_subset
 
-class InputShaftCalculator():
+class InputMechanismCalculator():
     def __init__(self):
         self.bearings = {}
         self.data = {

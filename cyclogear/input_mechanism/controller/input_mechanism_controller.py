@@ -1,8 +1,7 @@
 from ..mediator import Mediator
 
-from ..model.input_shaft_calculator import InputShaftCalculator
-from ..view.InputShaft import InputShaft
-
+from ..model.input_mechanism_calculator import InputMechanismCalculator
+from ..view.InputMechanism import InputMechanism
 from ..tabs.drive_shaft_tab.view.DriveShaftTab import DriveShaftTab
 from ..tabs.drive_shaft_tab.model.drive_shaft_tab_calculator import DriveShaftTabCalculator
 from ..tabs.drive_shaft_tab.controller.drive_shaft_tab_controller import DriveShaftTabController
@@ -25,22 +24,22 @@ from db_handler.controller.db_controller import ViewSelectItemController
 from db_handler.model.db_handler import DbHandler
 from db_handler.view.Window import Window
 
-class InputShaftController:
+class InputMechanismController:
     """
-    Controller for the InputShaft in the application.
+    Controller for the InputMechanism in the application.
 
-    This class handles the interactions between the model (data) and the view (InputShaft),
+    This class handles the interactions between the model (data) and the view (InputMechanism),
     including initializing the view with data, connecting signals and slots, and handling
     user interactions.
     """
-    def __init__(self, model: InputShaftCalculator, view: InputShaft):
+    def __init__(self, model: InputMechanismCalculator, view: InputMechanism):
         """
-        Initialize the InputShaftController.W
+        Initialize the InputMechanismController.W
 
         :param data: The data for the application.
-        :param view: The InputShaft (QWidget) instance of the input shaft coomponent's GUI.
+        :param view: The InputMechanism (QWidget) instance of the input shaft coomponent's GUI.
         """
-        self._input_shaft = view
+        self._input_mechanism = view
         self._calculator = model
 
         self._startup()
@@ -56,22 +55,22 @@ class InputShaftController:
     def _initTabs(self):
         tab_id = 1
 
-        tab1 = DriveShaftTab(self._input_shaft)
+        tab1 = DriveShaftTab(self._input_mechanism)
         tab1_calculator = DriveShaftTabCalculator()
         tab1_controller = DriveShaftTabController(tab_id, tab1, tab1_calculator, self._mediator)
 
         tab_id +=1
-        tab2 = BearingsTab(self._input_shaft)
+        tab2 = BearingsTab(self._input_mechanism)
         tab2_calculator = BearingsTabCalculator()
         tab2_controller = BearingsTabController(tab_id, tab2, tab2_calculator, self._mediator)
 
         tab_id +=1
-        tab3 = PowerLossTab(self._input_shaft)
+        tab3 = PowerLossTab(self._input_mechanism)
         tab3_calculator = PowerLossTabCalculator()
         tab3_controller = PowerLossTabController(tab_id, tab3, tab3_calculator, self._mediator)
 
         tab_id +=1
-        tab4 = ResultsTab(self._input_shaft)
+        tab4 = ResultsTab(self._input_mechanism)
         tab4_controller = ResultsTabController(tab_id, tab4, self._mediator)
 
         self.tabs = [tab1, tab2, tab3, tab4]
@@ -82,7 +81,7 @@ class InputShaftController:
             data = self._calculator.get_data()
             tab_controller.init_state(data)
 
-        self._input_shaft.initTabs(self.tabs, tab_titles)
+        self._input_mechanism.initTabs(self.tabs, tab_titles)
 
     def _init_shaft_designer(self):
         # Set an instance of shaft designer
@@ -99,7 +98,7 @@ class InputShaftController:
         This method sets up connections between UI elements and their corresponding
         actions or handlers.
         """
-        self._input_shaft.previewButton.clicked.connect(self._open_shaft_designer_window)
+        self._input_mechanism.previewButton.clicked.connect(self._open_shaft_designer_window)
         self._mediator.shaftDesigningFinished.connect(self._on_shaft_designing_finished)
 
         self._mediator.selectMaterial.connect(self._on_select_materials)
@@ -159,7 +158,7 @@ class InputShaftController:
         self._shaft_designer_controller.update_bearing_data(bearing_data)
 
     def _on_shaft_designing_finished(self):
-        self._input_shaft.handleShaftDesigningFinished()
+        self._input_mechanism.handleShaftDesigningFinished()
 
     def _open_shaft_material_selection(self):
         """
@@ -169,7 +168,7 @@ class InputShaftController:
             (None or dict): selected item data.
         """
         db_handler = DbHandler()
-        db_window = Window(self._input_shaft)
+        db_window = Window(self._input_mechanism)
         db_window.setWindowTitle("Dobór materiału")
         tables_group_name = 'wał czynny-materiały'
 
@@ -199,7 +198,7 @@ class InputShaftController:
             tables_group_name = 'wał czynny-łożyska-centralne'
 
         db_handler = DbHandler()
-        db_window = Window(self._input_shaft)
+        db_window = Window(self._input_mechanism)
         db_window.setWindowTitle("Dobór łożyska")
         # Get available tables
         available_tables = db_handler.get_available_tables(tables_group_name)
@@ -225,7 +224,7 @@ class InputShaftController:
             (None or dict): selected item data.
         """
         db_handler = DbHandler()
-        db_window = Window(self._input_shaft)
+        db_window = Window(self._input_mechanism)
         db_window.setWindowTitle("Dobór elementu tocznego")
         # Get available tables
         tables_group_name = f"wał czynny-elementy toczne-{self._calculator.get_bearing_rolling_element_type(bearing_section_id)}"
@@ -258,7 +257,7 @@ class InputShaftController:
             data.append(tab_controller.get_data())
 
         # Get isShaftDesigned flag
-        data.append(self._input_shaft.isShaftDesigned)
+        data.append(self._input_mechanism.isShaftDesigned)
         return data
 
     def load_data(self, data):
@@ -279,6 +278,6 @@ class InputShaftController:
             tab_controller.set_state(data[idx+2])
         
         # Set isShaftDesigned flag
-        self._input_shaft.isShaftDesigned = data[-1]
-        if self._input_shaft.isShaftDesigned:
+        self._input_mechanism.isShaftDesigned = data[-1]
+        if self._input_mechanism.isShaftDesigned:
             self._on_shaft_designing_finished()
