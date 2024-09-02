@@ -27,7 +27,7 @@ pip install -r requirements.txt
 To run the code, type in the comand prompt:
 
 ```python
-python app/main.py
+python cyclogear/main.py
 ```
 
 ## Build the app
