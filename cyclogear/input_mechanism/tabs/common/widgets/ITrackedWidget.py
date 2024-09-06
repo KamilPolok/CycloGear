@@ -162,4 +162,5 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
         """
         Call appropriate methods time when the widget becomes visible.
         """
+        for trackedWidget in self.findChildren(ITrackedWidget): trackedWidget.onActivated()
         self._checkState()
