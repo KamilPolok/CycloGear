@@ -1,6 +1,6 @@
-from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QWidget
-from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtGui import QAction, QIcon
+from PySide2.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QAction
+from PySide2.QtCore import Signal 
+from PySide2.QtGui import QIcon
 
 from config import APP_ICON
 
@@ -10,7 +10,7 @@ class MainWindow(QMainWindow):
     functionalities, also views the app components that can be 
     added through addComponent() method.
     '''
-    quitAppSignal = pyqtSignal()
+    quitAppSignal = Signal()
 
     def __init__(self):
         super().__init__()

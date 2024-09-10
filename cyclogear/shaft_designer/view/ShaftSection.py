@@ -1,9 +1,9 @@
 from abc import ABC, ABCMeta, abstractmethod
 from ast import literal_eval
 
-from PyQt6.QtCore import pyqtSignal, Qt, QSize
-from PyQt6.QtWidgets import QFrame, QHBoxLayout, QPushButton, QVBoxLayout, QWidget, QSizePolicy 
-from PyQt6.QtGui import QIcon
+from PySide2.QtCore import Signal, Qt, QSize
+from PySide2.QtWidgets import QFrame, QHBoxLayout, QPushButton, QVBoxLayout, QWidget, QSizePolicy 
+from PySide2.QtGui import QIcon
 
 from .pyqt_helpers import createDataInputRow
 from .ShaftSubsection import ShaftSubsection
@@ -34,7 +34,7 @@ class ABCQWidgetMeta(ABCMeta, type(QWidget)):
     pass
 
 class Section(QWidget, metaclass=ABCQWidgetMeta):
-    subsectionDataSignal = pyqtSignal(tuple)
+    subsectionDataSignal = Signal(tuple)
 
     def __init__(self, name, parent=None):
         super().__init__(parent)
@@ -102,8 +102,8 @@ class Section(QWidget, metaclass=ABCQWidgetMeta):
         pass
 
 class ShaftSection(Section):
-    addSubsectionSignal = pyqtSignal()
-    removeSubsectionPlotSignal = pyqtSignal(str, int)
+    addSubsectionSignal = Signal()
+    removeSubsectionPlotSignal = Signal(str, int)
 
     def __init__(self, name, parent=None):
         super().__init__(name, parent)
@@ -190,7 +190,7 @@ class ShaftSection(Section):
         self.subsectionDataSignal.emit(data)
 
 class EccentricsSection(Section):
-    removeSubsectionPlotSignal = pyqtSignal(str, int)
+    removeSubsectionPlotSignal = Signal(str, int)
 
     def __init__(self, name, parent=None):
         super().__init__(name, parent)

@@ -1,8 +1,8 @@
 from ast import literal_eval
 
-from PyQt6.QtCore import pyqtSignal, Qt, QSize
-from PyQt6.QtWidgets import QFrame, QHBoxLayout, QPushButton, QSizePolicy, QVBoxLayout, QWidget
-from PyQt6.QtGui import QIcon
+from PySide2.QtCore import Signal, Qt, QSize
+from PySide2.QtWidgets import QFrame, QHBoxLayout, QPushButton, QSizePolicy, QVBoxLayout, QWidget
+from PySide2.QtGui import QIcon
 
 from config import RESOURCES_DIR_NAME, dependencies_path
 
@@ -28,8 +28,8 @@ class HoverButton(QPushButton):
         super().leaveEvent(event)
 
 class ShaftSubsection(QWidget):
-    subsectionDataSignal = pyqtSignal(dict)
-    removeSubsectionSignal = pyqtSignal(int)
+    subsectionDataSignal = Signal(dict)
+    removeSubsectionSignal = Signal(int)
 
     def __init__(self, subsectionName, subsectionNumber, parent=None):
         super().__init__(parent)

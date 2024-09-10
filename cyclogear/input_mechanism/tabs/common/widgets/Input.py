@@ -1,13 +1,13 @@
 from typing import Optional
 
-from PyQt6.QtGui import QFocusEvent, QKeyEvent, QRegularExpressionValidator
-from PyQt6.QtCore import Qt, QRegularExpression, QTimer, pyqtSignal, QObject
-from PyQt6.QtWidgets import QApplication, QLineEdit, QWidget
+from PySide2.QtGui import QFocusEvent, QKeyEvent, QRegularExpressionValidator
+from PySide2.QtCore import Qt, QRegularExpression, QTimer, Signal, QObject
+from PySide2.QtWidgets import QApplication, QLineEdit, QWidget
 
 class Input(QLineEdit):
     """Custom QLineEdit that validates numeric input and monitors for inactivity."""
 
-    inputConfirmedSignal = pyqtSignal(object)
+    inputConfirmedSignal = Signal(object)
 
     def __init__(self, parent: QWidget=None, decimalPrecision: int=2):
         """
@@ -118,7 +118,7 @@ class InactivityMonitor(QObject):
     Monitor inactivity and emits a signal after a specified timeout interval.
     """
     
-    inactivitySignal = pyqtSignal()
+    inactivitySignal = Signal()
 
     def __init__(self, timeout_interval: int=1000):
         """

@@ -1,6 +1,6 @@
-from PyQt6.QtCore import Qt, QRegularExpression
-from PyQt6.QtGui import QRegularExpressionValidator, QFont
-from PyQt6.QtWidgets import QHBoxLayout, QLabel, QLineEdit
+from PySide2.QtCore import Qt, QRegularExpression
+from PySide2.QtGui import QRegularExpressionValidator, QFont
+from PySide2.QtWidgets import QHBoxLayout, QLabel, QLineEdit
 
 def createDataInputRow(symbol):
     layout = QHBoxLayout()

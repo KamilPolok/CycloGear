@@ -1,4 +1,4 @@
-from PyQt6.QtCore import pyqtSignal
+from PySide2.QtCore import Signal
 
 from .ITrackedWidget import ITrackedWidget
 
@@ -8,8 +8,8 @@ class ITrackedTab(ITrackedWidget):
     - implement methods that should be overriden (but do not have to) by subclasses
     - override parent class method to implement additional functionalities
     """
-    updateStateSignal = pyqtSignal()
-    allInputsProvided = pyqtSignal()
+    updateStateSignal = Signal()
+    allInputsProvided = Signal()
 
     def __init__(self, parent):
         super().__init__(parent)

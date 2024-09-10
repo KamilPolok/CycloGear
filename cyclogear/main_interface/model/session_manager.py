@@ -1,7 +1,7 @@
 import json
 import os
 
-from PyQt6.QtWidgets import QFileDialog
+from PySide2.QtWidgets import QFileDialog
 
 from ..view.MainWindow import MainWindow
 from utils.message_handler import MessageHandler

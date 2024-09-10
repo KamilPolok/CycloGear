@@ -1,6 +1,6 @@
-from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLabel, QApplication, QPushButton, QHBoxLayout, QStyle, QSpacerItem, QSizePolicy
-from PyQt6.QtGui import QFont, QFontMetrics
-from PyQt6.QtCore import QSize, Qt
+from PySide2.QtWidgets import QDialog, QVBoxLayout, QLabel, QApplication, QPushButton, QHBoxLayout, QStyle, QSpacerItem, QSizePolicy
+from PySide2.QtGui import QFont, QFontMetrics
+from PySide2.QtCore import QSize, Qt
 
 class MessageDialog(QDialog):
     '''
@@ -85,19 +85,19 @@ class MessageDialog(QDialog):
     @classmethod
     def critical(cls, parent, title, message):
         dialog = cls(parent, title, message, QStyle.StandardPixmap.SP_MessageBoxCritical)
-        dialog.exec()
+        dialog.exec_()
 
     @classmethod
     def information(cls, parent, title, message):
         dialog = cls(parent, title, message, QStyle.StandardPixmap.SP_MessageBoxInformation)
-        dialog.exec()
+        dialog.exec_()
 
     @classmethod
     def question(cls, parent, title, message):
         dialog = cls(parent, title, message, QStyle.StandardPixmap.SP_MessageBoxQuestion)
-        return dialog.exec()
+        return dialog.exec_()
 
     @classmethod
     def warning(cls, parent, title, message):
         dialog = cls(parent, title, message, QStyle.StandardPixmap.SP_MessageBoxWarning)
-        dialog.exec()
+        dialog.exec_()

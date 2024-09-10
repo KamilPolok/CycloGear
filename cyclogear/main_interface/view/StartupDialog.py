@@ -1,5 +1,5 @@
-from PyQt6.QtWidgets import QDialog, QVBoxLayout, QPushButton
-from PyQt6.QtCore import pyqtSignal, Qt
+from PySide2.QtWidgets import QDialog, QVBoxLayout, QPushButton
+from PySide2.QtCore import Signal, Qt
 
 from .MainWindow import MainWindow
 
@@ -12,9 +12,9 @@ class StartupDialog(QDialog):
     create new project, open existing project
     or quit.
     '''
-    newProjectSignal = pyqtSignal()
-    openProjectSignal = pyqtSignal()
-    quitAppSignal = pyqtSignal()
+    newProjectSignal = Signal()
+    openProjectSignal = Signal()
+    quitAppSignal = Signal()
     
     def __init__(self, parent: MainWindow):
         super().__init__(parent)

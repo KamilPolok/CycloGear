@@ -22,7 +22,7 @@ class DbController:
         '''
         self._items_view.setWindowTitle('Łożyska')
         self._items_view.updateList(*self._db_handler.fetch_bearings(*args, **kwargs))
-        return self._items_view.exec()
+        return self._items_view.exec_()
 
     def show_bearing_types(self, *args, **kwargs):
         '''
@@ -33,7 +33,7 @@ class DbController:
         '''
         self._items_view.setWindowTitle('Rodzaje łożysk')
         self._items_view.updateList(*self._db_handler.fetch_bearing_types(*args, **kwargs))
-        return self._items_view.exec()
+        return self._items_view.exec_()
 
     def show_rolling_elements(self, *args, **kwargs):
         '''
@@ -44,7 +44,7 @@ class DbController:
         '''
         self._items_view.setWindowTitle('Elementy toczne')
         self._items_view.updateList(*self._db_handler.fetch_rolling_elements(*args, **kwargs))
-        return self._items_view.exec()
+        return self._items_view.exec_()
 
     def show_materials(self):
         '''
@@ -55,7 +55,7 @@ class DbController:
         '''
         self._items_view.setWindowTitle('Materiały')
         self._items_view.updateList(*self._db_handler.fetch_materials())
-        return self._items_view.exec()
+        return self._items_view.exec_()
 
     def save_data(self, data):
         '''

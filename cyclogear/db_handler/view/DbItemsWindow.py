@@ -1,5 +1,5 @@
-from PyQt6.QtWidgets import QDialog, QVBoxLayout
-from PyQt6.QtCore import pyqtSignal
+from PySide2.QtWidgets import QDialog, QVBoxLayout
+from PySide2.QtCore import Signal
 
 from .ItemsList import ItemsList
 
@@ -8,7 +8,7 @@ class DbItemsWindow(QDialog):
     This class creates a window for
     displaying and selection of items from the database
     '''
-    itemSelected = pyqtSignal(dict)
+    itemSelected = Signal(dict)
     def __init__(self, parent):
         super().__init__(parent)
 

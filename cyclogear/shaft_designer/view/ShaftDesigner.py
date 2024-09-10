@@ -1,6 +1,6 @@
-from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QFont, QIcon 
-from PyQt6.QtWidgets import (QHBoxLayout, QMainWindow, QSizePolicy, QSpacerItem, QPushButton,
+from PySide2.QtCore import Qt, QSize
+from PySide2.QtGui import QFont, QIcon 
+from PySide2.QtWidgets import (QHBoxLayout, QMainWindow, QSizePolicy, QSpacerItem, QPushButton,
                              QVBoxLayout, QWidget, QScrollArea)
 
 from .chart.Chart import Chart

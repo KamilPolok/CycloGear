@@ -3,3 +3,4 @@ pandas==2.0.3
 pip-chill==1.0.3
 pyinstaller==6.3.0
 pyqt6-tools==6.4.2.3.3
+PySide2==5.15.2.1

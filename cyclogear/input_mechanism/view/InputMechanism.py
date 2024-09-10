@@ -1,6 +1,6 @@
-from PyQt6.QtCore import QSize
-from PyQt6.QtGui import QIcon, QFont
-from PyQt6.QtWidgets import QTabWidget, QWidget, QHBoxLayout, QVBoxLayout, QPushButton
+from PySide2.QtCore import QSize
+from PySide2.QtGui import QIcon, QFont
+from PySide2.QtWidgets import QTabWidget, QWidget, QHBoxLayout, QVBoxLayout, QPushButton
 
 from config import RESOURCES_DIR_NAME, dependencies_path
 

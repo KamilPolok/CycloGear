@@ -1,8 +1,8 @@
-from PyQt6.QtWidgets import QPushButton
-from PyQt6.QtCore import pyqtSignal
+from PySide2.QtWidgets import QPushButton
+from PySide2.QtCore import Signal
 
 class DataButton(QPushButton):
-    dataChangedSignal = pyqtSignal(object)
+    dataChangedSignal = Signal(object)
 
     def __init__(self, defaultText='', parent=None):
         super().__init__(defaultText, parent)

@@ -1,6 +1,6 @@
-from PyQt6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QKeyEvent
+from PySide2.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton
+from PySide2.QtCore import Qt
+from PySide2.QtGui import QKeyEvent
 
 from config import APP_NAME
 

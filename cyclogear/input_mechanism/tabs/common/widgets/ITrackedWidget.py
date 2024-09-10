@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 
-from PyQt6.QtCore import QEvent
-from PyQt6.QtWidgets import QWidget
+from PySide2.QtCore import QEvent
+from PySide2.QtWidgets import QWidget
 
 from .Input import Input
 from .Output import Output
@@ -55,7 +55,7 @@ class ITrackedWidget(QWidget, metaclass=ABCQWidgetMeta):
 
             for item in self._itemsToSelect:
                 item.dataChangedSignal.disconnect(self._checkState)
-        except (TypeError, AttributeError):
+        except (TypeError, AttributeError, RuntimeError):
             pass
 
     def _setupStateTracking(self):

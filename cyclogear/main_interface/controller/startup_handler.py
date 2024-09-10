@@ -2,7 +2,7 @@
 import json
 import os
 
-from PyQt6.QtWidgets import QFileDialog
+from PySide2.QtWidgets import QFileDialog
 
 from ..view.StartupDialog import StartupDialog
 from utils.message_handler import MessageHandler
@@ -31,7 +31,7 @@ class StartupHandler():
     def _load_json_data(self):
         data = []
         file_dialog = QFileDialog(self._startup_window, 'Otwórz', None, 'JSON Files (*.json)')
-        if file_dialog.exec():
+        if file_dialog.exec_():
             self.file_path = file_dialog.selectedFiles()[0]
             try:
                 with open(self.file_path, 'r') as read_file:
@@ -57,5 +57,5 @@ class StartupHandler():
     
     def startup(self):
         self.new_project = True
-        result = self._startup_window.exec()
+        result = self._startup_window.exec_()
         return result == self._startup_window.DialogCode.Accepted

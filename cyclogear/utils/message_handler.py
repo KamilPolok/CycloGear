@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QWidget
+from PySide2.QtWidgets import QWidget
 
 from .widgets.MessageDialog import MessageDialog
 

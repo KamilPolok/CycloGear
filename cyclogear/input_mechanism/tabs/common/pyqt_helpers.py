@@ -2,9 +2,9 @@
     This file collects all functions that are common for each ITrackedTab class.
 """
 
-from PyQt6.QtWidgets import QHBoxLayout, QLabel, QFrame, QSizePolicy, QLineEdit
-from PyQt6.QtGui import QFont
-from PyQt6.QtCore import Qt
+from PySide2.QtWidgets import QHBoxLayout, QLabel, QFrame, QSizePolicy, QLineEdit
+from PySide2.QtGui import QFont
+from PySide2.QtCore import Qt
 
 from .widgets.Input import Input
 from .widgets.Output import Output

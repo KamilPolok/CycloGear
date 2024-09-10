@@ -1,5 +1,5 @@
-from PyQt6.QtCore import pyqtSignal, Qt
-from PyQt6.QtWidgets import QComboBox, QVBoxLayout, QHBoxLayout, QStackedWidget, QWidget
+from PySide2.QtCore import Signal, Qt
+from PySide2.QtWidgets import QComboBox, QVBoxLayout, QHBoxLayout, QStackedWidget, QWidget
 
 from ...common.widgets.DataButton import DataButton
 from ...common.widgets.Section import Section
@@ -7,8 +7,8 @@ from ...common.widgets.ITrackedTab import ITrackedTab
 from ...common.pyqt_helpers import createDataDisplayRow, createDataInputRow, createHeader
 
 class PowerLossTab(ITrackedTab):
-    rollingElementDiameterProvided = pyqtSignal(str, bool, bool)
-    sectionDataProvided = pyqtSignal(str, bool, bool)
+    rollingElementDiameterProvided = Signal(str, bool, bool)
+    sectionDataProvided = Signal(str, bool, bool)
 
     def _initSelector(self):
         selectorLayout = QHBoxLayout()

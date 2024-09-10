@@ -1,5 +1,5 @@
-from PyQt6.QtWidgets import QDialog, QLabel, QVBoxLayout
-from PyQt6.QtGui import QPixmap
+from PySide2.QtWidgets import QDialog, QLabel, QVBoxLayout
+from PySide2.QtGui import QPixmap
 
 from config import RESOURCES_PATH, dependencies_path
 

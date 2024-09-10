@@ -1,4 +1,4 @@
-from PyQt6.QtCore import QTimer, QCoreApplication
+from PySide2.QtCore import QTimer, QCoreApplication
 
 from ..view.MainWindow import MainWindow
 from ..view.QuitDialog import QuitDialog
@@ -93,7 +93,7 @@ class MainController():
         dialog = QuitDialog(self._app_window)
 
         while True:
-            result = dialog.exec()
+            result = dialog.exec_()
             if result == QuitDialog.DialogCode.Accepted:
                 if self._save_data():
                     QCoreApplication.quit()

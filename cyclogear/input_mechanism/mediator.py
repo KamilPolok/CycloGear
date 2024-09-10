@@ -1,16 +1,16 @@
 
-from PyQt6.QtCore import pyqtSignal, QObject
+from PySide2.QtCore import Signal, QObject
 
 class Mediator(QObject):
-    shaftDesigningFinished = pyqtSignal()
-    updateComponentData = pyqtSignal(int, dict)
+    shaftDesigningFinished = Signal()
+    updateComponentData = Signal(int, dict)
 
-    selectMaterial = pyqtSignal()
-    selectBearingType = pyqtSignal(str)
-    selectBearing = pyqtSignal(str, dict)
-    selectRollingElement = pyqtSignal(str, dict)
+    selectMaterial = Signal()
+    selectBearingType = Signal(str)
+    selectBearing = Signal(str, dict)
+    selectRollingElement = Signal(str, dict)
 
-    bearingChanged = pyqtSignal(str, object)
+    bearingChanged = Signal(str, object)
 
     def emit_shaft_designing_finished(self):
         self.shaftDesigningFinished.emit()

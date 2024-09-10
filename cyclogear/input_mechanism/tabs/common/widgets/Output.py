@@ -1,7 +1,7 @@
 from typing import Optional
 
-from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QLineEdit, QWidget
+from PySide2.QtCore import Qt
+from PySide2.QtWidgets import QLineEdit, QWidget
 
 class Output(QLineEdit):
     """

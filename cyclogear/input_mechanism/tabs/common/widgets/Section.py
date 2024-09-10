@@ -1,5 +1,5 @@
 from typing import Callable
-from PyQt6.QtWidgets import QLayout, QVBoxLayout, QWidget
+from PySide2.QtWidgets import QLayout, QVBoxLayout, QWidget
 
 from .ITrackedWidget import ITrackedWidget
 

@@ -1,6 +1,6 @@
-from PyQt6.QtWidgets import QTableView, QHeaderView, QAbstractItemView
-from PyQt6.QtGui import QTextDocument, QStandardItemModel, QStandardItem
-from PyQt6.QtCore import Qt, pyqtSignal
+from PySide2.QtWidgets import QTableView, QHeaderView, QAbstractItemView
+from PySide2.QtGui import QTextDocument, QStandardItemModel, QStandardItem
+from PySide2.QtCore import Qt, Signal
 
 class RichTextHeader(QHeaderView):
     '''
@@ -55,14 +55,14 @@ class ItemsList(QTableView):
     updates of headers and data, and emits a signal when an item is selected.
 
     Attributes:
-        itemSelected (pyqtSignal): Signal emitted when an item is selected, 
+        itemSelected (Signal): Signal emitted when an item is selected, 
                                    providing the selected item as a dictionary.
         headers (list): The list of headers for the table.
         keys (list): The list of keys used for mapping data to dictionary form.
         data (list): The list of data rows to be displayed in the table.
         dataModel (QStandardItemModel): The model backing the table view.
     """
-    itemSelected = pyqtSignal(dict)
+    itemSelected = Signal(dict)
 
     # Style sheets for header, selected item, hover, and vertical scrollbar
     headerStyle = """

@@ -1,12 +1,12 @@
-from PyQt6.QtWidgets import QToolButton, QMenu, QWidgetAction, QCheckBox, QWidget, QHBoxLayout, QLabel 
-from PyQt6.QtGui import QIcon, QMouseEvent
-from PyQt6.QtCore import pyqtSignal
+from PySide2.QtWidgets import QToolButton, QMenu, QWidgetAction, QCheckBox, QWidget, QHBoxLayout, QLabel 
+from PySide2.QtGui import QIcon, QMouseEvent
+from PySide2.QtCore import Signal
 
 class ClickableLabel(QLabel):
     """
     A QLabel subclass that emits a clicked signal when it is clicked.
     """
-    clicked = pyqtSignal()
+    clicked = Signal()
 
     def mousePressEvent(self, event):
         self.clicked.emit()
@@ -18,7 +18,7 @@ class RichTextCheckbox(QWidget):
     a clickable label, that allows rich text formatting.
     It purpose is to display subscripts properly.
     '''
-    stateChanged = pyqtSignal(int)
+    stateChanged = Signal(int)
 
     def __init__(self, text, parent=None):
         super().__init__(parent)
@@ -51,7 +51,7 @@ class CheckboxDropdown(QToolButton):
     """
     A custom QToolButton that displays a dropdown menu with checkboxes.
     """
-    stateChanged = pyqtSignal()
+    stateChanged = Signal()
     def __init__(self):
         super().__init__()
         

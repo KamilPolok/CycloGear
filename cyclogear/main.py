@@ -2,8 +2,8 @@ import path_config
 
 import sys
 
-from PyQt6.QtWidgets import QApplication
-from PyQt6.QtCore import QCoreApplication
+from PySide2.QtWidgets import QApplication
+from PySide2.QtCore import QCoreApplication
 
 from main_interface.view.MainWindow import MainWindow
 from main_interface.controller.main_controller import MainController
@@ -20,7 +20,7 @@ def main():
 
     main_controller = MainController(main_window)
 
-    sys.exit(cyclo_app.exec())
+    sys.exit(cyclo_app.exec_())
 
 if __name__ == "__main__":
 

@@ -1,6 +1,6 @@
-from PyQt6.QtWidgets import QHBoxLayout, QPushButton, QVBoxLayout, QStyle
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QCursor
+from PySide2.QtWidgets import QHBoxLayout, QPushButton, QVBoxLayout, QStyle
+from PySide2.QtCore import Qt
+from PySide2.QtGui import QCursor
 
 from ...common.widgets.DataButton import DataButton
 from ...common.widgets.ITrackedTab import ITrackedTab

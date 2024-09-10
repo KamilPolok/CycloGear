@@ -1,6 +1,6 @@
-from PyQt6.QtWidgets import QVBoxLayout, QScrollArea, QWidget, QFrame
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QPalette
+from PySide2.QtWidgets import QVBoxLayout, QScrollArea, QWidget, QFrame
+from PySide2.QtCore import Qt
+from PySide2.QtGui import QPalette
 
 from ...common.widgets.ITrackedTab import ITrackedTab
 from ...common.pyqt_helpers import createDataDisplayRow, createHeader
