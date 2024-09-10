@@ -1,7 +1,6 @@
+import sys, os
 import sqlite3
 import pandas as pd
-import os
-import sys
 
 # Function to determine if we're running as a PyInstaller bundle
 def is_frozen():
@@ -28,109 +27,235 @@ config_dir = os.path.dirname(config_path)
 if config_dir not in sys.path:
     sys.path.append(config_dir)
 
-
 from config import DATA_PATH, DATA_DIR_NAME, dependencies_path
 
-database_tables = [
-    {   
-        "name": "wał czynny-łożyska-podporowe-kulkowe",
-        "csv_name": "wal_czynny-lozyska-podporowe-kulkowe.csv",
-        "headers": ["Kod", "Dw [mm]", "Dz [mm]", "B [mm]", "C [kN]", "C0 [kN]", "n max [obr/min]", "elementy toczne"],
-        "types": ['TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'REAL', 'REAL', 'INTEGER', 'TEXT']
-    },
-    {
-        "name": "wał czynny-łożyska-podporowe-walcowe",
-        "csv_name": "wal_czynny-lozyska-podporowe-walcowe.csv",
-        "headers": ["Kod", "Dw [mm]", "Dz [mm]", "B [mm]", "C [kN]", "C0 [kN]", "n max [obr/min]", "elementy toczne"],
-        "types": ['TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'REAL', 'REAL', 'INTEGER', 'TEXT']
-    },
-    {
-        "name": "wał czynny-łożyska-centralne-walcowe",
-        "csv_name": "wal_czynny-lozyska-centralne-walcowe.csv",
-        "headers": ["Kod", "Dw [mm]", "Dz [mm]", "E [mm]", "B [mm]", "C [kN]", "C0 [kN]", "n max [obr/min]", "elementy toczne"],
-        "types": ['TEXT', 'INTEGER', 'INTEGER', 'REAL', 'INTEGER', 'REAL', 'REAL', 'INTEGER', 'TEXT']
-    },
-    {
-        "name": "wał czynny-łożyska-centralne-igiełkowe",
-        "csv_name": "wal_czynny-lozyska-centralne-igielkowe.csv",
-        "headers": ["Kod", "Dw [mm]", "Dz [mm]", "E [mm]", "B [mm]", "C [kN]", "C0 [kN]", "n max [obr/min]", "elementy toczne"],
-        "types": ['TEXT', 'INTEGER', 'INTEGER', 'REAL', 'INTEGER', 'REAL', 'REAL', 'INTEGER', 'TEXT']
-    },
-    {
-        "name": "wał czynny-materiały",
-        "csv_name": "wal_czynny-materialy.csv",
-        "headers": [ "Oznaczenie", "Rm [MPa]", "Re [MPa]", "Zgj [MPa]", "Zgo [MPa]", "Zsj [MPa]", "Zso [MPa]", "E [MPa]", "G [MPa]", "g [kg/m3]" ],
-        "types": [ 'TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER' ]
-    },
-    {
-        "name": "wał czynny-elementy toczne-kulki",
-        "csv_name": "wal_czynny-elementy_toczne-kulki.csv",
-        "headers": [ "Kod", "D" ],
-        "types": [ 'STRING', 'INTEGER']
-    },
-    {
-        "name": "wał czynny-elementy toczne-wałeczki",
-        "csv_name": "wal_czynny-elementy_toczne-waleczki.csv",
-        "headers": [ "Kod", "D" ],
-        "types": [ 'STRING', 'INTEGER']
-    },
-    {
-        "name": "wał czynny-elementy toczne-igiełki",
-        "csv_name": "wal_czynny-elementy_toczne-igielki.csv",
-        "headers": [ "Kod", "D" ],
-        "types": [ 'STRING', 'INTEGER']
-    }
-]
-
 class DbCreator:
+    '''
+    This class creates a database of components which data
+    is used in the application.
+    '''
     def __init__(self): 
         self._create_database()
         self._create_tables()
-        self._populate_tables()
 
     def _create_database(self):
-        # Get the destination directory absoulte path where csv and database files should be stored
+        # Set the destination directory absoulte path where csv and database files should be stored
         if not os.path.exists(DATA_PATH):
             sys.stderr.write(f"Error: {DATA_PATH} does not exist.\n")
             sys.exit(1)
 
-        # Get the absoulte path of the created database
-        self._database_abs_path = dependencies_path(f'{DATA_DIR_NAME}//baza_elementow.db')
+        # Set the absoulte path of the created database
+        self._database_abs_path = dependencies_path(f'{DATA_DIR_NAME}//components.db')
 
+        # If database already exists, remove it
+        if os.path.exists(self._database_abs_path):
+            os.remove(self._database_abs_path)
+
+        # Create new database
         conn = sqlite3.connect(self._database_abs_path)
         conn.close
-    
+
     def _create_tables(self):
         conn = sqlite3.connect(self._database_abs_path)
-        # Create table for every table parameters listed above
-        self._tables = database_tables
-        
-        for table in self._tables:
-            headers_with_types = [h + ' ' + t for h, t in zip(table['headers'], table['types'])]
-            headers_str = '", "'.join(headers_with_types)
-            query = f"CREATE TABLE IF NOT EXISTS \"{table['name']}\" ({headers_str})"
-            conn.cursor().execute(query)
+        cursor = conn.cursor()
+
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS Materials (
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL,
+                r_m TEXT NOT NULL,
+                r_e INTEGER NOT NULL,
+                z_gj INTEGER NOT NULL,
+                z_go INTEGER NOT NULL,
+                z_sj INTEGER NOT NULL,
+                z_so INTEGER NOT NULL,
+                e INTEGER NOT NULL,
+                g INTEGER NOT NULL,
+                ro INTEGER NOT NULL
+            )
+        ''')
+
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS MountingTypes (
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL
+            )
+        ''')
+
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS RollingElementTypes (
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL
+            )
+        ''')
+
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS BearingTypes (
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL,
+                rolling_element_type_id INTEGER,
+                mounting_type_id INTEGER,
+                FOREIGN KEY (rolling_element_type_id) REFERENCES RollingElementTypes(id)
+                FOREIGN KEY (mounting_type_id) REFERENCES MountingTypes(id)
+            )
+        ''')
+
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS RollingElements (
+                id INTEGER PRIMARY KEY,
+                d REAL NOT NULL,
+                rolling_element_type_id INTEGER,
+                FOREIGN KEY (rolling_element_type_id) REFERENCES RollingElementTypes(id)
+            )
+        ''')
+
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS Bearings (
+                id INTEGER PRIMARY KEY,
+                designation TEXT NOT NULL,
+                d_in REAL NOT NULL,
+                d_out REAL NOT NULL,
+                e REAL,
+                b REAL NOT NULL,
+                c REAL NOT NULL,
+                c_0 REAL NOT NULL,
+                n_max REAL NOT NULL,
+                bearing_type_id INTEGER,
+                rolling_element_type_id INTEGER,
+                FOREIGN KEY (bearing_type_id) REFERENCES BearingTypes(id),
+                FOREIGN KEY (rolling_element_type_id) REFERENCES RollingElementTypes(id)
+            )
+        ''')
 
         conn.commit()
-        conn.close
-    
-    def _populate_tables(self):
+        conn.close()
+
+    def add_materials(self, file):
         conn = sqlite3.connect(self._database_abs_path)
-       
-        for table in self._tables:
-            # Get the associated csv file absolute path 
-            csv_path = dependencies_path(f'{DATA_DIR_NAME}//{table["csv_name"]}')
-            # Check if the csv file exists
-            if not os.path.exists(csv_path):
-                sys.stderr.write(f"Error: {csv_path} does not exist.\n")
-                conn.close()
-                sys.exit(1)
-            # Populate the table with data from the csv file
-            df = pd.read_csv(csv_path, delimiter=';', decimal=',')
-            df.columns = table["headers"]
-            df.to_sql(table["name"], conn, if_exists='replace', index=False)
+        df = pd.read_csv(file, skiprows=[1], delimiter=';', decimal=',')
+        df.index.name = 'id'
+        df.to_sql('Materials', conn, if_exists='replace', index=True)
+
+        conn.commit()
+        conn.close()
+
+    def add_mounting_types(self):
+        conn = sqlite3.connect(self._database_abs_path)
+        cursor = conn.cursor()
+
+        mounting_types = [
+            ('podporowe',),
+            ('centralne',)
+        ]
+
+        cursor.executemany('''
+            INSERT INTO MountingTypes (name)
+            VALUES (?)
+        ''', mounting_types)
+
+        conn.commit()
+        conn.close()
+    
+    def add_rolling_element_types(self):
+        conn = sqlite3.connect(self._database_abs_path)
+        cursor = conn.cursor()
+
+        rolling_element_types = [
+            ('kulki',),
+            ('wałeczki',),
+            ('igiełki',)
+        ]
+
+        cursor.executemany('''
+            INSERT INTO RollingElementTypes (name)
+            VALUES (?)
+        ''', rolling_element_types)
+
+        conn.commit()
+        conn.close()
+
+    def add_bearing_types(self):
+        conn = sqlite3.connect(self._database_abs_path)
+        cursor = conn.cursor()
+
+        bearing_types = [
+            ('kulkowe', 1, 1), # kulki, podporowe
+            ('walcowe', 2, 1), # wałeczki, podporowe
+            ('walcowe', 2, 2), # wałeczki, centralne
+            ('igiełkowe', 3, 2)  # igiełki, centralne
+        ]
+
+        cursor.executemany('''
+        INSERT INTO BearingTypes (name, rolling_element_type_id, mounting_type_id)
+        VALUES (?, ?, ?)
+        ''', bearing_types)
+        
+        conn.commit()
+        conn.close()
+
+    def add_rolling_elements(self, file, rolling_element_type):
+        conn = sqlite3.connect(self._database_abs_path)
+        cursor = conn.cursor()
+
+        df = pd.read_csv(file, skiprows=[1], delimiter=';', decimal=',')
+
+        df['rolling_element_type_id'] = rolling_element_type
+
+        insert_query = '''
+            INSERT INTO RollingElements (d, rolling_element_type_id)
+            VALUES (?, ?)
+        '''
+        
+        for _, row in df.iterrows():
+            cursor.execute(insert_query, (row['d'], row['rolling_element_type_id']))
+
+        conn.commit()
+        conn.close()
+
+    def add_bearings(self, file, bearing_type, rolling_element_type, e=False):
+        conn = sqlite3.connect(self._database_abs_path)
+        cursor = conn.cursor()
+
+        df = pd.read_csv(file, skiprows=[1], delimiter=';', decimal=',')
+
+        df['bearing_type_id'] = bearing_type
+        df['rolling_element_type_id'] = rolling_element_type
+
+        if not e:
+            df['e'] = None
+
+        insert_query = '''
+            INSERT INTO Bearings (designation, d_in, d_out, e, b, c, c_0, n_max, bearing_type_id, rolling_element_type_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        '''
+        
+        for _, row in df.iterrows():
+            cursor.execute(insert_query, (
+                row['designation'],
+                row['d_in'],
+                row['d_out'],
+                row['e'],
+                row['b'],
+                row['c'],
+                row['c_0'],
+                row['n_max'],
+                row['bearing_type_id'],
+                row['rolling_element_type_id']
+            ))
 
         conn.commit()
         conn.close()
 
 db_creator = DbCreator()
+
+db_creator.add_materials('data/wal_czynny-materialy.csv')
+db_creator.add_mounting_types()
+db_creator.add_bearing_types()
+db_creator.add_rolling_element_types()
+db_creator.add_rolling_elements('data/wal_czynny-elementy_toczne-kulki.csv', 1)
+db_creator.add_rolling_elements('data/wal_czynny-elementy_toczne-waleczki.csv', 2)
+db_creator.add_rolling_elements('data/wal_czynny-elementy_toczne-igielki.csv', 3)
+db_creator.add_bearings('data/wal_czynny-lozyska-podporowe-kulkowe.csv', 1, 1)
+db_creator.add_bearings('data/wal_czynny-lozyska-podporowe-walcowe.csv', 2, 2)
+db_creator.add_bearings('data/wal_czynny-lozyska-centralne-walcowe.csv', 3, 2, True)
+db_creator.add_bearings('data/wal_czynny-lozyska-centralne-igielkowe.csv', 4, 3, True)

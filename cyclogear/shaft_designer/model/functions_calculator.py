@@ -101,7 +101,7 @@ class FunctionsCalculator():
         
     def _calculate_dmin_function_by_equivalent_stress(self):
         # Calculate minimal shaft diameter based on equivalent stress condition
-        Zgo = self._data['Materiał']['Zgo'][0] * 10**6
+        Zgo = self._data['Materiał']['z_go'][0] * 10**6
         xz = self._data['xz'][0]  
         kgo = Zgo / xz
         self.d_min_by_equivalent_stress = np.power(32 * self.equivalent_moment / (np.pi * kgo), 1 / 3) * 1000
@@ -111,7 +111,7 @@ class FunctionsCalculator():
     
     def _calculate_dmin_function_by_torsional_strength(self):
         # Calculate minimal shaft diameter based on torsional strength condition
-        Zso = self._data['Materiał']['Zso'][0] * 10**6
+        Zso = self._data['Materiał']['z_so'][0] * 10**6
         xz = self._data['xz'][0]
         kso = Zso / xz
         self.d_min_by_torsional_strength = np.power(16 * self.torque / (np.pi * kso), 1 / 3) * 1000
@@ -121,7 +121,7 @@ class FunctionsCalculator():
 
     def _calculate_dmin_function_by_permissible_angle_of_twist(self):   
         # Calculate minimal shaft diameter d - based permissible angle of twist condition
-        G = self._data['Materiał']['G'][0] * 10**6
+        G = self._data['Materiał']['g'][0] * 10**6
         qdop = self._data['qdop'][0]
         self.d_min_by_permissible_angle_of_twist = np.sqrt(32 * self.torque / (np.pi * G * qdop)) * 1000
         self.d_min_by_permissible_angle_of_twist = np.ceil(self.d_min_by_permissible_angle_of_twist * 100) / 100
@@ -191,7 +191,7 @@ class FunctionsCalculator():
             f_dop = self._data['fdop'][0]
             # Calculate the diameter and the moment of inertia of the equivalent smooth shaft
             d = sum(step['l'] * step['d'] for step in self._shaft_steps)/(sum(step['l'] for step in self._shaft_steps))
-            E = self._data['Materiał']['E'][0] * 10**6
+            E = self._data['Materiał']['e'][0] * 10**6
             I = np.pi * (d * 0.001)**4 / 64
             EI = E * I
             # Calculate coefficients k=I/Ij for every shaft step

@@ -20,9 +20,9 @@ from ..tabs.results_tab.controller.results_tab_controller import ResultsTabContr
 from shaft_designer.view.ShaftDesigner import ShaftDesigner
 from shaft_designer.controller.shaft_designer_controller import ShaftDesignerController
 
-from db_handler.controller.db_controller import ViewSelectItemController
+from db_handler.controller.db_controller import DbController
 from db_handler.model.db_handler import DbHandler
-from db_handler.view.Window import Window
+from db_handler.view.DbItemsWindow import DbItemsWindow
 
 class InputMechanismController:
     """
@@ -47,6 +47,8 @@ class InputMechanismController:
 
     def _startup(self):
         """Initialize the input shaft widget with necessary data, set up tabs and initialize the shaft designer"""
+        self.db_window = DbItemsWindow(self._input_mechanism)
+        self.db_controller = DbController(self.db_window)
         self._mediator = Mediator()
         self._calculator.set_initial_data()
         self._initTabs()
@@ -102,6 +104,7 @@ class InputMechanismController:
         self._mediator.shaftDesigningFinished.connect(self._on_shaft_designing_finished)
 
         self._mediator.selectMaterial.connect(self._on_select_materials)
+        self._mediator.selectBearingType.connect(self._on_select_bearing_type)
         self._mediator.selectBearing.connect(self._on_select_bearing)
         self._mediator.selectRollingElement.connect(self._on_select_rolling_element)
 
@@ -123,21 +126,49 @@ class InputMechanismController:
         self._shaft_designer.show()
 
     def _on_select_materials(self):
-        result = self._open_shaft_material_selection()
-        if result:
-            self.tab_controllers[0].on_materials_selected(result)
+        """
+        Open selection of shaft material from database
+        """
+        if self.db_controller.show_materials():
+            self.tab_controllers[0].on_materials_selected(self.db_controller.data)
+    
+    def _on_select_bearing_type(self, bearing_section_id):
+        """
+        Open selection of bearing type from database
+
+        Args:
+            bearing_section_id (str): Id of section that specifies the bearing location.
+        """
+        support_type = 'centralne' if bearing_section_id == 'eccentrics' else 'podporowe'
+        if self.db_controller.show_bearing_types(support_type):
+            self.tab_controllers[1].on_bearing_type_selected(bearing_section_id, self.db_controller.data)
 
     def _on_select_bearing(self, bearing_section_id, data):
+        """
+        Open selection of bearing from database
+        
+        Args:
+            bearing_section_id (str): Id of section that specifies the bearing location.
+        """
         self._calculator.update_data(data)
-        result = self._open_bearing_selection(bearing_section_id)
-        if result:
-            self.tab_controllers[1].on_bearing_selected(bearing_section_id, result)
+        support_type = 'centralne' if bearing_section_id == 'eccentrics' else 'podporowe'
+        bearing_type = self._calculator.get_bearing_type(bearing_section_id)
+        limits = self._calculator.get_bearings_attributes_limits(bearing_section_id)
+        if self.db_controller.show_bearings(support_type, bearing_type, *limits):
+            self.tab_controllers[1].on_bearing_selected(bearing_section_id, self.db_controller.data)
 
     def _on_select_rolling_element(self, bearing_section_id, data):
+        """
+        Open selection of rolling element from database
+
+        Args:
+            bearing_section_id (str): Id of section that specifies the bearing location.
+        """
         self._calculator.update_data(data)
-        result = self._open_rolling_element_selection(bearing_section_id)
-        if result:
-            self.tab_controllers[2].on_rolling_element_selected(bearing_section_id, result)
+        bearing_type = self._calculator.get_bearing_type(bearing_section_id)
+        limits = self._calculator.get_rollings_element_limits(bearing_section_id)
+        if self.db_controller.show_rolling_elements(bearing_type, limits):
+            self.tab_controllers[2].on_rolling_element_selected(bearing_section_id, self.db_controller.data)
 
     def _on_update_preliminary_data(self):
         """
@@ -159,87 +190,6 @@ class InputMechanismController:
 
     def _on_shaft_designing_finished(self):
         self._input_mechanism.handleShaftDesigningFinished()
-
-    def _open_shaft_material_selection(self):
-        """
-        Open the window for selection of the shaft material
-
-        Returns:
-            (None or dict): selected item data.
-        """
-        db_handler = DbHandler()
-        db_window = Window(self._input_mechanism)
-        db_window.setWindowTitle("Dobór materiału")
-        tables_group_name = 'wał czynny-materiały'
-
-        available_tables = db_handler.get_available_tables(tables_group_name)
-        limits = db_handler.get_table_items_filters(tables_group_name)
-        view_select_items_ctrl = ViewSelectItemController(db_handler, db_window, available_tables, limits)
-        result = view_select_items_ctrl.startup()
-        if result:
-            return view_select_items_ctrl.selected_item_attributes
-        else:
-            return None
-        
-    def _open_bearing_selection(self, bearing_section_id):
-        """
-        Open the window for bearing selection the.
-
-        Args:
-            bearing_section_id (str): Id of section that specifies the bearing location.
-
-        Returns:
-            (None or dict): selected item data.
-        """
-        # Specify the name of the tables to open
-        if bearing_section_id == 'support_A' or  bearing_section_id == 'support_B':
-            tables_group_name = 'wał czynny-łożyska-podporowe'
-        elif bearing_section_id == 'eccentrics':
-            tables_group_name = 'wał czynny-łożyska-centralne'
-
-        db_handler = DbHandler()
-        db_window = Window(self._input_mechanism)
-        db_window.setWindowTitle("Dobór łożyska")
-        # Get available tables
-        available_tables = db_handler.get_available_tables(tables_group_name)
-        # Specify the limits for the group of tables
-        limits = db_handler.get_table_items_filters(tables_group_name)
-        self._calculator.set_bearings_attributes_limits(limits, bearing_section_id)
-        # Setup the controller for the subwindow
-        view_select_items_ctrl = ViewSelectItemController(db_handler, db_window, available_tables, limits)
-        result = view_select_items_ctrl.startup()
-        if result:
-            return view_select_items_ctrl.selected_item_attributes
-        else:
-            return None
-        
-    def _open_rolling_element_selection(self, bearing_section_id):
-        """
-        Open the window for rolling element selection.
-
-        Args:
-            bearing_section_id (str): Id of section that specifies the bearing location for which the rollin 
-                                      elements are being selected.
-        Returns:
-            (None or dict): selected item data.
-        """
-        db_handler = DbHandler()
-        db_window = Window(self._input_mechanism)
-        db_window.setWindowTitle("Dobór elementu tocznego")
-        # Get available tables
-        tables_group_name = f"wał czynny-elementy toczne-{self._calculator.get_bearing_rolling_element_type(bearing_section_id)}"
-        available_tables = db_handler.get_available_tables(tables_group_name)
-        # Specify the limits for the group of tables
-        limits = db_handler.get_table_items_filters(tables_group_name)
-        self._calculator.set_rollings_element_limits(limits, bearing_section_id)
-        
-        # Setup the controller for the subwindow
-        view_select_items_ctrl = ViewSelectItemController(db_handler, db_window, available_tables, limits)
-        result = view_select_items_ctrl.startup()
-        if result:
-            return view_select_items_ctrl.selected_item_attributes
-        else:
-            return None
 
     def save_data(self):
         '''

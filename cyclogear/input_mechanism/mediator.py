@@ -6,6 +6,7 @@ class Mediator(QObject):
     updateComponentData = pyqtSignal(int, dict)
 
     selectMaterial = pyqtSignal()
+    selectBearingType = pyqtSignal(str)
     selectBearing = pyqtSignal(str, dict)
     selectRollingElement = pyqtSignal(str, dict)
 
@@ -19,6 +20,9 @@ class Mediator(QObject):
 
     def select_material(self):
         self.selectMaterial.emit()
+    
+    def select_bearing_type(self, bearing_section_id: str):
+        self.selectBearingType.emit(bearing_section_id)
     
     def select_bearing(self, bearing_section_id: str, data: dict):
         self.selectBearing.emit(bearing_section_id, data)

@@ -58,19 +58,31 @@ class BearingsTab(ITrackedTab):
         section.addWidget(createDataInputRow(self._inputs['Bearings'][section_name]['fd'], 'f<sub>d</sub>', 'Współczynnik zależny od zmiennych obciążeń dynamicznych łożyska', decimalPrecision=2))
         section.addWidget(createDataInputRow(self._inputs['Bearings'][section_name]['ft'], 'f<sub>t</sub>', 'Współczynnik zależny od temperatury pracy łożyska', decimalPrecision=2))
 
+        # Set button for bearing type selection
+        bearing_type_button_layout = QHBoxLayout()
+        button_label = createHeader('Rodzaj łożyska:', bold=True)
+
+        select_bearing_button = DataButton('Wybierz rodzaj łożyska')
+        self._items['Bearings'][section_name]['bearing_type'] = select_bearing_button
+
+        bearing_type_button_layout.addWidget(button_label)
+        bearing_type_button_layout.addWidget(select_bearing_button)
+
+        section.addLayout(bearing_type_button_layout)
+
         # Set button for bearing selection
-        button_layout = QHBoxLayout()
+        bearing_button_layout = QHBoxLayout()
         button_label = createHeader('Łożysko:', bold=True)
 
         select_bearing_button = DataButton('Wybierz Łożysko')
         self._items['Bearings'][section_name]['data'] = select_bearing_button
 
-        button_layout.addWidget(button_label)
-        button_layout.addWidget(select_bearing_button)
+        bearing_button_layout.addWidget(button_label)
+        bearing_button_layout.addWidget(select_bearing_button)
 
         section_layout.addWidget(section)
         section_layout.addWidget(createDataDisplayRow(self._inputs['Bearings'][section_name]['C'], 'C', 'Wymagana nośność łożyska', decimalPrecision=2))
-        section_layout.addLayout(button_layout)
+        section_layout.addLayout(bearing_button_layout)
         section_layout.addStretch()
 
         return container
@@ -107,6 +119,16 @@ class BearingsTab(ITrackedTab):
             item_data (dict): Data of the selected item.
         """
         self._items['Bearings'][section_name]['data'].setData(item_data)
+
+    def update_selected_bearing_type(self, section_name, item_data):
+        """
+        Update the displayed code for the selected bearing.
+
+        Args:
+            section_name (str): Specifies the bearing location.
+            item_data (dict): Data of the selected item.
+        """
+        self._items['Bearings'][section_name]['bearing_type'].setData(item_data)
     
     def initUI(self, items, inputs, outputs):
         """

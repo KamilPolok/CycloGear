@@ -31,15 +31,6 @@ class BearingsTabController:
 
         self._tab.enable_select_bearing_button(section_name, all_data_provided, data_changed)
 
-    def _select_bearing(self, bearing_section_id):
-        """
-        Emit a signal with the updated data for the selected bearing.
-
-        Args:
-            bearing_section_id (str): Id of section that specifies the bearing location.
-        """
-        self._mediator.select_bearing(bearing_section_id, self.get_data())
-
     def _connect_signals_and_slots(self):
         """
         Connect signals and slots for interactivity in the tab.
@@ -48,14 +39,16 @@ class BearingsTabController:
         self._tab.allInputsProvided.connect(self._update_component_data)
         self._tab.updateStateSignal.connect(self.update_state)
 
-        for section_name, item in self._items['Bearings'].items():
-           item['data'].dataChangedSignal.connect(partial(self._mediator.update_bearing, section_name))
-
-        for section_name, item in self._items['Bearings'].items():
-            item['data'].clicked.connect(partial(self._select_bearing, section_name))
+        for bearing_section_id, item in self._items['Bearings'].items():
+            item['data'].dataChangedSignal.connect(partial(self._mediator.update_bearing, bearing_section_id))
+            item['data'].clicked.connect(partial(self._mediator.select_bearing, bearing_section_id, self.get_data()))
+            item['bearing_type'].clicked.connect(partial(self._mediator.select_bearing_type, bearing_section_id))
 
     def _update_component_data(self):
         self._mediator.update_component_data(self._id, self.get_data())
+
+    def on_bearing_type_selected(self, section_name, item_data):
+        self._tab.update_selected_bearing_type(section_name, item_data)
     
     def on_bearing_selected(self, section_name, item_data):
         self._tab.update_selected_bearing(section_name, item_data)
@@ -97,9 +90,9 @@ class BearingsTabController:
                         ['Bearings', 'eccentrics', 'dip']
                         ]
         
-        items = [['Bearings', 'support_A', 'data'],
-                 ['Bearings', 'support_B', 'data'],
-                 ['Bearings', 'eccentrics', 'data'],
+        items = [['Bearings', 'support_A', 'data'], ['Bearings', 'support_A', 'bearing_type'],
+                 ['Bearings', 'support_B', 'data'], ['Bearings', 'support_B', 'bearing_type'],
+                 ['Bearings', 'eccentrics', 'data'], ['Bearings', 'eccentrics', 'bearing_type'],
                  ]
         
         self._tab_data = extract_data(self._component_data, inputs_keys+items)

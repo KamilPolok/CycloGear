@@ -48,6 +48,7 @@ class InputMechanismCalculator():
               # Podpora A
               'support_A': {                         
                 'data': None,               # Parametry łożyska
+                'bearing_type': None,       # Rodzaj łożyska
                 'rolling_elements': None,   # Elementy toczne
                 'F': None,                  # Siła działająca na łożysko 
                 'dip': [None, 'mm'],        # Średnica wewnętrzna łożyska - na podstawie zaprojektowanego wału
@@ -65,6 +66,7 @@ class InputMechanismCalculator():
                # Podpora B
               'support_B': {                         
                 'data': None,               # Parametry łożyska
+                'bearing_type': None,       # Rodzaj łożyska
                 'rolling_elements': None,   # Elementy toczne
                 'F': None,                  # Siła działająca na łożysko
                 'dip': [None, 'mm'],        # Średnica wewnętrzna łożyska - na podstawie zaprojektowanego wału
@@ -82,6 +84,7 @@ class InputMechanismCalculator():
                # Miośrody pod koła cykloidalne
               'eccentrics': {                         
                 'data': None,               # Parametry łożyska
+                'bearing_type': None,       # Rodzaj łożyska
                 'rolling_elements': None,   # Elementy toczne
                 'F': None,                  # Siła działająca na łożysko
                 'l': None,                  # Położenie łożyska na wale
@@ -115,8 +118,8 @@ class InputMechanismCalculator():
         Calculate bearings attributes.
         """
         for attributes in self.data['Bearings'].values():
-            Dz = attributes['data']['Dz'][0]
-            Dw = attributes['data']['Dw'][0]
+            Dz = attributes['data']['d_out'][0]
+            Dw = attributes['data']['d_in'][0]
 
             dw = 0.25 * (Dz - Dw)
 
@@ -134,39 +137,38 @@ class InputMechanismCalculator():
         
         self.data['P'][0] = absolute_power_loss
 
-    def set_bearings_attributes_limits(self, limits, bearing_section_id):
+    def get_bearings_attributes_limits(self, bearing_section_id):
         """
-        Set attributes limits of given bearing.
+        Get attributes limits of given bearing.
 
         Args:
-            limits (Dict[str, Dict[str, float]]): dict of available limits for given item
             bearing_section_id (str): Id of section that specifies the bearing location.
+        Returns
+            (tuple): tuple (float, float) of limits: 
         """
-        limits['Dw']['min'] = self.data['Bearings'][bearing_section_id]['dip'][0]
-        limits['Dw']['max'] = self.data['Bearings'][bearing_section_id]['dip'][0] + 10
-        limits['C']['min'] = self.data['Bearings'][bearing_section_id]['C'][0]
+        return self.data['Bearings'][bearing_section_id]['dip'][0], self.data['Bearings'][bearing_section_id]['C'][0]
 
-    def set_rollings_element_limits(self, limits, bearing_section_id):
+    def get_rollings_element_limits(self, bearing_section_id):
         """
         Set attributes limits of given bearing rolling elements.
 
         Args:
-            limits (Dict[str, Dict[str, float]]): dict of available limits for given item
             bearing_section_id (str): Id of section that specifies the bearing location.
+        Returns
+            (float): limit 
         """
-        limits['D']['min'] = math.floor(self.data['Bearings'][bearing_section_id]['drc'][0]) - 1
-        limits['D']['max'] = math.ceil(self.data['Bearings'][bearing_section_id]['drc'][0]) + 1
+        return self.data['Bearings'][bearing_section_id]['drc'][0]
 
-    def get_bearing_rolling_element_type(self, bearing_section_id):
+    def get_bearing_type(self, bearing_section_id):
         """
         Get type of rolling emenet for given bearing
 
         Args:
             bearing_section_id (str): Id of section that specifies the bearing location.
         Returns:
-            (str): type of rolling element
+            (str): type of bearing
         """
-        return self.data['Bearings'][bearing_section_id]['data']['elementy toczne'][0]
+        return self.data['Bearings'][bearing_section_id]['bearing_type']['name'][0]
         
     def get_bearing_attributes(self, bearing_section_id, bearing_data):
         """
@@ -180,15 +182,15 @@ class InputMechanismCalculator():
             (dict): Bearing attributes.
         """
         if bearing_data:
-            Dw = bearing_data['Dw'][0]
-            B = bearing_data['B'][0]
+            Dw = bearing_data['d_in'][0]
+            B = bearing_data['b'][0]
 
             if bearing_section_id == 'eccentrics':
                 e = self.data['e'][0]
-                Dz = bearing_data['E'][0]
+                Dz = bearing_data['e'][0]
             else:
                 e = 0
-                Dz = bearing_data['Dz'][0]
+                Dz = bearing_data['d_out'][0]
 
             bearing_data = {'Dw': Dw, 'Dz': Dz, 'B': B, 'e': e}
 

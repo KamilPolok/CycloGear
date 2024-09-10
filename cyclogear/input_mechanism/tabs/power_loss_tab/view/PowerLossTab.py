@@ -52,7 +52,7 @@ class PowerLossTab(ITrackedTab):
 
         # Set button for bearing selection
         buttonLayout = QHBoxLayout()
-        buttonLabel = createHeader('Element toczny o znormalizowanej średnicy:', bold=True)
+        buttonLabel = createHeader('Znormalizowana średnica elementu tocznego:', bold=True)
 
         selectRollingElementButton = DataButton('Wybierz element toczny')
         self._items['Bearings'][sectionName]['rolling_elements'] = selectRollingElementButton
@@ -63,7 +63,7 @@ class PowerLossTab(ITrackedTab):
         diameterSubsection = Section(self, sectionName, self.rollingElementDiameterProvided.emit)
         diameterSubsection.addWidget(createDataDisplayRow(self._outputs['Bearings'][sectionName]['di'], 'd', 'Średnica wewnętrzna łożyska', decimalPrecision=2))
         diameterSubsection.addWidget(createDataDisplayRow(self._outputs['Bearings'][sectionName]['do'], 'D', 'Średnica zewnętrzna łożyska', decimalPrecision=2))
-        diameterSubsection.addWidget(createDataDisplayRow(self._outputs['Bearings'][sectionName]['drc'], 'd<sub>w</sub>', 'Obliczona średnica elementów tocznych', decimalPrecision=2))
+        diameterSubsection.addWidget(createDataDisplayRow(self._outputs['Bearings'][sectionName]['drc'], 'd<sub>w</sub>', 'Obliczona średnica elementu tocznego', decimalPrecision=4))
 
         # Set data subsection
         dataSubsection = Section(self, sectionName, self.sectionDataProvided.emit)

@@ -1,22 +1,23 @@
+import sys
+import os
+
 import sqlite3
 import pandas as pd
-import os
-import sys
-import re
 
 from config import DATA_PATH, DATA_DIR_NAME, dependencies_path
 
 class DbHandler:
-    def __init__(self):
-        self._startup()
+    def __init__(self) -> None:
+        self._database_abs_path = dependencies_path(f'{DATA_DIR_NAME}//components.db')
+
+        self._check_if_database_exists()
     
-    def _startup(self):
-        # Check if destination folder where database file should be, exists
+    def _check_if_database_exists(self):
+         # Check if destination folder where database file should be, exists
         if not os.path.exists(DATA_PATH):
             sys.stderr.write(f"Error: Directory {DATA_PATH} does not exist.\n")
             sys.exit(1)
         # Check if database file exists
-        self._database_abs_path = dependencies_path(f'{DATA_DIR_NAME}//baza_elementow.db')
         if not os.path.exists(self._database_abs_path):
             sys.stderr.write(f"Error: Database file {self._database_abs_path} does not exist.\n")
             sys.exit(1)
@@ -26,152 +27,148 @@ class DbHandler:
             conn.close()
         except sqlite3.Error as e:
             sys.stderr.write(f"Connection failed with error: {e}")
-        #TODO: Add check if all required tables are in the database and check if they aren't empty
-
-    def get_available_tables(self, table_group_name = None):
-        conn = sqlite3.connect(self._database_abs_path)
-        cursor = conn.cursor()
-        # Fetch all tables names from the database
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
-        all_tables = [row[0] for row in cursor.fetchall()]
-        # If table group name is not provided, return all tables 
-        if table_group_name is None:
-            return all_tables
-        else:
-            # Filter tables based on the provided table group name
-            matching_table_names = [table for table in all_tables if table.startswith(table_group_name)]
-
-            if not matching_table_names:
-                sys.stderr.write(f"Error: Invalid group name: {table_group_name}.\n")
-                conn.close()
-                return []
-
-            conn.close()
-            return matching_table_names
     
-    def get_table_items_attributes(self, table_name):
+    def fetch_bearings(self, support_type, bearing_type, min_d_in=None, min_C=None):
         conn = sqlite3.connect(self._database_abs_path)
-        cursor = conn.cursor()
-        # Check if the table exists in the database
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
-        if not cursor.fetchone():
-            sys.stderr.write(f"Table '{table_name}' does not exist in the database.")
-            conn.close()
-            return []
-        # Get the column names from the table and store them in list
-        cursor.execute(f"PRAGMA table_info(\"{table_name}\")")
-        columns =  cursor.fetchall()
 
-        conn.close()
+        query = '''
+        SELECT designation, d_in, d_out, {} b, c, c_0, n_max FROM Bearings
+        JOIN BearingTypes ON Bearings.bearing_type_id = BearingTypes.id
+        JOIN MountingTypes ON BearingTypes.mounting_type_id = MountingTypes.id
+        WHERE BearingTypes.name = ? AND MountingTypes.name = ?
+        '''
 
-        headers = [column[1] for column in columns[1:]]
+        # Modify the query and headers depending on the support type
+        if support_type == 'centralne':
+            additional_column = 'e,'
+            headers = ['kod', 'D<sub>w</sub>', 'D<sub>z</sub>', 'E', 'B', 'C', 'C<sub>0</sub>', 'n<sub>max</sub>']
+            units = ['-', 'mm', 'mm', 'mm', 'mm', 'MPa', 'MPa', 'obr/min']
+        else:
+            additional_column = ''
+            headers = ['kod', 'D<sub>w</sub>', 'D<sub>z</sub>', 'B', 'C', 'C<sub>0</sub>', 'n<sub>max</sub>']
+            units = ['-', 'mm', 'mm', 'mm', 'MPa', 'MPa', 'obr/min']
 
-        attributes = [(header.split('[')[0].strip(), header[header.find('[')+1:header.find(']')].strip()) for header in headers]
-        return attributes
+        # Format the query with the additional column if needed
+        query = query.format(additional_column)
 
-    def get_table_items_filters(self, table_or_group_name):
-        conn = sqlite3.connect(self._database_abs_path)
-        cursor = conn.cursor()
-        # First, try to treat the input as a full table name
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table_or_group_name,))
-        table = cursor.fetchone()
-        # If not found, then try to treat the input as a group name prefix
-        if not table:
-            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE ? LIMIT 1", (table_or_group_name + '%',))
-            table = cursor.fetchone()
-        # Check if any table with given name or group name prefix was found
-        if not table:
-            sys.stderr.write(f"No tables found with name or group name: {table_or_group_name}.")
-            conn.close()
-            return []
-        # Get the column names from the table and store them in list
-        cursor.execute(f"PRAGMA table_info(\"{table[0]}\")")
-        columns = cursor.fetchall()
+        # Add constraints for min_d_in and min_C if provided
+        constraints = []
+        params = [bearing_type, support_type]
 
-        column_names = [column[1] for column in columns[1:]]
-        # Get only the attributse from the column names 
-        attributes = [re.sub(r'\[.*?\]', '', name).strip() for name in column_names]
+        if min_d_in is not None:
+            constraints.append('d_in >= ?')
+            params.append(min_d_in)
 
-        conn.close()
-        return {attribute:{"min": 0, "max": 0} for attribute in attributes}
+        if min_C is not None:
+            constraints.append('c >= ?')
+            params.append(min_C)
 
-    def get_single_item(self, table_name, code):
-        conn = sqlite3.connect(self._database_abs_path)
-        cursor = conn.cursor()
+        if constraints:
+            query += ' AND ' + ' AND '.join(constraints)
 
-        # Get the columns names
-        cursor.execute(f"PRAGMA table_info(\"{table_name}\")")
-        columns = cursor.fetchall()
+            # Add limit to ensure only 5 results are returned
+            query += ' ORDER BY d_in, c_0 LIMIT 5'
 
-        # Set the dictionary - for every name in the column name create a list with values and units.
-        attributes = {}
-
-        for column in columns:
-            coulmn_name = column[1]
-            # Check if the item contains square brackets (indicating a unit)
-            if '[' in coulmn_name and ']' in coulmn_name:
-                # Split the attribute and its unit
-                attr, unit = coulmn_name.rsplit(' ', 1)
-                # Remove the square brackets from the unit
-                unit = unit.strip('[]')
-            else:
-                # For items without a unit, use the whole item as the attribute and an empty string for the unit
-                attr, unit = coulmn_name, ''
-
-            # Add to the dictionary
-            attributes[attr] = [None, unit]
-        # Get the first column name
-        first_column_name = columns[0][1]
-
-        # Find the row where the first column is equal to code
-        cursor.execute(f"SELECT * FROM \"{table_name}\" WHERE {first_column_name} = ?", (code,)) 
-        item_data = cursor.fetchone()
-
-        # For every value in the row get the adequate column name and set the value in the list
-        for i, value in enumerate(item_data):
-            attribute = list(attributes.keys())[i]
-            attributes[attribute][0] = value
+        df = pd.read_sql_query(query, conn, params=params)
         
         conn.close()
 
-        return attributes
-    
-    def get_filtered_results(self, table_name, limits):
+        # Combine headers with units for display
+        headers = [header + f'<br><small>[{unit}]</small>' for header, unit in zip(headers, units)]
+        keys = df.columns.tolist()
+        data = df.values.tolist()
+
+        return headers, keys, data
+
+    def fetch_bearing_types(self, mount_type):
         conn = sqlite3.connect(self._database_abs_path)
-        cursor = conn.cursor()
 
-        # Check if the table exists in the database
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
-        if not cursor.fetchone():
-            sys.stderr.write(f"Table '{table_name}' does not exist in the database.")
-            conn.close()
-            return []
+        query = '''
+        SELECT BearingTypes.name FROM BearingTypes 
+        JOIN RollingElementTypes ON BearingTypes.rolling_element_type_id = RollingElementTypes.id
+        JOIN MountingTypes ON BearingTypes.mounting_type_id = MountingTypes.id
+        WHERE MountingTypes.name = ?
+        '''
 
-        # Get the column names from the table and store them in list
-        cursor.execute(f"PRAGMA table_info(\"{table_name}\")")
-        columns =  cursor.fetchall()
-
-        column_names = [column[1] for column in columns[1:]]
-        # Create the base of the query
-        query = f"SELECT * FROM \"{table_name}\" WHERE"
-        # Create the filters query part
-        filters_query = []
-
-        for attribute, attribute_limits in limits.items():
-                # Get the full column name from the header of the table: attribute + units part
-                column_name = next((column_name for column_name in column_names if column_name.startswith(attribute)), None)
-                if attribute_limits['min']:
-                    filters_query.append(f" \"{column_name}\" >= {attribute_limits['min']}")
-                if attribute_limits['max']:
-                    filters_query.append(f" \"{column_name}\" <= {attribute_limits['max']}")
-        # Join the queries
-        query += " AND".join(filters_query)
-
-        if query.endswith(" AND") or query.endswith("WHERE"):
-            query = query.rsplit(' ', 1)[0]
-        # Get the results in form of a dataframe
-        df = pd.read_sql_query(query,conn)
-
+        df = pd.read_sql_query(query, conn, params=(mount_type,))
+        
         conn.close()
-        df.columns = [column.replace("[", "\n[") for column in df.columns]
-        return df
+
+        headers = ['Rodzaj łożyska']
+        keys = df.columns.tolist() 
+        data = df.values.tolist()
+
+        return headers, keys, data
+
+    def fetch_rolling_elements(self, bearing_type, d_min=None):
+        conn = sqlite3.connect(self._database_abs_path)
+
+        if d_min is None:
+            # If d is None, list all results
+            query = '''
+                SELECT RollingElements.d FROM BearingTypes
+                JOIN RollingElements ON BearingTypes.rolling_element_type_id = RollingElements.rolling_element_type_id
+                WHERE BearingTypes.name = ?
+                ORDER BY d
+            '''
+            df = pd.read_sql_query(query, conn, params=(bearing_type,))
+        else:
+            # Query to check if an exact match exists
+            query_exact = '''
+                SELECT RollingElements.d FROM BearingTypes
+                JOIN RollingElements ON BearingTypes.rolling_element_type_id = RollingElements.rolling_element_type_id
+                WHERE BearingTypes.name = ? AND RollingElements.d = ?
+            '''
+            df_exact = pd.read_sql_query(query_exact, conn, params=(bearing_type, d_min))
+            
+            if not df_exact.empty:
+                # Exact match found, return it
+                df = df_exact
+            else:
+                # Exact match not found, find closest lower and greater values
+                query_smaller = '''
+                    SELECT RollingElements.d FROM BearingTypes
+                    JOIN RollingElements ON BearingTypes.rolling_element_type_id = RollingElements.rolling_element_type_id
+                    WHERE BearingTypes.name = ? AND RollingElements.d < ?
+                    ORDER BY RollingElements.d DESC
+                    LIMIT 1
+                '''
+                query_greater = '''
+                    SELECT RollingElements.d FROM BearingTypes
+                    JOIN RollingElements ON BearingTypes.rolling_element_type_id = RollingElements.rolling_element_type_id
+                    WHERE BearingTypes.name = ? AND RollingElements.d > ?
+                    ORDER BY RollingElements.d ASC
+                    LIMIT 1
+                '''
+                df_smaller = pd.read_sql_query(query_smaller, conn, params=(bearing_type, d_min))
+                df_greater = pd.read_sql_query(query_greater, conn, params=(bearing_type, d_min))
+                df = pd.concat([df_smaller, df_greater]).sort_values(by='d').reset_index(drop=True)
+
+        headers = ['D']
+        units = ['mm']
+
+        headers = [header + f'<br><small>[{unit}]</small>' for header, unit in zip(headers, units)]
+        keys = df.columns.tolist()
+        data = df.values.tolist()
+
+        return headers, keys, data
+        
+    def fetch_materials(self):
+        conn = sqlite3.connect(self._database_abs_path)
+
+        query = '''
+        SELECT  name, r_m, r_e, z_gj, z_go, z_sj, z_so, e, g, ro FROM Materials
+        '''
+
+        df = pd.read_sql_query(query, conn)
+        
+        conn.close()
+
+        headers = ['kod', 'R<sub>m</sub>', 'R<sub>e</sub>', 'Z<sub>gj</sub>', 'Z<sub>go</sub>', 'Z<sub>sj</sub>', 'Z<sub>so</sub>', 'E', 'G', 'ρ']
+        units = ['-', 'MPa', 'MPa', 'MPa', 'MPa', 'MPa', 'MPa', 'MPa', 'MPa', 'kg/m<sup>3</sup>']
+        
+        headers = [ header + f'<br><small>[{unit}]</small>' for header, unit in zip(headers, units)]
+        keys = df.columns.tolist()
+        data = df.values.tolist()
+
+        return headers, keys, data
