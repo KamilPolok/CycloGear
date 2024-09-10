@@ -40,6 +40,8 @@ class InputMechanism(QWidget):
         Init widget holding and managing tabs.
         '''
         self._tabWidget = QTabWidget(self)
+        font = QFont('Arial', 10)
+        self._tabWidget.tabBar().setFont(font)
 
         self.tabsSectionLayout.addWidget(self._tabWidget)
 
@@ -67,8 +69,7 @@ class InputMechanism(QWidget):
         self.previewButton = QPushButton('Podgląd', self)
         self.previewButton.setToolTip('Otwórz podgląd wału')
         self.previewButton.setFixedSize(QSize(100, 30))
-        font = QFont('Segoe UI', 12)
-        font.setBold(True)
+        font = QFont('Arial', 12, QFont.Bold)
         self.previewButton.setFont(font)
 
         distance_between_buttons = 10

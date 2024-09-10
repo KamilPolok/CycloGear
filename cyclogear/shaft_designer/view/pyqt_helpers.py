@@ -2,14 +2,16 @@ from PySide2.QtCore import Qt, QRegularExpression
 from PySide2.QtGui import QRegularExpressionValidator, QFont
 from PySide2.QtWidgets import QHBoxLayout, QLabel, QLineEdit
 
+from utils.widgets.Label import Label
+
 def createDataInputRow(symbol):
     layout = QHBoxLayout()
     layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
     
     # Symbol label
-    symbolLabel = QLabel(f'{symbol}')
-    symbolLabel.setFixedWidth(10)
-    font = QFont()
+    symbolLabel = Label(f'{symbol}')
+    symbolLabel.setFixedWidth(15)
+    font = symbolLabel.font()
     font.setBold(True)
     font.setItalic(True)
     symbolLabel.setFont(font)
@@ -25,7 +27,7 @@ def createDataInputRow(symbol):
     lineEdit.setValidator(QRegularExpressionValidator(regex, lineEdit))
 
     # Units label
-    unitsLabel = QLabel('mm')
+    unitsLabel = Label('mm')
     unitsLabel.setFixedWidth(25)
 
     # Assemble the layout

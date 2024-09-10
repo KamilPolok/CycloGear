@@ -1,5 +1,7 @@
 from PySide2.QtCore import Signal, Qt
-from PySide2.QtWidgets import QComboBox, QVBoxLayout, QHBoxLayout, QStackedWidget, QWidget
+from PySide2.QtWidgets import QComboBox, QVBoxLayout, QHBoxLayout, QStackedWidget, QWidget, QListView
+from PySide2.QtGui import QFont
+
 
 from ...common.widgets.DataButton import DataButton
 from ...common.widgets.Section import Section
@@ -15,11 +17,11 @@ class BearingsTab(ITrackedTab):
         layout_selector_label = createHeader('Miejsce osadzenia łożyska:', bold=True)
 
         self.layout_selector = QComboBox()
-        self.layout_selector.setFixedWidth(150)
-        self.layout_selector.setEditable(True)
-        line_edit = self.layout_selector.lineEdit()
-        line_edit.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        line_edit.setReadOnly(True)
+        self.layout_selector.setFont(QFont('Arial', 10, 2))
+
+        list_view = QListView()
+        list_view.setFont(QFont('Arial', 10, 2))
+        self.layout_selector.setView(list_view)
  
         self.layout_selector.addItems(["Podpora przesuwna A", "Podpora stała B", "Mimośrody"])
         self.layout_selector.currentIndexChanged.connect(self._on_change_section)

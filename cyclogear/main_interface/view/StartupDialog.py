@@ -1,8 +1,9 @@
-from PySide2.QtWidgets import QDialog, QVBoxLayout, QPushButton
+from PySide2.QtWidgets import QDialog, QVBoxLayout
 from PySide2.QtCore import Signal, Qt
 
 from .MainWindow import MainWindow
 
+from utils.widgets.PushButton import PushButton
 from config import APP_NAME
 
 class StartupDialog(QDialog):
@@ -24,17 +25,17 @@ class StartupDialog(QDialog):
         self._initUI()
     
     def _initUI(self):
-        self.setFixedSize(200, 100)
+        self.setFixedSize(200, 120)
 
         layout = QVBoxLayout(self)
         
-        newButton = QPushButton("Nowy Projekt", self)
+        newButton = PushButton("Nowy Projekt", self)
         newButton.clicked.connect(self.newProjectSignal.emit)
         
-        openButton = QPushButton("Otwórz Projekt", self)
+        openButton = PushButton("Otwórz Projekt", self)
         openButton.clicked.connect(self.openProjectSignal.emit)
 
-        exitButton = QPushButton("Wyjdź", self)
+        exitButton = PushButton("Wyjdź", self)
         exitButton.clicked.connect(self.quitAppSignal.emit)
         
         layout.addWidget(newButton)

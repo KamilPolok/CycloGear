@@ -1,6 +1,9 @@
-from PySide2.QtWidgets import QDialog, QVBoxLayout, QLabel, QApplication, QPushButton, QHBoxLayout, QStyle, QSpacerItem, QSizePolicy
-from PySide2.QtGui import QFont, QFontMetrics
+from PySide2.QtWidgets import QDialog, QVBoxLayout, QApplication, QHBoxLayout, QStyle, QSpacerItem, QSizePolicy
+from PySide2.QtGui import QFontMetrics
 from PySide2.QtCore import QSize, Qt
+
+from .Label import Label
+from .PushButton import PushButton
 
 class MessageDialog(QDialog):
     '''
@@ -38,7 +41,7 @@ class MessageDialog(QDialog):
         self.layout.addLayout(messageLayout)
 
         # Message type icon
-        self.iconLabel = QLabel()
+        self.iconLabel = Label()
         self.iconLabel.setFixedWidth(50)
         self.iconLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         icon = self.style().standardIcon(self.iconType)
@@ -46,11 +49,8 @@ class MessageDialog(QDialog):
         messageLayout.addWidget(self.iconLabel)
 
         # Message label 
-        self.messageLabel = QLabel(self.message)
+        self.messageLabel = Label(self.message)
         self.messageLabel.setWordWrap(True)
-        messageFont = QFont()
-        messageFont.setPointSize(9)
-        self.messageLabel.setFont(messageFont)
         messageLayout.addWidget(self.messageLabel)
 
     def _initButtons(self):
@@ -63,13 +63,13 @@ class MessageDialog(QDialog):
             buttonLayout.addItem(QSpacerItem(20, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
 
             # Yes Button
-            self.yesButton = QPushButton("Tak")
+            self.yesButton = PushButton("Tak")
             self.yesButton.setFixedWidth(80)
             self.yesButton.clicked.connect(self.accept)
             buttonLayout.addWidget(self.yesButton)
 
             # No button
-            self.noButton = QPushButton("Nie")
+            self.noButton = PushButton("Nie")
             self.noButton.setFixedWidth(80)
             self.noButton.clicked.connect(self.reject)
             buttonLayout.addWidget(self.noButton)
@@ -77,7 +77,7 @@ class MessageDialog(QDialog):
             buttonLayout.addItem(QSpacerItem(20, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
         else:
             # OK button
-            self.okButton = QPushButton("OK")
+            self.okButton = PushButton("OK")
             self.okButton.clicked.connect(self.accept)
             self.okButton.setFixedWidth(80)
             buttonLayout.addWidget(self.okButton)

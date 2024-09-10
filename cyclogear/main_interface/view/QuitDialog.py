@@ -1,6 +1,9 @@
-from PySide2.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton
+from PySide2.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout
 from PySide2.QtCore import Qt
 from PySide2.QtGui import QKeyEvent
+
+from utils.widgets.PushButton import PushButton
+from utils.widgets.Label import Label
 
 from config import APP_NAME
 
@@ -21,7 +24,7 @@ class QuitDialog(QDialog):
         self._setButtons()
 
     def _setMessage(self):
-        self.label = QLabel("Zapisać zmiany w projekcie?", self)
+        self.label = Label("Zapisać zmiany w projekcie?", self)
         self.layout.addWidget(self.label)
 
     def _setButtons(self):
@@ -31,19 +34,19 @@ class QuitDialog(QDialog):
         self.layout.addLayout(buttonLayout)
 
         # Yes button
-        self.yesButton = QPushButton("Tak")
+        self.yesButton = PushButton("Tak")
         buttonLayout.addWidget(self.yesButton)
         self.yesButton.setFixedWidth(80)
         self.yesButton.clicked.connect(self.accept)
 
         # No button
-        self.noButton = QPushButton("Nie")
+        self.noButton = PushButton("Nie")
         self.noButton.setFixedWidth(80)
         self.noButton.clicked.connect(self.reject)
         buttonLayout.addWidget(self.noButton)
 
         # Ignore button
-        self.ignoreButton = QPushButton("Anuluj")
+        self.ignoreButton = PushButton("Anuluj")
         buttonLayout.addWidget(self.ignoreButton)
         self.ignoreButton.setFixedWidth(80)
         self.ignoreButton.clicked.connect(self.ignore)

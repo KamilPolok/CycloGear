@@ -2,10 +2,11 @@
     This file collects all functions that are common for each ITrackedTab class.
 """
 
-from PySide2.QtWidgets import QHBoxLayout, QLabel, QFrame, QSizePolicy, QLineEdit
+from PySide2.QtWidgets import QHBoxLayout, QFrame, QSizePolicy, QLineEdit
 from PySide2.QtGui import QFont
 from PySide2.QtCore import Qt
 
+from utils.widgets.Label import Label
 from .widgets.Input import Input
 from .widgets.Output import Output
 
@@ -30,21 +31,26 @@ def _createEntrypointRow(entrypoint: QLineEdit, data: list, symbol: str, descrip
     layout.setSpacing(5)
     row.setLayout(layout)
 
+    font = QFont("Arial", 10)
+
     # Description label
-    descriptionLabel = QLabel(description)
+    descriptionLabel = Label(description)
     descriptionLabel.setMinimumWidth(100)
     descriptionLabel.setWordWrap(True)
+    descriptionLabel.setFont(font)
 
     # Symbol label
-    symbolLabel = QLabel(symbol)
-    symbolLabel.setFixedWidth(30)
+    symbolLabel = Label(symbol)
+    symbolLabel.setFixedWidth(35)
     symbolLabel.setAlignment(Qt.AlignmentFlag.AlignLeft)
     symbolLabel.setAlignment(Qt.AlignmentFlag.AlignVCenter)
+    symbolLabel.setFont(font)
 
     # Equals sign
-    equalsSign = QLabel('=')
+    equalsSign = Label('=')
     equalsSign.setFixedWidth(20)
     equalsSign.setAlignment(Qt.AlignmentFlag.AlignCenter)
+    equalsSign.setFont(font)
 
     # Entrypoint
     entrypoint.setParent(row)
@@ -56,8 +62,9 @@ def _createEntrypointRow(entrypoint: QLineEdit, data: list, symbol: str, descrip
         entrypoint.setValue(value)
 
     # Units label
-    unitsLabel = QLabel(data[-1])
+    unitsLabel = Label(data[-1])
     unitsLabel.setFixedWidth(50)
+    unitsLabel.setFont(font)
 
     # Assemble the layout
     layout.addWidget(descriptionLabel)
@@ -80,7 +87,7 @@ def createDataDisplayRow(data: list, symbol: str, description: str='', decimalPr
     return _createEntrypointRow(output, data, symbol, description, decimalPrecision)
 
 def createHeader(text, size=10, font='Arial', bold=False):
-    header = QLabel(text)
+    header = Label(text)
     font = QFont(font, size)
     font.setBold(bold)
     header.setFont(font)

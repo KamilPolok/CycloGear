@@ -143,7 +143,7 @@ class ShaftDesigner(QMainWindow):
         self.sidebar.setWidgetResizable(True)
         self.sidebar.setWidget(self.container)
         self.sidebar.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        self.sidebar.setFixedWidth(230)
+        self.sidebar.setFixedWidth(260)
 
         self.contentLayout.addWidget(self.sidebar)
 
@@ -235,10 +235,9 @@ class ShaftDesigner(QMainWindow):
                 border: 1px solid #f97171;
             }
         """)
-        font = QFont()
-        font.setBold(True)
+        font = QFont('Arial', 10, QFont.Bold)
         self.confirmDraftButton.setFont(font)
-        self.confirmDraftButton.setFixedSize(QSize(140, 30))
+        self.confirmDraftButton.setFixedSize(QSize(180, 30))
         self.confirmDraftButton.setIconSize(QSize(24, 24))
         self.confirmDraftButton.setIcon(QIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//approve_icon.png')))
         self.confirmDraftButton.setToolTip("Zatwierdź projekt wału")

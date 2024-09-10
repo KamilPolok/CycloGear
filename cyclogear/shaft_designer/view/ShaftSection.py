@@ -3,7 +3,7 @@ from ast import literal_eval
 
 from PySide2.QtCore import Signal, Qt, QSize
 from PySide2.QtWidgets import QFrame, QHBoxLayout, QPushButton, QVBoxLayout, QWidget, QSizePolicy 
-from PySide2.QtGui import QIcon
+from PySide2.QtGui import QIcon, QFont
 
 from .pyqt_helpers import createDataInputRow
 from .ShaftSubsection import ShaftSubsection
@@ -22,6 +22,12 @@ class HoverButton(QPushButton):
     def __init__(self, parent: QFrame):
         super().__init__(parent)
 
+        self.setStyleSheet("""                                                  
+            QPushButton {
+                background-color: transparent;
+            }
+            """)
+
     def enterEvent(self, event):
         self.parent().setStyleSheet(self.parent()._onHoverStyle)
         super().enterEvent(event)
@@ -29,6 +35,17 @@ class HoverButton(QPushButton):
     def leaveEvent(self, event):
         self.parent().setStyleSheet(self.parent()._defaultStyle)
         super().leaveEvent(event)
+
+class HeaderButton(HoverButton):
+    def __init__(self, parent: QFrame):
+        super().__init__(parent)
+
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        parentStyle = self.styleSheet()
+        newStyle = "QPushButton {text-align: left; padding-left: 10px}"
+        self.setStyleSheet(parentStyle + newStyle)
+        font = QFont("Arial", 10, QFont.Bold)
+        self.setFont(font)
 
 class ABCQWidgetMeta(ABCMeta, type(QWidget)):
     pass
@@ -55,7 +72,7 @@ class Section(QWidget, metaclass=ABCQWidgetMeta):
         # Set header layout
         header = CustomFrame()
         self._headerHeight = 25
-        header.setFixedHeight(self._headerHeight)  # Set the height to 30 pixels
+        header.setFixedHeight(self._headerHeight)
         self._mainLayout.addWidget(header)
 
         self._headerLayout = QHBoxLayout()
@@ -65,20 +82,11 @@ class Section(QWidget, metaclass=ABCQWidgetMeta):
         header.setLayout(self._headerLayout)
 
         # Set toggle section button
-        self.toggleSectionButton = HoverButton(header)
-        self.toggleSectionButton.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        self.toggleSectionButton.setStyleSheet("""                                                  
-            QPushButton {
-                background-color: transparent;
-                text-align: left;
-                font-size: 10pt;
-                font-weight: 600;                                
-                padding-left: 10px
-            }
-        """)
-        self.toggleSectionButton.setText(self._name)
-        self.toggleSectionButton.clicked.connect(self.toggleContent)
-        self._headerLayout.addWidget(self.toggleSectionButton)
+        self.toggleHeaderButton = HeaderButton(header)
+        
+        self.toggleHeaderButton.setText(self._name)
+        self.toggleHeaderButton.clicked.connect(self.toggleContent)
+        self._headerLayout.addWidget(self.toggleHeaderButton)
     
     def _initContent(self):
         # Set content layout
@@ -112,14 +120,14 @@ class ShaftSection(Section):
     def _initHeader(self):
         super()._initHeader()
         # Set add subsection button
-        self._addSubsectionButton = QPushButton()
+        self._addSubHeaderButton = QPushButton()
         buttonSize = self._headerHeight
         iconSize = self._headerHeight * 0.9
-        self._addSubsectionButton.setFixedSize(buttonSize, buttonSize)
-        self._addSubsectionButton.setIconSize(QSize(iconSize, iconSize))
-        self._addSubsectionButton.setIcon(QIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//add_icon.png')))
-        self._addSubsectionButton.setToolTip('Dodaj')
-        self._addSubsectionButton.setStyleSheet("""                         
+        self._addSubHeaderButton.setFixedSize(buttonSize, buttonSize)
+        self._addSubHeaderButton.setIconSize(QSize(iconSize, iconSize))
+        self._addSubHeaderButton.setIcon(QIcon(dependencies_path(f'{RESOURCES_DIR_NAME}//icons//buttons//add_icon.png')))
+        self._addSubHeaderButton.setToolTip('Dodaj')
+        self._addSubHeaderButton.setStyleSheet("""                         
             QPushButton {
                 background-color: transparent;
                 color: black;
@@ -136,10 +144,10 @@ class ShaftSection(Section):
             }
         """)
         
-        self._addSubsectionButton.clicked.connect(self.addSubsection)
-        self._headerLayout.addWidget(self._addSubsectionButton)
+        self._addSubHeaderButton.clicked.connect(self.addSubsection)
+        self._headerLayout.addWidget(self._addSubHeaderButton)
 
-        self._addSubsectionButton.setVisible(False)
+        self._addSubHeaderButton.setVisible(False)
 
     def addSubsection(self):
         subsection = ShaftSubsection(self._subsectionName, self.subsectionCount, self)
@@ -149,7 +157,7 @@ class ShaftSection(Section):
         self.subsections.append(subsection)
         self._contentLayout.addWidget(subsection)
         self.subsectionCount += 1
-        self.setAddSubsectionButtonEnabled(False)
+        self.setAddSubHeaderButtonEnabled(False)
         self.addSubsectionSignal.emit()
 
     def removeSubsection(self, subsectionNumber):
@@ -176,12 +184,12 @@ class ShaftSection(Section):
         for subsectionNumber, attributes in values.items():
                 self.subsections[subsectionNumber].setValues(attributes)
 
-    def setAddSubsectionButtonEnabled(self, enabled):
-        self._addSubsectionButton.setEnabled(enabled)
+    def setAddSubHeaderButtonEnabled(self, enabled):
+        self._addSubHeaderButton.setEnabled(enabled)
     
     def toggleContent(self, event):
         super().toggleContent(event)
-        self._addSubsectionButton.setVisible(not self._addSubsectionButton.isVisible())
+        self._addSubHeaderButton.setVisible(not self._addSubHeaderButton.isVisible())
 
     def handleSubsectionData(self, subsectionData):
         subsection = self.sender()
