@@ -68,7 +68,8 @@ class ShaftCalculator:
     def _calculate_section_after_eccentricities(self):
         # Draw the shaft section after the second eccentric
         section = 'Za Mimośrodami'
-        start_z = self._shaft_attributes['Li'][-1] + self.shaft_sections['Mimośrody'][list(self.shaft_sections['Mimośrody'].keys())[-1]]['l'] / 2
+        last_eccentric_number = max(list(self.shaft_sections['Mimośrody'].keys()))
+        start_z = self._shaft_attributes['Li'][-1] + self.shaft_sections['Mimośrody'][last_eccentric_number]['l'] / 2
 
         for subsection_number, subsection_data in self.shaft_sections[section].items():
             length = subsection_data['l']
